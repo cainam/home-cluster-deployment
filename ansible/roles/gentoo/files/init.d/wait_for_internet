@@ -6,7 +6,7 @@ depend()
 {
         local opts mywant=""
         after root
-	need net.wlan0
+#	need net.wlan0
         use dns
         use root
 }
