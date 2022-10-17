@@ -6,6 +6,7 @@ What I like to do
 * keep all data local, no data on the "cloud"
 * use data only in a way which allows my to inspect at any time
 * run an compact and robust setup
+
 to use for 
 * Home Automation with Home Assistent
 * Zigbee Gateway zur Einbinung von Zigbee Geräten
