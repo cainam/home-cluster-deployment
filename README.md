@@ -1,7 +1,7 @@
 # k8s_at_home
 Kubernetes cluster with oauth, keycloak, local repository management used for home.assistant
 
-What I like to do
+## What I like to do
 * play with Kubernetes, Raspberry and Hardware
 * keep all data local, no data on the "cloud"
 * use data only in a way which allows my to inspect at any time
@@ -14,7 +14,7 @@ to use for
 * Internet proxy (Privoxy)
 * analyze internet traffic(z.B. ntop)
 
-What I learnt among other
+## What I learnt among other
 * ICE connectors (see C14 on parts list) are  are designed for 10A (at least I had to think about the consequences)
 * Instead of torturing the sheet metal with pliers, an electric all-rounder ala Dremel would have been better, not only visually, but I would also have saved myself a bloody finger
 * Be careful when measuring voltage! If you touch the housing of the power supply unit, the FI will fly out. As far as that is known. I have learned that this can lead to the family not being allowed to continue tinkering that day, because of course the television sets will also go out.
