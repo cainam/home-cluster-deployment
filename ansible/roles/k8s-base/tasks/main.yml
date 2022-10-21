@@ -1,0 +1,36 @@
+---
+- set_fact: # using fact because vars are re-evaluate each time they are used
+    selected_host: >-
+      {{
+        ansible_play_hosts | random
+      }}
+
+- debug: var=selected_host
+  delegate_to: "{{ selected_host }}"
+
+- name: prepare images
+  import_tasks: prepare_images.yml
+  delegate_to: "{{ selected_host }}"
+  run_once: true
+  tags:
+  - k8s_images
+
+# install kubernetes if it doesn't exit
+- name: check if k8s is installed
+  stat:
+    path: "{{ k8s_check_file }}"
+  register: etc_k8s
+
+- name: install cluster if needed
+  include_tasks: init.yml
+  when: not etc_k8s.stat.exists
+  run_once: yes
+
+# update if version is newer 
+- name: get k8s version
+  shell: "grep image: {{ k8s_check_file }} | cut -d : -f 4"
+  register: k8s_version
+  
+- debug:
+    msg: "installed k8s version: {{ k8s_version }}"
+

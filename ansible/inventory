@@ -1,0 +1,4 @@
+all:
+  hosts:
+    k8s-1-int.adm13:
+    k8s-2-int.adm13:

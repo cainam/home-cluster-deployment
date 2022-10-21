@@ -1,0 +1,10 @@
+---
+# file: site.yml
+- hosts: all
+  gather_facts: no
+  vars:
+    auto_legacy_silent: true
+    auto_silent: true
+    ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
+  roles:
+    - k8s-base

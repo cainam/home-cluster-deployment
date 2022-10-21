@@ -1,0 +1,7 @@
+---
+xselected_host: >-
+      {{
+        ansible_play_hosts | random
+      }}
+
+k8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
