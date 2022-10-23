@@ -8,17 +8,25 @@
     msg: "selected_host: {{ selected_host }}, real hostname: {{ hn.stdout }}"
 
 - name: get list of images
-  shell: kubeadm config images list 2>/dev/null
+  shell: kubeadm config images list --kubernetes-version "{{ k8s_version }}" 2>/dev/null
   register: required_images
+  changed_when: false
 
 - debug:
     msg: "images to download: {{ required_images.stdout_lines }}"
 
 - name: pull, tag and push k8s images
   shell: |
-    podman pull {{ item }} ;
-    loc_img=myregistry.adm13:443/$(echo "{{ item }}" | xargs basename);
-    podman tag "{{ item }}" "$loc_img";
-    podman push "$loc_img";
+    echo "arm {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
+    # podman pull {{ item }} ;
+    # loc_img=myregistry.adm13:443/k8s/$(echo "{{ item }}" | xargs basename);
+    # podman tag "{{ item }}" "$loc_img";
+    # podman push "$loc_img";
   with_items: "{{ required_images.stdout_lines }}"
 
+- name: prepare flannel image
+  shell: |
+    curl -O https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+    grep image kube-flannel.yml | grep -v "#image" | awk '{print $2}' | sed -e 's/^/arm /g' -e 's#$# /k8s/ images for kube-flannel#g' | bash pull-tag-push.sh
+  environment:
+    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 

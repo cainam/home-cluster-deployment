@@ -1,0 +1,46 @@
+- name: force-reinstall
+  shell: /etc/init.d/kubelet stop; kubeadm reset --force; rm -rf kubeadm.log /etc/kubernetes/pki/ /etc/kubernetes/manifests/ /etc/kubernetes/tmp/ /etc/kubernetes/*.conf  /var/log/kubelet/kubelet.log /var/log/crio/crio.log /var/lib/kubelet/*; iptables -F; iptables -t nat -F; /etc/init.d/crio restart; ip link delete dev cni0; ip link delete dev flannel.1; rm  /opt/cni/bin/flannel /etc/cni/net.d/10-flannel.conflist
+  ignore_errors: yes
+  tags:
+    - never
+    - force_reinstall
+  
+- name: prepare images
+  import_tasks: prepare_images.yml
+  delegate_to: "{{ selected_host }}"
+  run_once: true
+  tags:
+  - k8s_images
+  
+# install kubernetes if it doesn't exit
+- name: check if k8s is installed
+  stat:
+    path: "{{ k8s_check_file }}"
+  register: etc_k8s
+
+#- debug:
+#     msg: "{{ map('extract', hostvars, ['etc_k8s']) | list}}"
+#   run_once: true
+
+- name: install cluster if needed
+  include_tasks: init.yml
+  when: not etc_k8s.stat.exists and inventory_hostname == selected_host
+
+- name: install flannel pod network
+  shell: |
+    sed -i -e 's#image: .*\/.*\/#image: myregistry.adm13:443/k8s/#g' kube-flannel.yml 
+    sed -i -e '/ip-masq/a\ \ \ \ \ \ \ \ - --iface=eth0' kube-flannel.yml # Erzwingen von eth0 Netzwerk
+    . set_env.sh blabla
+    kubectl apply -f kube-flannel.yml  
+  when: not etc_k8s.stat.exists and inventory_hostname == selected_host
+  environment:
+    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
+
+- name: join nodes if needed
+  include_tasks: join.yml
+  when: not etc_k8s.stat.exists and inventory_hostname != selected_host
+
+- name: taint to allow master nodes to run pods
+  shell: |
+    kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-

@@ -1,0 +1,26 @@
+---
+- name: tempfile for kubeadm
+  tempfile:
+    state: file
+    suffix: temp
+  register: kubeadm_tmp
+  
+- name: copy tempfile for kubeadm
+  template:
+    src: kubeadm.yaml
+    dest: "{{ kubeadm_tmp.path }}"
+    
+- name: install k8s
+  shell: kubeadm init --upload-certs --config "{{ kubeadm_tmp.path }}"
+  register: init_out
+  
+- debug: var=init_out
+
+- name: get join command
+  shell: kubeadm token create --print-join-command
+  register: join_command
+  
+- name: get certificate key
+  shell: kubeadm init phase upload-certs --upload-certs | grep -v upload-certs
+  register: cert_key
+

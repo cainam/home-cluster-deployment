@@ -1,0 +1,7 @@
+---
+- debug:
+    msg: "joining inventory_hostname:{{ inventory_hostname }} selected_host: {{ selected_host }}"
+
+- name: joining nodes
+  shell: "{{ hostvars[selected_host].join_command.stdout }} --control-plane --certificate-key {{ hostvars[selected_host].cert_key.stdout }}"
+  
