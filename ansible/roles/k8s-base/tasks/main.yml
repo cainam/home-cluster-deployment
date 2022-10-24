@@ -29,5 +29,5 @@
     msg: update
   when: current_k8s_version.stdout is version( k8s_version, '<')
 - name: update k8s
-  shell: echo update
+  shell: "kubeadm upgrade apply {{ k8s_version }}"
   when: current_k8s_version.stdout is version( k8s_version, '<')

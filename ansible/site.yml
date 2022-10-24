@@ -9,4 +9,11 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   roles:
-    - k8s-base
+    - role: k8s-base
+      tags: 
+        - never
+        - k8s
+    - role: gentoo
+      tags: 
+        - never
+        - gentoo
