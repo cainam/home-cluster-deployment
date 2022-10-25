@@ -1,0 +1,19 @@
+--- a/include/urcu/compiler.h	2022-01-05 21:38:11.000000000 +0100
++++ b/include-fix/urcu/compiler.h	2022-02-22 19:05:15.121307654 +0100
+@@ -48,6 +48,7 @@
+ #define caa_min(a,b) ((a)<(b)?(a):(b))
+ #endif
+ 
++/*
+ #if defined(__SIZEOF_LONG__)
+ #define CAA_BITS_PER_LONG	(__SIZEOF_LONG__ * 8)
+ #elif defined(_LP64)
+@@ -55,6 +56,8 @@
+ #else
+ #define CAA_BITS_PER_LONG	32
+ #endif
++*/
++#define CAA_BITS_PER_LONG	64
+ 
+ /*
+  * caa_container_of - Get the address of an object containing a field.
