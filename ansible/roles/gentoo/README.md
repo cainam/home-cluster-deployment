@@ -5,7 +5,7 @@ EMERGE_DEFAULT_OPTS="--usepkgonly --getbinpkgonly"
 ## Locales
 
 generating locales that are never used is waste. Let's reduce the waste, see https://wiki.gentoo.org/wiki/Localization/Guide  for further reading:
-`
+```
 # grep -v -e ^$ -e ^# /etc/locale.gen
 # locale-gen
 # eselect locale list
@@ -19,4 +19,4 @@ Available targets for the LANG variable:
   [7]   POSIX
   [8]   C.UTF8 *
   [ ]   (free form)
-`
+```
