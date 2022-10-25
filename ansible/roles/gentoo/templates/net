@@ -1,0 +1,19 @@
+config_eth0="{{ myip.stdout }} netmask 255.255.255.0"
+routes_eth0="10.10.10.0/24  via eth0"
+dns_servers_eth0="192.168.178.1"
+ifplugd_eth0=""
+
+# Routing priority
+metric_wlan0="90"
+metric_eth0="100"
+
+#modules="wpa_supplicant"
+modules_wlan0="wpa_supplicant"
+config_wlan0="dhcp"
+#config_wlan0="192.168.0.20 netmask 255.255.0.0"
+#routes_wlan0="default via 192.168.178.1"
+wpa_supplicant_wlan0="-Dnl80211 -f /var/log/wpa_supplicant.log"
+
+dns_domain_lo="homenetwork"
+dns_domain="hmenetwork"
+dns_domain_wlan0="hxxomenetwork"

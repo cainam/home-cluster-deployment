@@ -1,7 +1,7 @@
 ---
 # file: site.yml
 - hosts: all
-  gather_facts: no
+  gather_facts: yes
   vars:
     auto_legacy_silent: true
     auto_silent: true

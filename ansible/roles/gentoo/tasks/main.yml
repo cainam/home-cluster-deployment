@@ -1,4 +1,45 @@
 ---
+
+- name: get ip
+  shell: getent hosts $(hostname) | awk '{print $1}'
+  changed_when: false
+  register: myip
+
+- name: rc.conf
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^{{ item.setting }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.setting }}"
+    backup: yes
+  loop:
+    - line: 'rc_logger="YES" # write rc logs to /var/log/rc.log, otherwise boot logs are lost'
+      setting: rc_logger
+
+- name: hostname in /etc/conf.d
+  lineinfile:
+    path: "/etc/conf.d/{{ item.file }}"
+    regexp: "^{{ item.setting }}"
+    line: "hostname=\"{{ item.line }}\""
+    backup: yes
+  loop:
+    - line: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+      setting: hostname
+      file: hostname
+
+- name: ntp-client conf
+  lineinfile:
+    path: /etc/conf.d/ntp-client
+    regexp: "^{{ item.setting }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.setting }}"
+    backup: yes
+  loop:
+    - line: 'rc_use="dns"'
+      setting: rc_use
+    - line: 'rc_need="net.wlan0"'
+      setting: rc_need
+
 - name: gentoo files
   copy:
     src: "{{ item.file }}"
@@ -10,9 +51,41 @@
       dest: /var/lib/portage
     - file: gentoo.conf
       dest: /etc/portage/repos.conf
+    - file: ipv6.conf
+      dest: /etc/modprobe.d/
+    - file: hosts
+      dest: /etc
       
 - name: make.conf
   template:
     src: make.conf
     dest: "/etc/portage/make.conf"
     backup: yes 
+
+- name: include wlan secrets
+  include_vars: ../wlan
+
+- name: wpa_supplicant.conf
+  template:
+    src: wpa_supplicant.conf 
+    dest: "/etc/wpa_supplicant/wpa_supplicant.conf"
+    backup: yes 
+
+- name: /etc/conf.d/net
+  template:
+    src: net 
+    dest: "/etc/conf.d/net"
+    backup: yes 
+
+- name: emerge sync
+  shell: emerge --sync
+  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
+  
+- name: emerge build
+  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+ 
+- name: emerge deploy
+  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+  
