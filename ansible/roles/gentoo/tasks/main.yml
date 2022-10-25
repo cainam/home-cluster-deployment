@@ -55,6 +55,8 @@
       dest: /etc/modprobe.d/
     - file: hosts
       dest: /etc
+    - file: patches
+      dest: /etc/portage/patches
       
 - name: make.conf
   template:

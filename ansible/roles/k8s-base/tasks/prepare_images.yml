@@ -22,6 +22,8 @@
     # loc_img=myregistry.adm13:443/k8s/$(echo "{{ item }}" | xargs basename);
     # podman tag "{{ item }}" "$loc_img";
     # podman push "$loc_img";
+  environment:
+    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
   with_items: "{{ required_images.stdout_lines }}"
 
 - name: prepare flannel image
