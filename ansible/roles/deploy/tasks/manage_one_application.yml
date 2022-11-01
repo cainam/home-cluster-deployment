@@ -1,0 +1,33 @@
+- name: set app fact
+  set_fact:
+    app: "{{ application.key }}"
+  
+- name: app:{{ app }} status
+  debug:
+    msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
+#  loop: "{{ namespace.value | dict2items }}"
+
+- name: app:{{ app }} build and fill
+  shell: |
+    . set_env.sh "{{ namespace.key }}"
+     helm:from_git_to_local.sh {{ application.value.platform }} {{ application.value.git }} {{ application.value.subdir }}
+#  loop: "{{ namespace.value | dict2items }}"
+  register: out
+  
+- name: app:{{ app }} output
+  debug:
+    msg: "output: item: {{ item }}"
+  loop: "{{ out  | dict2items }}"
+   
+- name: app:{{ app }} install or upgrade
+  shell: |
+    . set_env.sh "{{ namespace.key }}"
+     helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ application.value.helm_options | default('') }}
+#  loop: "{{ namespace.value | dict2items }}"
+  register: out
+  
+- name: app:{{ app }} output
+  debug:
+    msg: "output: item: {{ item }}"
+  loop: "{{ out  | dict2items }}"
+   

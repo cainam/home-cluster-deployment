@@ -4,14 +4,22 @@
     state: file
     suffix: temp
   register: kubeadm_tmp
+
+- name: get internal IP
+  shell: getent hosts $(hostname) | awk '{print $1}'
+  register: internal_first_master_ip_cmd
   
 - name: copy tempfile for kubeadm
   template:
     src: kubeadm.yaml
     dest: "{{ kubeadm_tmp.path }}"
+  vars: 
+    internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
     
 - name: install k8s
   shell: kubeadm init --upload-certs --config "{{ kubeadm_tmp.path }}"
+  vars: 
+    internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
   register: init_out
   
 - debug: var=init_out

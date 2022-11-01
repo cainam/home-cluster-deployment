@@ -1,0 +1,19 @@
+- name: prepare applications
+  debug:
+    msg: "namespace: {{ item }} application: {{ applications[item] }}" 
+  with_items: "{{ applications.keys() | list }}"
+  
+- name: check if container registry is available
+  shell: curl -s --cacert /data/certs/myCA.pem -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
+  register: check_registry
+  
+- name: restart registry
+  shell: /etc/init.d/run-registry restart
+  when: check_registry.stdout != "true"
+
+- name: run per namespace
+  include_tasks: manage_applications.yml
+  loop: "{{ applications | dict2items }}"
+  loop_control:
+    loop_var: namespace
+ 

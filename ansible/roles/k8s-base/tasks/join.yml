@@ -2,6 +2,12 @@
 - debug:
     msg: "joining inventory_hostname:{{ inventory_hostname }} selected_host: {{ selected_host }}"
 
+- name: get internal IP
+  shell: getent hosts $(hostname) | awk '{print $1}'
+  register: internal_secondary_master_ip_cmd
+
 - name: joining nodes
-  shell: "{{ hostvars[selected_host].join_command.stdout }} --control-plane --certificate-key {{ hostvars[selected_host].cert_key.stdout }}"
+  shell: "{{ hostvars[selected_host].join_command.stdout }} --control-plane --certificate-key {{ hostvars[selected_host].cert_key.stdout }} --apiserver-advertise-address {{ internal_secondary_master_ip }}"
+  vars:
+    internal_secondary_master_ip: "{{ internal_secondary_master_ip_cmd.stdout }}"
   

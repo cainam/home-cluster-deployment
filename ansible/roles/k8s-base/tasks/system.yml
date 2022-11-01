@@ -20,8 +20,8 @@
   lineinfile:
     path: /boot/cmdline.txt
     state: present
-    regexp: '^((?!.*cgroup_enable=memory).*console.*)$'
-    line: '\1 cgroup_enable=memory'
+    regexp: '^((?!.*{{ item }}).*console.*)$'
+    line: '\1 {{ item }}'
     backrefs: yes
   loop:
     - cgroup_enable=memory

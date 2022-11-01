@@ -17,3 +17,15 @@
       tags: 
         - never
         - gentoo
+    - role: deploy
+      run_once: true
+      environment:
+        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
+      tags:
+        - never
+        - deploy
+    - role: raspberry
+      tags:
+        - never
+        - raspberry
+

@@ -1,3 +1,10 @@
+## TODO:
+check to apply the etcd tuning options:
+          snapshot-count: 5000
+          heartbeat-interval: 400
+          election-timeout: 3000
+          experimental-warning-apply-duration: 300ms
+
 
 ## networking information
 ```

@@ -41,8 +41,8 @@
   include_tasks: join.yml
   when: not etc_k8s.stat.exists and inventory_hostname != selected_host
 
-#- name: taint to allow master nodes to run pods
-#  shell: |
-#    kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
-#    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
-#  when: inventory_hostname == selected_host
+- name: taint to allow master nodes to run pods
+  shell: |
+    kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+  when: inventory_hostname == selected_host

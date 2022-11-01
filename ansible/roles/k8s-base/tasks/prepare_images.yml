@@ -15,6 +15,16 @@
 - debug:
     msg: "images to download: {{ required_images.stdout_lines }}"
 
+- name: check if container registry is available
+  shell: curl -s --cacert /data/certs/myCA.pem -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
+  register: check_registry
+  
+- name: restart registry
+  shell: /etc/init.d/run-registry restart
+  when: check_registry.stdout != "true"
+
+
+
 - name: pull, tag and push k8s images
   shell: |
     echo "arm {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
