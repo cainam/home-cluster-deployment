@@ -3,14 +3,26 @@ applications:
   tools:
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
-      platform: arm64
+      platform: arm
       subdir: charts/helm-chart/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=true}" --version=5.7.0 
-    kube-state-metrics:
-      git: https://github.com/prometheus-community/helm-charts.git
-      platform: arm64
-      subdir: charts/kube-state-metrics
     prometheus:
       git: https://github.com/prometheus-community/helm-charts.git
-      platform: arm64
+      platform: arm
       subdir: charts/prometheus
+      helm_options: --set nodeExporter.hostRootFsMount.mountPropagation=HostToContainer --set nodeExporter.hostRootfs=false --set alertmanager.persistentVolume.volumeName=prometheus-alertmanager --set server.persistentVolume.volumeName=prometheus-server
+      storage: 
+      - name: prometheus-alertmanager
+        size: 2Gi
+      - name: prometheus-server
+        size: 8Gi
+  istio-system:
+    base: 
+      git: https://github.com/istio/istio.git
+      platform: arm
+      subdir: manifests/charts/base
+    istiod: 
+      git: https://github.com/istio/istio.git
+      platform: arm
+      subdir: manifests/charts/istio-control/istio-discovery
+      helm_options: --set global.proxy.privileged=true

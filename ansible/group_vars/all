@@ -1,0 +1,14 @@
+gluster_directory: /data/gluster
+
+helm_repo_base: https://helm.adm13:9443/
+
+volumes_to_exempt:
+  - deconz
+  - helm
+  - home_assistant
+  - k8s_at_home
+  - keycloak_data
+  - meinKram
+  - registry
+  - startseite
+

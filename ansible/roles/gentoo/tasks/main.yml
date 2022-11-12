@@ -5,6 +5,17 @@
   changed_when: false
   register: myip
 
+- name: ensure required directories exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.perm }}"
+  loop:
+    - path: /etc/modprobe.d
+      perm: u=rwx,g=rx,o=rx
+    - path: /etc/wpa_supplicant
+      perm: u=rwx,g=rx,o=rx
+
 - name: rc.conf
   lineinfile:
     path: /etc/rc.conf
@@ -36,6 +47,7 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.setting }}"
     backup: yes
+    create: yes
   loop:
     - line: 'rc_use="dns"'
       setting: rc_use
@@ -51,8 +63,8 @@
   loop:
     - file: world
       dest: /var/lib/portage
-    - file: gentoo.conf
-      dest: /etc/portage/repos.conf
+#    - file: gentoo.conf
+#      dest: /etc/portage/repos.conf
     - file: ipv6.conf
       dest: /etc/modprobe.d/
     - file: hosts
@@ -60,11 +72,11 @@
     - file: patches/
       dest: /etc/portage/patches/*
       
-- name: make.conf
-  template:
-    src: make.conf
-    dest: "/etc/portage/make.conf"
-    backup: yes 
+#- name: make.conf
+#  template:
+#    src: make.conf
+#    dest: "/etc/portage/make.conf"
+#    backup: yes 
 
 - name: include wlan secrets
   include_vars: ../wlan

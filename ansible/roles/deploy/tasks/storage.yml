@@ -1,0 +1,53 @@
+- name: app:{{ app }} create gluster volume
+  gluster.gluster.gluster_volume:
+    state: present
+    name: "{{ storage.name }}"
+    bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}/data"
+    force: yes
+    replicas: "{{ replicas }}"
+    directory: /data
+    options:
+      {
+        cluster.quorum-type: 'fixed',
+      }
+    cluster: "{{ gluster_hosts }}"
+    
+- name: app:{{ app }} add volume to be kept
+  set_fact:
+    keep_volumes: "{{ keep_volumes +[storage.name] }}"
+  run_once: true
+
+- name: app:{{ app }} show keep_volumes
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ keep_volumes }}"
+
+- name: app:{{ app }} PersistentVolume
+  shell: |
+      set -x
+      kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        namespace: {{ ns }}
+        name: "{{ storage.name }}"
+        labels:
+          storage.k8s.io/name: glusterfs
+      spec:
+        claimRef:
+          namespace: "{{ ns }}"
+          name: "{{ storage.name }}"
+        accessModes:
+          - ReadWriteOnce
+          - ReadOnlyMany
+          - ReadWriteMany
+        capacity:
+          storage: "{{ storage.size }}"
+        storageClassName: ""
+        persistentVolumeReclaimPolicy: Delete
+        volumeMode: Filesystem
+        glusterfs:
+          endpoints: glusterfs
+          path: "{{ storage.name }}"
+          readOnly: no
+      EOF

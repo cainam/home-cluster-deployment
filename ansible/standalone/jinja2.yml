@@ -1,0 +1,49 @@
+---
+
+- name: test 
+  gather_facts: false
+  hosts: all
+  tasks:
+  - set_fact:
+        ns: tools
+        gluster_ips:
+          - eins
+          - zwei
+
+  - shell: |
+         echo "{% for a in gluster_ips %}
+          - addresses:\n
+             - ip:{{ a}}
+            ports:
+             - port: 49152
+          {% endfor %}"
+    register: y
+  - debug: var=y
+
+  - name: app:{{ app }} gluster endpoints in namespace
+    shell: |
+      cat - <<EOF
+      apiVersion: v1
+      kind: Endpoints
+      metadata:
+        name: glusterfs
+        namespace: {{ ns }}
+      subsets:
+      {% for a in gluster_ips %}
+        - addresses:
+          - ip: {{ a }}
+          ports:
+          - port: 49152
+      {% endfor %}
+      EOF
+    register: out
+  - debug:
+      msg: "{{ item }}"
+    with_items: "{{ out.stdout_lines }}"
+
+
+#  - addresses:                   
+#      - ip: 192.168.3.133   
+#    ports:
+#      - port: 49152
+

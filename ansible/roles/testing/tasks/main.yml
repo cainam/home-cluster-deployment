@@ -1,0 +1,19 @@
+- name: prepare applications
+  debug:
+    msg: "namespace: {{ item }} application: {{ applications[item] }}" 
+  with_items: "{{ applications.keys() | list }}"
+
+- name: prepare applications
+  debug:
+    msg: "test: {{ applications | dict2items }}"
+
+- name: Display all cluster names
+  ansible.builtin.debug:
+    var: item
+  loop: "{{ applications | community.general.json_query('*.*.storage') }}"
+
+- name: prepare applications
+  debug:
+    msg: "test: {{ applications | dict2items | map(attribute='storage') }}"
+
+

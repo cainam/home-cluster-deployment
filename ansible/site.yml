@@ -2,6 +2,7 @@
 # file: site.yml
 - hosts: all
   gather_facts: yes
+  any_errors_fatal: true
   vars:
     auto_legacy_silent: true
     auto_silent: true
@@ -18,7 +19,6 @@
         - never
         - gentoo
     - role: deploy
-      run_once: true
       environment:
         PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
       tags:
@@ -28,4 +28,10 @@
       tags:
         - never
         - raspberry
+    - role: testing
+      environment:
+        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin"
+      tags:
+        - never
+        - testing
 

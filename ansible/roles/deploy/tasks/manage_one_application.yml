@@ -1,30 +1,97 @@
 - name: set app fact
   set_fact:
     app: "{{ application.key }}"
-  
+        
 - name: app:{{ app }} status
   debug:
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
-#  loop: "{{ namespace.value | dict2items }}"
 
-- name: app:{{ app }} build and fill
-  shell: |
-    . set_env.sh "{{ namespace.key }}"
-     helm:from_git_to_local.sh {{ application.value.platform }} {{ application.value.git }} {{ application.value.subdir }}
-#  loop: "{{ namespace.value | dict2items }}"
-  register: out
+- block:
+  - name: app:{{ app }} determine gluster hosts
+    set_fact:
+      gluster_hosts: "{{ hostvars.keys()|list }}"
+
+  - name: app:{{ app }} get gluster hosts ips
+    shell: for hostname in "{{ gluster_hosts | join(' ') }}"; do getent hosts $hostname | awk '{print $1}'; done
+    register: gluster_getent
+
+  - name: app:{{ app }} set gluster ips and number of replicas
+    set_fact:
+      replicas: "{{ gluster_hosts | length }}"
+      gluster_ips: "{{ gluster_getent.stdout_lines }}"
+
+  - name: app:{{ app }} debug
+    debug: 
+      msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
+
+  - name: app:{{ app }} storage
+    include_tasks: storage.yml
+    with_items: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+    
+  - name: app:{{ app }} gluster service in namespace
+    shell: |
+      kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: glusterfs
+        namespace: {{ ns }}
+      spec:
+        ports:
+        - port: 49152
+      EOF
+    register: gluster_service
+    changed_when: "'unchanged' not in gluster_service.stdout"
+
+  - name: app:{{ app }} gluster endpoints in namespace
+    shell: |
+      set -x
+      kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: Endpoints
+      metadata:
+        name: glusterfs
+        namespace: {{ ns }}
+      subsets:
+      {% for a in gluster_ips %}
+        - addresses:
+          - ip: {{ a }}
+          ports:
+          - port: 49152
+      {% endfor %}
+      EOF
+    register: gluster_ep
+    changed_when: "'unchanged' not in gluster_ep.stdout"
+  when: application.value.storage is defined
   
-- name: app:{{ app }} output
-  debug:
-    msg: "output: item: {{ item }}"
-  loop: "{{ out  | dict2items }}"
+- block:
+    - name: app:{{ app }} build and fill
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+         helm:from_git_to_local.sh {{ application.value.platform }} {{ application.value.git }} {{ application.value.subdir }}
+      register: build_out
+  
+    - name: app:{{ app }} build output
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ build_out  | dict2items }}"
+
+    - name: app:{{ app }} helm repo refresh
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+        helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
+        helm repo index "${helm_repo_dir}" --url $helm_url
+        helm repo update
+  when: "'build' in ansible_run_tags" 
    
 - name: app:{{ app }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
      helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ application.value.helm_options | default('') }}
-#  loop: "{{ namespace.value | dict2items }}"
   register: out
+  when: "application.value.install | default(true)"
   
 - name: app:{{ app }} output
   debug:

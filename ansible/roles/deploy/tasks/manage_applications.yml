@@ -1,8 +1,19 @@
 - name: configure namespace
   shell: |
-    kubectl create namespace "{{ namespace.key }}"
+    #kubectl create namespace "{{ namespace.key }}"
+    kubectl apply -f - <<EOF
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: {{ namespace.key }}
+    EOF
     echo "{{ namespace.key }}" | grep -q -e kube -e istio || kubectl label namespace "{{ namespace.key }}" istio-injection=enabled
-  register: out
+  register: namespace_out
+
+- name: app:{{ app }} namespace management output
+  debug:
+    msg: "output: item: {{ item }}"
+  loop: "{{ namespace_out  | dict2items }}"
 
 # The error was: ModuleNotFoundError: No module named 'kubernetes'
 #- name: Create a k8s namespace
@@ -19,6 +30,7 @@
   
 - name: manage application in {{ ns }}
   include_tasks: manage_one_application.yml
+  when: limit_namespace is not defined or {{ ns }} == limit_namespace
   loop: "{{ namespace.value | dict2items }}"
   loop_control:
     loop_var: application
