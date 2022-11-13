@@ -81,6 +81,10 @@
       dest: /etc/portage
     - file: package.license
       dest: /etc/portage
+    - file: brickmount
+      dest: /etc/init.d/
+    - file: glustermount
+      dest: /etc/init.d/
 
 - name: include wlan secrets
   include_vars: ../wlan

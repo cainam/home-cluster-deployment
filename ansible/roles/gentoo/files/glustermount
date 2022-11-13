@@ -17,7 +17,6 @@ depend()
 start()
 {
         ebegin "Mounting gluster volume"
-        my_ip=$(getent hosts $(hostname -f));
         einfo "gluster volumes:"$(gluster volume list)
         for v in $(gluster volume list); do 
            einfo "mounting localhost:$v to /data/$v"
