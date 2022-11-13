@@ -41,3 +41,4 @@ sys-kernel/linux-headers
 sys-power/cpupower
 sys-process/iotop
 www-servers/lighttpd
+sys-kernel/linux-firmware

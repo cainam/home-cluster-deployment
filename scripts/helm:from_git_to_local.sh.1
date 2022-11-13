@@ -1,0 +1,52 @@
+#!/bin/bash
+
+function pull_local(){
+ ls -l ;
+}
+
+platform=$1 # arm64
+git_source=$2 # https://github.com/oauth2-proxy/manifests.git
+
+dir=$(mktemp --directory)
+cd $dir
+echo "directory: $PWD"
+git clone "${git_source}"
+
+find . -name Chart.yaml | xargs dirname | while read pack_dir; do
+cd $pack_dir
+echo "directory: $PWD"
+
+src_img=$(grep -v ^# values.yaml | yq -r '(.image.repository),(.image.tag)' | tr '\n' ':' | sed -e 's/:$//')
+img_name=$(echo "$src_img" | cut -d : -f 1  | xargs basename)
+
+image_entry="$platform $src_img /$category/"
+echo "$image_entry" >> $images_list
+echo "$image_entry" | pull-tag-push.sh
+
+# treat dependencies
+while read name repo version; do 
+  echo "resolving dependency: $name $version $repo";
+  if [ ${version::1} == "~" ]; then 
+    version=$(echo "${version:1}" | sed -e 's/[0-9]$//');
+  fi; 
+  curl -s $repo | yq -r '.entries.redis[] | select(.version|startswith("16.4." ) ) | [.version, (.urls|join(","))  ] | @tsv' | sort -n -r  | head -n 1 | while read version url; do
+    dep_dir=$(mktemp --directory) 
+    echo "entering $dep_dir and treating dependency with $url"
+    cd $dep_dir
+    curl -O -s $url
+    tar xfz $(echo $url | xargs basename)
+    pull_local
+
+  done
+done < <(cat Chart.yaml | yq -r -c '(.dependencies[] | [.name, .repository, .version] |@tsv)')
+
+# re-set env with current dir
+. set_env.sh $category
+
+helm package -d $helm_repo_dir/ $PWD
+helm repo index "${helm_repo_dir}" --url $helm_url
+helm repo update
+
+done
+
+

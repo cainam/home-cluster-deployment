@@ -1,0 +1,41 @@
+#!/sbin/openrc-run
+
+description="Mounts gluster volumes"
+
+depend()
+{
+        local opts mywant=""
+        after root
+        want $mywant
+        need glusterd
+        before run-registry
+        before lighttpd
+        use dns
+        use root
+}
+
+start()
+{
+        ebegin "Mounting gluster volume"
+        my_ip=$(getent hosts $(hostname -f));
+        einfo "gluster volumes:"$(gluster volume list)
+        for v in $(gluster volume list); do 
+           einfo "mounting localhost:$v to /data/$v"
+	   [ ! -d /data/$v ] && mkdir "/data/$v"
+           mount -t glusterfs localhost:$v /data/$v
+        done
+        rc=0
+        eend "Done"
+        return $rc
+}
+
+stop()
+{
+  ebegin "Unmounting gluster volumes"
+        for v in $(gluster volume list); do 
+           umount /data/$v
+        done
+        rc=0
+        eend "Done"
+        return $rc 
+}

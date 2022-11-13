@@ -1,0 +1,36 @@
+#!/bin/bash
+
+action=$1
+atype=$2
+search=$3
+add=""
+
+if (echo "$action" | grep -q ^d); then 
+  action=describe
+elif (echo "$action" | grep -q ^g); then
+  action="get -o yaml"
+elif (echo "$action" | grep -q ^e); then
+  action="exec -it "
+  add="-- bash"
+  atype=pod
+  search=$2
+elif (echo "$action" | grep -q ^l); then
+  action=logs
+  atype=pod
+  search=$2
+fi
+
+if (echo "$atype" | grep -q ^s); then
+  atype=svc
+elif (echo "$atype" | grep -q ^p); then
+  atype=pod
+fi
+
+read i n < <(kubectl get $atype -A -l app.kubernetes.io/name=$search --no-headers=true  -o jsonpath="{..metadata.name} {..metadata.namespace}")
+
+if (echo $action | grep -q -e ^exec -e ^logs); then
+  atype=
+fi
+
+kubectl $action $atype -n $n $i $add
+

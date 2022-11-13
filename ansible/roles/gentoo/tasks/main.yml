@@ -1,4 +1,10 @@
 ---
+- name: fstab
+  lineinfile: 
+    path: /etc/fstab
+    regexp: "^/dev/sda1"
+    line: "/dev/sda1               /data   ext4            noatime         0 1"
+    backup: yes
 
 - name: get ip
   shell: getent hosts $(hostname) | awk '{print $1}'
@@ -63,35 +69,57 @@
   loop:
     - file: world
       dest: /var/lib/portage
-#    - file: gentoo.conf
-#      dest: /etc/portage/repos.conf
+    - file: gentoo.conf
+      dest: /etc/portage/repos.conf
     - file: ipv6.conf
       dest: /etc/modprobe.d/
     - file: hosts
       dest: /etc
     - file: patches/
       dest: /etc/portage/patches/*
-      
-#- name: make.conf
-#  template:
-#    src: make.conf
-#    dest: "/etc/portage/make.conf"
-#    backup: yes 
+    - file: package.use
+      dest: /etc/portage
+    - file: package.license
+      dest: /etc/portage
 
 - name: include wlan secrets
   include_vars: ../wlan
 
-- name: wpa_supplicant.conf
+- name: make.conf, wpa_supplicant.conf, /etc/conf.d/net
   template:
-    src: wpa_supplicant.conf 
-    dest: "/etc/wpa_supplicant/wpa_supplicant.conf"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     backup: yes 
+  loop:
+    - src: make.conf
+      dest: "/etc/portage/make.conf"
+    - src: wpa_supplicant.conf
+      dest: "/etc/wpa_supplicant/wpa_supplicant.conf"
+    - src: net
+      dest: "/etc/conf.d/net"
 
-- name: /etc/conf.d/net
-  template:
-    src: net 
-    dest: "/etc/conf.d/net"
-    backup: yes 
+- name: symlinks for services
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    state: link
+  loop:
+    - src: net.lo
+      dest: /etc/init.d/net.eth0
+    - src: net.lo
+      dest: /etc/init.d/net.wlan0
+
+- name: enable services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  loop:
+    - net.wlan0
+    - net.eth0
+    - ntp-client
 
 - name: emerge sync
   shell: emerge --sync

@@ -1,0 +1,67 @@
+#!/sbin/openrc-run
+
+description="Mounts bricks for gluster volumes"
+glusterconf=/var/lib/glusterd
+my_ips=$(cat /proc/net/fib_trie | awk '/32 host/ { print f } {f=$2}')
+gluster_dir=/data/gluster
+
+depend()
+{
+        local opts mywant=""
+        after root
+	need net
+        want $mywant
+        before glusterd
+        before run-registry
+        before lighttpd
+        use dns
+        use root
+}
+
+start()
+{
+        ebegin "Mounting bricks"
+
+          for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do 
+             for loc in $(find ${glusterconf}/vols/${v}/bricks/  -maxdepth 1 -mindepth 1 -type f -printf "%f\n"); do 
+               einfo "found volume $v and brick $loc"
+               node=$(echo $loc|cut -d : -f 1);
+               node_ip=$(getent hosts ${node}|awk '{print $1}');
+               if $(echo "$my_ips" | grep -q  "${node_ip}" ); then 
+                 mp=$(echo ${loc} | cut -d : -f 2- | sed -e 's#-#/#g'  | sed -e 's#/data$##');
+                 brickname=$(echo ${mp} | cut -d _ -f 2-);
+	         einfo "mounting /data/disk_$brickname ${gluster_dir}/brick_$brickname";
+                 mount ${gluster_dir}/disk_$brickname ${gluster_dir}/brick_$brickname;
+	       else
+	         einfo "my_ips: $my_ips node_ip: $node_ip doesn't match, skip"
+	       fi
+             done ;
+          done
+          rc=0
+        eend "Done"
+        return $rc
+}
+
+stop()
+{
+  ebegin "Unmounting bricks"
+          for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do 
+             for loc in $(find ${glusterconf}/vols/${v}/bricks/  -maxdepth 1 -mindepth 1 -type f -printf "%f\n"); do 
+               einfo "found volume $v and brick $loc"
+               node=$(echo $loc|cut -d : -f 1);
+               node_ip=$(getent hosts ${node}|awk '{print $1}');
+               if $(echo "$my_ips" | grep -q  "${node_ip}" ); then 
+	         mp=$(echo ${loc} | cut -d : -f 2- | sed -e 's#-#/#g');
+                 brickname=$(echo ${mp} | cut -d _ -f 2-);
+                 einfo "unmounting ${gluster_dir}/brick_$brickname"
+                 umount ${gluster_dir}/brick_$brickname;
+               else
+                 einfo "my_ips: $my_ips node_ip: $node_ip doesn't match, skip"
+               fi
+             done ;
+          done
+          rc=0
+
+        eend "Done"
+        return $rc 
+}
