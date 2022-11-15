@@ -51,3 +51,4 @@
           path: "{{ storage.name }}"
           readOnly: no
       EOF
+  when: outside_k8s is not defined

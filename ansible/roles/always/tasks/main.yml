@@ -2,3 +2,4 @@
   set_fact:
     gluster_hosts: "{{ hostvars.keys()|list }}"
 
+- debug: var=ansible_search_path

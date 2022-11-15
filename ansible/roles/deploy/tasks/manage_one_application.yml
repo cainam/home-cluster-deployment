@@ -25,7 +25,7 @@
       msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
 
   - name: app:{{ app }} storage
-    include_tasks: storage.yml
+    include_tasks: common/storage.yml
     with_items: "{{ application.value.storage }}"
     loop_control:
       loop_var: storage
