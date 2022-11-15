@@ -6,6 +6,19 @@
     line: "/dev/sda1               /data   ext4            noatime         0 1"
     backup: yes
 
+- name: symlinks for CA
+  file:
+    src: "/data/mine/certs/myCA.pem"
+    dest: "/etc/ssl/certs/myCA.pem"
+    owner: root
+    group: root
+    state: link
+  register: ca
+
+- name: update CA certificates
+  shell: /usr/sbin/update-ca-certificates
+  when: ca.changed
+
 - name: get ip
   shell: getent hosts $(hostname) | awk '{print $1}'
   changed_when: false
@@ -63,28 +76,43 @@
 - name: gentoo files
   copy:
     src: "{{ item.file }}"
-    dest: "{{ item.dest }}/{{ item.file }}"
-    mode: 0644
+    # dest: "{{ item.dest }}/{{ item.file }}"
+    dest: "{{ item.dest }}"
+    mode: preserve
     backup: yes
   loop:
     - file: world
-      dest: /var/lib/portage
+      dest: /var/lib/portage/
     - file: gentoo.conf
-      dest: /etc/portage/repos.conf
+      dest: /etc/portage/repos.conf/
     - file: ipv6.conf
       dest: /etc/modprobe.d/
     - file: hosts
-      dest: /etc
-    - file: patches/
-      dest: /etc/portage/patches/*
-    - file: package.use
+      dest: /etc/
+    - file: patches
+      dest: /etc/portage/
+    - file: portage/package.accept_keywords
       dest: /etc/portage
-    - file: package.license
+    - file: portage/package.use
+      dest: /etc/portage/package.use
+    - file: portage/package.license
       dest: /etc/portage
+    - file: env
+      dest: /etc/portage/
+    - file: portage/package.env
+      dest: /etc/portage
+    - file: run-registry
+      dest: /etc/init.d/
     - file: brickmount
       dest: /etc/init.d/
     - file: glustermount
       dest: /etc/init.d/
+    - file: haproxy.cfg
+      dest: /etc/haproxy/
+    - file: keepalived.conf
+      dest: /etc/keepalived/
+    - file: registries.conf
+      dest: /etc/containers/
 
 - name: include wlan secrets
   include_vars: ../wlan
@@ -124,6 +152,11 @@
     - net.wlan0
     - net.eth0
     - ntp-client
+    - brickmount
+    - glustermount
+    - keepalived
+    - run-registry
+    - haproxy
 
 - name: emerge sync
   shell: emerge --sync
