@@ -1,0 +1,54 @@
+#!/sbin/openrc-run
+
+description="run registry"
+service_hostname=myregistry.adm13
+ipconf="192.168.4.99/16"
+
+depend()
+{
+        local opts mywant=""
+        after glusterd
+        after keepalived
+        need glusterd
+        after brickmount
+        want $mywant
+        use dns
+        use root
+}
+
+start()
+{
+        ebegin "Starting registry"
+
+        ip=$(getent hosts "${service_hostname}" | awk '{print $1}')
+        ip addr | grep -q $ip
+        #(ping -q -c 1 "${service_hostname}" 2>&1) > /dev/null
+        ret_ip=$?
+        if [ $ret_ip -ne 0 ];then 
+          einfo "ip of host ${service_hostname} not assigned here, nothing to do!"
+          eend "Done"
+          return 0
+        fi
+
+        # claim IP
+        #ip address add "${ipconf}" dev wlan0
+        podman rm -f registry
+        podman run --rm --privileged -d --name registry -p 1443:443 -v /data/registry:/var/lib/registry \
+                -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+                -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+                -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \
+                -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/myregistry.adm13.key \
+        myregistry.adm13:443/registry:2.8.1
+
+        rc=0
+        eend "Done"
+        return $rc
+}
+
+stop()
+{
+  ebegin "Stopping registry"
+  podman stop registry
+  rc=0
+  return $rc
+}
