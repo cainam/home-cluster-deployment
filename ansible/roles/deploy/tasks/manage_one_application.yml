@@ -7,7 +7,7 @@
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
 
 - block:
-  - name: app:{{ app }} determine gluster hosts
+  - name: app:{{ app }} determine gluster hosts # REMOVE ME I AM REDUNDANT!
     set_fact:
       gluster_hosts: "{{ hostvars.keys()|list }}"
 

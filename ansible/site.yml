@@ -10,6 +10,7 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   roles:
+    - role: always
     - role: k8s-base
       tags: 
         - never

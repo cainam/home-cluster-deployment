@@ -1,0 +1,4 @@
+- name: determine gluster hosts fact
+  set_fact:
+    gluster_hosts: "{{ hostvars.keys()|list }}"
+
