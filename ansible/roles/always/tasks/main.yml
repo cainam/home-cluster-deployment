@@ -1,5 +1,22 @@
-- name: determine gluster hosts fact
-  set_fact:
-    gluster_hosts: "{{ hostvars.keys()|list }}"
+- block:
+    - name: determine gluster hosts fact
+      set_fact:
+        gluster_hosts: "{{ hostvars.keys()|list }}"
+  
 
-- debug: var=ansible_search_path
+    - debug: var=ansible_search_path
+
+    - name: get gluster hosts ips
+      shell: for hostname in "{{ gluster_hosts | join(' ') }}"; do getent hosts $hostname | awk '{print $1}'; done
+      register: gluster_getent
+
+    - name: set gluster ips and number of replicas
+      set_fact:
+        replicas: "{{ gluster_hosts | length }}"
+        gluster_ips: "{{ gluster_getent.stdout_lines }}"
+
+    - name: debug
+      debug:
+        msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
+  run_once: true
+

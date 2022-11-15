@@ -2,23 +2,29 @@
   set_fact:
     app: "{{ application.key }}"
 
-- name: app:{{ app }} ensure bricks for gluster
-  shell: |
-    set -e;
-    # exit if gluster volume exists already, better: do it upfront and outside
-    gluster vol list | grep "^{{ storage.name }}$" && exit
-    echo "brick: {{ brick }}\ndisk: {{ disk }}"
-    if [ -d "{{ brick }}" ] || [ -f "{{ disk }}"; then echo "either brick or disk exist already, please fix this manually"; exit -1; fi
-    mkdir -p "{{ gluster_directory }}/disks"
-    truncate -s "{{ storage.size }}B" "{{ disk }}";
-    mkfs.ext4 "{{ disk }}";
-    [ ! -d "{{ brick }}" ] && mkdir -p "{{ brick }}";
-    mount "{{ disk }}" "{{ brick }}"
-  vars: 
-    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
-    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
-  when: application.value.storage is defined
+- name: app:{{ app }} storage
+  include_tasks: common/storage_brick.yml
   with_items: "{{ application.value.storage }}"
   loop_control:
     loop_var: storage
-  register: brick_result
+
+#- name: app:{{ app }} ensure bricks for gluster
+#  shell: |
+#    set -e;
+#    # exit if gluster volume exists already, better: do it upfront and outside
+#    gluster vol list | grep "^{{ storage.name }}$" && exit
+#    echo "brick: {{ brick }}\ndisk: {{ disk }}"
+#    if [ -d "{{ brick }}" ] || [ -f "{{ disk }}"; then echo "either brick or disk exist already, please fix this manually"; exit -1; fi
+#    mkdir -p "{{ gluster_directory }}/disks"
+#    truncate -s "{{ storage.size }}B" "{{ disk }}";
+#    mkfs.ext4 "{{ disk }}";
+#    [ ! -d "{{ brick }}" ] && mkdir -p "{{ brick }}";
+#    mount "{{ disk }}" "{{ brick }}"
+#  vars: 
+#    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
+#    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
+#  when: application.value.storage is defined
+#  with_items: "{{ application.value.storage }}"
+#  loop_control:
+#    loop_var: storage
+#  register: brick_result
