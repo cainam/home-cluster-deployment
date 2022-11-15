@@ -11,6 +11,8 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   roles:
     - role: always
+      tags:
+        - always
     - role: k8s-base
       tags: 
         - never
