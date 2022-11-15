@@ -115,6 +115,8 @@
       dest: /etc/sysctl.d/
     - file: registries.conf
       dest: /etc/containers/
+    - file: glusterd
+      dest: /etc/conf.d/
 
 - name: include wlan secrets
   include_vars: ../wlan
