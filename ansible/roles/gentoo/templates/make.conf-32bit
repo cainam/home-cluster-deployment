@@ -1,0 +1,48 @@
+# These settings were set by the catalyst build script that automatically
+# built this stage.
+# Please consult /usr/share/portage/config/make.conf.example for a more
+
+# detailed example.
+ARCH_FLAGS="-mfpu=crypto-neon-fp-armv8 -march=armv8-a+crc -mcpu=cortex-a72"
+ARCH_FLAGS=""
+COMMON_FLAGS="${ARCH_FLAGS} -O2 -pipe -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DBOOST_ALLOW_DEPRECATED_HEADERS -U__OPTIMIZE__ -O0"
+COMMON_FLAGS="${ARCH_FLAGS} -O2 -pipe"
+
+#COMMON_FLAGS="-O2 -pipe -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=hard -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DBOOST_ALLOW_DEPRECATED_HEADERS -DUATOMIC_NO_LINK_ERROR"
+#COMMON_FLAGS="-O2 -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=hard -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DBOOST_ALLOW_DEPRECATED_HEADERS"
+
+CFLAGS="${COMMON_FLAGS}"
+CXXFLAGS="${COMMON_FLAGS}"
+FCFLAGS="${COMMON_FLAGS}"
+FFLAGS="${COMMON_FLAGS}"
+# WARNING: Changing your CHOST is not something that should be done lightly.
+# Please consult https://wiki.gentoo.org/wiki/Changing_the_CHOST_variable before changing.
+CHOST="armv7a-unknown-linux-gnueabihf"
+
+# NOTE: This stage was built with the bindist Use flag enabled
+
+# This sets the language of build output to English.
+# Please keep this setting intact when reporting bugs.
+LC_MESSAGES=C
+
+ACCEPT_KEYWORDS="~arm64"
+
+MAKEOPTS="-j2 -l2"
+EMERGE_DEFAULT_OPTS=""
+EMERGE_DEFAULT_OPTS="--buildpkg"
+{% if gentoo_build is not defined %}
+EMERGE_DEFAULT_OPTS="--usepkgonly --getbinpkgonly"
+{% endif %}
+
+EMERGE_DEFAULT_OPTS="${EMERGE_DEFAULT_OPTS} --jobs 1 --load-average 2"
+#EMERGE_DEFAULT_OPTS="--buildpkg"
+
+FEATURES="${FEATURES} buildpkg"
+
+USE="elogind"
+# VIDEO_CARDS="fbdev" 
+VIDEO_CARDS="vc4"
+
+{% if gentoo_build is not defined %}
+PORTAGE_BINHOST="ssh://root@gentoo-binhost/var/cache/binpkgs"
+{% endif %}
