@@ -1,0 +1,5 @@
+app-misc/yq **
+sys-cluster/keepalived **
+app-containers/cri-tools **
+dev-db/etcd **
+

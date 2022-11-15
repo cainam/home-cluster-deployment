@@ -1,0 +1,4 @@
+# required by dev-embedded/rpi-eeprom (argument)
+>=dev-embedded/rpi-eeprom-12.5_p1-r1 rpi-eeprom
+sys-kernel/linux-firmware linux-fw-redistributable no-source-code
+
