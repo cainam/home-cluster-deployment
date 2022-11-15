@@ -111,6 +111,8 @@
       dest: /etc/haproxy/
     - file: keepalived.conf
       dest: /etc/keepalived/
+    - file: keepalived
+      dest: /etc/sysctl.d/
     - file: registries.conf
       dest: /etc/containers/
 
