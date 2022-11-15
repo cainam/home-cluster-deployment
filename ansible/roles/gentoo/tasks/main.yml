@@ -6,6 +6,19 @@
     line: "/dev/sda1               /data   ext4            noatime         0 1"
     backup: yes
 
+- name: symlinks for CA
+  file:
+    src: "/data/mine/certs/myCA.pem"
+    dest: "/etc/ssl/certs/myCA.pem"
+    owner: root
+    group: root
+    state: link
+  register: ca
+
+- name: update CA certificates
+  shell: /usr/sbin/update-ca-certificates
+  when: ca.changed
+
 - name: get ip
   shell: getent hosts $(hostname) | awk '{print $1}'
   changed_when: false
