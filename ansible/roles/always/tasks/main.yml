@@ -19,3 +19,7 @@
       debug:
         msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
   run_once: true
+<<<<<<< HEAD
+=======
+
+>>>>>>> c834615 (.)
