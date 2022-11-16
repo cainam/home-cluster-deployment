@@ -8,7 +8,7 @@ depend()
         after root
         want $mywant
         need glusterd
-        before run-registry
+        before registry
         before lighttpd
         use dns
         use root
