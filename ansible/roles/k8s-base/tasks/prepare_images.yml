@@ -20,7 +20,7 @@
   register: check_registry
   
 - name: restart registry
-  shell: /etc/init.d/run-registry restart
+  shell: /etc/init.d/registry restart
   when: check_registry.stdout != "true"
 
 

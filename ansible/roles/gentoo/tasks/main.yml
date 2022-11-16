@@ -123,7 +123,7 @@
       dest: /etc/portage/
     - file: portage/package.env
       dest: /etc/portage
-    - file: run-registry
+    - file: registry
       dest: /etc/init.d/
     - file: brickmount
       dest: /etc/init.d/
@@ -181,7 +181,7 @@
     - brickmount
     - glustermount
     - keepalived
-    - run-registry
+    - registry
     - haproxy
 
 - name: emerge sync
