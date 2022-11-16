@@ -1,8 +1,6 @@
 #!/sbin/openrc-run
 
 description="run registry"
-service_hostname=myregistry.adm13
-ipconf="192.168.4.99/16"
 
 depend()
 {
@@ -19,6 +17,7 @@ depend()
 start()
 {
         ebegin "Starting registry"
+	einfo "registry: ${service_hostname}"
 
         ip=$(getent hosts "${service_hostname}" | awk '{print $1}')
         ip addr | grep -q $ip
