@@ -20,9 +20,3 @@
         msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
   run_once: true
 
-<<<<<<< HEAD
-- debug: var=ansible_search_path
-
-
-=======
->>>>>>> 6ec09c8002ae938f6fa1453690d433c42c91d8bf
