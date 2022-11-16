@@ -149,8 +149,6 @@
       dest: /etc/sysctl.d/
     - file: registries.conf
       dest: /etc/containers/
-    - file: conf.d/registry
-      dest: /etc/conf.d/
     - file: conf.d/glusterd
       dest: /etc/conf.d/
 
@@ -159,16 +157,21 @@
 
 - name: make.conf, wpa_supplicant.conf, /etc/conf.d/net
   template:
-    src: "{{ item.src }}"
+    src: "{{ item.file }}"
     dest: "{{ item.dest }}"
     backup: yes 
   loop:
-    - src: make.conf
+    - file: make.conf
       dest: "/etc/portage/make.conf"
-    - src: wpa_supplicant.conf
+    - file: wpa_supplicant.conf
       dest: "/etc/wpa_supplicant/wpa_supplicant.conf"
-    - src: net
+    - file: net
       dest: "/etc/conf.d/net"
+    - file: conf.d/registry
+      dest: /etc/conf.d/
+    - file: conf.d/glustermount
+      dest: /etc/conf.d/
+
 
 - name: symlinks for services
   file:

@@ -19,9 +19,9 @@ start()
         ebegin "Mounting gluster volume"
         einfo "gluster volumes:"$(gluster volume list)
         for v in $(gluster volume list); do 
-           einfo "mounting localhost:$v to /data/$v"
-	   [ ! -d /data/$v ] && mkdir "/data/$v"
-           mount -t glusterfs localhost:$v /data/$v
+           einfo "mounting localhost:$v to $shared_mounts/$v"
+	   [ ! -d $shared_mounts/$v ] && mkdir "/data/$v"
+           mount -t glusterfs localhost:$v $shared_mounts/$v
         done
         rc=0
         eend "Done"
@@ -32,7 +32,7 @@ stop()
 {
   ebegin "Unmounting gluster volumes"
         for v in $(gluster volume list); do 
-           umount /data/$v
+           umount $shared_mounts/$v
         done
         rc=0
         eend "Done"
