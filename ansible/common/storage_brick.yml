@@ -1,3 +1,8 @@
+- name: app:{{ app }} set brick and disk path
+  set_fact:
+    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
+    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
+
 - name: app:{{ app }} ensure bricks for gluster
   shell: |
     set -e;
@@ -10,12 +15,13 @@
     mkfs.ext4 "{{ disk }}";
     [ ! -d "{{ brick }}" ] && mkdir -p "{{ brick }}";
     mount "{{ disk }}" "{{ brick }}"
-  vars:
-    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
-    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
-  when: application.value.storage is defined
-  with_items: "{{ application.value.storage }}"
+#  vars:
+#    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
+#    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
   loop_control:
     loop_var: storage
   register: brick_result
 
+- name: show brick and disk
+  debug:
+    msg: "brick: {{ brick }} disk: {{disk}}"
