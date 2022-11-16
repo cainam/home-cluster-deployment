@@ -2,10 +2,10 @@
   gluster.gluster.gluster_volume:
     state: present
     name: "{{ storage.name }}"
-    bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}/data"
+    bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
     force: yes
     replicas: "{{ replicas }}"
-    directory: /data
+    # directory: /data
     options:
       {
         cluster.quorum-type: 'fixed',
@@ -16,11 +16,13 @@
   set_fact:
     keep_volumes: "{{ keep_volumes +[storage.name] }}"
   run_once: true
+  when: outside_k8s is not defined
 
 - name: app:{{ app }} show keep_volumes
   debug:
     msg: "{{ item }}"
   loop: "{{ keep_volumes }}"
+  when: outside_k8s is not defined
 
 - name: app:{{ app }} PersistentVolume
   shell: |
