@@ -66,6 +66,8 @@
       perm: u=rwx,g=rx,o=rx
     - path: /etc/wpa_supplicant
       perm: u=rwx,g=rx,o=rx
+    - path: "{{ shared_mounts }}"
+      perm: u=rwx,g=rx,o=rx
 
 - name: rc.conf
   lineinfile:
