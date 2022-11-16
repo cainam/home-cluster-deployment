@@ -13,8 +13,6 @@
   vars:
     brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
     disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
-  when: application.value.storage is defined
-  with_items: "{{ application.value.storage }}"
   loop_control:
     loop_var: storage
   register: brick_result

@@ -5,6 +5,8 @@
 - name: app:{{ app }} storage
   include_tasks: common/storage_brick.yml
   with_items: "{{ application.value.storage }}"
+  when: application.value.storage is defined
+  with_items: "{{ application.value.storage }}"
   loop_control:
     loop_var: storage
 
