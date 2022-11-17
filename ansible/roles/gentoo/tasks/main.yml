@@ -38,6 +38,13 @@
     line: "/dev/sda1               /data   ext4            noatime         0 1"
     backup: yes
 
+- name: auto.master
+  lineinfile: 
+    path: /etc/autofs/auto.master
+    regexp: "^{{ shared_mounts }}"
+    line: "{{ shared_mounts }} /etc/autofs/gluster.autofs"
+    backup: yes
+
 - name: symlinks for CA
   file:
     src: "/data/mine/certs/myCA.pem"
@@ -151,6 +158,8 @@
       dest: /etc/containers/
     - file: conf.d/glusterd
       dest: /etc/conf.d/
+    - file: gluster.autofs
+      dest: /etc/autofs/
 
 - name: include wlan secrets
   include_vars: ../wlan
@@ -200,6 +209,7 @@
     - keepalived
     - registry
     - haproxy
+    - autofs
   ignore_errors: yes
 
 - name: emerge sync
