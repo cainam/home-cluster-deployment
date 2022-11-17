@@ -146,8 +146,6 @@
       dest: /etc/init.d/
     - file: brickmount
       dest: /etc/init.d/
-    - file: glustermount
-      dest: /etc/init.d/
     - file: haproxy.cfg
       dest: /etc/haproxy/
     - file: keepalived.conf
@@ -178,9 +176,6 @@
       dest: "/etc/conf.d/net"
     - file: conf.d/registry
       dest: /etc/conf.d/
-    - file: conf.d/glustermount
-      dest: /etc/conf.d/
-
 
 - name: symlinks for services
   file:
