@@ -42,3 +42,5 @@ sys-power/cpupower
 sys-process/iotop
 www-servers/lighttpd
 sys-kernel/linux-firmware
+net-fs/autofs
+net-fs/nfs-utils

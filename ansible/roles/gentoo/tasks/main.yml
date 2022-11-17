@@ -200,6 +200,7 @@
     - keepalived
     - registry
     - haproxy
+  ignore_errors: yes
 
 - name: emerge sync
   shell: emerge --sync
