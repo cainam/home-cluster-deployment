@@ -1,0 +1,2 @@
+keycloak sed -e 's/bitnami/dcm4che/' -e 's/-.*//g'
+keycloaksdf sed -e 's/:$/:18.0.2/'

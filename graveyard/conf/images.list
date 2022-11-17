@@ -1,0 +1,57 @@
+arm docker.io/library/alpine:latest / just a Linux image used for testing
+arm docker.io/arm32v6/registry:2.8.1 / the image of the registry
+arm kubernetesui/dashboard:v2.6.0 /k8s/ nice!
+arm library/debian:latest / debian
+arm64 bitnami/keycloak:18.0.2-debian-11-r3 /auth/
+arm64 bitnami/postgresql:14.4.0-debian-11-r2 /auth/
+arm64 bitnami/redis:6.2.6-debian-10-r142 /auth/
+arm64 deconzcommunity/deconz:2.16.01 /home/ 
+arm64 ghcr.io/home-assistant/home-assistant:2022.4.0 /home/ Home Assistant
+arm64 ghcr.io/home-assistant/home-assistant:2022.6.5 /home/ Home Assistant
+arm64 jimmidyson/configmap-reload:v0.5.0 /istio/ add-on for prometheus
+arm64 kiali/kiali-operator:v1.52.0 /istio/ Kiali dashboard
+arm64 kiali/kiali:v1.52.0 /istio/ Kiali dashboard
+arm64 kiali/kiali-operator:v1.57.1 /istio/ Kiali dashboard
+arm64 kiali/kiali:v1.57.1 /istio/ Kiali dashboard
+arm64 prom/prometheus:v2.31.1 /istio/ istio for prometheus
+arm64 quay.io/oauth2-proxy/oauth2-proxy:v7.2.1 /auth/
+arm64 querycapistio/pilot:1.13.3 /istio/ pilot for istio
+arm64 querycapistio/pilot:1.14.1 /istio/ pilot for istio
+arm64 querycapistio/pilot:1.14.3 /istio/ pilot for istio
+arm64 querycapistio/proxyv2:1.13.3 /istio/ pilot for istio
+arm64 querycapistio/proxyv2:1.14.3 /istio/ pilot for istio
+arm64 dcm4che/keycloak:18.0.2 /auth/
+arm dcm4che/keycloak:18.0.2 /auth/
+arm bitnami/postgresql:14.4.0-debian-11-r2 /auth/
+arm64 quay.io/keycloak/keycloak:18.0.2 /auth/
+arm k8s.gcr.io/kube-apiserver:v1.24.0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-controller-manager:v1.24.0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-scheduler:v1.24.0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-proxy:v1.24.0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/pause:3.7 /k8s/ images for Kubernetes
+arm k8s.gcr.io/etcd:3.5.3-0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/coredns/coredns:v1.8.6 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-apiserver:v1.24.3 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-controller-manager:v1.24.3 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-scheduler:v1.24.3 /k8s/ images for Kubernetes
+arm k8s.gcr.io/kube-proxy:v1.24.3 /k8s/ images for Kubernetes
+arm k8s.gcr.io/pause:3.7 /k8s/ images for Kubernetes
+arm k8s.gcr.io/etcd:3.5.3-0 /k8s/ images for Kubernetes
+arm k8s.gcr.io/coredns/coredns:v1.8.6 /k8s/ images for Kubernetes
+arm64 kubernetesui/dashboard:v2.6.1 /tools/
+arm64 k8s.gcr.io/metrics-server/metrics-server: /tools/
+quay.io/oauth2-proxy/oauth2-proxy:v7.2.1 /tools/
+bitnami/redis:6.2.6-debian-10-r142 /tools/
+arm64 k8s.gcr.io/metrics-server/metrics-server:0.5.0 /tools/
+arm64 k8s.gcr.io/metrics-server/metrics-server:v0.5.0 /tools/
+arm kubernetesui/dashboard:v2.6.1 /tools/
+arm k8s.gcr.io/metrics-server/metrics-server:v0.5.0 /tools/
+arm64 quay.io/oauth2-proxy/oauth2-proxy:v7.3.0 /auth/
+arm64 bitnami/keycloak:18.0.2-debian-11-r25 /auth/
+arm64 bitnami/postgresql:14.5.0-debian-11-r6 /auth/
+arm bitnami/keycloak:18.0.2-debian-11-r25 /auth/
+arm bitnami/postgresql:14.5.0-debian-11-r6 /auth/
+arm64 kubernetesui/dashboard:v2.7.0 /tools/
+arm64 registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.6.0 /tools/
+arm64 registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.5.0 /tools/
+arm64 quay.io/prometheus/node-exporter:v1.3.1 /tools/
