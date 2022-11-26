@@ -200,11 +200,15 @@
     - net.eth0
     - ntp-client
     - brickmount
-    - glustermount
     - keepalived
     - registry
     - haproxy
     - autofs
+    - crio
+    - glusterd 
+    - kubelet
+    - lighttpd
+    - syslog-ng
   ignore_errors: yes
 
 - name: emerge sync
