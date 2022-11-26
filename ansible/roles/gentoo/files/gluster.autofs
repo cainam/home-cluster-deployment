@@ -1,0 +1,3 @@
+# * -fstype=glusterfs,defaults,_netdev,backupvolfile-server=other_node &:/home/&
+
+* -fstype=glusterfs,defaults localhost:/&
