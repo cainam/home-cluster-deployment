@@ -9,6 +9,7 @@
     ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
+    PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
   roles:
     - role: always
       tags:
@@ -22,8 +23,8 @@
         - never
         - gentoo
     - role: deploy
-#      environment:
-#        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
+      environment:
+        PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
       tags:
         - never
         - deploy
