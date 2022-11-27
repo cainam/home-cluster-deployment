@@ -34,8 +34,8 @@
 
 - name: deploy configuration files
   copy:
-    src: etc/sysctl.d/k8s.conf
-    dest: /etc/sysctl.d/k8s.conf
+    src: "{{ item }}"
+    dest: "/{{ item }}"
     mode: 0644
   loop:
     - etc/sysctl.d/k8s.conf
@@ -46,3 +46,26 @@
   service:
     name: kubelet
     enabled: yes
+
+- name: ensure required directories exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.perm }}"
+  loop:
+    - path: /data/etcd
+      perm: u=rwx,g=rx,o=rx
+
+- name: ensure /var/lib/etcd is absent
+  file:
+    path: /var/lib/etcd
+    state: absent
+
+- name: create /var/lib/etcd link to /data/etcd
+  file:
+    src: "/data/etcd"
+    dest: "/var/lib/etcd"
+    owner: root
+    group: root
+    state: link
+

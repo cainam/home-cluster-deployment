@@ -1,5 +1,5 @@
 - name: force-reinstall
-  shell: /etc/init.d/kubelet stop; kubeadm reset --force; rm -rf kubeadm.log /etc/kubernetes/pki/ /etc/kubernetes/manifests/ /etc/kubernetes/tmp/ /etc/kubernetes/*.conf  /var/log/kubelet/kubelet.log /var/log/crio/crio.log /var/lib/kubelet/*; iptables -F; iptables -t nat -F; /etc/init.d/crio restart; ip link delete dev cni0; ip link delete dev flannel.1; rm  /opt/cni/bin/flannel /etc/cni/net.d/10-flannel.conflist
+  shell: /etc/init.d/kubelet stop; kubeadm reset --force; rm -rf kubeadm.log /etc/kubernetes/pki/ /etc/kubernetes/manifests/ /etc/kubernetes/tmp/ /etc/kubernetes/*.conf  /var/log/kubelet/kubelet.log /var/log/crio/crio.log /var/lib/kubelet/*; iptables -F; iptables -t nat -F; /etc/init.d/crio restart; ip link delete dev cni0; ip link delete dev flannel.1; rm  /opt/cni/bin/flannel /etc/cni/net.d/10-flannel.conflist; /etc/init.d/kubelet restart
   ignore_errors: yes
   when: "'force_reinstall' in ansible_run_tags" 
   tags:

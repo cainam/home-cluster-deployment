@@ -10,11 +10,11 @@ localAPIEndpoint:
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
-imageRepository: "myregistry.adm13:443/k8s"
+imageRepository: "{{ my_registry }}/k8s"
 controlPlaneEndpoint: "k8s.adm13:7443"
 networking:
  podSubnet: "10.244.0.0/16"
-kubernetesVersion: v1.25.2
+kubernetesVersion: "{{ k8s_version }}"
 ---
 kind: JoinConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
