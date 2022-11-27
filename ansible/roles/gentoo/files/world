@@ -44,3 +44,4 @@ www-servers/lighttpd
 sys-kernel/linux-firmware
 net-fs/autofs
 net-fs/nfs-utils
+sys-block/fio

@@ -1,42 +1,18 @@
 ---
 
-- name: gluster peering
-  gluster_peer:
-    state: present
-    nodes:
-      - "{{ item }}"
-  loop: "{{ gluster_hosts }}"
-
-- name: set app name
-  set_fact:
-    app: registry
-
-- name: app:{{ app }} storage bricks
-  include_tasks: common/storage_brick.yml
-  vars:
-    outside_k8s: true
-  with_items:
-    - name: registry
-      size: 5G
-  loop_control:
-    loop_var: storage
-
-- name: app:{{ app }} storage
-  include_tasks: common/storage.yml
-  vars:
-    outside_k8s: true
-  with_items:
-    - name: registry
-  loop_control:
-    loop_var: storage
-  run_once: true
-
-- name: fstab
-  lineinfile: 
-    path: /etc/fstab
-    regexp: "^/dev/sda1"
-    line: "/dev/sda1               /data   ext4            noatime         0 1"
-    backup: yes
+#- name: fstab
+#  lineinfile: 
+#    path: /etc/fstab
+#    regexp: "^/dev/sda1"
+#    line: "/dev/sda1               /data   ext4            noatime         0 1"
+#    backup: yes
+- name: mount /data
+  mount:
+    path: /data
+    src: /dev/sda1
+    fstype: ext4
+    opts: noatime
+    state: mounted
 
 - name: auto.master
   lineinfile: 
@@ -44,6 +20,19 @@
     regexp: "^{{ shared_mounts }}"
     line: "{{ shared_mounts }} /etc/autofs/gluster.autofs"
     backup: yes
+
+- name: ensure required directories exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.perm }}"
+  loop:
+    - path: /etc/modprobe.d
+      perm: u=rwx,g=rx,o=rx
+    - path: /etc/wpa_supplicant
+      perm: u=rwx,g=rx,o=rx
+    - path: "{{ shared_mounts }}"
+      perm: u=rwx,g=rx,o=rx
 
 - name: symlinks for CA
   file:
@@ -62,19 +51,6 @@
   shell: getent hosts $(hostname) | awk '{print $1}'
   changed_when: false
   register: myip
-
-- name: ensure required directories exist
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "{{ item.perm }}"
-  loop:
-    - path: /etc/modprobe.d
-      perm: u=rwx,g=rx,o=rx
-    - path: /etc/wpa_supplicant
-      perm: u=rwx,g=rx,o=rx
-    - path: "{{ shared_mounts }}"
-      perm: u=rwx,g=rx,o=rx
 
 - name: rc.conf
   lineinfile:
@@ -210,6 +186,9 @@
     - lighttpd
     - syslog-ng
   ignore_errors: yes
+
+- name: gluster
+  import_tasks: gluster.yml
 
 - name: emerge sync
   shell: emerge --sync
