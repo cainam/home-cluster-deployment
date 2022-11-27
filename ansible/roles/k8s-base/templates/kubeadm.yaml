@@ -3,7 +3,7 @@ apiVersion: kubelet.config.k8s.io/v1beta1
 cgroupDriver: cgroupfs
 ---
 kind: InitConfiguration
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 localAPIEndpoint:
   advertiseAddress: {{ internal_first_master_ip }}
 
@@ -27,3 +27,4 @@ etcd:
           listen-client-urls: https://{{ internal_secondary_master_ip | default("") }}:2379
           initial-advertise-peer-urls: https://{{ inventory_hostname }}:2380
           advertise-client-urls: https://{{ inventory_hostname }}:2379
+          data-dir: /data/etcd

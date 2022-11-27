@@ -33,6 +33,8 @@
       perm: u=rwx,g=rx,o=rx
     - path: "{{ shared_mounts }}"
       perm: u=rwx,g=rx,o=rx
+    - path: /etc/modules-load.d
+      perm: u=rwx,g=rx,o=rx
 
 - name: symlinks for CA
   file:
@@ -113,6 +115,8 @@
       dest: /etc/portage/repos.conf/
     - file: ipv6.conf
       dest: /etc/modprobe.d/
+    - file: k8s.conf
+      dest: /etc/modules-load.d/
     - file: hosts
       dest: /etc/
     - file: patches
