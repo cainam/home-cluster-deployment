@@ -103,7 +103,7 @@
     mode: preserve
     backup: yes
   loop:
-    - file: scripts/pull-tag-push.sh
+    - file: scripts/
       dest: /usr/local/bin/
     - file: cmdline.txt
       dest: /boot/
