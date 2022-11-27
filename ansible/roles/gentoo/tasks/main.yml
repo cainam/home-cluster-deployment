@@ -90,6 +90,11 @@
     - line: 'rc_need="net.wlan0"'
       setting: rc_need
 
+- name: mount boot
+  shell: mountpoint -q /boot || mount /boot
+  changed_when: false 
+
+
 - name: gentoo files
   copy:
     src: "{{ item.file }}"
@@ -98,6 +103,8 @@
     mode: preserve
     backup: yes
   loop:
+    - file: cmdline.txt
+      dest: /boot/
     - file: world
       dest: /var/lib/portage/
     - file: gentoo.conf
