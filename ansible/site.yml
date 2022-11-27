@@ -22,8 +22,8 @@
         - never
         - gentoo
     - role: deploy
-      environment:
-        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
+#      environment:
+#        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
       tags:
         - never
         - deploy
