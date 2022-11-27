@@ -33,7 +33,7 @@ start()
         # claim IP
         #ip address add "${ipconf}" dev wlan0
         podman rm -f registry
-        podman run --rm --privileged -d --name registry -p 1443:443 -v ${host_volume=}:/var/lib/registry \
+        podman run --rm --privileged -d --name registry -p 1443:443 -v ${host_volume}:/var/lib/registry \
                 -e REGISTRY_STORAGE_DELETE_ENABLED=true \
                 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
                 -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \

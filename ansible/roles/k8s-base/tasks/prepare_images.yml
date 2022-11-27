@@ -23,22 +23,12 @@
   shell: /etc/init.d/registry restart
   when: check_registry.stdout != "true"
 
-
-
 - name: pull, tag and push k8s images
   shell: |
-    echo "arm {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
-    # podman pull {{ item }} ;
-    # loc_img=myregistry.adm13:443/k8s/$(echo "{{ item }}" | xargs basename);
-    # podman tag "{{ item }}" "$loc_img";
-    # podman push "$loc_img";
-  environment:
-    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
+    echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
   with_items: "{{ required_images.stdout_lines }}"
 
 - name: prepare flannel image
   shell: |
     curl -O https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
     grep image kube-flannel.yml | grep -v "#image" | awk '{print $2}' | sed -e 's/^/arm /g' -e 's#$# /k8s/ images for kube-flannel#g' | bash pull-tag-push.sh
-  environment:
-    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 

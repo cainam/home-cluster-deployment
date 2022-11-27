@@ -23,8 +23,6 @@
         - never
         - gentoo
     - role: deploy
-      environment:
-        PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
       tags:
         - never
         - deploy
@@ -33,8 +31,6 @@
         - never
         - raspberry
     - role: testing
-      environment:
-        PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin"
       tags:
         - never
         - testing
