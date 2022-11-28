@@ -7,15 +7,15 @@
 
 - name: set app name
   set_fact:
-    app: registry
+    app: host
 
 - name: app:{{ app }} storage bricks
   include_tasks: common/storage_brick.yml
   vars:
     outside_k8s: true
-  with_items:
-    - name: registry
-      size: 5G
+  with_items: "{{ gluster_vols }}"
+#    - name: registry
+#      size: 5G
   loop_control:
     loop_var: storage
 
@@ -23,8 +23,8 @@
   include_tasks: common/storage.yml
   vars:
     outside_k8s: true
-  with_items:
-    - name: registry
+  with_items: "{{ gluster_vols }}"
+#    - name: registry
   loop_control:
     loop_var: storage
   run_once: true

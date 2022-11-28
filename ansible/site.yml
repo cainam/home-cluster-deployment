@@ -14,6 +14,9 @@
     - role: always
       tags:
         - always
+    - role: image-build
+      tags:
+        - image-build
     - role: k8s-base
       tags: 
         - never

@@ -15,16 +15,17 @@ controlPlaneEndpoint: "k8s.adm13:7443"
 networking:
  podSubnet: "10.244.0.0/16"
 kubernetesVersion: "{{ k8s_version }}"
----
-kind: JoinConfiguration
-apiVersion: kubeadm.k8s.io/v1beta3
-localAPIEndpoint:
-  advertiseAddress: {{ internal_secondary_master_ip | default("") }}
-etcd:
-    local:
-        extraArgs:
-          listen-peer-urls: https://{{ internal_secondary_master_ip | default("") }}:2380
-          listen-client-urls: https://{{ internal_secondary_master_ip | default("") }}:2379
-          initial-advertise-peer-urls: https://{{ inventory_hostname }}:2380
-          advertise-client-urls: https://{{ inventory_hostname }}:2379
-          data-dir: /data/etcd
+#---
+#kind: JoinConfiguration
+#apiVersion: kubeadm.k8s.io/v1beta3
+#localAPIEndpoint:
+#  advertiseAddress: {{ internal_secondary_master_ip | default("") }}
+#etcd:
+#    local:
+#        extraArgs:
+#          listen-peer-urls: https://{{ internal_secondary_master_ip | default("") }}:2380
+#          listen-client-urls: https://{{ internal_secondary_master_ip | default("") }}:2379
+#          initial-advertise-peer-urls: https://{{ inventory_hostname }}:2380
+#          advertise-client-urls: https://{{ inventory_hostname }}:2379
+#          data-dir: /data/etcd
+

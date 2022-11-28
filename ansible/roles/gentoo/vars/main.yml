@@ -1,0 +1,6 @@
+---
+gluster_vols:
+  - name: registry
+    size: 5G
+  - name: helm
+    size: 1G

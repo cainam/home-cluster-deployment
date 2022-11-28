@@ -1,0 +1,7 @@
+---
+images:
+  - name: helm
+    source: https://github.com/lachie83/k8s-helm.git
+    dockerfile: Dockerfile
+    branch: v3.10.1
+    build_args: --build-arg TARGETARCH=arm64 --from docker.io/alpine --arch=arm64

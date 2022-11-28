@@ -1,0 +1,28 @@
+- name: images
+  debug:
+    msg: "img: {{ item }}"
+  loop: "{{ images  }}"
+  run_once: true
+
+- name: tempdir for build
+  tempfile:
+    state: directory
+    suffix: "-build-image"
+  register: build_dir
+
+- name: build
+  shell: |
+    set -x
+    git clone --branch "{{ item.branch }}" "{{ item.source }}"
+    cd *
+    image="{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
+    podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile }}" --tag "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
+    podman push "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
+  args:
+    chdir: "{{ build_dir.path }}"
+  loop: "{{ images  }}"
+  run_once: true
+  register: build_out
+
+- debug: var=build_out
+
