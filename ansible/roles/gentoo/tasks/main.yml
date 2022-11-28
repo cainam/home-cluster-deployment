@@ -105,6 +105,8 @@
     mode: preserve
     backup: yes
   loop:
+    - file: 02-cgroup-manager.conf
+      dest: /etc/crio/crio.conf.d/
     - file: scripts/
       dest: /usr/local/bin/
     - file: cmdline.txt

@@ -47,7 +47,12 @@
     name: kubelet
     enabled: yes
 
-- name: ensure required directories exist
+- name: check /var/lib/etcd
+  stat:
+    path: "/var/lib/etcd"
+  register: etcd_data
+
+- name: ensure /data/etcd exists
   file:
     path: "{{ item.path }}"
     state: directory
@@ -60,6 +65,7 @@
   file:
     path: /var/lib/etcd
     state: absent
+  when: not ( etcd_data.stat.islnk is defined and etcd_data.stat.islnk)
 
 - name: create /var/lib/etcd link to /data/etcd
   file:
@@ -68,4 +74,5 @@
     owner: root
     group: root
     state: link
+  when: not ( etcd_data.stat.islnk is defined and etcd_data.stat.islnk)
 

@@ -34,8 +34,6 @@
     . set_env.sh blabla
     kubectl apply -f kube-flannel.yml  
   when: not etc_k8s.stat.exists and inventory_hostname == selected_host
-  environment:
-    PATH: "/data/meinKram/scripts/:/usr/sbin:/usr/bin:/sbin:/bin" 
 
 - name: join nodes if needed
   include_tasks: join.yml
