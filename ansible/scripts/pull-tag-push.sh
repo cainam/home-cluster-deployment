@@ -7,7 +7,7 @@ while read arch img section comments; do
   version=${img#*:};
   mine=$reg$section$bname:$version; 
   echo "pulling $arch $img $section basename:$bname version:$version upload to section:$section/$bname:$version #$comments pushing as $mine";
-  podman pull --arch=$arch $img;
+  (podman pull --arch=$arch $img;
   podman tag $img $mine; 
-  podman push $mine;
+  podman push $mine;) || exit 9
 done

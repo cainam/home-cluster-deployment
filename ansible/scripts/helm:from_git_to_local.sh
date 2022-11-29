@@ -16,6 +16,10 @@ function pull_local(){
     yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' values.yaml | while read image_section;do
       repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
       tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
+      if [ "${tag}" == "" ]; then
+        echo "tag is empty (${tag}, trying appVersion"
+        tag=$(yq -r '.appVersion' Chart.yaml)
+      fi
       echo "treat image repository: ${repository} tag: ${tag}"
       if [ "${repository}" == "" ] || [ "${tag}" == "" ]; then
         echo "repository and tag are not allowed to be empty"
@@ -27,10 +31,13 @@ function pull_local(){
         [ "${mapping}" = "" ] && mapping="cat"
         fetch_img=$(echo "${repository}:${tag}" | eval $mapping)
     
-        image_entry="$platform $fetch_img /$category/"
-        echo "image_entry: $image_entry from original chart image: ${repository}:${tag} - via mapping: $mapping"
-        # grep -F -x -q "$image_entry" $images_list || echo "$image_entry" >> $images_list # add entry if it is missing
-        echo "$image_entry" | pull-tag-push.sh
+        for rem_reg in "" docker.io/; do 
+	  image_entry="$platform ${rem_reg}$fetch_img /$category/"
+          echo "image_entry: $image_entry from original chart image: ${repository}:${tag} - via mapping: $mapping"
+          # grep -F -x -q "$image_entry" $images_list || echo "$image_entry" >> $images_list # add entry if it is missing
+	  echo "$image_entry" | pull-tag-push.sh
+	  [ $? -ne 9 ] && break
+	done
         yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
         yq -yi '.'"${image_section}"'.tag="'"$(echo "${fetch_img}"|cut -d : -f 2)"'"' values.yaml
         
