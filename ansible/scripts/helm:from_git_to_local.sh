@@ -13,22 +13,27 @@ function pull_local(){
 
     # manage images
     # first try, but to keep for later usage: img_infos=$yq -y '(.. | .image? // empty)' test | sed -e 's/: /:"/g' -e 's/$/"/g' | sed -e 's/---"$/---/g' ) #| tr '\n' ' ' | sed -e 's/\s*---\s*/\n/g')
-    yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' values.yaml | while read image_section;do
+    yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' values.yaml | while read image_section_org;do
+      echo
+      image_section=$(echo "${image_section_org}" | sed -e 's/^/"/' -e 's/$/"/' -e 's/\./"\."/g')
       repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
       tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
       if [ "${tag}" == "" ]; then
-        echo "tag is empty (${tag}, trying appVersion"
-        tag=$(yq -r '.appVersion' Chart.yaml)
+        # echo "tag is empty (${tag}), trying appVersion"
+        # tag=$(yq -r '.appVersion' Chart.yaml)
+        echo "tag is empty (${tag}), trying latest"
+        tag="latest" #$(yq -r '.appVersion' Chart.yaml)
       fi
-      echo "treat image repository: ${repository} tag: ${tag}"
+      echo "treat image repository: ${repository} tag: ${tag} image_section=${image_section=} (from org:${image_section_org})"
       if [ "${repository}" == "" ] || [ "${tag}" == "" ]; then
         echo "repository and tag are not allowed to be empty"
         exit -1
       fi
       if [ "${repository}" != "null" ]; then
         img_name=$(echo "${repository}" | grep -o '[^/]*$' )
-        read dummy mapping < <( grep "^${img_name}\s\+" ${images_map})
-        [ "${mapping}" = "" ] && mapping="cat"
+        # read dummy mapping < <( grep "^${img_name}\s\+" ${images_map})
+        #[ "${mapping}" = "" ] && mapping="cat"
+	mapping=cat
         fetch_img=$(echo "${repository}:${tag}" | eval $mapping)
     
         for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
