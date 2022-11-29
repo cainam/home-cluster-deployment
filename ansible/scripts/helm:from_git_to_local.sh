@@ -31,7 +31,7 @@ function pull_local(){
         [ "${mapping}" = "" ] && mapping="cat"
         fetch_img=$(echo "${repository}:${tag}" | eval $mapping)
     
-        for rem_reg in "" docker.io/; do 
+        for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
 	  image_entry="$platform ${rem_reg}$fetch_img /$category/"
           echo "image_entry: $image_entry from original chart image: ${repository}:${tag} - via mapping: $mapping"
           # grep -F -x -q "$image_entry" $images_list || echo "$image_entry" >> $images_list # add entry if it is missing
