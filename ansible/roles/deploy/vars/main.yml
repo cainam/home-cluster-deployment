@@ -12,8 +12,8 @@ applications:
       subdir: charts/prometheus
       helm_options: --set nodeExporter.hostRootFsMount.mountPropagation=HostToContainer --set nodeExporter.hostRootfs=false --set alertmanager.persistentVolume.volumeName=prometheus-alertmanager --set server.persistentVolume.volumeName=prometheus-server
       storage: 
-      - name: prometheus-alertmanager
-        size: 2Gi
+      - name: storage-prometheus-alertmanager-0
+        size: 1Gi
       - name: prometheus-server
         size: 8Gi
   istio-system:
