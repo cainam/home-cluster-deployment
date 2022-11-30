@@ -1,6 +1,13 @@
 ---
 applications:
   tools:
+    infopage:
+      git: https://github.com/cainam/k8s_at_home.git
+      platform: arm
+      subdir: infopage
+      storage:
+      - name: infopage
+        size: 5Mi
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       platform: arm
