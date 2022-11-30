@@ -6,6 +6,26 @@
 #    regexp: "^/dev/sda1"
 #    line: "/dev/sda1               /data   ext4            noatime         0 1"
 #    backup: yes
+
+- name: groups
+  group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid }}"
+  loop:
+    - name: k8s-prometheus
+      gid: 100100
+
+- name: users
+  user: 
+    create_home: false
+    name: "{{ item.name }}"
+    group: "{{ item.group }}"
+    uid: "{{ item.uid }}"
+  loop:
+    - name: k8s-prometheus
+      uid: 100100
+      group: k8s-prometheus
+
 - name: mount /data
   mount:
     path: /data

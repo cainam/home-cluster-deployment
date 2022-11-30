@@ -1,5 +1,10 @@
 ---
 images:
+  - name: mypython
+    source: local
+    dockerfile: mypython.dockerfile
+    branch: 3.10.5-slim
+    build_args: --from docker.io/python:3.10.5-slim
   - name: helm
     source: https://github.com/lachie83/k8s-helm.git
     dockerfile: Dockerfile

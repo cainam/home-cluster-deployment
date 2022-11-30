@@ -10,11 +10,21 @@
     suffix: "-build-image"
   register: build_dir
 
+- name: copy local dockerfiles
+  copy:
+    src: "{{ item }}"
+    dest: "{{ build_dir.path }}"
+    mode: 0644
+  loop:
+    - mypython.dockerfile
+
 - name: build
   shell: |
     set -x
-    git clone --branch "{{ item.branch }}" "{{ item.source }}"
-    cd *
+    if [ "{{ item.source }}" != "local" ]; then
+      git clone --branch "{{ item.branch }}" "{{ item.source }}"
+      cd *
+    fi
     image="{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
     podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile }}" --tag "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
     podman push "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"

@@ -10,10 +10,11 @@ applications:
       git: https://github.com/prometheus-community/helm-charts.git
       platform: arm
       subdir: charts/prometheus
-      helm_options: --set nodeExporter.hostRootFsMount.mountPropagation=HostToContainer --set nodeExporter.hostRootfs=false --set alertmanager.persistentVolume.volumeName=prometheus-alertmanager --set server.persistentVolume.volumeName=prometheus-server
+      xhelm_options: --set nodeExporter.hostRootFsMount.mountPropagation=HostToContainer --set--set nodeExporter.hostRootfs=false --set alertmanager.persistentVolume.volumeName=prometheus-alertmanager --set server.persistentVolume.volumeName=prometheus-server
+      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 
       storage: 
       - name: storage-prometheus-alertmanager-0
-        size: 1Gi
+        size: 2Gi
       - name: prometheus-server
         size: 8Gi
   istio-system:

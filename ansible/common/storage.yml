@@ -46,7 +46,8 @@
         capacity:
           storage: "{{ storage.size }}"
         storageClassName: ""
-        persistentVolumeReclaimPolicy: Delete
+        #persistentVolumeReclaimPolicy: Delete
+        persistentVolumeReclaimPolicy: Retain
         volumeMode: Filesystem
         glusterfs:
           endpoints: glusterfs
