@@ -44,7 +44,7 @@ function pull_local(){
 	  [ $? -ne 9 ] && break
 	done
         yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
-        yq -yi '.'"${image_section}"'.tag="'"$(echo "${fetch_img}"|cut -d : -f 2)"'"' values.yaml
+        yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
         
         #yq -yi '.image.repository |= "'${category}/${img_name}'"' values.yaml
         ## the new replace command is                                                        yq -yi '(.. | .repository? // empty) |= "lkj"' values.yaml
