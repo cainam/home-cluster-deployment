@@ -69,8 +69,8 @@ function pull_local(){
     done < <(cat Chart.yaml | yq -r -c '(.dependencies[]? | [.name, .repository, .version] |@tsv)')
   
     yq -yi '.dependencies[]?.repository |= "'$helm_url'"' Chart.yaml
-    [ "${appVersion}" != "" ] && yq -yi  '.appVersion="'"${appVersion}"'"' Chart.yaml
-    [ "${version}" != "" ] && yq -yi  '.version="'"${version}"'"' Chart.yaml
+    [ "${appVersion}" != "" ] && echo "updating appVersion" && yq -yi  '.appVersion="'"${appVersion}"'"' Chart.yaml
+    [ "${version}" != "" ] && echo "updating version" && yq -yi  '.version="'"${version}"'"' Chart.yaml
     helm dependency build $PWD
 
     helm package -d $helm_repo_dir/ $PWD

@@ -30,6 +30,8 @@ applications:
     kiali:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-operator 
+      version: v1.60.0
+      appVersion: v1.60.0
       helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.tag=v1.60.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/istio/kiali --set cr.spec.deployment.image_version=v1.60.0
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
