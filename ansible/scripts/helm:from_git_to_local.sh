@@ -70,7 +70,7 @@ function pull_local(){
   
     yq -yi '.dependencies[]?.repository |= "'$helm_url'"' Chart.yaml
     [ "${appVersion}" != "" ] && echo "updating appVersion" && yq -yi  '.appVersion="'"${appVersion}"'"' Chart.yaml
-    [ "${version}" != "" ] && echo "updating version" && yq -yi  '.version="'"${version}"'"' Chart.yaml
+    [ "${chart_version}" != "" ] && echo "updating chart_version" && yq -yi  '.version="'"${chart_version}"'"' Chart.yaml
     helm dependency build $PWD
 
     helm package -d $helm_repo_dir/ $PWD
@@ -86,7 +86,7 @@ platform=""
 git_source=""
 git_subdir=""
 appVersion=""
-version=""
+chart_version=""
 
 for i in "$@"; do
   case $i in
@@ -106,8 +106,8 @@ for i in "$@"; do
       appVersion="${i#*=}"
       shift
       ;;
-    --version=*)
-      version="${i#*=}"
+    --chart_version=*)
+      chart_version="${i#*=}"
       shift
       ;;
     *)
@@ -123,7 +123,7 @@ echo "platform: $platform"
 echo "git_source: $git_source"
 echo "git_subdir: $git_subdir"
 echo "appVersion: $appVersion"
-echo "version: $version"
+echo "chart_version: $chart_version"
 
 dir=$(mktemp --directory)
 cd $dir
