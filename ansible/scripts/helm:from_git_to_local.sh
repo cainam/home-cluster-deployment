@@ -45,13 +45,8 @@ function pull_local(){
 	done
         yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
         yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
-        
-        #yq -yi '.image.repository |= "'${category}/${img_name}'"' values.yaml
-        ## the new replace command is                                                        yq -yi '(.. | .repository? // empty) |= "lkj"' values.yaml
-        #yq -yi '.image.tag |= "'$(echo "${fetch_img}"|cut -d : -f 2)'"' values.yaml
       fi
     done
-    # yq -yi '.image.registry |= "'${registry}'"' values.yaml
   
     # treat dependencies
     while read name repo version; do 
@@ -74,6 +69,8 @@ function pull_local(){
     done < <(cat Chart.yaml | yq -r -c '(.dependencies[]? | [.name, .repository, .version] |@tsv)')
   
     yq -yi '.dependencies[]?.repository |= "'$helm_url'"' Chart.yaml
+    [ "${appVersion}" != "" ] && yq -yi  '.appVersion="'"${appVersion}"'"' Chart.yaml
+    [ "${version}" != "" ] && yq -yi  '.version="'"${version}"'"' Chart.yaml
     helm dependency build $PWD
 
     helm package -d $helm_repo_dir/ $PWD
@@ -85,9 +82,48 @@ function pull_local(){
 
 }
 
-platform=$1 # arm64
-git_source=$2 # https://github.com/oauth2-proxy/manifests.git
-git_subdir=$3
+platform=""
+git_source=""
+git_subdir=""
+appVersion=""
+version=""
+
+for i in "$@"; do
+  case $i in
+    -p=*|--platform=*)
+      platform="${i#*=}"
+      shift
+      ;;
+    -g=*|--git_source=*)
+      git_source="${i#*=}"
+      shift
+      ;;
+    -s=*|--git_subdir=*)
+      git_subdir="${i#*=}"
+      shift
+      ;;
+    --appVersion=*)
+      appVersion="${i#*=}"
+      shift
+      ;;
+    --version=*)
+      version="${i#*=}"
+      shift
+      ;;
+    *)
+      ;;
+  esac
+done
+
+#platform=$1 # arm64
+#git_source=$2 # https://github.com/oauth2-proxy/manifests.git
+#git_subdir=$3
+
+echo "platform: $platform"
+echo "git_source: $git_source"
+echo "git_subdir: $git_subdir"
+echo "appVersion: $appVersion"
+echo "version: $version"
 
 dir=$(mktemp --directory)
 cd $dir

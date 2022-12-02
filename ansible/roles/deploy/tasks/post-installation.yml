@@ -1,5 +1,0 @@
-- name: prepare by application
-  include_tasks: prepare_application.yml
-  loop: "{{ namespace.value | dict2items }}"
-  loop_control:
-    loop_var: application

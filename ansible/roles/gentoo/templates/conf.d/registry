@@ -1,4 +1,4 @@
 service_hostname="{{ my_registry }}"
-ipconf="192.168.4.99/16"
+# ipconf="192.168.4.99/16"
 host_volume="{{ shared_mounts }}/registry"
 

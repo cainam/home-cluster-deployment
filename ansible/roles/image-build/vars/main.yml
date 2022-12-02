@@ -1,5 +1,9 @@
 ---
 images:
+  - name: kiali
+    source: quay.io/kiali/kiali-operator
+    branch: v1.60.0
+    section: /tools/
   - name: mypython
     source: local
     dockerfile: mypython.dockerfile

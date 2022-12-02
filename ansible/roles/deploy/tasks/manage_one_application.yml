@@ -70,7 +70,7 @@
     - name: app:{{ app }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
-         helm:from_git_to_local.sh {{ application.value.platform }} {{ application.value.git }} {{ application.value.subdir }}
+         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --version={{ application.value.version | default("") }} --appVersion={{ application.value.appVersion | default("") }} 
       register: build_out
   
     - name: app:{{ app }} build output
@@ -97,4 +97,69 @@
   debug:
     msg: "output: item: {{ item }}"
   loop: "{{ out  | dict2items }}"
-   
+
+- block:
+  - name: app:{{ app }} network info
+    debug: 
+      msg: "network: gw_port={{ application.value.network.gwPort }}"
+
+  - name: app:{{ app }} tempfile for gateway
+    tempfile:
+      state: file
+      suffix: k8s_gw
+    register: gw_temp
+
+  - name: app:{{ app }} network info
+    shell: |
+      kubectl get svc -n istio-ingress gateway -o yaml >> "{{ gw_temp.path }}"
+      LENofAPP=$(yq -r -M '.spec.ports[] | select(.name == "{{ application.key }}") | length'  "{{ gw_temp.path }}")
+      echo "LENofAPP:${LENofAPP}"
+      if [ "$LENofAPP" = "" ]; then # application section missing
+        yq -yi '.spec.ports += [{"name": "{{ application.key }}"}]' "{{ gw_temp.path }}"
+      fi
+      yq -iy 'getpath(path(.spec.ports[] | select(.name == "{{ application.key }}"))).port={{ application.value.network.gwPort }}' "{{ gw_temp.path }}"
+      yq -iy 'getpath(path(.spec.ports[] | select(.name == "{{ application.key }}"))).targetPort={{ application.value.network.targetPort }}' "{{ gw_temp.path }}"
+      kubectl apply -f "{{ gw_temp.path }}"
+    when: application.value.network is defined
+
+  - name: app:{{ app }} prepare Gateway and VirtualService
+    set_fact:
+      space: "{{ namespace.key }}"
+      name: "{{ application.key }}"
+      gw_port: "{{ application.value.network.gwPort }}"
+      prefix: "/"
+      pod_port: "{{ application.value.network.podPort }}"
+
+  - name: app:{{ app }} tempfile for Gateway
+    tempfile:
+      state: file
+      suffix: k8s.conf
+    register: gateway_tmp
+
+  - name: app:{{ app }} copy tempfile for Gateway
+    template:
+      src: gateway.k8s
+      dest: "{{ gateway_tmp.path }}"
+  
+  - name: app:{{ app }} tempfile for VirtualService
+    tempfile:
+      state: file
+      suffix: k8s.conf
+    register: vs_tmp
+  
+  - name: app:{{ app }} copy tempfile for VirtualService
+    template:
+      src: virtualservice.k8s
+      dest: "{{ vs_tmp.path }}"
+  
+  - name: app:{{ app }} create Gateway and VirtualService
+    shell: |
+      kubectl apply -f "{{ gateway_tmp.path }}"
+      kubectl apply -f "{{ vs_tmp.path }}"
+  when: application.value.network is defined 
+  
+
+
+
+
+

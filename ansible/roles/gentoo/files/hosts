@@ -43,4 +43,4 @@
 
 
 10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13
-192.168.4.99 my-lb.adm13
+192.168.4.100 my-lb.adm13

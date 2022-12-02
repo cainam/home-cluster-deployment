@@ -27,54 +27,7 @@
   loop_control:
     loop_var: namespace
   run_once: true
-  
-- name: list volumes to keep
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ keep_volumes }}"
-  run_once: true
-  
-- name: list of existing volumes
-  shell: gluster vol list
-  run_once: true
-  register: existing_volumes
 
-- name: determine volumes for deletion
-  set_fact:
-    volume2delete: "{{ existing_volumes.stdout_lines | difference(keep_volumes) }}"
+- name: post installation
+  include_tasks: post_installation.yml
   run_once: true
-
-- name: list volumes to delete
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ volume2delete }}"
-  run_once: true
-  
-- block:
-    - name: purge volumes - get bricks
-      shell: |
-        gluster vol info "{{ item }}" | grep "^Brick[0-9]" | cut -d : -f 3- | sort -u
-      loop: "{{ volume2delete }}"
-      run_once: true
-      register: get_bricks_out
-      
-    - debug: var=get_bricks_out
-
-    - name: purge volumes - delete volume
-      gluster.gluster.gluster_volume:
-        state: absent
-        name: "{{ item }}"
-      loop: "{{ volume2delete }}"
-      run_once: true
-      
-    - name: purge volumes - delete bricks
-      shell: |
-        umount -v "{{ item.1 }}"
-        echo "{{ item.1 }}" | grep -q "^/data/gluster/bricks/" && rm -rfv "{{ item.1 }}"
-      #loop: "{{ get_bricks_out.stdout_lines }}"      
-      with_subelements:
-         - "{{ get_bricks_out.results }}"
-         - stdout_lines
-  
-  when: "'purge_volumes' in ansible_run_tags" 
-

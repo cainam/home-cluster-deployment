@@ -1,5 +1,20 @@
 ---
 applications:
+  istio-system:
+    base: 
+      git: https://github.com/istio/istio.git
+      platform: arm
+      subdir: manifests/charts/base
+    istiod: 
+      git: https://github.com/istio/istio.git
+      platform: arm
+      subdir: manifests/charts/istio-control/istio-discovery
+      helm_options: --set global.proxy.privileged=true
+  istio-ingress:
+    gateway:
+      git: https://github.com/istio/istio.git
+      subdir: manifests/charts/gateway
+      helm_options: --set service.loadBalancerIP="{{ load_balancer_ip }}" --set 'service.externalIPs={"{{ load_balancer_ip }}"}'
   tools:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
@@ -8,9 +23,16 @@ applications:
       storage:
       - name: infopage
         size: 5Mi
+      network:
+        gwPort: 2000
+        targetPort: 12000
+        podPort: 80
+    kiali:
+      git: https://github.com/kiali/helm-charts.git
+      subdir: kiali-operator 
+      helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.tag=v1.60.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/istio/kiali --set cr.spec.deployment.image_version=v1.60.0
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
-      platform: arm
       subdir: charts/helm-chart/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=true}" --version=6.0.2
     prometheus:
@@ -24,13 +46,4 @@ applications:
         size: 2Gi
       - name: prometheus-server
         size: 8Gi
-  istio-system:
-    base: 
-      git: https://github.com/istio/istio.git
-      platform: arm
-      subdir: manifests/charts/base
-    istiod: 
-      git: https://github.com/istio/istio.git
-      platform: arm
-      subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true
+

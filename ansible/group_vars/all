@@ -3,6 +3,8 @@ gluster_directory: /data/gluster
 helm_repo_base: https://helm.adm13:9443/
 my_registry: myregistry.adm13:443
 shared_mounts: /shared
+default_platform: arm64
+load_balancer_ip: 192.168.4.100
 
 volumes_to_exempt:
   - deconz

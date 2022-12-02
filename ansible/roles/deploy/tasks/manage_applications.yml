@@ -7,7 +7,7 @@
     metadata:
       name: {{ namespace.key }}
     EOF
-    echo "{{ namespace.key }}" | grep -q -e kube -e istio || kubectl label namespace "{{ namespace.key }}" istio-injection=enabled
+    echo "{{ namespace.key }}" | grep -q -e kube -e istio-system || kubectl label namespace "{{ namespace.key }}" istio-injection=enabled
   register: namespace_out
 
 - name: app:{{ app }} namespace management output
@@ -30,7 +30,7 @@
   
 - name: manage application in {{ ns }}
   include_tasks: manage_one_application.yml
-  when: limit_namespace is not defined or {{ ns }} == limit_namespace
+  when: limit_namespace is not defined or ns == limit_namespace
   loop: "{{ namespace.value | dict2items }}"
   loop_control:
     loop_var: application
