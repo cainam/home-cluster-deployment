@@ -45,6 +45,7 @@ function pull_local(){
 	done
         yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
         yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
+	yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
       fi
     done
   

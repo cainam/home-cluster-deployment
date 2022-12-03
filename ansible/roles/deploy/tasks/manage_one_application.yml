@@ -129,6 +129,7 @@
       gw_port: "{{ application.value.network.gwPort }}"
       prefix: "/"
       pod_port: "{{ application.value.network.podPort }}"
+      target_service: "{{ application.value.network.service | default(application.key) }}"
 
   - name: app:{{ app }} tempfile for Gateway
     tempfile:
@@ -158,8 +159,4 @@
       kubectl apply -f "{{ vs_tmp.path }}"
   when: application.value.network is defined 
   
-
-
-
-
 
