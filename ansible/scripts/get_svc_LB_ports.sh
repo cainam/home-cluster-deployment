@@ -10,7 +10,7 @@ export CACERT=${SERVICEACCOUNT}/ca.crt
 export APISERVER=https://kubernetes.default.svc
 
 #curl -s --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X GET ${APISERVER}/api/v1/namespaces/istio-ingress/services/istio-ingress 
-data=$(curl -s --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X GET ${APISERVER}/api/v1/namespaces/istio-ingress/services/istio-ingress)
+data=$(curl -s --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X GET ${APISERVER}/api/v1/namespaces/istio-ingress/services/gateway)
 
 echo "$data" | jq -Mr '.spec.externalIPs[]'
 echo "$data" | jq -Mr '.spec.ports[] | [.name, .port, .targetPort] | @csv' 
