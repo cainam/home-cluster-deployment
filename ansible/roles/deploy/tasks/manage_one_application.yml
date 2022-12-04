@@ -101,7 +101,7 @@
 - block:
   - name: app:{{ app }} network info
     debug: 
-      msg: "network: gw_port={{ application.value.network.gwPort }}"
+      msg: "network: {{ application.value.network }}"
 
   - name: app:{{ app }} tempfile for gateway
     tempfile:
@@ -127,8 +127,9 @@
       space: "{{ namespace.key }}"
       name: "{{ application.key }}"
       gw_port: "{{ application.value.network.gwPort }}"
+      target_port: "{{ application.value.network.targetPort }}"
       prefix: "/"
-      pod_port: "{{ application.value.network.podPort }}"
+      svc_port: "{{ application.value.network.svcPort }}"
       target_service: "{{ application.value.network.service | default(application.key) }}"
 
   - name: app:{{ app }} tempfile for Gateway

@@ -32,9 +32,9 @@
       git_dir=${git_dir%%.git}
       cd "${git_dir}"
     fi
-    image="{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
-    podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default('whoCares') }}" --tag "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
-    podman push "{{ my_registry }}/{{ item.name }}:{{ item.branch }}"
+    image="{{ my_registry }}{{ item.section | default('/')}}{{ item.name }}:{{ item.branch }}"
+    podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default('whoCares') }}" --tag "${image}"
+    podman push "${image}"
   args:
     chdir: "{{ build_dir.path }}"
   loop: "{{ images  }}"

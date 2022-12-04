@@ -21,15 +21,19 @@ applications:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
       network:
-        gwPort: 2003
-        targetPort: 12003
-        podPort: 80
+        gwPort: 2004
+        targetPort: 12004
+        svcPort: 80
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: keycloak
       storage:
       - name: keycloak
         size: 1Gi
+      network:
+        gwPort: 2005
+        targetPort: 12005
+        svcPort: 1121
   tools:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
@@ -41,17 +45,17 @@ applications:
       network:
         gwPort: 2000
         targetPort: 12000
-        podPort: 1111
+        svcPort: 1111
     kiali-operator:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-operator 
       chart_version: v1.60.0
       appVersion: v1.60.0
-      helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.60.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.60.0
+      helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.60.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.60.0 --set cr.spec.external_services.prometheus.url="http://prometheus.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
       network:
         gwPort: 2002
         targetPort: 12002
-        podPort: 20001
+        svcPort: 20001
         service: kiali
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
@@ -60,7 +64,7 @@ applications:
       network:
         gwPort: 2001
         targetPort: 12001
-        podPort: 9090
+        svcPort: 9090
     prometheus:
       git: https://github.com/prometheus-community/helm-charts.git
       platformX: arm
