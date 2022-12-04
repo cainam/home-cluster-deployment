@@ -17,6 +17,7 @@
     mode: 0644
   loop:
     - mypython.dockerfile
+    - keycloak.dockerfile
 
 - name: build
   shell: |
