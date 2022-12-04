@@ -27,6 +27,9 @@ applications:
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: keycloak
+      storage:
+      - name: keycloak
+        size: 1Gi
   tools:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
