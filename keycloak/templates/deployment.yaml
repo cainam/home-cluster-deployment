@@ -43,15 +43,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: KC_LOG_LEVEL
-            value: "debug"
+            value: "info"
           - name: KC_HTTP_ENABLED
             value: "true"
           - name: X_KC_HOSTNAME_PORT
             value: "2005"
           - name: KC_HOSTNAME_URL
             value: "https://192.168.4.100:2005/"
-          - name: XXXKC_HOSTNAME_ADMIN_URL
-            value: "https://192.168.4.100:2005/admin"
+          - name: KC_HOSTNAME_ADMIN_URL
+            value: "https://192.168.4.100:2005/"
           - name: KC_HOSTNAME_STRICT
             value: "false"
           - name: KC_HOSTNAME_STRICT_HTTPS
