@@ -1,6 +1,6 @@
 FROM docker.io/library/debian:11.5-slim
 
-ENV KEYCLOAK_VERSION 19.0.2
+ENV KEYCLOAK_VERSION 19.0.3
 ENV LANG en_US.UTF-8
 
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
