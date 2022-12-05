@@ -42,7 +42,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: X_KC_LOG_LEVEL
+          - name: KC_LOG_LEVEL
             value: "debug"
           - name: KC_HTTP_ENABLED
             value: "true"
