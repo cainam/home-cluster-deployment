@@ -9,7 +9,7 @@ USER root
 RUN apt -y update && apt -y upgrade && apt -y install  openjdk-11-jre-headless  curl
 RUN groupadd keycloak && useradd --home-dir /opt --gid keycloak --no-create-home keycloak && chown -R -h keycloak:keycloak /opt
 USER keycloak
-RUN curl -L -o /opt/kc.tar.gz $KEYCLOAK_DIST && cd /opt/ && tar --extract --gzip --owner=keycloak --file=kc.tar.gz --owner=keycloak --group=keycloak && rm /opt/kc.tar.gz
+RUN curl -L -o /opt/kc.tar.gz $KEYCLOAK_DIST && cd /opt/ && tar --extract --gzip --owner=keycloak --file=kc.tar.gz --owner=keycloak --group=keycloak && rm /opt/kc.tar.gz && ln -s * keycloak
 
 USER 1000
 
