@@ -35,7 +35,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           command:
-            - "/opt/keycloak-19.0.2/bin/kc.sh"
+            - "/opt/keycloak/bin/kc.sh"
             - "start"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
