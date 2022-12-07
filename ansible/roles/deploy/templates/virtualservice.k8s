@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{name}}
+  namespace: {{space}}
+spec:
+  gateways:
+  - {{name}}
+  hosts:
+  - '*'
+  http:
+  - match:
+    - uri:
+        prefix: {{prefix}}
+    route:
+    - destination:
+        host: {{target_service}}
+        port:
+          number: {{svc_port}}
+
