@@ -5,6 +5,8 @@ my_registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
 load_balancer_ip: 192.168.4.100
+local_ca_file: /data/mine/certs/myCA.pem
+local_ca: "{{ lookup('file', local_ca_file) }}"
 
 volumes_to_exempt:
   - deconz

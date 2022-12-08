@@ -31,3 +31,12 @@
 - name: update k8s
   shell: "kubeadm upgrade apply --yes {{ k8s_version }}"
   when: current_k8s_version.stdout is version( k8s_version, '<')
+
+- name: ca template
+  template:
+    src: ca
+    dest: /tmp/myca
+
+- name: create CA configmap
+  shell: |
+    kubectl apply -f /tmp/myca

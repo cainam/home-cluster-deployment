@@ -38,7 +38,7 @@ start()
 	         einfo "mounting ${disk} ${mp} (sub_path=${sub_path} app_name=${app_name} vol=${vol_name}"
                  mount ${disk} ${mp}
 	       else
-	         einfo "my_ips: $my_ips node_ip: $node_ip doesn't match, skip"
+                 einfo "my_ips: "$(echo "$my_ips" | xargs)" but node_ip: $node_ip doesn't match, skip"
 	       fi
              done ;
           done
@@ -61,7 +61,7 @@ stop()
                  einfo "unmounting ${gluster_dir}/brick_$brickname"
                  umount ${gluster_dir}/brick_$brickname;
                else
-                 einfo "my_ips: $my_ips node_ip: $node_ip doesn't match, skip"
+                 einfo "my_ips: "$(echo "$my_ips" | xargs)" but node_ip: $node_ip doesn't match, skip"
                fi
              done ;
           done

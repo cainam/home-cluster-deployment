@@ -20,7 +20,7 @@ applications:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
-      helm_options: --set 'extraArgs.provider=keycloak-oidc'
+      helm_options: --set 'extraArgs.provider=keycloak-oidc' --set 'extraArgs.client-id=test' --set 'extraArgs.client-secret=IZ7ozP19a5OENc92XdNtoxWzSsH5Fud9' --set 'extraArgs.redirect-url=https://192.168.4.100:2004/oauth2/callback' --set 'extraArgs.oidc-issuer-url=https://192.168.4.100:2005/auth/realms/master'
       network:
         gwPort: 2004
         targetPort: 12004

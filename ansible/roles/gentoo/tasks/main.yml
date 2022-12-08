@@ -60,7 +60,7 @@
 
 - name: symlinks for CA
   file:
-    src: "/data/mine/certs/myCA.pem"
+    src: "{{ local_ca }}"
     dest: "/usr/local/share/ca-certificates//myCA.crt"
     owner: root
     group: root

@@ -3,7 +3,7 @@ images:
   - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
-    branch: 19.0.2
+    branch: 19.0.3
     section: /auth/
   - name: kiali-operator
     source: quay.io/kiali/kiali-operator
