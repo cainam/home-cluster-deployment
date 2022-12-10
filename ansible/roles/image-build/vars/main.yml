@@ -1,5 +1,9 @@
 ---
 images:
+  - name: proxyv2
+    source: docker.io/istio/proxyv2
+    branch: 1.16.0
+    section: /istio/
   - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
