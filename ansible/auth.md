@@ -8,3 +8,4 @@ oauth2:
 keycloak:
 - create clientID: someID
   Client authentication = On
+- storage: persistentvolume => /opt/keycloak/data

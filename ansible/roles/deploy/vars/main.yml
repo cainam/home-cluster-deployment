@@ -9,13 +9,13 @@ applications:
       git: https://github.com/istio/istio.git
       platform: arm
       subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true
+      helm_options: --set global.proxy.privileged=true --set global.hub="{{ my_registry }}"
   istio-ingress:
     gateway:
       git: https://github.com/istio/istio.git
       subdir: manifests/charts/gateway
-      helm_options: --set 'service.externalIPs={"{{ load_balancer_ip }}"}'
-      xhelm_options: --set service.loadBalancerIP="{{ load_balancer_ip }}" --set 'service.externalIPs={"{{ load_balancer_ip }}"}'
+      helm_options: --set 'service.externalIPs={"{{ load_balancer_ip }}"}' 
+      xhelm_options: --set 'service.loadBalancerIP="{{ load_balancer_ip }}"' --set 'service.externalIPs={"{{ load_balancer_ip }}"}'
   auth:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
