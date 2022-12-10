@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  myCA.pem: |
+    {{ local_ca | indent( width=4, first=False) }}
+kind: ConfigMap
+metadata:
+  name: myca
+  namespace: default
