@@ -67,7 +67,7 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           volumeMounts:
-          - mountPath: /opt/jboss/keycloak/standalone/
+          - mountPath: /opt/keycloak/data
             name: {{ .Chart.Name }}
           #livenessProbe:
           #  httpGet:
