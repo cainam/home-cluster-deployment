@@ -9,7 +9,7 @@ applications:
       git: https://github.com/istio/istio.git
       platform: arm
       subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true --set global.hub="{{ my_registry }}"
+      helm_options: --set global.proxy.privileged=true --set global.hub="{{ my_registry }}/istio" --set global.tag=1.16.0
   istio-ingress:
     gateway:
       git: https://github.com/istio/istio.git
