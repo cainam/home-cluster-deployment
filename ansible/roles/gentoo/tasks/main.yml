@@ -122,7 +122,6 @@
 - name: gentoo files
   copy:
     src: "{{ item.file }}"
-    # dest: "{{ item.dest }}/{{ item.file }}"
     dest: "{{ item.dest }}"
     mode: preserve
     backup: yes
@@ -169,10 +168,12 @@
       dest: /etc/sysctl.d/
     - file: registries.conf
       dest: /etc/containers/
-    - file: conf.d/glusterd
+    - file: conf.d/
       dest: /etc/conf.d/
     - file: gluster.autofs
       dest: /etc/autofs/
+    - file: syslog-ng.conf
+      dest: /etc/syslog-ng/
 
 - name: include wlan secrets
   include_vars: ../wlan
