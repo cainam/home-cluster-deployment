@@ -60,7 +60,7 @@
 
 - name: symlinks for CA
   file:
-    src: "{{ local_ca }}"
+    src: "{{ local_ca_file }}"
     dest: "/usr/local/share/ca-certificates//myCA.crt"
     owner: root
     group: root
