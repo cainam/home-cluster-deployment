@@ -8,8 +8,5 @@ ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLO
 USER root 
 RUN apt -y update && apt -y upgrade && apt -y install  openjdk-11-jre-headless  curl
 RUN groupadd keycloak && useradd --home-dir /opt --gid keycloak --no-create-home keycloak && chown -R -h keycloak:keycloak /opt
-USER keycloak
+USER 100200
 RUN curl -L -o /opt/kc.tar.gz $KEYCLOAK_DIST && cd /opt/ && tar --extract --gzip --owner=keycloak --file=kc.tar.gz --owner=keycloak --group=keycloak && rm /opt/kc.tar.gz && ln -s * keycloak
-
-USER 1000
-
