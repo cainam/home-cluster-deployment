@@ -14,6 +14,8 @@
   loop:
     - name: k8s-prometheus
       gid: 100100
+    - name: k8s-keycloak
+      gid: 100200
 
 - name: users
   user: 
@@ -25,6 +27,9 @@
     - name: k8s-prometheus
       uid: 100100
       group: k8s-prometheus
+    - name: k8s-keycloak
+      uid: 100200
+      group: k8s-keycloak
 
 - name: mount /data
   mount:
