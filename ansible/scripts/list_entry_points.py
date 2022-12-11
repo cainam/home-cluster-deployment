@@ -5,7 +5,7 @@ import socketserver as SocketServer
 import logging
 import sys
 import subprocess
-from kubernetes import client, config
+#from kubernetes import client, config
 
 logger = logging.getLogger()
 fileHandler = logging.FileHandler("/tmp/logfile.log")
@@ -42,14 +42,25 @@ class GetHandler( SimpleHTTPServer.SimpleHTTPRequestHandler ):
           (name,port,target)=item.split(',')
           name=name.replace('"','')
           response+='<tr><td>'+name+'</td><td><a href="https://'+externalIP+':'+port+'">'+name+'</a></td></tr>'
+        response+="</table>"
+
+        output = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:443/v2/_catalog"], capture_output=True)
+        response+="<hr/>registry status<br/><pre>"+output.stdout.decode('ascii')+"</pre>"
+
+        output = subprocess.run(["bash", "/app/my_status.sh"], capture_output=True)
+        response+="<hr/>registry content<br/><pre>"+output.stdout.decode('ascii')+"</pre>"
+
+        #for item in output.stdout.decode('ascii').split('\n'):
+
+
         response+="</html>"
         logger.info("response: "+response)
-        for item in output.stderr.decode('ascii').split('\n'):
-          logger.info("subprocess output.stderr: "+item)
+        #for item in output.stderr.decode('ascii').split('\n'):
+        #  logger.info("subprocess output.stderr: "+item)
         #config.load_incluster_config()
  
         #v1 = client.CoreV1Api()
-        print("Listing pods with their IPs:")
+        #print("Listing pods with their IPs:")
         #ret = v1.list_pod_for_all_namespaces(watch=False)
         #for i in ret.items:
         #  logger.info("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
@@ -64,6 +75,11 @@ class GetHandler( SimpleHTTPServer.SimpleHTTPRequestHandler ):
 
 
 Handler = GetHandler
+SocketServer.TCPServer.allow_reuse_address = True
 httpd = SocketServer.TCPServer(("", args.port), Handler)
+#httpd = SocketServer.TCPServer(("", args.port), Handler, False)
+#httpd.allow_reuse_address = True 
+#httpd.server_bind()     # Manually bind, to support allow_reuse_address
+#httpd.server_activate() # (see above comment)
 
 httpd.serve_forever()
