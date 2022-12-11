@@ -17,11 +17,6 @@
 127.0.0.1	localhost
 #::1		localhost
 
-#
-# Imaginary network.
-#10.0.0.2               myname
-#10.0.0.3               myfriend
-#
 # According to RFC 1918, you can use the following IP networks for private 
 # nets which will never be connected to the Internet:
 #
@@ -36,11 +31,8 @@
 # APNIC, LACNIC, RIPE NCC, or AfriNIC.)
 #
 
-192.168.3.133 k8s-2.adm13 k8s-2
-192.168.4.101 k8s-1.adm13 k8s-1
 10.10.10.21 k8s-1-int.adm13 k8s-1-int gentoo-binhost
 10.10.10.22 k8s-2-int.adm13 k8s-2-int
-
 
 10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13
 192.168.4.100 my-lb.adm13

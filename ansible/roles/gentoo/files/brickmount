@@ -10,7 +10,7 @@ depend()
 {
         local opts mywant=""
         after root
-	need net
+	need net.eth0
         want $mywant
         before glusterd
         before registry
@@ -19,7 +19,43 @@ depend()
         use root
 }
 
+action_on_bricks()
+{
+  action="$1"
+  ebegin "Mounting bricks"
+  for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do
+    for loc in $(grep -l "^hostname=$(hostname)" ${glusterconf}/vols/${v}/bricks/* );do
+      echo "found volume $v and brick $loc"
+      mp=$(grep "^path=" "${loc}" | sed -e 's/^path=//g')
+      app_name=$(dirname "${mp}" | xargs basename)
+      vol_name=$(basename "${mp}")
+      disk="${brick_disk}/app:${app_name}-vol:${vol_name}"
+
+      echo "${action} ${disk} ${mp} (app_name=${app_name} vol=${vol_name}"
+      if [ "${action}" = "mount" ]; then
+        mount ${disk} ${mp}
+      elif [ "${action}" = "umount" ]; then
+        umount ${mp}
+      fi
+    done
+  done
+  rc=0
+  eend "Done"
+  return $rc
+}
+
 start()
+{
+  action_on_bricks mount
+}
+
+stop()
+{
+  action_on_bricks umount
+}
+
+
+old_start()
 {
         ebegin "Mounting bricks"
 
@@ -47,7 +83,7 @@ start()
         return $rc
 }
 
-stop()
+old_stop()
 {
   ebegin "Unmounting bricks"
           for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do 
