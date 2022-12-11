@@ -1,0 +1,4 @@
+# Keepalived options
+# Increase logging:
+#KEEPALIVED_OPTS="-D"
+KEEPALIVED_OPTS="--log-detail --log-facility 0"
