@@ -9,3 +9,11 @@ keycloak:
 - create clientID: someID
   Client authentication = On
 - storage: persistentvolume => /opt/keycloak/data
+
+
+istio: 
+  - standard ingress gateway + gw + vs
+  - AuthorizationPolicy like
+    - https://napo.io/posts/istio-oidc-authn--authz-with-oauth2-proxy/
+    - with ports like https://www.alibabacloud.com/help/en/alibaba-cloud-service-mesh/latest/set-the-authorization-policy-for-tcp-traffic
+    - reference: https://istio.io/latest/docs/reference/config/security/authorization-policy/
