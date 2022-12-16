@@ -19,3 +19,8 @@
       debug:
         msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}\ngluster_ips: {{ gluster_ips }}"
   run_once: true
+
+- name: set fact for var
+  set_fact:
+    t: fact
+
