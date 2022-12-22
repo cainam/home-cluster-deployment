@@ -105,20 +105,6 @@
       setting: hostname
       file: hostname
 
-- name: ntp-client conf
-  lineinfile:
-    path: /etc/conf.d/ntp-client
-    regexp: "^{{ item.setting }}"
-    line: "{{ item.line }}"
-    insertafter: "{{ item.setting }}"
-    backup: yes
-    create: yes
-  loop:
-    - line: 'rc_use="dns"'
-      setting: rc_use
-    - line: 'rc_need="net.wlan0"'
-      setting: rc_need
-
 - name: mount boot
   shell: mountpoint -q /boot || mount /boot
   changed_when: false 
