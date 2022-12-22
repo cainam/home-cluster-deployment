@@ -1,0 +1,38 @@
+#!/sbin/openrc-run
+
+description="wait for internet before starting services which depend on this connectivity"
+
+depend()
+{
+        local opts mywant=""
+        after root
+	need net.wlan0
+        use dns
+        use root
+}
+
+start()
+{
+ebegin "starting"
+LOGFILE="/tmp/wait_for_internet"
+echo "date" > "${LOGFILE}"
+
+for i in $(seq 1 3600); do
+  (echo -n "postup: "; date) >> "${LOGFILE}"
+  if curl -q -s http://example.com > /dev/null; then
+    echo "internet ok" >> "${LOGFILE}"
+    eend "succeeded"
+    return 0
+  else
+    sleep 1
+  fi;
+done
+eend "failed"
+return 1
+
+}
+
+stop()
+{
+  true
+}
