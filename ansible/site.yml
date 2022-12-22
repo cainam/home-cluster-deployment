@@ -7,15 +7,30 @@
     auto_legacy_silent: true
     auto_silent: true
     ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
+    erv: erv
+    t: erv
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
     PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
+  tasks:
+  - name: set facts var
+    set_fact:
+      t: fact
   roles:
     - role: always
       tags:
         - always
+    - role: test_var
+      tags: 
+        - never
+        - test
+      vars:
+        params:
+          erv: erv2
+          t: erv2
     - role: image-build
       tags:
+        - never
         - image-build
     - role: k8s-base
       tags: 

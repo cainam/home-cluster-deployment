@@ -1,4 +1,5 @@
-###
+rc_after=crio
+
 # Kubernetes Kubelet (worker) config
 
 command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests"
