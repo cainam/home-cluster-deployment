@@ -20,14 +20,6 @@
     - role: always
       tags:
         - always
-    - role: test_var
-      tags: 
-        - never
-        - test
-      vars:
-        params:
-          erv: erv2
-          t: erv2
     - role: image-build
       tags:
         - never
