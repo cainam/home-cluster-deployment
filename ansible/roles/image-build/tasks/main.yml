@@ -20,6 +20,7 @@
     - keycloak.dockerfile
 
 - name: build
+  # include_tasks: build.yml
   shell: |
     set -x
     if [ "{{ item.dockerfile | default('') }}" = "" ]; then # nothing to build, try pull-push
@@ -37,9 +38,10 @@
     podman push "${image}"
   args:
     chdir: "{{ build_dir.path }}"
+  register: build_out
+  when: image is not defined or item.name == image
   loop: "{{ images  }}"
   run_once: true
-  register: build_out
 
 - debug: var=build_out
 
