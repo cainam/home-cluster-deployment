@@ -42,10 +42,22 @@ oauth2:
     redeem_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token"
     profile_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
     validate_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
+4. 
+kubectl get cm -n auth oauth2-proxy -o yaml
+data:
+  oauth2_proxy.cfg: |
+    email_domains = [ "*" ]
+    provider = "keycloak-oidc"
+    client_id = "test"
+    client_secret = "EcANXittpGgEpAUyEc9gWFnRxU3nW9qC"
+    oidc_issuer_url = "https://my-lb.adm13:2005/realms/test"
+    ssl_insecure_skip_verify = "true"
+    silence_ping_logging = "true"
+    redirect_url="https://my-lb.adm13:12000/oauth2/callback"
 
 keycloak:
-- create realm
-- create user test 
+- create realm test
+- create user test, mail test@abc.de (verified) named first last
 - create group test with user test
 - create client_id test with client_authentication=on and valid redirect_url http://example.com/*
 test: 
