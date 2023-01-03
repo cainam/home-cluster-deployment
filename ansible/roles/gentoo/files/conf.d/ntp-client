@@ -19,18 +19,4 @@ NTPCLIENT_OPTS="-s -b -u \
 # being up & running before we try to run.  Otherwise, you
 # can disable this.
 rc_use="dns"
-rc_need="net.wlan0"
-
-einfo "preup starting"
-LOGFILE="/tmp/ntp-preup"
-echo "date" > "${LOGFILE}"
-
-for i in $(seq 1 3600); do
-  (echo -n "postup: "; date) >> "${LOGFILE}"
-  if curl -q -s http://example.com > /dev/null; then
-    echo "internet ok" >> "${LOGFILE}"
-    return 0;
-  else
-    sleep 1;
-  fi;
-done
+rc_need="wait_for_internet"

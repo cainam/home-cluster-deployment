@@ -1,4 +1,4 @@
-rc_after=crio
+rc_need=crio
 
 # Kubernetes Kubelet (worker) config
 

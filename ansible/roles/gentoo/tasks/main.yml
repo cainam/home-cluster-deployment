@@ -147,9 +147,7 @@
       dest: /etc/portage/
     - file: portage/package.env
       dest: /etc/portage
-    - file: registry
-      dest: /etc/init.d/
-    - file: brickmount
+    - file: init.d/
       dest: /etc/init.d/
     - file: haproxy.cfg
       dest: /etc/haproxy/
@@ -217,6 +215,7 @@
     - lighttpd
     - syslog-ng
     - lighttpd
+    - wait_for_internet
   ignore_errors: yes
 
 - name: gluster
