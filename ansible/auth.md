@@ -42,8 +42,8 @@ data:
     redirect_url="https://my-lb.adm13:12000/oauth2/callback"
 
 keycloak:
-- create realm
-- create user test 
+- create realm test
+- create user test, mail test@abc.de (verified) named first last
 - create group test with user test
 - create client_id test with client_authentication=on and valid redirect_url http://example.com/*
 test: 
