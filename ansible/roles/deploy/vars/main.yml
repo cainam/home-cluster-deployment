@@ -20,6 +20,7 @@ applications:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
+      helm_options: --set proxyVarsAsSecrets=false
       network:
         gwPort: 2004
         targetPort: 12004

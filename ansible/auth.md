@@ -5,55 +5,29 @@ oauth2:
 - https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/ 
 - https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-auth-provider
 
-1.
-  oauth2_proxy.cfg: |
-    provider = "keycloak"
-    client_id = "test"
-    client_secret = "LLrwCk590XXNigXgPArtD8L48ekbBEsy"
-    oidc_issuer_url = "https://my-lb.adm13:2005/realms/master"
-    ssl_insecure_skip_verify = "true"
-    email_domains = [ "*" ]
-    upstreams = [ "file:///dev/null" ]
-
-2.
-    email_domains = [ "*" ]
-    provider = "keycloak"
-    client_id = "test"
-    client_secret = "LLrwCk590XXNigXgPArtD8L48ekbBEsy"
-    oidc_issuer_url = "https://my-lb.adm13:2005/realms/test"
-    ssl_insecure_skip_verify = "true"
-    silence_ping_logging = "true"
-    login_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth"
-    redeem_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token"
-    profile_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
-    validate_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
-
-3. with redirect_uri error but correct provider
-    email_domains = [ "*" ]
-    provider = "keycloak-oidc"
-    client_id = "test"
-    client_secret = "LLrwCk590XXNigXgPArtD8L48ekbBEsy"
-    oidc_issuer_url = "https://my-lb.adm13:2005/realms/test"
-    ssl_insecure_skip_verify = "true"
-    silence_ping_logging = "true"
-    scope = "openid profile email groups"
-    redirect_url="https://my-lb.adm13:12000/oauth2/callback"
-    login_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth"
-    redeem_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token"
-    profile_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
-    validate_url="https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo"
-4. 
 kubectl get cm -n auth oauth2-proxy -o yaml
 data:
-  oauth2_proxy.cfg: |
+  oauth2_proxy.cfg: |-
     email_domains = [ "*" ]
+    upstreams = [ "file:///dev/null" ]
     provider = "keycloak-oidc"
     client_id = "test"
-    client_secret = "EcANXittpGgEpAUyEc9gWFnRxU3nW9qC"
+    client_secret = "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"
+    cookie_secret = "lki74598sjfojifggjnsodnf"
     oidc_issuer_url = "https://my-lb.adm13:2005/realms/test"
     ssl_insecure_skip_verify = "true"
     silence_ping_logging = "true"
     redirect_url="https://my-lb.adm13:12000/oauth2/callback"
+
+data:
+  oauth2_proxy.cfg: "email_domains = [ \"*\" ]\nupstreams = [ \"file:///dev/null\"
+    ]\nprovider = \"keycloak-oidc\"\nclient_id = \"test\"\nclient_secret = \"oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0\"\ncookie_secret
+    = \"lki74598sjfojifggjnsodnf\"\noidc_issuer_url = \"https://my-lb.adm13:2005/realms/test\"\nssl_insecure_skip_verify
+    = \"true\"\nsilence_ping_logging = \"true\"\nset_authorization_header=true\nskip_provider_button=true\nwhitelist_domains
+    = [ \"my-lb.adm13:*\",\"*.my-lb.adm13:*\" ]\ncookie_samesite=\"lax\"\ncookie_csrf_per_request=true\ncookie_csrf_expire=\"5m\"\nset_xauthrequest=true\npass_user_headers
+    = true\npass_authorization_header = true\npass_access_token = true\ncookie_secure
+    = false\nreverse_proxy=true "
+
 
 keycloak:
 - create realm test
