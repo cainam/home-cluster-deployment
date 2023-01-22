@@ -1,48 +1,53 @@
 config:
-  cookieSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
   # cookieName: "_oauth2_proxy"    # Name of the cookie that oauth2-proxy creates, if not set defaults to "_oauth2_proxy"
   configFile: |-
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
+        cookie_secret =  "RSpqiiJwzChK-HqCApslzJdLMf9l5_-qdLUfNSXyMI8=" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
+        cookie_secure = false
+        cookie_csrf_per_request = true
+        show_debug_on_error = true
+        redirect_url="https://my-lb.adm13:12000/oauth2/callback"
 alphaConfig:
   enabled: true
-  providers:
-  - clientID: "test"       # IdP Client ID
-    clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
-    id: oidc-istio
-    provider: oidc   # We use the generic 'oidc' provider
-    loginURL: "https://my-lb.adm13:2005/realms/test//protocol/openid-connect/auth" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/auth
-    redeemURL: "https://my-lb.adm13:2005/realms/test//protocol/openid-connect/token" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/token
-    profileURL: "https://my-lb.adm13:2005/realms/test//protocol/openid-connect/userinfo" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/userinfo
-    validateURL: "https://my-lb.adm13:2005/realms/test//protocol/openid-connect/userinfo" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/userinfo
-  scope: "openid email profile groups"
-  allowedGroups:
-  - test # List all groups managed at our your IdP which should be allowed access
-  # - infrateam
-  # - anothergroup
-  oidcConfig:
-    emailClaim: email.  # Name of the clain in JWT containing the E-Mail
-    groupsClaim: groups # Name of the claim in JWT containing the Groups
-    userIDClaim: email  # Name of the claim in JWT containing the User ID
-    skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
-    issuerURL: "https://my-lb.adm13:2005/realms/test"
-    jwksURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/certs"   # https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/certs
-  upstreamConfig:
-    upstreams:
-      - id: static_200
-        path: /
-        static: true
-        staticCode: 200
-  # Headers that should be added to responses from the proxy
-  injectResponseHeaders: # Send this headers in responses from oauth2-proxy
-    - name: X-Auth-Request-Preferred-Username
-      values:
-        - claim: preferred_username
-    - name: X-Auth-Request-Email
-      values:
-        - claim: email
+  configData:
+    providers:
+    - clientID: "test"       # IdP Client ID
+      clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
+      id: oidc-istio
+      provider: oidc   # We use the generic 'oidc' provider
+      loginURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/auth
+      redeemURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/token
+      profileURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/userinfo
+      validateURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/userinfo" #https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/userinfo
+      #allowedGroups:
+      #- test # List all groups managed at our your IdP which should be allowed access
+      scope: "openid email"
+    # - infrateam
+    # - anothergroup
+      oidcConfig:
+        emailClaim: email.  # Name of the clain in JWT containing the E-Mail
+        groupsClaim: groups # Name of the claim in JWT containing the Groups
+        userIDClaim: email  # Name of the claim in JWT containing the User ID
+        skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
+        issuerURL: "https://my-lb.adm13:2005/realms/test"
+        jwksURL: "https://my-lb.adm13:2005/realms/test/protocol/openid-connect/certs"   # https://<keycloak-domain>/identity/auth/realms/<keycloak-realm>/protocol/openid-connect/certs
+    upstreamConfig:
+        upstreams:
+          - id: static_200
+            path: /
+            static: true
+            staticCode: 200
+    # Headers that should be added to responses from the proxy
+    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
+        - name: X-Auth-Request-Preferred-Username
+          values:
+            - claim: preferred_username
+        - name: X-Auth-Request-Email
+          values:
+            - claim: email
 extraArgs:
   cookie-secure: "false"
-  cookie-domain: ".my-lb.adm13" # ".example.com"    # Replace with your base domain
+  cookie-domain: "my-lb.adm13" # ".example.com"    # Replace with your base domain
   cookie-samesite: lax
   cookie-expire: 12h               # How long our Cookie is valid
   auth-logging: true               # Enable / Disable auth logs

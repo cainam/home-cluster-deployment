@@ -1,5 +1,9 @@
 # links
 
+all: 
+- https://www.blog.jetstack.io/blog/istio-oidc/
+- https://www.ventx.de/blog/post/istio_oauth2_proxy/index.html
+
 oauth2:
 - https://github.com/oauth2-proxy/manifests.git
 - https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/ 
