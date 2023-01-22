@@ -51,9 +51,9 @@ applications:
     kiali-operator:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-operator 
-      chart_version: v1.60.0
-      appVersion: v1.60.0
-      helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.60.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.60.0 --set cr.spec.external_services.prometheus.url="http://prometheus.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      chart_version: v1.62.0
+      appVersion: v1.62.0
+      helm_options:  --set cr.create=true --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.62.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.62.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
       network:
         gwPort: 2002
         targetPort: 12002
