@@ -37,6 +37,10 @@ applications:
         targetPort: 12005
         svcPort: 1121
   tools:
+    jaeger:
+      git: https://github.com/jaegertracing/helm-charts.git
+      subdir: charts/jaeger
+      remove_dependencies: kafka,elasticsearch
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       platformX: arm

@@ -70,7 +70,7 @@
     - name: app:{{ app }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
-         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} 
+         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }}
       register: build_out
   
     - name: app:{{ app }} build output
