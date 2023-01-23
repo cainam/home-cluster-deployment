@@ -41,6 +41,7 @@ applications:
       git: https://github.com/jaegertracing/helm-charts.git
       subdir: charts/jaeger
       remove_dependencies: kafka,elasticsearch
+      helm_options: --set provisionDataStore.cassandra=false --set allInOne.enabled=true --set storage.type=none --set agent.enabled=false --set collector.enabled=false --set query.enabled=false
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       platformX: arm
