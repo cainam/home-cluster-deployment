@@ -51,6 +51,11 @@ function pull_local(){
   
     # treat dependencies
     while read name repo version; do 
+      if echo "$remove_deps" | grep -q "^$name"; then
+        echo "dependency $name will be removed from Chart.yaml and skipped from processing"
+	yq -yi 'del(.dependencies[]? | select (.name=="'"${name}"'"))' Chart.yaml
+        continue
+      fi
       echo "resolving dependency: $name $version $repo";
       if [ ${version::1} == "~" ]; then 
         version=$(echo "${version:1}" | sed -e 's/[0-9]$//');
@@ -103,6 +108,10 @@ for i in "$@"; do
       git_subdir="${i#*=}"
       shift
       ;;
+    --remove_dependencies=*)
+      remove_deps="${i#*=}"
+      shift
+      ;;
     --appVersion=*)
       appVersion="${i#*=}"
       shift
@@ -123,12 +132,15 @@ done
 echo "platform: $platform"
 echo "git_source: $git_source"
 echo "git_subdir: $git_subdir"
+echo "remove_deps: $git_subdir"
 echo "appVersion: $appVersion"
 echo "chart_version: $chart_version"
 
 dir=$(mktemp --directory)
 cd $dir
 echo "directory: $PWD"
+
+remove_deps=$(echo "$remove_deps" | sed -e 's/,/\n/g')
 
 git-subdir-checkout.sh "${git_source}" "${git_subdir}" 2>&1 | sed -e 's/^/git-subdir-checkout.sh: /g'
 cd */$git_subdir
