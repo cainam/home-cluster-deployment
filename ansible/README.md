@@ -10,6 +10,13 @@ Notes:
 - remove claimRef: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - create token: kubectl create token -n tools kiali-service-account
 
+Manage Registry:
+- remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
+- fix corruption/0-byte files: find /var/lib/registry/docker/registry/v2 -size 0 -path "*_manifests/revisions/sha256*" -exec rm -v {} \;
+- delete physically: # podman exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml
+- additionally sometimes structures have to be removed in /var/lib/registry/docker/registry/v2/repositories when no image version is shown
+
+
 
 TODO: 
 - applications as url prefix of my-lb.adm13

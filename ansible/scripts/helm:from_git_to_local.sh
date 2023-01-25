@@ -16,36 +16,41 @@ function pull_local(){
     yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' values.yaml | while read image_section_org;do
       echo
       image_section=$(echo "${image_section_org}" | sed -e 's/^/"/' -e 's/$/"/' -e 's/\./"\."/g')
-      repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
-      tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
+      section_type=$(yq -r '.'"${image_section}"' | type' values.yaml )
+      if [ "${section_type}" == "string" ]; then # if image is only a string use the value as repository
+        repository=$(yq -r '.'"${image_section}" values.yaml )
+	tag=$(echo "${repository}" | grep -q : && echo "${repository##*:}")
+        fetch_img="${repository}"
+      else
+        repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
+        tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
+        img_name=$(echo "${repository}" | grep -o '[^/]*$' )
+        fetch_img=$(echo "${repository}:${tag}")
+      fi
       if [ "${tag}" == "" ]; then
         # echo "tag is empty (${tag}), trying appVersion"
         # tag=$(yq -r '.appVersion' Chart.yaml)
         echo "tag is empty (${tag}), trying latest"
         tag="latest" #$(yq -r '.appVersion' Chart.yaml)
       fi
-      echo "treat image repository: ${repository} tag: ${tag} image_section=${image_section=} (from org:${image_section_org})"
+      echo "treat image repository: ${repository} tag: ${tag} image_section=${image_section} section_type=${section_type} (from org:${image_section_org})"
       if [ "${repository}" == "" ] || [ "${tag}" == "" ]; then
         echo "repository and tag are not allowed to be empty"
         exit -1
       fi
       if [ "${repository}" != "null" ]; then
-        img_name=$(echo "${repository}" | grep -o '[^/]*$' )
-        # read dummy mapping < <( grep "^${img_name}\s\+" ${images_map})
-        #[ "${mapping}" = "" ] && mapping="cat"
-	mapping=cat
-        fetch_img=$(echo "${repository}:${tag}" | eval $mapping)
-    
         for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
 	  image_entry="$platform ${rem_reg}$fetch_img /$category/"
-          echo "image_entry: $image_entry from original chart image: ${repository}:${tag} - via mapping: $mapping"
+          echo "image_entry: $image_entry from original chart image: ${fetch_img}"
           # grep -F -x -q "$image_entry" $images_list || echo "$image_entry" >> $images_list # add entry if it is missing
 	  echo "$image_entry" | pull-tag-push.sh
 	  [ $? -ne 9 ] && break
 	done
-        yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
-        yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
-	yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
+	if [ "${section_type}" != "string" ]; then # only if image is not a single string
+          yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
+          yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
+	  yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
+	fi
       fi
     done
   
@@ -77,11 +82,13 @@ function pull_local(){
     yq -yi '.dependencies[]?.repository |= "'$helm_url'"' Chart.yaml
     [ "${appVersion}" != "" ] && echo "updating appVersion" && yq -yi  '.appVersion="'"${appVersion}"'"' Chart.yaml
     [ "${chart_version}" != "" ] && echo "updating chart_version" && yq -yi  '.version="'"${chart_version}"'"' Chart.yaml
+    set -x
     helm dependency build $PWD
 
     helm package -d $helm_repo_dir/ $PWD
     helm repo index "${helm_repo_dir}" --url $helm_url
     helm repo update
+    set +x
     cd -
     echo "done for $pack_dir"
   done
