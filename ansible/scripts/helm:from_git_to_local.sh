@@ -24,9 +24,10 @@ function pull_local(){
       else
         repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
         tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
-        img_name=$(echo "${repository}" | grep -o '[^/]*$' )
         fetch_img=$(echo "${repository}:${tag}")
       fi
+      img_name=$(echo "${repository}" | grep -o '[^/]*$' )
+
       if [ "${tag}" == "" ]; then
         # echo "tag is empty (${tag}), trying appVersion"
         # tag=$(yq -r '.appVersion' Chart.yaml)
@@ -46,7 +47,10 @@ function pull_local(){
 	  echo "$image_entry" | pull-tag-push.sh
 	  [ $? -ne 9 ] && break
 	done
-	if [ "${section_type}" != "string" ]; then # only if image is not a single string
+	if [ "${section_type}" == "string" ]; then # only if image is a single string
+	  echo "replacing ${image_section}.image by ${category}/${img_name}"
+          yq -yi '.'"${image_section}"'="'"${category}/${img_name}"'"' values.yaml
+	else
           yq -yi '.'"${image_section}"'.repository="'"${category}/${img_name}"'"' values.yaml
           yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
 	  yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
