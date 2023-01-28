@@ -17,6 +17,10 @@ Manage Registry:
 - additionally sometimes structures have to be removed in /var/lib/registry/docker/registry/v2/repositories when no image version is shown
 
 
+Istio with prefix:
+- loadbalancer: 443=>main gw(tls)=>VirtualService with prefixes
+
+
 
 TODO: 
 - applications as url prefix of my-lb.adm13
