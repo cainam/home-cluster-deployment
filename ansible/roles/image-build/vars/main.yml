@@ -1,5 +1,9 @@
 ---
 images:
+  - name: pushgateway
+    source: quay.io/prometheus/pushgateway
+    branch: latest
+    section: /tools/
   - name: jaeger-agent
     source: docker.io/jaegertracing/jaeger-agent
     branch: 1.39.0
