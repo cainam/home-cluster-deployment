@@ -20,6 +20,10 @@ Manage Registry:
 Istio with prefix:
 - loadbalancer: 443=>main gw(tls)=>VirtualService with prefixes
 
+etcd:
+# alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
+# etcdctl endpoint status
+# etcdctl endpoint health
 
 
 TODO: 
