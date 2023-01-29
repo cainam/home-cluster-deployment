@@ -30,7 +30,7 @@
   
 - name: manage application in {{ ns }}
   include_tasks: manage_one_application.yml
-  when: (limit_application is not defined or application == limit_application) and (limit_namespace is not defined or ns == limit_namespace)
+  when: (limit_application is not defined or application.key == limit_application) and (limit_namespace is not defined or ns == limit_namespace)
   loop: "{{ namespace.value | dict2items }}"
   loop_control:
     loop_var: application
