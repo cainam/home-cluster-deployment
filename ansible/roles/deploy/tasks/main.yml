@@ -17,14 +17,14 @@
 
 - name: prepare application prerequisites
   include_tasks: prepare_by_namespace.yml
-  when: (limit_namespace is not defined or ns == limit_namespace)
+  when: (limit_namespace is not defined or namespace.key == limit_namespace)
   loop: "{{ applications | dict2items }}"
   loop_control:
     loop_var: namespace
 
 - name: run per namespace
   include_tasks: manage_applications.yml
-  when: (limit_namespace is not defined or ns == limit_namespace)
+  when: (limit_namespace is not defined or namespace.key == limit_namespace)
   loop: "{{ applications | dict2items }}"
   loop_control:
     loop_var: namespace
