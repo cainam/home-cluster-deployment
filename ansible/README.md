@@ -25,6 +25,14 @@ etcd:
 # etcdctl endpoint status
 # etcdctl endpoint health
 
+kiali:
+prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
+  external_services:
+    prometheus:
+      auth:
+        insecure_skip_verify: true
+      url: http://prometheus-server.tools/graph
+
 
 TODO: 
 - applications as url prefix of my-lb.adm13
