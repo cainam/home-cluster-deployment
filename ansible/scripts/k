@@ -20,11 +20,23 @@ elif (echo "$action" | grep -q ^l); then
   search=$2
 fi
 
-if (echo "$atype" | grep -q ^s); then
-  atype=svc
-elif (echo "$atype" | grep -q ^p); then
-  atype=pod
-fi
+#if (echo "$atype" | grep -q ^s); then
+#  atype=svc
+#elif (echo "$atype" | grep -q ^p); then
+#  atype=pod
+#fi
+#
+case "$atype" in
+  s)
+    atype="svc"
+  ;;
+  p)
+    atype="pod"
+  ;;
+  d)
+    atype="deploy"
+  ;;
+esac
 
 read i n < <(kubectl get $atype -A -l app.kubernetes.io/name=$search --no-headers=true  -o jsonpath="{..metadata.name} {..metadata.namespace}")
 

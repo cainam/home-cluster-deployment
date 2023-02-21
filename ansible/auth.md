@@ -1,5 +1,10 @@
 # links
 
+
+error:
+[2023/02/09 19:24:55] [oauthproxy.go:823] Error redeeming code during OAuth2 callback: could not verify id_token: audience claims [] do not exist in claims: map[acr:0 at_hash:lwpWV3nKMvtRyhcSZdFppQ aud:test auth_time:1.675970421e+09 azp:test email:test@abc.de email_verified:true exp:1.675970994e+09 family_name:last given_name:first iat:1.675970694e+09 iss:https://my-lb.adm13:2005/realms/test jti:a077fae1-b000-4e14-bef9-c7f5894cc403 name:first last nonce:oqVtYnjYky9ym_u1KwZXn3uPlt4N3km6rAlNSwhW_F4 preferred_username:test session_state:9ce3f240-8131-4410-930c-4bbd65f7aaec sid:9ce3f240-8131-4410-930c-4bbd65f7aaec sub:a52872d5-b846-42a9-ab29-15426e17870f typ:ID]
+
+
 all: 
 - https://www.blog.jetstack.io/blog/istio-oidc/
 - https://www.ventx.de/blog/post/istio_oauth2_proxy/index.html
@@ -70,8 +75,10 @@ env:
 
 - storage: persistentvolume => /opt/keycloak/data
 
-
 istio: 
+helm upgrade --install -n istio-system istiod istio-system/istiod --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.16.2 --set global.proxy.image=istio/proxyv2:1.16.2 --set global.proxy_init.image=istio/proxyv2:1.16.2 --set global.tracer.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi -f values-istiod.yaml 
+
+
   - standard ingress gateway + gw + vs
   - AuthorizationPolicy like
     - https://napo.io/posts/istio-oidc-authn--authz-with-oauth2-proxy/

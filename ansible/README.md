@@ -31,7 +31,7 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
     prometheus:
       auth:
         insecure_skip_verify: true
-      url: http://prometheus-server.tools/graph
+      url: http://prometheus-server.tools/prometheus/
 
 
 TODO: 

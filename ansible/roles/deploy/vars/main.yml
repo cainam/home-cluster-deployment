@@ -9,7 +9,8 @@ applications:
       git: https://github.com/istio/istio.git
       platform: arm
       subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true --set global.hub="{{ my_registry }}/istio" --set global.tag=1.16.0
+      # helm_options: --set global.proxy.privileged=true --set global.hub="{{ my_registry }}/istio" --set global.tag=1.16.2 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
+      helm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.16.2 --set global.proxy.image=istio/proxyv2:1.16.2 --set global.proxy_init.image=istio/proxyv2:1.16.2 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
   istio-ingress:
     gateway:
       git: https://github.com/istio/istio.git
@@ -41,7 +42,7 @@ applications:
       git: https://github.com/jaegertracing/helm-charts.git
       subdir: charts/jaeger
       remove_dependencies: kafka,elasticsearch
-      helm_options: --set provisionDataStore.cassandra=false --set allInOne.enabled=true --set storage.type=none --set agent.enabled=false --set collector.enabled=false --set query.enabled=false
+      helm_options: --set provisionDataStore.cassandra=false --set allInOne.enabled=true --set storage.type=none --set agent.enabled=false --set collector.enabled=false --set query.enabled=false --set allInOne.args[0]="--query.base-path=/jaeger"
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       platformX: arm
@@ -76,7 +77,7 @@ applications:
       git: https://github.com/prometheus-community/helm-charts.git
       platformX: arm
       subdir: charts/prometheus
-      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus/ --set server.baseURL=https://my-lb.adm13/prometheus/
+      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/
       storage: 
       - name: storage-prometheus-alertmanager-0
         size: 2Gi
