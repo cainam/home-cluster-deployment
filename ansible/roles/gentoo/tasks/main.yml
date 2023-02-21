@@ -191,7 +191,7 @@
     state: link
   loop:
     - src: net.lo
-      dest: /etc/init.d/net.eth0
+      dest: /etc/init.d/net.end0
     - src: net.lo
       dest: /etc/init.d/net.wlan0
 
@@ -202,7 +202,7 @@
     state: restarted
   loop:
     - net.wlan0
-    - net.eth0
+    - net.end0
     - ntp-client
     - brickmount
     - keepalived

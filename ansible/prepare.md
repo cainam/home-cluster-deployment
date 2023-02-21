@@ -33,7 +33,7 @@ etc/conf.d/net
 /mnt/boot/config.txt
 
 # plus ...
-(cd etc/init.d/ && ln -s net.lo net.eth0
+(cd etc/init.d/ && ln -s net.lo net.end0
 mkdir root/.ssh && chmod 700 root/.ssh
 root/.ssh/authorized_keys
 ln -s /etc/init.d/sshd etc/runlevels/default/sshd

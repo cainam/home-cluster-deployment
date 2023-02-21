@@ -10,7 +10,7 @@ depend()
 {
         local opts mywant=""
         after root
-	need net.eth0
+	need net.end0
         want $mywant
         before glusterd
         before registry

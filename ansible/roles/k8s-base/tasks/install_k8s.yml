@@ -30,7 +30,7 @@
 - name: install flannel pod network
   shell: |
     sed -i -e 's#image: .*\/.*\/#image: myregistry.adm13:443/k8s/#g' kube-flannel.yml 
-    sed -i -e '/ip-masq/a\ \ \ \ \ \ \ \ - --iface=eth0' kube-flannel.yml # Erzwingen von eth0 Netzwerk
+    sed -i -e '/ip-masq/a\ \ \ \ \ \ \ \ - --iface=end0' kube-flannel.yml # Erzwingen von eth0 Netzwerk
     . set_env.sh blabla
     kubectl apply -f kube-flannel.yml  
   when: not etc_k8s.stat.exists and inventory_hostname == selected_host
