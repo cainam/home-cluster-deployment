@@ -1,19 +1,19 @@
 - name: set app fact
   set_fact:
-    app: "{{ application.key }}"
+    name_prefix: "namespace:{{ namespace.key}} app:{{ application.key }} - "
         
-- name: app:{{ app }} status
+- name: {{ name_prefix }} status
   debug:
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
 
 - block:
-  - name: app:{{ app }} storage
+  - name: {{ name_prefix }} storage
     include_tasks: common/storage.yml
     with_items: "{{ application.value.storage }}"
     loop_control:
       loop_var: storage
     
-  - name: app:{{ app }} gluster service in namespace
+  - name: {{ name_prefix }} gluster service in namespace
     shell: |
       kubectl apply -f - <<EOF
       apiVersion: v1
@@ -28,7 +28,7 @@
     register: gluster_service
     changed_when: "'unchanged' not in gluster_service.stdout"
 
-  - name: app:{{ app }} gluster endpoints in namespace
+  - name: {{ name_prefix }} gluster endpoints in namespace
     shell: |
       set -x
       kubectl apply -f - <<EOF
@@ -50,49 +50,62 @@
   when: application.value.storage is defined
   
 - block:
-    - name: app:{{ app }} build and fill
+    - name: {{ name_prefix }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
          helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }}
       register: build_out
   
-    - name: app:{{ app }} build output
+    - name: {{ name_prefix }} build output
       debug:
         msg: "{{ item }}"
       loop: "{{ build_out  | dict2items }}"
 
-    - name: app:{{ app }} helm repo refresh
+    - name: {{ name_prefix }} helm repo refresh
       shell: |
         . set_env.sh "{{ namespace.key }}"
         helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
         helm repo index "${helm_repo_dir}" --url $helm_url
         helm repo update
   when: "'build' in ansible_run_tags" 
+
+- block:
+  - name: {{ name_prefix }} files
+    debug:
+      msg: "key: {{ item.key }} val:{{ item.value }}"
+    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+
+  - name: simply fail
+    fail:
+      msg: fail and fall
+  when: application.value.files is defined
    
-- name: app:{{ app }} install or upgrade
+- name: {{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
      helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ application.value.helm_options | default('') }}
   register: out
   when: "application.value.install | default(true)"
   
-- name: app:{{ app }} output
+- name: {{ name_prefix }} output
   debug:
     msg: "output: item: {{ item }}"
   loop: "{{ out  | dict2items }}"
 
 - block:
-  - name: app:{{ app }} network info
+  - name: {{ name_prefix }} network info
     debug: 
       msg: "network: {{ application.value.network }}"
 
-  - name: app:{{ app }} tempfile for gateway
+  - name: {{ name_prefix }} tempfile for gateway
     tempfile:
       state: file
       suffix: k8s_gw
     register: gw_temp
 
-  - name: app:{{ app }} network info
+  - name: {{ name_prefix }} network info
     shell: |
       kubectl get svc -n istio-ingress gateway -o yaml >> "{{ gw_temp.path }}"
       LENofAPP=$(yq -r -M '.spec.ports[] | select(.name == "{{ application.key }}") | length'  "{{ gw_temp.path }}")
@@ -105,7 +118,7 @@
       kubectl apply -f "{{ gw_temp.path }}"
     when: application.value.network is defined
 
-  - name: app:{{ app }} prepare Gateway and VirtualService
+  - name: {{ name_prefix }} prepare Gateway and VirtualService
     set_fact:
       space: "{{ namespace.key }}"
       name: "{{ application.key }}"
@@ -115,29 +128,29 @@
       svc_port: "{{ application.value.network.svcPort }}"
       target_service: "{{ application.value.network.service | default(application.key) }}"
 
-  - name: app:{{ app }} tempfile for Gateway
+  - name: {{ name_prefix }} tempfile for Gateway
     tempfile:
       state: file
       suffix: k8s.conf
     register: gateway_tmp
 
-  - name: app:{{ app }} copy tempfile for Gateway
+  - name: {{ name_prefix }} copy tempfile for Gateway
     template:
       src: gateway.k8s
       dest: "{{ gateway_tmp.path }}"
   
-  - name: app:{{ app }} tempfile for VirtualService
+  - name: {{ name_prefix }} tempfile for VirtualService
     tempfile:
       state: file
       suffix: k8s.conf
     register: vs_tmp
   
-  - name: app:{{ app }} copy tempfile for VirtualService
+  - name: {{ name_prefix }} copy tempfile for VirtualService
     template:
       src: virtualservice.k8s
       dest: "{{ vs_tmp.path }}"
   
-  - name: app:{{ app }} create Gateway and VirtualService
+  - name: {{ name_prefix }} create Gateway and VirtualService
     shell: |
       kubectl apply -f "{{ gateway_tmp.path }}"
       kubectl apply -f "{{ vs_tmp.path }}"
