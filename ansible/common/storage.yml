@@ -33,9 +33,15 @@
       metadata:
         namespace: {{ ns }}
         name: "{{ storage.name }}"
-        labels:
-          storage.k8s.io/name: glusterfs
       spec:
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - example-node
         claimRef:
           namespace: "{{ ns }}"
           name: "{{ storage.name }}"
@@ -49,9 +55,7 @@
         #persistentVolumeReclaimPolicy: Delete
         persistentVolumeReclaimPolicy: Retain
         volumeMode: Filesystem
-        glusterfs:
-          endpoints: glusterfs
-          path: "{{ storage.name }}"
-          readOnly: no
+        local:
+          path: "/shared/{{ storage.name }}/"
       EOF
   when: outside_k8s is not defined

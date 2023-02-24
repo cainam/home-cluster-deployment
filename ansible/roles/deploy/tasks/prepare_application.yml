@@ -2,13 +2,14 @@
   set_fact:
     app: "{{ application.key }}"
 
-- name: app:{{ app }} storage
-  include_tasks: common/storage_brick.yml
-  with_items: "{{ application.value.storage }}"
+- block:
+  - name: app:{{ app }} storage
+    include_tasks: common/storage_brick.yml
+    when: application.value.storage is defined #|| storage is defined
+    with_items: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
   when: application.value.storage is defined
-  with_items: "{{ application.value.storage }}"
-  loop_control:
-    loop_var: storage
 
 #- name: app:{{ app }} ensure bricks for gluster
 #  shell: |

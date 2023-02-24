@@ -15,6 +15,10 @@
   set_fact:
     keep_volumes: "{{ volumes_to_exempt }}"
 
+- name: general configuration
+  include_tasks: prepare.yml
+  run_once: true
+
 - name: prepare application prerequisites
   include_tasks: prepare_by_namespace.yml
   when: (limit_namespace is not defined or namespace.key == limit_namespace)

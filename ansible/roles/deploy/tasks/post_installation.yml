@@ -1,3 +1,7 @@
+- name: tls certificates for ingress gateway
+  shell: |
+    kubectl get secret -n istio-ingress istio-ingress 2> /dev/null  >> /dev/null || kubectl create -n istio-ingress secret tls istio-ingress --key=/data/mine/certs/my-lb.adm13.key --cert=/data/mine/certs/my-lb.adm13.crt
+
 - name: list volumes to keep
   debug:
     msg: "{{ item }}"
@@ -52,6 +56,3 @@
 #  shell: |
 #    kubectl get svc -n istio-ingress gateway 2>&1 | cat > /dev/null && kubectl patch svc gateway --namespace istio-ingress --patch '{"spec": { "loadBalancerIP": "{{ load_balander_ip }}" }}'
 
-- name: tls certificates for ingress gateway
-  shell: |
-    kubectl get secret -n istio-ingress istio-ingress 2> /dev/null  >> /dev/null || kubectl create -n istio-ingress secret tls istio-ingress --key=/data/mine/certs/my-lb.adm13.key --cert=/data/mine/certs/my-lb.adm13.crt
