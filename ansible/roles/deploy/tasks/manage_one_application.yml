@@ -1,13 +1,13 @@
 - name: set app fact
   set_fact:
-    app: "{{ application.key }}"
+    name_prefix: "namespace:{{ namespace.key}} app:{{ application.key }} - "
         
-- name: app:{{ app }} status
+- name: {{ name_prefix }} status
   debug:
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
 
 - block:
-  - name: app:{{ app }} storage
+  - name: {{ name_prefix }} storage
     include_tasks: common/storage.yml
     with_items: "{{ application.value.storage }}"
     loop_control:
@@ -51,33 +51,46 @@
 #  when: application.value.storage is defined
   
 - block:
-    - name: app:{{ app }} build and fill
+    - name: {{ name_prefix }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
          helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }}
       register: build_out
   
-    - name: app:{{ app }} build output
+    - name: {{ name_prefix }} build output
       debug:
         msg: "{{ item }}"
       loop: "{{ build_out  | dict2items }}"
 
-    - name: app:{{ app }} helm repo refresh
+    - name: {{ name_prefix }} helm repo refresh
       shell: |
         . set_env.sh "{{ namespace.key }}"
         helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
         helm repo index "${helm_repo_dir}" --url $helm_url
         helm repo update
   when: "'build' in ansible_run_tags" 
+
+- block:
+  - name: {{ name_prefix }} files
+    debug:
+      msg: "key: {{ item.key }} val:{{ item.value }}"
+    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+
+  - name: simply fail
+    fail:
+      msg: fail and fall
+  when: application.value.files is defined
    
-- name: app:{{ app }} install or upgrade
+- name: {{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
      helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ application.value.helm_options | default('') }}
   register: out
   when: "application.value.install | default(true)"
   
-- name: app:{{ app }} output
+- name: {{ name_prefix }} output
   debug:
     msg: "output: item: {{ item }}"
   loop: "{{ out  | dict2items }}"
