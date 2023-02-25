@@ -1,0 +1,21 @@
+- name: .{{ name_prefix }} files
+  debug:
+    msg: "key: {{ file.key }} val:{{ file.value }}"
+
+- name: .{{ name_prefix }} tempfile for {{ file.key }}
+  tempfile:
+    state: file
+  register: tmp_file
+
+- name: .{{ name_prefix }} copy template to tempfile
+  template:
+    src: "{{ file.value.file }}"
+    dest: "{{ tmp_file.path }}"
+
+- name: .{{ name_prefix }} set fact for files to keep tempfile location
+  set_fact:
+    applications: "{{ applications | combine({namespace.key: {application.key: {'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
+
+- name: updated application information
+  debug:
+    msg: "{{ applications[namespace.key][application.key] }}"

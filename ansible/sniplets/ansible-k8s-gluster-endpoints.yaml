@@ -1,0 +1,36 @@
+#  - name: app:{{ app }} gluster service in namespace
+#    shell: |
+#      kubectl apply -f - <<EOF
+#      apiVersion: v1
+#      kind: Service
+#      metadata:
+#        name: glusterfs
+#        namespace: {{ ns }}
+#      spec:
+#        ports:
+#        - port: 49152
+#      EOF
+#    register: gluster_service
+#    changed_when: "'unchanged' not in gluster_service.stdout"
+##
+#  - name: app:{{ app }} gluster endpoints in namespace
+#    shell: |
+#      set -x
+#      kubectl apply -f - <<EOF
+#      apiVersion: v1
+#      kind: Endpoints
+#      metadata:
+#        name: glusterfs
+#        namespace: {{ ns }}
+#      subsets:
+#      {% for a in gluster_ips %}
+#        - addresses:
+#          - ip: {{ a }}
+#          ports:
+#          - port: 49152
+#      {% endfor %}
+#      EOF
+#    register: gluster_ep
+#    changed_when: "'unchanged' not in gluster_ep.stdout"
+#  when: application.value.storage is defined
+

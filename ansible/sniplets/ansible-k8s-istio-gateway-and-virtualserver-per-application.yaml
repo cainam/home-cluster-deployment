@@ -1,0 +1,38 @@
+#  - name: app:{{ app }} prepare Gateway and VirtualService
+#    set_fact:
+#      space: "{{ namespace.key }}"
+#      name: "{{ application.key }}"
+#      gw_port: "{{ application.value.network.gwPort }}"
+#      target_port: "{{ application.value.network.targetPort }}"
+#      prefix: "/"
+#      svc_port: "{{ application.value.network.svcPort }}"
+#      target_service: "{{ application.value.network.service | default(application.key) }}"
+#
+#  - name: app:{{ app }} tempfile for Gateway
+#    tempfile:
+#      state: file
+#      suffix: k8s.conf
+#    register: gateway_tmp
+#
+#  - name: app:{{ app }} copy tempfile for Gateway
+#    template:
+#      src: gateway.k8s
+#      dest: "{{ gateway_tmp.path }}"
+#  
+#  - name: app:{{ app }} tempfile for VirtualService
+#    tempfile:
+#      state: file
+#      suffix: k8s.conf
+#    register: vs_tmp
+#  
+#  - name: app:{{ app }} copy tempfile for VirtualService
+#    template:
+#      src: virtualservice.k8s
+#      dest: "{{ vs_tmp.path }}"
+#  
+#  - name: app:{{ app }} create Gateway and VirtualService
+#    shell: |
+#      kubectl apply -f "{{ gateway_tmp.path }}"
+#      kubectl apply -f "{{ vs_tmp.path }}"
+#  when: application.value.network is defined 
+

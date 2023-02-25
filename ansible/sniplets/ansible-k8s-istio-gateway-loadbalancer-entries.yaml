@@ -1,0 +1,25 @@
+#- block:
+#  - name: app:{{ app }} network info
+#    debug: 
+#      msg: "network: {{ application.value.network }}"
+#
+#  - name: app:{{ app }} tempfile for gateway
+#    tempfile:
+#      state: file
+#      suffix: k8s_gw
+#    register: gw_temp
+#
+#  - name: app:{{ app }} network info
+#    shell: |
+#      kubectl get svc -n istio-ingress gateway -o yaml >> "{{ gw_temp.path }}"
+#      LENofAPP=$(yq -r -M '.spec.ports[] | select(.name == "{{ application.key }}") | length'  "{{ gw_temp.path }}")
+#      echo "LENofAPP:${LENofAPP}"
+#      if [ "$LENofAPP" = "" ]; then # application section missing
+#        yq -yi '.spec.ports += [{"name": "{{ application.key }}"}]' "{{ gw_temp.path }}"
+#      fi
+#      yq -iy 'getpath(path(.spec.ports[] | select(.name == "{{ application.key }}"))).port={{ application.value.network.gwPort }}' "{{ gw_temp.path }}"
+#      yq -iy 'getpath(path(.spec.ports[] | select(.name == "{{ application.key }}"))).targetPort={{ application.value.network.targetPort }}' "{{ gw_temp.path }}"
+#      kubectl apply -f "{{ gw_temp.path }}"
+#    when: application.value.network is defined
+
+
