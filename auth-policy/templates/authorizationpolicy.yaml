@@ -3,7 +3,7 @@ items:
 - apiVersion: security.istio.io/v1
   kind: AuthorizationPolicy
   metadata:
-    name: ext-authz
+    name: ext-authz2
     namespace: tools
   spec:
     action: CUSTOM
