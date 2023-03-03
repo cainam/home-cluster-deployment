@@ -4,6 +4,7 @@ items:
   kind: AuthorizationPolicy
   metadata:
     name: ext-authz
+    namespace: tools
   spec:
     action: CUSTOM
     provider:
