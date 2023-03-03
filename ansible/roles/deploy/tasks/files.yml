@@ -1,3 +1,7 @@
+- name: set app_data
+  set_fact:
+    app_data: "{{ applications['auth']['oauth2-proxy'] }}"
+
 - name: .{{ name_prefix }} files
   debug:
     msg: "key: {{ file.key }} val:{{ file.value }}"
@@ -12,10 +16,19 @@
     src: "{{ file.value.file }}"
     dest: "{{ tmp_file.path }}"
 
-- name: .{{ name_prefix }} set fact for files to keep tempfile location
+- name: .{{ name_prefix }} set fact for files to keep tempfile location - attention - with this update, app_data will resolve helm_options differently
   set_fact:
     applications: "{{ applications | combine({namespace.key: {application.key: {'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
 
-- name: updated application information
+- name: .{{ name_prefix }} reset applications to update helm_options
+  set_fact:
+    applications: "{{ applications | combine({namespace.key: {application.key: {'helm_options': app_data.helm_options,'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
+
+#- name: app_data not modified
+#  debug:
+#    msg: "{{ app_data }}"
+
+- name: applications.ns.app
   debug:
     msg: "{{ applications[namespace.key][application.key] }}"
+

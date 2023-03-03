@@ -11,7 +11,7 @@ export registry="myregistry.adm13:443"
 
 export helm_dir=/shared/helm
 export helm_options="--repository-config $helm_dir/config --repository-cache $helm_dir/cache "
-export podman_options="-t --rm --network host -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
+export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
 alias helmx="podman run ${podman_options} myregistry.adm13:443/helm:v3.10.2 $helm_options"
 function helm(){
   podman run ${podman_options} ${registry}/helm:v3.10.2 $helm_options $*

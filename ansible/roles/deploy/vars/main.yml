@@ -19,13 +19,11 @@ applications:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
-      helm_options: --set proxyVarsAsSecrets=false \{% if application is defined %\}\{% if application.value.files.config.tempfile is defined %\}--values \{\{ application.value.files.config.tempfile \}\} \{% endif %\}\{% endif %\}
+      helm_options: --set proxyVarsAsSecrets=false {% raw %} {% if applications['auth']['oauth2-proxy']['files']['config']['tempfile'] is defined %}  --values {{ applications['auth']['oauth2-proxy']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
       files:
         config:
           file: oauth2-proxy-config.yaml
       network:
-        gwPort: 2004
-        targetPort: 12004
         svcPort: 80
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git

@@ -44,7 +44,7 @@
 - name: .{{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
-     helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ application.value.helm_options | default('') }}
+     helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ applications[namespace.key][application.key].helm_options | default('') }}
   register: out
   when: "application.value.install | default(true)"
   
