@@ -3,15 +3,7 @@ items:
 - apiVersion: security.istio.io/v1
   kind: AuthorizationPolicy
   metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"security.istio.io/v1beta1","kind":"AuthorizationPolicy","metadata":{"annotations":{},"name":"ext-authz","namespace":"istio-system"},"spec":{"action":"CUSTOM","provider":{"name":"oauth2-proxy"},"rules":[{"to":[{"operation":{"hosts":["my-lb.adm13"]}}]}],"selector":{"matchLabels":{"istio":"gateway"}}}}
-    creationTimestamp: "2023-02-01T17:54:38Z"
-    generation: 2
     name: ext-authz
-    namespace: istio-system
-    resourceVersion: "10120362"
-    uid: 691459f1-df9e-4d86-a039-e6fcd5acf1b1
   spec:
     action: CUSTOM
     provider:
@@ -25,5 +17,3 @@ items:
       matchLabels:
         istio: gateway
 kind: List
-metadata:
-  resourceVersion: ""

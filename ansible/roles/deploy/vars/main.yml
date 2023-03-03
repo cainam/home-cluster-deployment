@@ -46,6 +46,9 @@ applications:
         svcName: jaeger-query
         rewrite: /jaeger
         svcPort: 16686
+    auth-policy:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: auth-policy
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: infopage
