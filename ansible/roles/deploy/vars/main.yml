@@ -1,6 +1,9 @@
 ---
 applications:
   istio-system:
+    auth-policy:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: auth-policy
     base: 
       git: https://github.com/istio/istio.git
       platform: arm
@@ -46,9 +49,6 @@ applications:
         svcName: jaeger-query
         rewrite: /jaeger
         svcPort: 16686
-    auth-policy:
-      git: https://github.com/cainam/k8s_at_home.git
-      subdir: auth-policy
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: infopage
