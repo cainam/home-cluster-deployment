@@ -9,8 +9,8 @@ spec:
   rules:
   - to:
     - operation:
-        hosts:
-        - my-lb.adm13
+        hosts: 
+          {{ toYaml .Values.hosts | indent 10 }}
   selector:
     matchLabels:
       istio: gateway
