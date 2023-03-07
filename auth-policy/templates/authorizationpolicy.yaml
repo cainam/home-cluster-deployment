@@ -1,7 +1,7 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: ext-authz2
+  name: {{ .Values.PolicyName }}
 spec:
   action: CUSTOM
   provider:
