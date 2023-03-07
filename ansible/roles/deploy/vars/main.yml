@@ -4,7 +4,8 @@ applications:
     auth-policy:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: auth-policy
-      helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
+      helm_options: --set PolicyName=ext-authz 
+      lkj: --set hosts[0]="my-lb.adm13"
     base: 
       git: https://github.com/istio/istio.git
       platform: arm
