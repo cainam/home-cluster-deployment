@@ -14,11 +14,11 @@ images:
     section: /tools/
   - name: pilot
     source: docker.io/istio/pilot
-    branch: 1.16.2
+    branch: 1.17.1
     section: /istio/
   - name: proxyv2
     source: docker.io/istio/proxyv2
-    branch: 1.16.2
+    branch: 1.17.1
     section: /istio/
   - name: alpine
     source: docker.io/alpine
