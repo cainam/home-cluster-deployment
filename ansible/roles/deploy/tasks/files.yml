@@ -1,6 +1,6 @@
 - name: set app_data
   set_fact:
-    app_data: "{{ applications['auth']['oauth2-proxy'] }}"
+    app_data: "{{ applications[namespace.key][application.key] }}"
 
 - name: .{{ name_prefix }} files
   debug:
@@ -24,9 +24,9 @@
   set_fact:
     applications: "{{ applications | combine({namespace.key: {application.key: {'helm_options': app_data.helm_options,'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
 
-#- name: app_data not modified
-#  debug:
-#    msg: "{{ app_data }}"
+- name: app_data
+  debug:
+    msg: "{{ app_data }}"
 
 - name: applications.ns.app
   debug:
