@@ -2,4 +2,4 @@
 sys-cluster/glusterfs -ipv6 debug
 net-proxy/haproxy -slz
 sys-libs/glibc userlocales
-
+>=sys-devel/binutils-2.40-r4 gold

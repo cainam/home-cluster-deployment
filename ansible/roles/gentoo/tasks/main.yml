@@ -115,7 +115,7 @@
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
     mode: preserve
-    backup: yes
+    backup: "{{ item.backup | default('yes') }}"
   loop:
     - file: lighttpd.conf
       dest: /etc/lighttpd/
@@ -125,6 +125,7 @@
       dest: /usr/local/bin/
     - file: cmdline.txt
       dest: /boot/
+      backup: no
     - file: world
       dest: /var/lib/portage/
     - file: gentoo.conf
@@ -141,6 +142,8 @@
       dest: /etc/portage
     - file: portage/package.use
       dest: /etc/portage/package.use
+    - file: portage/package.mask
+      dest: /etc/portage/package.mask
     - file: portage/package.license
       dest: /etc/portage
     - file: env
