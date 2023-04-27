@@ -35,8 +35,9 @@
     kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
     kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
     # kubectl apply -f kube-flannel.yml  
-     helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ applications[namespace.key][application.key].helm_options | default('') }}
-  when: not etc_k8s.stat.exists and inventory_hostname == selected_host
+    helm upgrade --install -n kube-flannel kube-flannel kube-flannel/kube-flannel
+  # when: not etc_k8s.stat.exists and inventory_hostname == selected_host
+  when: inventory_hostname == selected_host
 
 - name: join nodes if needed
   include_tasks: join.yml
