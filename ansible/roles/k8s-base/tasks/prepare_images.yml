@@ -28,7 +28,8 @@
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
   with_items: "{{ required_images.stdout_lines }}"
 
-- name: prepare flannel image
+- name: prepare flannel
   shell: |
-    curl -O https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-    grep image kube-flannel.yml | grep -v "#image" | awk '{print $2}' | sed -e 's/^/arm /g' -e 's#$# /k8s/ images for kube-flannel#g' | bash pull-tag-push.sh
+    # curl -O https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+    # grep image kube-flannel.yml | grep -v "#image" | awk '{print $2}' | sed -e 's/^/arm /g' -e 's#$# /k8s/ images for kube-flannel#g' | bash pull-tag-push.sh
+    helm:from_git_to_local.sh --platform=arm64 --git_source=https://github.com/flannel-io/flannel.git --git_subdir=chart/kube-flannel --chart_version= --appVersion= --remove_dependencies=
