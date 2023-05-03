@@ -32,4 +32,8 @@
   shell: |
     # curl -O https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
     # grep image kube-flannel.yml | grep -v "#image" | awk '{print $2}' | sed -e 's/^/arm /g' -e 's#$# /k8s/ images for kube-flannel#g' | bash pull-tag-push.sh
+    . set_env.sh kube-flannel
     helm:from_git_to_local.sh --platform=arm64 --git_source=https://github.com/flannel-io/flannel.git --git_subdir=chart/kube-flannel --chart_version= --appVersion= --remove_dependencies=
+    helm repo add kube-flannel https://helm.adm13:9443/kube-flannel
+    helm repo index "${helm_repo_dir}" --url $helm_url
+
