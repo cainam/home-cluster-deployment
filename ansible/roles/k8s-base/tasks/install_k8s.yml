@@ -35,7 +35,8 @@
     kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
     kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
     # kubectl apply -f kube-flannel.yml  
-    helm upgrade --install -n kube-flannel kube-flannel kube-flannel/flannel --set flannel.args[2]="--iface=end0"
+    # helm upgrade --install -n kube-flannel kube-flannel kube-flannel/flannel --set "flannel.args[2]=--iface=end0" --set flannel.image_cni.repository=k8s/flannel-cni-plugin
+    helm upgrade --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  --set flannel.image_cni.repository=k8s/flannel-cni-plugin
   # when: not etc_k8s.stat.exists and inventory_hostname == selected_host
   when: inventory_hostname == selected_host
 
