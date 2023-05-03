@@ -1,0 +1,28 @@
+meshConfig:
+  defaultConfig:
+    discoveryAddress: istiod.istio-system.svc:15012
+    tracing:
+      zipkin:
+        address: jaeger-collector.tools:9411
+  enablePrometheusMerge: true
+  enableTracing: true
+  extensionProviders:
+  - envoyExtAuthzHttp:
+      headersToDownstreamOnDeny:
+      - content-type
+      - set-cookie
+      headersToUpstreamOnAllow:
+      - path
+      - x-auth-request-email
+      - x-auth-request-preferred-username
+      includeAdditionalHeadersInCheck:
+        X-Auth-Request-Redirect: https://%REQ(:authority)%%REQ(:path)%
+      includeRequestHeadersInCheck:
+      - authorization
+      - cookie
+      - x-auth-request-groups
+      port: 80
+      service: oauth2-proxy.auth.svc.cluster.local
+    name: oauth2-proxy
+  rootNamespace: null
+  trustDomain: cluster.local

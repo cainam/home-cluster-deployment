@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  gather_facts: False
+  connection: local
+  tasks:
+  - block:
+      - name: set
+        set_fact:
+          a: "{{ x }}"
+      - name: x
+        debug:
+          msg: '{{ a }}'
+      - name: y
+        debug:
+          msg: '{{ lookup("vars", "a"+"") }}'
+    vars:
+      blao: !nonlazy "{% raw %} {{ x }} {% endraw %}"
+      x: 'kljasdlkfjlkjsadflkj'
