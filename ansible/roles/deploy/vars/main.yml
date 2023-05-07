@@ -11,11 +11,12 @@ applications:
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
-      branch: 1.17.1
-      platform: arm
+      branch: 1.17.2
       subdir: manifests/charts/istio-control/istio-discovery
       xhelm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.1 --set global.proxy.image=istio/proxyv2:1.17.1 --set global.proxy_init.image=istio/proxyv2:1.17.1 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      helm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.1 --set global.proxy.image=istio/proxyv2:1.17.1 --set global.proxy_init.image=istio/proxyv2:1.17.1 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
+      yhelm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.2 --set global.proxy.image=istio/proxyv2:1.17.2 --set global.proxy_init.image=istio/proxyv2:1.17.2 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2
       files:
         config:
           file: istiod-mesh.yaml
