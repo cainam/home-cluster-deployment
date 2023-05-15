@@ -17,3 +17,10 @@ wpa_supplicant_wlan0="-Dnl80211 -f /var/log/wpa_supplicant.log"
 dns_domain_lo="homenetwork"
 dns_domain="hmenetwork"
 dns_domain_wlan0="hxxomenetwork"
+
+postup() {
+   if [ ${IFVAR} != "lo" ]; then
+# (long wait if you do this with net.lo)
+      /etc/init.d/ntp-client restart
+   fi
+}

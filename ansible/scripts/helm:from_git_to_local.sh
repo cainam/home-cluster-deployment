@@ -40,8 +40,14 @@ function pull_local(){
 	repo=$(yq -r '.'"${parent}"'.repository? // empty ' values.yaml )
 	[ -z "${repo}" ] && repo=$(yq -r '.'"${parent}"'.hub? // empty ' values.yaml ) # prefer parent.repository over parent.hub
       else
-        repository=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
-        tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
+        parent_tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
+
+        image=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
+	image_path=$(echo "${image}" | grep -q : && echo "${image%/*}")
+        image_itself=${image##*/}
+	[[ ${image_itself} == *:* && ${parent_tag} == "" ]] || image_itself="${image_itself}:${parent_tag}"
+
+	repo=
       fi
       if [[ ${image_itself} != *:* ]]; then
         # echo "tag is empty (${tag}), trying appVersion"
@@ -51,6 +57,7 @@ function pull_local(){
 	image_itself="${image_itself}:latest"
       fi
       fetch_img="${repo}/${image_path}/${image_itself}"
+      tag="${image_itself#*:}"
       echo "treat image repository: ${repo} image: ${image_itself} image_section=${image_section} section_type=${section_type} (from org:${image_section_org})"
       #if [ "${repository}" == "" ] || [ "${tag}" == "" ]; then
       #  echo "repository and tag are not allowed to be empty"
@@ -69,7 +76,7 @@ function pull_local(){
 	  echo "replacing ${image_section}.image by ${category}/${image_itself}"
           yq -yi '.'"${image_section}"'="'"${category}/${image_itself}"'"' values.yaml
 	else
-          yq -yi '.'"${image_section}"'.repository="'"${category}/${image_itself}"'"' values.yaml
+          yq -yi '.'"${image_section}"'.repository="'"${category}/${image_itself%:*}"'"' values.yaml
           yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
 	  yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
 	fi

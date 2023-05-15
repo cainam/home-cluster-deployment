@@ -14,7 +14,7 @@ export helm_options="--repository-config $helm_dir/config --repository-cache $he
 export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
 alias helmx="podman run ${podman_options} myregistry.adm13:443/helm:v3.10.2 $helm_options"
 function helm(){
-  podman run ${podman_options} ${registry}/helm:v3.10.2 $helm_options $*
+  podman run ${podman_options} ${registry}/helm:3.11.3 $helm_options $*
 }
 export -f helm
 export helm_repo=${category}
