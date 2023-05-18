@@ -58,11 +58,7 @@ function pull_local(){
       fi
       fetch_img="${repo}/${image_path}/${image_itself}"
       tag="${image_itself#*:}"
-      echo "treat image repository: ${repo} image: ${image_itself} image_section=${image_section} section_type=${section_type} (from org:${image_section_org})"
-      #if [ "${repository}" == "" ] || [ "${tag}" == "" ]; then
-      #  echo "repository and tag are not allowed to be empty"
-      #  exit -1
-      #fi
+      echo "treat image repository: ${repo} image: ${image_itself} fetch_img: ${fetch_img} image_section=${image_section} section_type=${section_type} (from org:${image_section_org})"
       set +x
       #if [ "${repository}" != "null" ]; then
         for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them

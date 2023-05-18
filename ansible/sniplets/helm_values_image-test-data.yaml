@@ -1,0 +1,9 @@
+a:
+  image: jaegertracing/jaeger-cassandra-schema
+b:
+  a:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.0
+c:
+  image:
+    repository: jaegertracing/example-hotrod
+
