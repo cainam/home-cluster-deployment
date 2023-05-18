@@ -15,10 +15,10 @@
   set_fact:
     keep_volumes: "{{ volumes_to_exempt }}"
 
-- name: general configuration
-  import_tasks: prepare.yml
-  run_once: true
-  failed_when: false
+#- name: general configuration
+#  import_tasks: prepare.yml
+#  run_once: true
+#  failed_when: false
 
 - name: prepare application prerequisites
   include_tasks: prepare_by_namespace.yml
@@ -35,10 +35,10 @@
     loop_var: namespace
   run_once: true
 
-- name: general configuration
-  import_tasks: prepare.yml
-  run_once: true
-  failed_when: false
+#- name: general configuration
+#  import_tasks: prepare.yml
+#  run_once: true
+#  failed_when: false
 
 - name: post installation
   include_tasks: post_installation.yml

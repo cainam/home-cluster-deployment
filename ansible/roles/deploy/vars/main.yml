@@ -1,31 +1,31 @@
 ---
 applications:
   istio-system:
-    auth-policy:
-      git: https://github.com/cainam/k8s_at_home.git
-      subdir: auth-policy
-      helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
     base: 
       git: https://github.com/istio/istio.git
-      platform: arm
+      branch: 1.17.2
+      xplatform: arm
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
       branch: 1.17.2
       subdir: manifests/charts/istio-control/istio-discovery
       xhelm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.1 --set global.proxy.image=istio/proxyv2:1.17.1 --set global.proxy_init.image=istio/proxyv2:1.17.1 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      yhelm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.2 --set global.proxy.image=istio/proxyv2:1.17.2 --set global.proxy_init.image=istio/proxyv2:1.17.2 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
-      zhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi
-      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2 --fix_source=.global.hub=istio-system --fix_source=.global.tag=1.17.2
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      lgit_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2 --fix_source=.global.hub=istio-system --fix_source=.global.tag=1.17.2
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2
       files:
         config:
           file: istiod-mesh.yaml
+    auth-policy:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: auth-policy
+      helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
   istio-ingress:
     gateway:
       git: https://github.com/istio/istio.git
       subdir: manifests/charts/gateway
-      helm_options: --set 'service.externalIPs={"{{ load_balancer_ip }}"}' 
+      helm_options: --set 'service.externalIPs={"{{ load_balancer_ip }}"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
   auth:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
@@ -36,6 +36,7 @@ applications:
           file: oauth2-proxy-config.yaml
       network:
         svcPort: 80
+        prefix: /oauth2
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: keycloak
@@ -68,9 +69,9 @@ applications:
     kiali-operator:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-operator 
-      chart_version: v1.62.0
-      appVersion: v1.62.0
-      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.62.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.62.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      chart_version: v1.68.0
+      appVersion: v1.68.0
+      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.68.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
       network:
         svcPort: 20001
         svcName: kiali
@@ -78,6 +79,7 @@ applications:
         rewrite: /kiali
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
+      branch: v2.7.0
       subdir: charts/helm-chart/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --version=6.0.2 --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
       network:

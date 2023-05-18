@@ -145,6 +145,10 @@ for i in "$@"; do
       git_subdir="${i#*=}"
       shift
       ;;
+    --git_branch=*)
+      git_branch="${i#*=}"
+      shift
+      ;;
     --remove_dependencies=*)
       remove_deps="${i#*=}"
       shift
@@ -175,9 +179,8 @@ done
 #git_subdir=$3
 
 echo "platform: $platform"
-echo "git_source: $git_source"
-echo "git_subdir: $git_subdir"
-echo "remove_deps: $git_subdir"
+echo "git_source: $git_source git_subdir: $git_subdir git_branch: $git_branch"
+echo "remove_deps: $remove_deps"
 echo "appVersion: $appVersion"
 echo "chart_version: $chart_version"
 
@@ -187,6 +190,6 @@ echo "directory: $PWD"
 
 remove_deps=$(echo "$remove_deps" | sed -e 's/,/\n/g')
 
-git-subdir-checkout.sh "${git_source}" "${git_subdir}" 2>&1 | sed -e 's/^/git-subdir-checkout.sh: /g'
+git-subdir-checkout.sh "${git_source}" "${git_subdir}" "${git_branch}" 2>&1 | sed -e 's/^/git-subdir-checkout.sh: /g'
 cd */$git_subdir
 pull_local || exit $?
