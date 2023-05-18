@@ -12,14 +12,6 @@ images:
     source: docker.io/jaegertracing/all-in-one
     branch: 1.39.0
     section: /tools/
-  - name: pilot
-    source: docker.io/istio/pilot
-    branch: 1.17.1
-    section: /istio/
-  - name: proxyv2
-    source: docker.io/istio/proxyv2
-    branch: 1.17.1
-    section: /istio/
   - name: alpine
     source: docker.io/alpine
     section: /
@@ -49,7 +41,10 @@ images:
     branch: 3.10.5-slim
     build_args: --from docker.io/python:3.10.5-slim
   - name: helm
-    source: https://github.com/lachie83/k8s-helm.git
-    dockerfile: Dockerfile
-    branch: v3.10.2
-    build_args: --build-arg TARGETARCH=arm64 --from docker.io/alpine --arch=arm64
+    source: docker.io/alpine/helm
+    branch: 3.11.3
+#  - name: helm
+#    source: https://github.com/lachie83/k8s-helm.git
+#    dockerfile: Dockerfile
+#    branch: v3.10.2
+#    build_args: --build-arg TARGETARCH=arm64 --from docker.io/alpine --arch=arm64
