@@ -1,9 +1,47 @@
-a:
+# jaeger
+tag: ""
+allInOne:
+  image: jaegertracing/all-in-one
+xallInOne:
+  image: jaegertracing/all-in-one
+  tag: 1.2
+schema:
   image: jaegertracing/jaeger-cassandra-schema
 b:
   a:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.0
-c:
+esRollover:
+  image: jaegertracing/jaeger-es-rollover
+  tag: latest
+hotrod:
   image:
     repository: jaegertracing/example-hotrod
+
+#istio
+pilot:
+  hub: ""
+  tag: ""
+  image: pilot
+global:
+  proxy:
+    image: proxyv2
+
+#prometheus
+configmapReload:
+  prometheus:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-config-reloader
+      tag: v0.65.1
+server:
+  image:
+    repository: quay.io/prometheus/prometheus
+    # if not set appVersion field from Chart.yaml is used
+    tag: ""
+
+# kiali-operator
+image:
+  repo: kiali/kiali-operator
+  tag: v1.68.0
+
+
 

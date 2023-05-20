@@ -4,5 +4,5 @@ metadata:
   name: {{ .Chart.Name }}
 rules:
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["services","virtualservices"]
   verbs: ["get", "watch", "list"]
