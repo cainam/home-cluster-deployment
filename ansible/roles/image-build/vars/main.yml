@@ -1,15 +1,7 @@
 ---
 images:
-  - name: pushgateway
-    source: quay.io/prometheus/pushgateway
-    branch: latest
-    section: /tools/
   - name: jaeger-agent
     source: docker.io/jaegertracing/jaeger-agent
-    branch: 1.39.0
-    section: /tools/
-  - name: all-in-one
-    source: docker.io/jaegertracing/all-in-one
     branch: 1.39.0
     section: /tools/
   - name: alpine
@@ -27,14 +19,6 @@ images:
     dockerfile: keycloak.dockerfile
     branch: 20.0.2
     section: /auth/
-  - name: kiali-operator
-    source: quay.io/kiali/kiali-operator
-    branch: v1.62.0
-    section: /tools/
-  - name: kiali
-    source: quay.io/kiali/kiali
-    branch: v1.62.0
-    section: /tools/
   - name: mypython
     source: local
     dockerfile: mypython.dockerfile
@@ -43,8 +27,3 @@ images:
   - name: helm
     source: docker.io/alpine/helm
     branch: 3.11.3
-#  - name: helm
-#    source: https://github.com/lachie83/k8s-helm.git
-#    dockerfile: Dockerfile
-#    branch: v3.10.2
-#    build_args: --build-arg TARGETARCH=arm64 --from docker.io/alpine --arch=arm64
