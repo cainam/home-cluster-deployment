@@ -10,9 +10,7 @@ applications:
       git: https://github.com/istio/istio.git
       branch: 1.17.2
       subdir: manifests/charts/istio-control/istio-discovery
-      xhelm_options: --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.17.1 --set global.proxy.image=istio/proxyv2:1.17.1 --set global.proxy_init.image=istio/proxyv2:1.17.1 --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      lgit_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2 --fix_source=.global.hub=istio-system --fix_source=.global.tag=1.17.2
       git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.2 --fix_source=.global.proxy.image=istio/proxyv2:1.17.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.2
       files:
         config:
@@ -52,12 +50,13 @@ applications:
     jaeger:
       git: https://github.com/jaegertracing/helm-charts.git
       subdir: charts/jaeger
-      remove_dependencies: kafka,elasticsearch
+      remove_dependencies: kafka,elasticsearch,cassandra,common
       helm_options: --set provisionDataStore.cassandra=false --set allInOne.enabled=true --set storage.type=none --set agent.enabled=false --set collector.enabled=false --set query.enabled=false --set allInOne.args[0]="--query.base-path=/jaeger"
       network:
         svcName: jaeger-query
         rewrite: /jaeger
         svcPort: 16686
+      git_to_local_params: --fix_source=.allInOne.tag=1.45.0 --fix_source=.schema.image= --fix_source=.ingester.image= --fix_source=.agent.image=  --fix_source=.collector.image= --fix_source=.query.oAuthSidecar.image= --fix_source=.query.image= --fix_source=.spark.image= --fix_source=.esIndexCleaner.image= --fix_source=.esRollover.image= --fix_source=.esLookback.image= --fix_source=.hotrod.image.repository=
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: infopage
@@ -69,27 +68,48 @@ applications:
     kiali-operator:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-operator 
-      chart_version: v1.68.0
-      appVersion: v1.68.0
-      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.68.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      yhelm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=myregistry.adm13:443/tools/kiali-operator --set image.tag=v1.68.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=myregistry.adm13:443/tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      xhelm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set image.repo=kiali-operator --set image.tag=v1.68.0 --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
       network:
         svcPort: 20001
         svcName: kiali
         prefix: /kiali
         rewrite: /kiali
+      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       branch: v2.7.0
       subdir: charts/helm-chart/kubernetes-dashboard
-      helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --version=6.0.2 --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
+      helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
       network:
         prefix: /kubernetes-dashboard/
         svcPort: 9090
         addition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
+    kube-state-metrics:
+      git: https://github.com/prometheus-community/helm-charts.git
+      subdir: charts/kube-state-metrics
+      branch: kube-state-metrics-4.30.0
+      git_to_local_params: --fix_source=.image.tag=v2.8.0
+      install: false
+    prometheus-node-exporter:
+      git: https://github.com/prometheus-community/helm-charts.git
+      subdir: charts/prometheus-node-exporter
+      branch: prometheus-node-exporter-4.8.1
+      git_to_local_params: --fix_source=.image.tag=v1.5.0
+      install: false
+    prometheus-pushgateway:
+      git: https://github.com/prometheus-community/helm-charts.git
+      subdir: charts/prometheus-pushgateway
+      branch: prometheus-pushgateway-2.1.6
+      git_to_local_params: --fix_source=.image.tag=v1.5.1
+      install: false
     prometheus:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus
-      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/
+      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false
+      remove_dependencies: alertmanager
+      git_to_local_params: --fix_source=.server.image.tag=v2.44.0
       storage: 
       - name: storage-prometheus-alertmanager-0
         size: 2Gi

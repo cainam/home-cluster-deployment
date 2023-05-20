@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#echo "normal"
-#echo "als Fehler" >&2
-
 export SERVICEACCOUNT=/var/run/secrets/kubernetes.io/serviceaccount
 export NAMESPACE=$(cat ${SERVICEACCOUNT}/namespace)
 export TOKEN=$(cat ${SERVICEACCOUNT}/token)

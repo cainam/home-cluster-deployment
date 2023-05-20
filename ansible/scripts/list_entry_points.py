@@ -28,7 +28,15 @@ logger.info(args.port)
 
 class GetHandler( SimpleHTTPServer.SimpleHTTPRequestHandler ):
     def do_GET(self):
-        logging.info(self.headers)
+        logging.info("headers:"+str(self.headers))
+        logging.info("path:"+str(self.path)+" type:"+str(type(self.path)))
+        if str(self.path) == '/check':
+          logging.info("check called")
+          self.send_response(200)
+          self.send_header("Content-type", "text/html")
+          #self.send_header("Content-length", len(response))
+          self.end_headers()
+          return
         externalIP=""
         response='<html><table border=1 align=center style="width:50%"><tr><th>Name</th><th>URL</th></tr>'
 
@@ -42,6 +50,13 @@ class GetHandler( SimpleHTTPServer.SimpleHTTPRequestHandler ):
           (name,port,target)=item.split(',')
           name=name.replace('"','')
           response+='<tr><td>'+name+'</td><td><a href="https://'+externalIP+':'+port+'">'+name+'</a></td></tr>'
+
+        output = subprocess.run(["bash", "/app/get_vs.sh"], capture_output=True)
+        for item in output.stdout.decode('ascii').split('\n'):
+          logger.info("subprocess output.stdout: "+item)
+          if item == "": continue
+          (name,prefix)=item.split('\t')
+          response+='<tr><td>'+name+'</td><td><a href="https://my-lb.adm13'+prefix+'">'+prefix+'</a></td></tr>'
         response+="</table>"
 
         output = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:443/v2/_catalog"], capture_output=True)
@@ -55,31 +70,19 @@ class GetHandler( SimpleHTTPServer.SimpleHTTPRequestHandler ):
 
         response+="</html>"
         logger.info("response: "+response)
-        #for item in output.stderr.decode('ascii').split('\n'):
-        #  logger.info("subprocess output.stderr: "+item)
-        #config.load_incluster_config()
- 
-        #v1 = client.CoreV1Api()
-        #print("Listing pods with their IPs:")
-        #ret = v1.list_pod_for_all_namespaces(watch=False)
-        #for i in ret.items:
-        #  logger.info("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
-
 
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(response))
         self.end_headers()
-        self.wfile.write(str.encode(response))
-
-
+        try:
+          self.wfile.write(str.encode(response))
+        except Exception as e:
+          logger.info("exception caught")
+          logger.error(traceback.format_exc())
 
 Handler = GetHandler
 SocketServer.TCPServer.allow_reuse_address = True
 httpd = SocketServer.TCPServer(("", args.port), Handler)
-#httpd = SocketServer.TCPServer(("", args.port), Handler, False)
-#httpd.allow_reuse_address = True 
-#httpd.server_bind()     # Manually bind, to support allow_reuse_address
-#httpd.server_activate() # (see above comment)
 
 httpd.serve_forever()
