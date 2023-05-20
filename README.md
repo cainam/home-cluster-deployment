@@ -1,5 +1,6 @@
 # k8s_at_home
 Kubernetes cluster with oauth, keycloak, local repository management used for home.assistant
+[Deployment and configuration is performed via Ansible](/ansible/README.md) 
 
 ## What I like to do
 * play with Kubernetes, Raspberry and Hardware
@@ -28,3 +29,4 @@ Incomplete list of problems:
 * The devices were no longer in the WLAN and could only be used again after a restart. First assumption was power-safe of the WLAN driver, but deactivation brought no improvement. Therefore the bootloader firmware was flashed.
 * why? Everything works, no cross-compiler used and still illegal instruction. How much time that takes, see this side note!
 * with quickpkg you shouldn't just be quick, otherwise you'll have file contents that lead to unnecessary errors and troubleshooting: # empty file because --include-config=n when `quickpkg` was used
+
