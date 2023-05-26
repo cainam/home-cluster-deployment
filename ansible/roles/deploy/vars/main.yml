@@ -46,6 +46,22 @@ applications:
         gwPort: 2005
         targetPort: 12005
         svcPort: 1121
+  home:
+    common:
+      git: https://github.com/k8s-at-home/library-charts.git
+      subdir: charts/stable/common
+      branch: common-4.5.2
+      install: false
+    home-assistant:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/home-assistant
+      git_to_local_params: --fix_source=.image.tag=2023.5.3
+      remove_dependencies: postgresql,mariadb,influxdb
+      helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap -set persistence.config.name=home-assistant-configuration
+      network:
+        svcName: home-assistant
+        rewrite: /
+        svcPort: 8123
   tools:
     jaeger:
       git: https://github.com/jaegertracing/helm-charts.git
