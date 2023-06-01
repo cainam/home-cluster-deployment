@@ -11,68 +11,63 @@ function pull_local(){
     ls -l Chart.yaml values.yaml
     [ -f Chart.lock ] && rm Chart.lock
 
+#        set -x
     if [ "${#fix_source[@]}" -ne 0 ];then
       echo "applying fix on source values.yaml"
       for key in "${!fix_source[@]}"; do
-        set -x
         yq -yi  "${key}="'"'"${fix_source[$key]}"'"' values.yaml
-	set +x
       done
     fi
 
+    input=values.yaml
     # manage images
-    # first try, but to keep for later usage: img_infos=$yq -y '(.. | .image? // empty)' test | sed -e 's/: /:"/g' -e 's/$/"/g' | sed -e 's/---"$/---/g' ) #| tr '\n' ' ' | sed -e 's/\s*---\s*/\n/g')
-    yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' values.yaml | while read image_section_org;do
+    yq -r 'path(..|(.repository,.image)? // empty) | [.[]|tostring]|join(".")' "${input}"  | while read match; do
       echo
-      image_section=$(echo "${image_section_org}" | sed -e 's/^/"/' -e 's/$/"/' -e 's/\./"\."/g')
-      section_type=$(yq -r '.'"${image_section}"' | type' values.yaml )
-      # namings pulling an image: <path>/<image>:<tag>
-      if [ "${section_type}" == "string" ]; then # if image is only a string use the value as repository
-        parent=$(yq -r 'path(.'"${image_section}"') | .[:-1] |join(".")' values.yaml) 
-	parent_tag=$(yq -r '.'"${parent}"'.tag? // empty ' values.yaml )
-
-	image=$(yq -r '.'"${image_section}" values.yaml )
-	image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
-        image_itself=${image##*/}
-	## [[ ${image_itself} == *:* && ${parent_tag} == "" ]] || image_itself="${image_itself}:${parent_tag}"
-
-	repo=$(yq -r '.'"${parent}"'.repository? // empty ' values.yaml )
-	[ -z "${repo}" ] && repo=$(yq -r '.'"${parent}"'.hub? // empty ' values.yaml ) # prefer parent.repository over parent.hub
-      else
-        parent_tag=$(yq -r '.'"${image_section}"'.tag? // empty' values.yaml)
-
-        image=$(yq -r '.'"${image_section}"'.repository? // empty' values.yaml)
-	[[ ${image} == "" ]] && image=$(yq -r '.'"${image_section}"'.repo? // empty' values.yaml)
-	image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
-        image_itself=${image##*/}
-	## [[ ${image_itself} == *:* && ${parent_tag} == "" ]] || image_itself="${image_itself}:${parent_tag}"
-
-	repo=
+      section_type=$(yq -r '.'"${match}"' | type' "${input}" )
+      echo "match: ${match} section_type: ${section_type}"
+      if [ "${section_type}" == "string" ]; then #use parent
+        match=$(yq -r 'path(.'"${match}"') | .[:-1] |join(".")' "${input}")
+        section_type=$(yq -r '.'"${match}"' | type' "${input}" )
       fi
-      [[ ${image_itself} == "" ]] && continue
-      fetch_img="${repo}/${image_path}/${image_itself}"
-      [[ ${fetch_img} != *:* && ${parent_tag} != "" ]] && fetch_img="${fetch_img}:${parent_tag}" 
-      [[ ${fetch_img} == *:* ]] && tag="${fetch_img#*:}"
-      fetch_img=$(echo "$fetch_img" | sed -e 's#/\+#/#' -e 's#^/\+##')
-      echo "treat image repository: ${repo} image: ${image_itself} fetch_img: ${fetch_img} image_section=${image_section} section_type=${section_type} (from org:${image_section_org})"
-      #if [ "${repository}" != "null" ]; then
-        for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
-	  image_entry=$(echo "$platform ${rem_reg}$fetch_img /$category/" | sed -e 's#/\+#/#' -e 's#^/\+##' )
-          echo "image_entry: $image_entry from original chart image: ${fetch_img}"
-	  echo "$image_entry" | pull-tag-push.sh
-	  [ $? -ne 9 ] && break
-	done
-	if [ "${section_type}" == "string" ]; then # only if image is a single string
-	  echo "replacing ${image_section}.image by ${category}/${image_itself}"
-          yq -yi '.'"${image_section}"'="'"${category}/${image_itself}"'"' values.yaml
-	else
-          yq -yi '.'"${image_section}"'.repository="'"${category}/${image_itself%:*}"'"' values.yaml
-          yq -yi '.'"${image_section}"'.repo="'"${category}/${image_itself%:*}"'"' values.yaml
-          yq -yi '.'"${image_section}"'.tag="'"${tag}"'"' values.yaml
-	  yq -yi 'del(.'"${image_section}"'.registry)' values.yaml
-	fi
-      #fi
-    done
+      echo "match: ${match} section_type: ${section_type}"
+      # mandatory: unique image
+      image=
+      for att in image repository repo; do
+        result=$(yq -r '.'"${match}"'.'"${att}"' // empty' "${input}")
+        echo "match: ${match}, lookup for ${att}, result:${result}"
+        if [ "${result}" != "" ]; then # something found
+          [ "${image}" != "" ] && echo "found another attribute, conflict, panic, exit!!!!" && exit -1
+          image="${result}"
+          image_attr='.'"${match}"'.'"${att}"
+        fi
+      done
+      image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
+      echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path}"
+      # tag: check attribute, check image => if both contain tag, error, if one contains: keep, if none contains: error
+      tag_attr=$(yq -r '.'"${match}"'.tag // empty' "${input}")
+      tagBy=attr
+      tag_image=
+      [[ ${image} == *:* ]] && tag_image=${image#*:} && tagBy=image
+      [ "${tag_image}" == "" -a "${tag_attr}" == "" ] && echo "no tag provided, panic! exit!" && exit -1
+      [ "${tag_image}" != "" -a "${tag_attr}" != "" ] && echo "image includes tag and additional tag attribute given, panic, exit!!!" && exit -1
+      tag="${tag_attr%%@*}${tag_image%%@*}"
+      fetch_img="${image}"
+      [ "${tagBy}" == "attr" ] && fetch_img="${fetch_img}:${tag}"
+      real_image_only="$(echo "${image}" | xargs basename)"
+
+      echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path} tagBy:${tagBy} tag:${tag} real_image_only: ${real_image_only}"
+      for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
+        image_entry=$(echo "$platform ${rem_reg}$fetch_img /$category/" | sed -e 's#/\+#/#' -e 's#^/\+##' )
+        (echo "$image_entry" | pull-tag-push.sh ) || true
+      done
+      echo "update image informations in chart"
+      yq -yi "${image_attr}=\"${category}/${real_image_only}\"" values.yaml
+      [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' values.yaml 
+      yq -yi 'del(.'"${match}"'.registry)' values.yaml
+      echo "next image, please!"
+    done 
+   # done <<< $(yq -r 'path(..|(.repository,.tag,.image)? // empty) | [.[]|tostring]|join(".")' values.yaml)
+#    set +x
   
     # treat dependencies
     while read name repo version; do 
@@ -81,22 +76,6 @@ function pull_local(){
 	yq -yi 'del(.dependencies[]? | select (.name=="'"${name}"'"))' Chart.yaml
         continue
       fi
-#      echo "resolving dependency: $name $version $repo";
-#      if [ ${version::1} == "~" ]; then 
-#        version=$(echo "${version:1}" | sed -e 's/[0-9]$//');
-#      fi; 
-#      if echo "${version}" | grep -q -e 'X' -e 'x' -e '*'; then
-#        version=$(echo "${version}" | sed -e "s/[Xx*].*$//g");
-#      fi
-#      echo "version updated to $version, next fetching from helm repo: $repo"
-#      curl -L -s $repo/index.yaml | yq -r '.entries."'$name'"[] | select(.version|startswith("'$version'" ) ) | [.version, (.urls|join(","))  ] | @tsv' | sort -n -r  | head -n 1 | while read version url; do
-#        dep_dir=$(mktemp --directory) 
-#        echo "entering $dep_dir and treating dependency with $url"
-#        cd $dep_dir
-#        curl -L -O -s $url
-#        tar xfz $(echo $url | xargs basename)
-#        pull_local || exit $?
-#      done
     done < <(cat Chart.yaml | yq -r -c '(.dependencies[]? | [.name, .repository, .version] |@tsv)')
   
     yq -yi '.dependencies[]?.repository |= "'$helm_url'"' Chart.yaml
