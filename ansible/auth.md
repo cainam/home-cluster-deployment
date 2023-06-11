@@ -49,6 +49,17 @@ curl -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_sec
 also outside the cluster it works:
 curl -k -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token
 
+#### full test with token
+tk=$(curl -s -H "Content-Type: application/x-www-form-urlencoded" -d "client_id=test" -d "username=test" -d "password=test" -d "grant_type=password" -d "scope=openid" -d "client_secret=oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0" -X POST https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token | jq -r .id_token); echo "token: $tk"
+curl -L -i -X GET -H "Authorization: Bearer $tk" https://my-lb.adm13/infopage # success
+curl -L -i -X GET -H "Authorization: Bearer xxx" https://my-lb.adm13/infopage # fail
+curl -L -i -X GET -H "Authorization: Bearer xxx" https://ha.my-lb.adm13 # success, oauth2 is bypassed
+
+
+#### full test as browser client
+ curl -s -H "Content-Type: application/x-www-form-urlencoded" -d "client_id=test" -d "username=test" -d "password=test" -d "grant_type=password" -d "scope=openid" -d "client_secret=oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0" -X POST https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token | jq
+
+
 test in browser: https://192.168.4.100:2005/realms/test/protocol/openid-connect/auth?client_id=test&response_type=code
 env:
     - name: KC_LOG_LEVEL
@@ -84,6 +95,7 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
     - https://napo.io/posts/istio-oidc-authn--authz-with-oauth2-proxy/
     - with ports like https://www.alibabacloud.com/help/en/alibaba-cloud-service-mesh/latest/set-the-authorization-policy-for-tcp-traffic
     - reference: https://istio.io/latest/docs/reference/config/security/authorization-policy/
+    - best!!! https://developer.okta.com/blog/2022/07/14/add-auth-to-any-app-with-oauth2-proxy
   # kubectl get AuthorizationPolicy -n istio-system ext-authz -o yaml
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
@@ -105,24 +117,4 @@ spec:
       istio: gateway
 
 
-  istio configmap: 
-    extensionProviders:
-    - name: "oauth2-proxy"
-      envoyExtAuthzHttp:
-        service: "oauth2-proxy.auth.svc.cluster.local"
-        port: "80" # The default port used by oauth2-proxy.
-      headersToUpstreamOnAllow:
-      - path
-      - x-auth-request-email
-      - x-auth-request-preferred-username
-      headersToDownstreamOnDeny:
-      - content-type
-      - set-cookie
-      includeRequestHeadersInCheck:
-      - authorization
-      - cookie
-      - x-auth-request-groups
-      includeAdditionalHeadersInCheck: # Optional for oauth2-proxy to enforce https
-        X-Auth-Request-Redirect: 'https://%REQ(:authority)%%REQ(:path)%'
-
-
+# subdomains: cookie_domain? whilelist-domain?

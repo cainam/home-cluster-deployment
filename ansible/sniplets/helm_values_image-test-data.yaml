@@ -1,12 +1,13 @@
 # jaeger
 tag: ""
 allInOne:
-  image: jaegertracing/all-in-one
+  image: jaegertracing/all-in-one:b
 xallInOne:
   image: jaegertracing/all-in-one
   tag: 1.2
 schema:
   image: jaegertracing/jaeger-cassandra-schema
+  tag: x
 b:
   a:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.0
@@ -16,15 +17,17 @@ esRollover:
 hotrod:
   image:
     repository: jaegertracing/example-hotrod
+    tag: hr
 
 #istio
 pilot:
   hub: ""
-  tag: ""
+  tag: "1"
   image: pilot
 global:
   proxy:
     image: proxyv2
+    tag: tg
 
 #prometheus
 configmapReload:
@@ -36,12 +39,22 @@ server:
   image:
     repository: quay.io/prometheus/prometheus
     # if not set appVersion field from Chart.yaml is used
-    tag: ""
+    tag: "xxx"
 
 # kiali-operator
 image:
   repo: kiali/kiali-operator
   tag: v1.68.0
 
+# common (home-assistant)
+# -- Image values
+image:
+  # -- Image repository
+  repository: tccr.io/truecharts/whoami
+  # -- Image tag
+  tag: 1.9.0@sha256:ff8dfff3c266af64aa7a6653c0b7f2c51fd6c0608335997af1d334aac3e19798
 
+gluetunImage:
+  repository: tccr.io/truecharts/gluetun
+  tag: v3.33.0@sha256:bb28fa01c89797cfc45fd8d565d0b55054ded2da01a38299db5529d5cc96c284
 

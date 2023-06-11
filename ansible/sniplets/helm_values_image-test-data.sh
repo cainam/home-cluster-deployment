@@ -1,6 +1,46 @@
 #!/bin/bash
 
 input="$1"
+    yq -r 'path(..|(.repository,.image)? // empty) | [.[]|tostring]|join(".")' "${input}"  | while read match; do
+      echo
+      section_type=$(yq -r '.'"${match}"' | type' "${input}" )
+      echo "match: ${match} section_type: ${section_type}"
+      if [ "${section_type}" == "string" ]; then #use parent
+        match=$(yq -r 'path(.'"${match}"') | .[:-1] |join(".")' "${input}")
+        section_type=$(yq -r '.'"${match}"' | type' "${input}" )
+      fi
+      echo "match: ${match} section_type: ${section_type}"
+      # mandatory: unique image
+      image=
+      for att in image repository repo; do
+        result=$(yq -r '.'"${match}"'.'"${att}"' // empty' "${input}")
+	echo "match: ${match}, lookup for ${att}, result:${result}"
+        if [ "${result}" != "" ]; then # something found
+	  [ "${image}" != "" ] && echo "found another attribute, conflict, panic, exit!!!!" && exit -1
+	  image="${result}"
+	  image_attr='.'"${match}"'.'"${att}"
+	fi
+      done
+      image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
+      echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path}"
+      # tag: check attribute, check image => if both contain tag, error, if one contains: keep, if none contains: error
+      tag_attr=$(yq -r '.'"${match}"'.tag // empty' "${input}")
+      tagBy=attr
+      tag_image=
+      [[ ${image} == *:* ]] && tag_image=${image#*:} && tagBy=image
+      [ "${tag_image}" == "" -a "${tag_attr}" == "" ] && echo "no tag provided, panic! exit!" && exit -1
+      fetch_img="${image}"
+      [ "${tagBy}" == "attr" ] && fetch_img="${fetch_img}:${tag}"
+      real_image_only="$(echo "${fetch_img}"  | cut -d : -f 1 | xargs basename)"
+
+      echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path} tagBy:${tagBy} tag:${tag} real_image_only: ${real_image_only}"
+
+
+
+    done
+
+
+exit
 
     yq -r 'path(..|.image? // empty) | [.[]|tostring]|join(".")' "${input}"  | while read image_section_org;do
           echo
