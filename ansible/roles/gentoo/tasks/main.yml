@@ -218,6 +218,7 @@
     - lighttpd
     - syslog-ng
     - lighttpd
+    - cronie
     - wait_for_internet
   ignore_errors: yes
 

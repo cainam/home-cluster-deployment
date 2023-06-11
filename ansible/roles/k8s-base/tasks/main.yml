@@ -28,8 +28,13 @@
 - debug: 
     msg: update
   when: current_k8s_version.stdout is version( k8s_version, '<')
-- name: update k8s
-  shell: "kubeadm upgrade apply --yes {{ k8s_version }}"
+- block:
+  - name: update k8s without etcd
+    shell: "KUBECONFIG=/etc/kubernetes/admin.conf kubeadm upgrade apply --etcd-upgrade=false --yes {{ k8s_version }}"
+    throttle: 1
+  - name: update etcd
+    shell: "KUBECONFIG=/etc/kubernetes/admin.conf kubeadm upgrade apply --etcd-upgrade=true --yes {{ k8s_version }}"
+    throttle: 1
   when: current_k8s_version.stdout is version( k8s_version, '<')
 
 - name: ca template

@@ -56,6 +56,17 @@ applications:
       tcbranch: common-12.10.4
       tcgit_to_local_params: --fix_source=.wireguardImage.repository=no_needed --fix_source=.kubectlImage.repository=rancher/kubectl
       install: false
+    deconz:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/deconz
+      affinity: k8s-2-int.adm13
+      helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi
+      git_to_local_params: --fix_source=.image.tag=2.21.02 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=1
+      storage:
+      - name: deconz-config
+        size: 5Mi
+      network:
+        svcPort: 80
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
@@ -63,7 +74,7 @@ applications:
       tcsubdir: charts/stable/home-assistant
       tcbranch: home-assistant-19.0.25
       tcggit_to_local_params: --fix_source=.image.tag=2023.5.3 --fix_source=.kubectlImage.repository=rancher/kubectl -fix_source=.kubectlImage.tag=v1.26.5
-      tcgit_to_local_params: --fix_source=.image.tag=2023.5.3 
+      git_to_local_params: --fix_source=.image.tag=2023.5.3 
       remove_dependencies: postgresql,mariadb,influxdb
       cm_helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap --set persistence.config.name=home-assistant-configuration --set configmap.config.enabled=true
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
@@ -72,8 +83,6 @@ applications:
       - name: home-assistant-config
         size: 100Mi
       network:
-        svcName: home-assistant
-        rewrite: /
         svcPort: 8123
         subdomain: ha
   tools:

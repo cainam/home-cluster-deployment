@@ -35,7 +35,15 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
       url: http://prometheus-server.tools/prometheus/
 
 
+home-assistant:
+  - not possible to change webroot, so subdomain used instead
+
 TODO: 
-- applications as url prefix of my-lb.adm13
-- applications as subdomain of my-lb.adm13
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
+- add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
+- VPN wireguard (Fritzbox + Android)
+- Kiali shows: "istio-ingressgateway not found", but 
+data:
+  mesh: |-
+    ingressService: gateway 
+  didn't work as expected but stopped istio flows completely

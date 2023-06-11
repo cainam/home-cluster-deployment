@@ -16,7 +16,7 @@
     msg: "images to download: {{ required_images.stdout_lines }}"
 
 - name: check if container registry is available
-  shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
+  shell: curl -s -X GET https://{{ my_registry }}/v2/_catalog | jq 'has("repositories")'
   register: check_registry
   
 - name: restart registry
