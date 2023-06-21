@@ -4,9 +4,11 @@ helm_repo_base: https://helm.adm13:9443/
 my_registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
-load_balancer_ip: 192.168.4.100
-local_ca_file: /data/mine/certs/myCA.pem
+cert_path: /data/mine/certs
+#local_ca_file: /data/mine/certs/myCA.pem
+local_ca_file: "{{ cert_path }}/myCA.pem"
 local_ca: "{{ lookup('file', local_ca_file) }}"
+base_domain: my-lb.adm13
 
 volumes_to_exempt:
   - deconz
@@ -17,4 +19,31 @@ volumes_to_exempt:
   - meinKram
   - registry
   - startseite
+
+default_gateway: gateway
+gateways:
+  gateway:
+    domain: "{{ base_domain }}"
+    external_ip: 192.168.4.100
+    virtualservice_inject:
+      http:
+      - name: dummy
+        directResponse:
+          status: 598
+        match:
+        - uri:
+            prefix: /dummy
+
+  ha-gw:
+    domain: "ha.{{ base_domain }}"
+    external_ip: 192.168.4.101
+    virtualservice_inject:
+      http:
+      - name: dummy
+        directResponse:
+          status: 592
+        match:
+        - uri:
+            prefix: /dummy
+
 

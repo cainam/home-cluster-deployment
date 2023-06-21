@@ -1,6 +1,28 @@
-- name: tls certificates for ingress gateway
-  shell: |
-    kubectl get secret -n istio-ingress istio-ingress 2> /dev/null  >> /dev/null || kubectl create -n istio-ingress secret tls istio-ingress --key=/data/mine/certs/my-lb.adm13.key --cert=/data/mine/certs/my-lb.adm13.crt
+- name: determine namespaces of gateways
+  shell: kubectl get pods --selector=istio="{{ item.key }}" -A -o jsonpath='{.items[*].metadata.namespace}'
+  register: ns_gw
+  failed_when: ns_gw.stdout == ""
+  loop: "{{ gateways | dict2items }}"
+
+- debug: 
+    msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
+  loop: "{{ ns_gw.results  }}"
+  when: "'debug' in ansible_run_tags"
+
+- name: extend gateways by discovered namespaces
+  set_fact:
+    gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
+  loop: "{{ ns_gw.results  }}"
+
+- debug: 
+    msg: "gateways: {{ gateways}}"
+  when: "'debug' in ansible_run_tags"
+
+- name: .{{ name_prefix }} gateways
+  include_tasks: post_gateway.yml
+  loop: "{{ gateways | dict2items }}"
+  loop_control:
+    loop_var: gateway
 
 - name: list volumes to keep
   debug:
@@ -51,8 +73,4 @@
          - stdout_lines
 
   when: "'purge_volumes' in ansible_run_tags"
-
-#- name: configure external IP of load-balancer 
-#  shell: |
-#    kubectl get svc -n istio-ingress gateway 2>&1 | cat > /dev/null && kubectl patch svc gateway --namespace istio-ingress --patch '{"spec": { "loadBalancerIP": "{{ load_balander_ip }}" }}'
 

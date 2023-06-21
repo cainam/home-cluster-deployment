@@ -38,9 +38,15 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 home-assistant:
   - not possible to change webroot, so subdomain used instead
 
+Networking:
+- Load-balancer <=> Gateway: one to one relationship
+- Gateway <=> VirtualService: one to one relationship
+- VirtualService <=> Application: one to many relationship
+
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
+- error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - VPN wireguard (Fritzbox + Android)
 - Kiali shows: "istio-ingressgateway not found", but 
 data:

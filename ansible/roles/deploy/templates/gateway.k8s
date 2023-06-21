@@ -15,6 +15,6 @@ spec:
       number: {{target_port}}
       protocol: HTTPS
     tls:
-      credentialName: istio-ingress
+      credentialName: {{name}}
       mode: SIMPLE
 
