@@ -1,6 +1,6 @@
-FROM docker.io/library/debian:11.5-slim
+FROM docker.io/library/debian:11.7-slim
 
-ENV KEYCLOAK_VERSION 20.0.2
+ENV KEYCLOAK_VERSION 21.1.1
 ENV LANG en_US.UTF-8
 
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
