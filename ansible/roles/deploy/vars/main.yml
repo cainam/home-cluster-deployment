@@ -35,7 +35,7 @@ applications:
         svcPort: 80
         prefix: /oauth2
     keycloak:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/charts/k8s_at_home.git
       subdir: keycloak
       helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200
       storage:
