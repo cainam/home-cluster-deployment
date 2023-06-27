@@ -1,0 +1,25 @@
+- name: set app fact
+  set_fact:
+    vs_title: "gateway:{{ gateway.key }} namespace:{{ app_ns.key }} "
+
+- name: dump namespace section before VirtualService application configuration
+  debug:
+    msg: "namespace: {{ app_ns }}"
+  when: "'debug' in ansible_run_tags"
+
+- name: .{{ vs_title }} - apply VirtualService application configuration
+  shell: |
+    echo  "update gateway {{ gateway.key }} in namespace {{ gateway.value.namespace }} with application {{ app_vs.key }} in namespace {{ app_ns.key }}"
+    kubectl get -o yaml vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" | yq -y 'del(.spec.http[]? | select(.name=="'"{{ app_vs.key }}"'"))' | yq -y '.spec.http += [{"name":"{{ app_vs.key }}","rewrite":{"uri":"{{ app_vs.value.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ app_vs.value.network.svcName | default(app_vs.key) }}.{{ app_ns.key }}.svc.cluster.local"{% if app_vs.value.network.svcPort is defined %},"port":{"number":{{ app_vs.value.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ app_vs.value.network.prefix | default("/" + app_vs.key) }}"}}] {% if app_vs.value.network.addition is defined %},{{ app_vs.value.network.addition }} {% endif %} }]' | kubectl apply -f -
+  register: vs_setup
+  loop: "{{ app_ns.value | dict2items }}"
+  loop_control:
+   loop_var: app_vs
+  
+- name: output of VirtualService application configuration
+  debug:
+    msg: "{{ vs_setup }}"
+#    msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
+#  loop: "{{ vs_setup.results | dict2items }}"
+  when: "'debug' in ansible_run_tags"
+
