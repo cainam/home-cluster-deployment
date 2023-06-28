@@ -17,7 +17,7 @@ images:
   - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
-    branch: 20.0.2
+    branch: 21.1.1
     section: /auth/
   - name: mypython
     source: local
