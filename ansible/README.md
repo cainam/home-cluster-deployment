@@ -38,6 +38,10 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 
 home-assistant:
   - not possible to change webroot, so subdomain used instead
+  - only managed to get it manually from a running instance
+    # llt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1ZTY2MmM4OTJhNzY0OWZjYTQwYzRmMTY4OTJiMzIyZCIsImlhdCI6MTY4ODIzMzYxNCwiZXhwIjoyMDAzNTkzNjE0fQ.NZz3wXYqgaZwQunqco28Sm0NMDDF3Cwy7VJGMcoldkg"
+    # curl -s -X GET  -H "Authorization: Bearer $llt" https://ha.my-lb.adm13/api/services | jq .[].domain -r
+  - usage: 
   - "long_lived_access_token":
     1. remove from config, restart, add again, it works again ... seems like it can be automated
     2. add token manually again
