@@ -37,7 +37,7 @@ applications:
     keycloak:
       git: https://github.com/cainam/charts/k8s_at_home.git
       subdir: keycloak
-      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200
+      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=21.1.1
       storage:
       - name: keycloak
         size: 1Gi

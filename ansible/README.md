@@ -25,6 +25,7 @@ etcd:
 # alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
 # etcdctl endpoint status
 # etcdctl endpoint health
+# etcdctl defrag
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -37,6 +38,11 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 
 home-assistant:
   - not possible to change webroot, so subdomain used instead
+  - "long_lived_access_token":
+    1. remove from config, restart, add again, it works again ... seems like it can be automated
+    2. add token manually again
+    3. if ok, add automatically
+    4. use it!
 
 Networking:
 - Load-balancer <=> Gateway: one to one relationship

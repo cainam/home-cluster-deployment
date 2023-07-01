@@ -220,6 +220,7 @@
     - lighttpd
     - cronie
     - wait_for_internet
+    - set_cpu_performance
   ignore_errors: yes
 
 - name: gluster

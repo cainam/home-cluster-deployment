@@ -38,11 +38,15 @@ case "$atype" in
   ;;
 esac
 
-read i n < <(kubectl get $atype -A -l app.kubernetes.io/name=$search --no-headers=true  -o jsonpath="{..metadata.name} {..metadata.namespace}")
+read i n < <(
+for label in app app.kubernetes.io/name; do
+kubectl get $atype -A -l $label=$search --no-headers=true  -o jsonpath="{..metadata.name} {..metadata.namespace}" | grep -v "^ $" 
+done
+)
 
 if (echo $action | grep -q -e ^exec -e ^logs); then
   atype=
 fi
-
+echo "namespace: $n item: $i"
 kubectl $action $atype -n $n $i $add
 
