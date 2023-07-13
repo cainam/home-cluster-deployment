@@ -39,7 +39,7 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 home-assistant:
   - not possible to change webroot, so subdomain used instead
   - only managed to get it manually from a running instance
-    # llt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1ZTY2MmM4OTJhNzY0OWZjYTQwYzRmMTY4OTJiMzIyZCIsImlhdCI6MTY4ODIzMzYxNCwiZXhwIjoyMDAzNTkzNjE0fQ.NZz3wXYqgaZwQunqco28Sm0NMDDF3Cwy7VJGMcoldkg"
+    # llt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3NDNlOWEzNDQ4ZjQ0ODEzYjQ5ZmQ3N2M3ZTFmODQ3YiIsImlhdCI6MTY4ODI4MjA2NiwiZXhwIjoyMDAzNjQyMDY2fQ.vdlnHJWNoIaXaxbf3UF1sIxgEi1rOMbAdAh2kctiQt0"
     # curl -s -X GET  -H "Authorization: Bearer $llt" https://ha.my-lb.adm13/api/services | jq .[].domain -r
   - usage: 
   - "long_lived_access_token":
@@ -63,3 +63,5 @@ data:
   mesh: |-
     ingressService: gateway 
   didn't work as expected but stopped istio flows completely
+  => solution probably : https://www.lisenet.com/2023/kiali-does-not-see-istio-ingressgateway-installed-in-separate-kubernetes-namespace/
+

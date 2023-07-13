@@ -56,6 +56,6 @@
         persistentVolumeReclaimPolicy: Retain
         volumeMode: Filesystem
         local:
-          path: "/shared/{{ storage.name }}/"
+          path: "{{ shared_mounts }}/{{ storage.name }}/"
       EOF
   when: outside_k8s is not defined

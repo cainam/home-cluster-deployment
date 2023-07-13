@@ -50,15 +50,16 @@ applications:
       git: https://github.com/k8s-at-home/library-charts.git
       subdir: charts/stable/common
       branch: common-4.5.2
-      tcgit: https://github.com/truecharts/library-charts.git
-      tcsubdir: library/common
-      tcbranch: common-12.10.4
-      tcgit_to_local_params: --fix_source=.wireguardImage.repository=no_needed --fix_source=.kubectlImage.repository=rancher/kubectl
       install: false
     gateway:
       git: https://github.com/istio/istio.git
       subdir: manifests/charts/gateway
       helm_options: --set 'service.externalIPs={"192.168.4.101"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=ha-gw
+    deconz-gw:
+      git: https://github.com/istio/istio.git
+      subdir: manifests/charts/gateway
+      helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
+      chart: gateway
     deconz:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz
@@ -70,21 +71,19 @@ applications:
         size: 5Mi
       network:
         svcPort: 80
+        prefix: /
+        gateway: deconz-gw
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      tcgit: https://github.com/truecharts/charts.git
-      tcsubdir: charts/stable/home-assistant
-      tcbranch: home-assistant-19.0.25
-      tcggit_to_local_params: --fix_source=.image.tag=2023.5.3 --fix_source=.kubectlImage.repository=rancher/kubectl -fix_source=.kubectlImage.tag=v1.26.5
       git_to_local_params: --fix_source=.image.tag=2023.5.3 
       remove_dependencies: postgresql,mariadb,influxdb
       cm_helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap --set persistence.config.name=home-assistant-configuration --set configmap.config.enabled=true
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
-      tchelm_options: --reset-values --set persistence.config.enabled=true --set persistence.config.size=100Mi --set cnpg.main.enabled=false --set cnpg.main.creds.std=nix 
       storage:
       - name: home-assistant-config
         size: 100Mi
+        config: true
       network:
         prefix: /
         svcPort: 8123

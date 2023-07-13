@@ -45,7 +45,7 @@
 - name: .{{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
-     helm upgrade --install -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.key }} {{ applications[namespace.key][application.key].helm_options | default('') }}
+     helm upgrade --install --reset-values -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} {{ applications[namespace.key][application.key].helm_options | default('') }}
   register: out
   when: "application.value.install | default(true)"
   
@@ -54,6 +54,15 @@
     msg: "output: item: {{ item }}"
   loop: "{{ out  | dict2items }}"
 
+- block:
+  - name: .{{ name_prefix }} install storage content
+    include_tasks: storage_content.yml
+    when: storage.config is defined and storage.config
+    with_items: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+  when: application.value.storage is defined
+    
 - name: record application with gateway for VirtualService
   set_fact:
     # gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
@@ -63,19 +72,6 @@
 - name: .{{ name_prefix }} debug gateways
   debug:
     msg: "gateways: {{ gateways}}"
-
-
-#- name: .{{ name_prefix }} => configure entry in main VirtualService
-#  shell: |
-#    kubectl get -o yaml vs -n istio-ingress main | yq -y 'del(.spec.http[]? | select(.name=="'"{{ application.key }}"'"))' | yq -y '.spec.http += [{"name":"{{ application.key }}","rewrite":{"uri":"{{ application.value.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ application.value.network.svcName | default(application.key) }}.{{ namespace.key }}.svc.cluster.local"{% if application.value.network.svcPort is defined %},"port":{"number":{{ application.value.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ application.value.network.prefix | default("/" + application.key) }}"}}] {% if application.value.network.addition is defined %},{{ application.value.network.addition }} {% endif %} }]' | kubectl apply -f -
-#  when: application.value.network is defined and application.value.network.subdomain is not defined and (application.value.install | default(true))
-
-#- block:
-#    - name: .{{ name_prefix }} => configure VirtualService for subdomain
-#      shell: |
-#        cmd=replace; kubectl get vs -n {{ namespace.key }} {{ application.key }} 2>> /dev/null >> /dev/null || cmd=apply
-#        echo -e "apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: {{ application.key }}\n  namespace: {{ namespace.key }}\nspec:\n  gateways:\n  - {{ namespace.key }}/{{ application.key }}\n  hosts:\n  - '{{ application.value.network.subdomain }}.my-lb.adm13'\n  http:\n  - directResponse:\n      status: 599\n    match:\n    - uri:\n        prefix: /dummy\n    name: dummy\n  - match:\n    - uri:\n        prefix: /\n    name: {{ application.key }}\n    rewrite:\n      uri: {{ application.value.network.rewrite | default("/") }}\n    route:\n    - destination:\n        host: {{ application.value.network.svcName | default(application.key) }}.{{ namespace.key }}.svc.cluster.local\n        port:\n          number: {{ application.value.network.svcPort }}" | kubectl ${cmd} -f -
-#  when: application.value.network.subdomain is defined and (application.value.install | default(true))
 
 - block:
   - name: .{{ name_prefix }} => affinity - label node
