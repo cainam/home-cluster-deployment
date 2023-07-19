@@ -46,7 +46,13 @@ home-assistant:
     1. remove from config, restart, add again, it works again ... seems like it can be automated
     2. add token manually again
     3. if ok, add automatically
-    4. use it!
+    4. use it! => yeah, works, but no straight forward automation, at least using copy of manual config can be reused for full automation
+
+  - install fusion solar => add HACS:
+    - user profile: extended modus
+  - in HACS: install FusionSolar, configure with Kiosk URL from Huawei
+  - Settings -> Energy Dashboard
+
 
 Networking:
 - Load-balancer <=> Gateway: one to one relationship
@@ -58,6 +64,7 @@ TODO:
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - VPN wireguard (Fritzbox + Android)
+- rename git repo
 - Kiali shows: "istio-ingressgateway not found", but 
 data:
   mesh: |-

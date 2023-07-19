@@ -76,7 +76,7 @@ applications:
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag=2023.5.3 
+      git_to_local_params: --fix_source=.image.tag=2023.7.2
       remove_dependencies: postgresql,mariadb,influxdb
       cm_helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap --set persistence.config.name=home-assistant-configuration --set configmap.config.enabled=true
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
@@ -107,16 +107,30 @@ applications:
         size: 5Mi
       network:
         xsvcPort: 1111
-    kiali-operator:
+    kiali-server:
       git: https://github.com/kiali/helm-charts.git
-      subdir: kiali-operator 
-      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+      subdir: kiali-server
+      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag=v1.71.0 --fix_source=.deployment.version_label=v1.71.0 --fix_source=.deployment.image_version=v1.71.0
       network:
         svcPort: 20001
         svcName: kiali
         prefix: /kiali
         rewrite: /kiali
-      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
+      #helm_options:  --set auth.strategy=anonymous --set istio_namespace=istio-system --set external_services.prometheus.url="http://prometheus-server.tools/" --set external_services.prometheus.auth.insecure_skip_verify=true  --set external_services.tracing.in_cluster_url=http://jaeger-query.tools:16685/jaeger --set external_services.tracing.enabled=true --set external_services.tracing.url=https://my-lb.adm13/jaeger --set external_services.istio.root_namespace=istio-system --set external_services.istio.component_status.components
+      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system  {% raw %} {% if applications['tools']['kiali']['files']['config']['tempfile'] is defined %}  --values {{ applications['tools']['kiali']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      files:
+        config:
+          file: kiali-config.yaml
+#    kiali-operator:
+##      git: https://github.com/kiali/helm-charts.git
+      subdir: kiali-operator 
+#      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+#      network:
+#        svcPort: 20001
+#        svcName: kiali
+#        prefix: /kiali
+#        rewrite: /kiali
+#      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       branch: v2.7.0
