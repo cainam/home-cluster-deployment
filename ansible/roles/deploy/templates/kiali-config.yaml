@@ -1,5 +1,3 @@
-external_services.prometheus.url="http://prometheus-server.tools/" --set external_services.prometheus.auth.insecure_skip_verify=true  --set external_services.tracing.in_cluster_url=http://jaeger-query.tools:16685/jaeger --set external_services.tracing.enabled=true --set external_services.tracing.url=https://my-lb.adm13/jaeger --set external_services.istio.root_namespace=istio-system --set external_services.istio.component_status.components
-
 external_services:
   prometheus:
     url: http://prometheus-server.tools/

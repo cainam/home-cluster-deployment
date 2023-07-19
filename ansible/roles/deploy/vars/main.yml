@@ -117,13 +117,13 @@ applications:
         prefix: /kiali
         rewrite: /kiali
       #helm_options:  --set auth.strategy=anonymous --set istio_namespace=istio-system --set external_services.prometheus.url="http://prometheus-server.tools/" --set external_services.prometheus.auth.insecure_skip_verify=true  --set external_services.tracing.in_cluster_url=http://jaeger-query.tools:16685/jaeger --set external_services.tracing.enabled=true --set external_services.tracing.url=https://my-lb.adm13/jaeger --set external_services.istio.root_namespace=istio-system --set external_services.istio.component_status.components
-      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system  {% raw %} {% if applications['tools']['kiali']['files']['config']['tempfile'] is defined %}  --values {{ applications['tools']['kiali']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system  {% raw %} {% if applications['tools']['kiali-server']['files']['config']['tempfile'] is defined %}  --values {{ applications['tools']['kiali-server']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
       files:
         config:
           file: kiali-config.yaml
 #    kiali-operator:
-##      git: https://github.com/kiali/helm-charts.git
-      subdir: kiali-operator 
+#      git: https://github.com/kiali/helm-charts.git
+#      subdir: kiali-operator 
 #      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
 #      network:
 #        svcPort: 20001
