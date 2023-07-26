@@ -3,25 +3,26 @@ applications:
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
-      branch: 1.17.3
+      branch: 1.18.1
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
-      branch: 1.17.3
+      branch: 1.18.1
       subdir: manifests/charts/istio-control/istio-discovery
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.17.3 --fix_source=.global.proxy.image=istio/proxyv2:1.17.3 --fix_source=.global.proxy_init.image=istio/proxyv2:1.17.3
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.18.1 --fix_source=.global.proxy.image=istio/proxyv2:1.18.1 --fix_source=.global.proxy_init.image=istio/proxyv2:1.18.1
       files:
         config:
           file: istiod-mesh.yaml
     auth-policy:
       git: https://github.com/cainam/k8s_at_home.git
-      subdir: auth-policy
+      subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
   istio-ingress:
     gateway:
       git: https://github.com/istio/istio.git
       subdir: manifests/charts/gateway
+      branch: 1.18.1
       helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
   auth:
     oauth2-proxy:
@@ -54,6 +55,7 @@ applications:
     gateway:
       git: https://github.com/istio/istio.git
       subdir: manifests/charts/gateway
+      branch: 1.18.1
       helm_options: --set 'service.externalIPs={"192.168.4.101"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=ha-gw
     deconz-gw:
       git: https://github.com/istio/istio.git
@@ -101,7 +103,7 @@ applications:
       git_to_local_params: --fix_source=.allInOne.tag=1.45.0 --fix_source=.schema.image= --fix_source=.ingester.image= --fix_source=.agent.image=  --fix_source=.collector.image= --fix_source=.query.oAuthSidecar.image= --fix_source=.query.image= --fix_source=.spark.image= --fix_source=.esIndexCleaner.image= --fix_source=.esRollover.image= --fix_source=.esLookback.image= --fix_source=.hotrod.image.repository=
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
-      subdir: infopage
+      subdir: charts/infopage
       storage:
       - name: infopage
         size: 5Mi
@@ -134,8 +136,10 @@ applications:
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       branch: v2.7.0
-      subdir: charts/helm-chart/kubernetes-dashboard
+      xsubdir: charts/helm-chart/kubernetes-dashboard
+      subdir: aio/deploy/helm-chart/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
+      remove_dependencies: metrics-server
       network:
         prefix: /kubernetes-dashboard/
         svcPort: 9090
@@ -143,27 +147,33 @@ applications:
     kube-state-metrics:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/kube-state-metrics
-      branch: kube-state-metrics-4.30.0
-      git_to_local_params: --fix_source=.image.tag=v2.8.0
+      xbranch: kube-state-metrics-5.8.2
+      branch: prometheus-23.1.0
+      git_to_local_params: --fix_source=.image.tag=v2.9.2
+      #git_to_local_params: --fix_source=.autosharding.enabled=false
       install: false
     prometheus-node-exporter:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus-node-exporter
-      branch: prometheus-node-exporter-4.8.1
-      git_to_local_params: --fix_source=.image.tag=v1.5.0
+      xbranch: prometheus-node-exporter-4.18.1
+      branch: prometheus-23.1.0
+      git_to_local_params: --fix_source=.image.tag=v1.6.1
       install: false
     prometheus-pushgateway:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus-pushgateway
-      branch: prometheus-pushgateway-2.1.6
-      git_to_local_params: --fix_source=.image.tag=v1.5.1
+      xbranch: prometheus-pushgateway-2.4.0
+      branch: prometheus-23.1.0
+      git_to_local_params: --fix_source=.image.tag=v1.6.0
       install: false
     prometheus:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus
+      branch: prometheus-23.1.0
+      xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
       helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false
       remove_dependencies: alertmanager
-      git_to_local_params: --fix_source=.server.image.tag=v2.44.0
+      git_to_local_params: --fix_source=.server.image.tag=v2.45.0
       storage: 
       - name: storage-prometheus-alertmanager-0
         size: 2Gi

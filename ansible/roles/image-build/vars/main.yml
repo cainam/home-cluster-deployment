@@ -26,4 +26,5 @@ images:
     build_args: --from docker.io/python:3.10.5-slim
   - name: helm
     source: docker.io/alpine/helm
-    branch: 3.11.3
+    branch: 3.12.2
+    section: /

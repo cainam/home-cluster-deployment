@@ -32,38 +32,47 @@ function pull_local(){
       echo "match: ${match} section_type: ${section_type}"
       # mandatory: unique image
       image=
-      for att in image repository repo; do
+      image_attr=
+      unset image_registry # used as criteria to set image_registry
+      for att in image repository repo registry; do
         result=$(yq -r '.'"${match}"'.'"${att}"' // empty' "${input}")
         echo "match: ${match}, lookup for ${att}, result:${result}"
         if [ "${result}" != "" ]; then # something found
+          if [ "${att}" = "registry" ]; then 
+	    image_registry="${result}"
+	    continue
+	  fi
           [ "${image}" != "" ] && echo "found another attribute, conflict, panic, exit!!!!" && exit -1
           image="${result}"
           image_attr='.'"${match}"'.'"${att}"
         fi
       done
-      image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
+      [ "${image}" = "" ] && echo "no image, nothing to do" && continue
+      #image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
+      image_path= && [[ ${image} == */* ]] && image_path="${image%/*}"
       echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path}"
       # tag: check attribute, check image => if both contain tag, error, if one contains: keep, if none contains: error
       tag_attr=$(yq -r '.'"${match}"'.tag // empty' "${input}")
       tagBy=attr
       tag_image=
       [[ ${image} == *:* ]] && tag_image=${image#*:} && tagBy=image
-      [ "${tag_image}" == "" -a "${tag_attr}" == "" ] && echo "no tag provided, panic! exit!" && exit -1
+      [ "${tag_image}" == "" -a "${tag_attr}" == "" ] && echo "no tag provided, so ${match} will be ignored" && continue
       [ "${tag_image}" != "" -a "${tag_attr}" != "" ] && echo "image includes tag and additional tag attribute given, panic, exit!!!" && exit -1
       tag="${tag_attr%%@*}${tag_image%%@*}"
       fetch_img="${image}"
       [ "${tagBy}" == "attr" ] && fetch_img="${fetch_img}:${tag}"
-      real_image_only="$(echo "${image}" | xargs basename)"
+      #real_image_only="$(echo "${image}" | xargs basename)"
+      real_image_only="${image}" && [[ ${image} == */* ]] && real_image_only="${image##*/}" # real_image_only, without path
 
       echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path} tagBy:${tagBy} tag:${tag} real_image_only: ${real_image_only}"
-      for rem_reg in "" docker.io/ quay.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
+      for rem_reg in "" docker.io/ quay.io/ registry.k8s.io/; do # try different registries directly as /etc/containerd/registries.conf should have deactivated them
         image_entry=$(echo "$platform ${rem_reg}$fetch_img /$category/" | sed -e 's#/\+#/#' -e 's#^/\+##' )
         (echo "$image_entry" | pull-tag-push.sh ) || true
       done
       echo "update image informations in chart"
-      yq -yi "${image_attr}=\"${category}/${real_image_only}\"" values.yaml
-      [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' values.yaml 
-      yq -yi 'del(.'"${match}"'.registry)' values.yaml
+      yq -yi "${image_attr}=\"${category}/${real_image_only}\"" "${input}"
+      [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' "${input}"
+      [[ ! -v ${image_registry} ]] && echo "replacing by default at ${match}.registry=${registry}" && yq -yi '.'"${match}"'.registry="'${registry}'"' "${input}" # replaces the following to ensure the value is empty instead of deleted: yq -yi 'del(.'"${match}"'.registry)' values.yaml
       echo "next image, please!"
     done 
    # done <<< $(yq -r 'path(..|(.repository,.tag,.image)? // empty) | [.[]|tostring]|join(".")' values.yaml)
@@ -93,6 +102,8 @@ function pull_local(){
   done
 
 }
+
+set -e
 
 platform=""
 git_source=""
@@ -162,4 +173,7 @@ remove_deps=$(echo "$remove_deps" | sed -e 's/,/\n/g')
 
 git-subdir-checkout.sh "${git_source}" "${git_subdir}" "${git_branch}" 2>&1 | sed -e 's/^/git-subdir-checkout.sh: /g'
 cd */$git_subdir
-pull_local || exit $?
+pull_local #|| exit $?
+x=$?
+echo "code:$x"
+exit $x

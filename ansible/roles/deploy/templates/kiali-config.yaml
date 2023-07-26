@@ -1,6 +1,6 @@
 external_services:
   prometheus:
-    url: http://prometheus-server.tools/
+    url: http://prometheus-server.tools/prometheus
     auth:
       insecure_skip_verify: true
   tracing:

@@ -29,12 +29,18 @@
     msg: update
   when: current_k8s_version.stdout is version( k8s_version, '<')
 - block:
+  - name: scale down application deployments
+    shell: |
+      for ns in $(kubectl get ns  | grep -v -e ^NAME -e ^kube | awk '{print $1}'); do echo "namespace: $ns";for x in $(kubectl get deploy -n $ns | grep -v NAME | awk '{print $1}'); do kubectl scale --replicas=0 deploy -n $ns $x ; done; done
   - name: update k8s without etcd
     shell: "KUBECONFIG=/etc/kubernetes/admin.conf kubeadm upgrade apply --etcd-upgrade=false --yes {{ k8s_version }}"
     throttle: 1
   - name: update etcd
     shell: "KUBECONFIG=/etc/kubernetes/admin.conf kubeadm upgrade apply --etcd-upgrade=true --yes {{ k8s_version }}"
     throttle: 1
+  - name: scale up application deployments
+    shell: |
+      for ns in $(kubectl get ns  | grep -v -e ^NAME -e ^kube | awk '{print $1}'); do echo "namespace: $ns";for x in $(kubectl get deploy -n $ns | grep -v NAME | awk '{print $1}'); do kubectl scale --replicas=1 deploy -n $ns $x ; done; done
   when: current_k8s_version.stdout is version( k8s_version, '<')
 
 - name: ca template

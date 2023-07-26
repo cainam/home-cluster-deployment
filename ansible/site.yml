@@ -24,7 +24,7 @@
       tags:
         - never
         - image-build
-    - role: k8s-base
+    - role: k8s
       tags: 
         - never
         - k8s
