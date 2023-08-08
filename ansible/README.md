@@ -53,6 +53,8 @@ home-assistant:
   - in HACS: install FusionSolar, configure with Kiosk URL from Huawei
   - Settings -> Energy Dashboard
 
+VPN wireguard (Fritzbox + Android):
+  - create FritzBox 
 
 Networking:
 - Load-balancer <=> Gateway: one to one relationship
