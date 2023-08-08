@@ -52,6 +52,16 @@
   shell: |
     kubectl apply -f /tmp/myca
 
-- name: additional DNS entries
-  shell: |
-    kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 my-lb.adm13\n\1    fallthrough\n\1}/g' | kubectl replace -f -
+- block:
+  - name: coredns configmap template
+    template:
+      src: coredns.cm.yaml
+      dest: /tmp/coredns.cm.yaml
+    #with_items: "{{ gateways }}"
+
+  - name: additional DNS entries
+    shell: |
+      # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 my-lb.adm13\n\1    fallthrough\n\1}/g' | kubectl replace -f -
+      kubectl replace -f /tmp/coredns.cm.yaml
+  run_once: true
+     
