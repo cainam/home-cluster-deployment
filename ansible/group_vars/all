@@ -21,6 +21,8 @@ volumes_to_exempt:
   - startseite
 
 default_gateway: gateway
+
+external_coredns_ip: 192.168.4.111
 gateways:
   gateway:
     domain: "{{ base_domain }}"
