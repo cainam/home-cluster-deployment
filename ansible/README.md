@@ -54,7 +54,9 @@ home-assistant:
   - Settings -> Energy Dashboard
 
 VPN wireguard (Fritzbox + Android):
-  - create FritzBox 
+  - tunnel created
+  - external coredns service interface used as DNS in wireguard
+
 
 Networking:
 - Load-balancer <=> Gateway: one to one relationship
