@@ -45,12 +45,12 @@ image:
 ## Init containers parameters:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
-volumePermissions:
-  enabled: false
-  image:
-    registry: docker.io
-    repository: bitnami/minideb
-    tag: buster
+#volumePermissions:
+#  enabled: false
+#  image:
+#    registry: docker.io
+#    repository: bitnami/minideb
+#    tag: buster
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -71,8 +71,8 @@ volumePermissions:
   ## You may want to use this volumePermissions.securityContext.runAsUser="auto" in combination with
   ## pod securityContext.enabled=false and shmVolume.chmod.enabled=false
   ##
-  securityContext:
-    runAsUser: 0
+#  securityContext:
+#    runAsUser: 0
 
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
