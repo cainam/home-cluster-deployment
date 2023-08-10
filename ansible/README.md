@@ -37,6 +37,7 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 
 
 home-assistant:
+  - DB, mariaDB to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
   - not possible to change webroot, so subdomain used instead
   - only managed to get it manually from a running instance
     # llt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3NDNlOWEzNDQ4ZjQ0ODEzYjQ5ZmQ3N2M3ZTFmODQ3YiIsImlhdCI6MTY4ODI4MjA2NiwiZXhwIjoyMDAzNjQyMDY2fQ.vdlnHJWNoIaXaxbf3UF1sIxgEi1rOMbAdAh2kctiQt0"
@@ -67,5 +68,4 @@ TODO:
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
-- VPN wireguard (Fritzbox + Android)
 - rename git repo
