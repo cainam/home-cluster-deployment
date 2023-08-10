@@ -14,7 +14,7 @@ global:
 ##
 image:
   registry: docker.io
-  repository: postgresql
+  repository: postgres
   tag: 15.3-alpine3.18
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
