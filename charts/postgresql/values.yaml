@@ -478,11 +478,11 @@ metrics:
       #   annotations:
       #     description: replication for {{ template "postgresql.fullname" . }} PostgreSQL is lagging by {{ "{{ $value }}" }} hour(s).
       #     summary: PostgreSQL replication is lagging by {{ "{{ $value }}" }} hour(s).
-  image:
-    registry: docker.io
-    repository: bitnami/postgres-exporter
-    tag: 0.8.0-debian-10-r28
-    pullPolicy: IfNotPresent
+#  image:
+#    registry: docker.io
+#    repository: bitnami/postgres-exporter
+#    tag: 0.8.0-debian-10-r28
+#    pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
