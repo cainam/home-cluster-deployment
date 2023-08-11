@@ -184,7 +184,7 @@ applications:
         rewrite: /prometheus
 
   db:
-    postgreslql:
+    postgresql:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/postgresql
       storage: 
