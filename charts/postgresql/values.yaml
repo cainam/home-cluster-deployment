@@ -5,7 +5,7 @@
 global:
   postgresql: {}
 #   imageRegistry: myRegistryName
-   imagePullSecrets:
+#   imagePullSecrets:
 #     - myRegistryKeySecretName
 #   storageClass: myStorageClass
 
