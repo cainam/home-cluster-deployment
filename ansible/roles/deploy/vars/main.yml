@@ -188,7 +188,7 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/postgresql
       storage: 
-      - name: pg-data
+      - name: data-postgresql-postgresql-0
         size: 2Gi
       - name: pg-config
         size: 4Mi
