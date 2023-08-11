@@ -478,7 +478,7 @@ metrics:
       #   annotations:
       #     description: replication for {{ template "postgresql.fullname" . }} PostgreSQL is lagging by {{ "{{ $value }}" }} hour(s).
       #     summary: PostgreSQL replication is lagging by {{ "{{ $value }}" }} hour(s).
-  image:
+  image: {}
 #    registry: docker.io
 #    repository: bitnami/postgres-exporter
 #    tag: 0.8.0-debian-10-r28
