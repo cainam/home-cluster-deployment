@@ -14,7 +14,7 @@ global:
 ##
 image:
   registry: docker.io
-  repository: postgresql
+  repository: postgres
   tag: 15.3-alpine3.18
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -47,15 +47,15 @@ image:
 ##
 volumePermissions:
   enabled: false
-  image:
-    registry: docker.io
-    repository: bitnami/minideb
-    tag: buster
+  image: {}
+#    registry: docker.io
+#    repository: bitnami/minideb
+#    tag: buster
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
     ##
-    pullPolicy: Always
+#    pullPolicy: Always
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -71,8 +71,8 @@ volumePermissions:
   ## You may want to use this volumePermissions.securityContext.runAsUser="auto" in combination with
   ## pod securityContext.enabled=false and shmVolume.chmod.enabled=false
   ##
-  securityContext:
-    runAsUser: 0
+#  securityContext:
+#    runAsUser: 0
 
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
@@ -307,7 +307,7 @@ persistence:
   # storageClass: "-"
   accessModes:
     - ReadWriteOnce
-  size: 8Gi
+  size: 2Gi
   annotations: {}
 
 ## updateStrategy for PostgreSQL StatefulSet and its slaves StatefulSets
@@ -478,11 +478,11 @@ metrics:
       #   annotations:
       #     description: replication for {{ template "postgresql.fullname" . }} PostgreSQL is lagging by {{ "{{ $value }}" }} hour(s).
       #     summary: PostgreSQL replication is lagging by {{ "{{ $value }}" }} hour(s).
-  image:
-    registry: docker.io
-    repository: bitnami/postgres-exporter
-    tag: 0.8.0-debian-10-r28
-    pullPolicy: IfNotPresent
+  image: {}
+#    registry: docker.io
+#    repository: bitnami/postgres-exporter
+#    tag: 0.8.0-debian-10-r28
+#    pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

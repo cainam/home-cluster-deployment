@@ -39,13 +39,6 @@
     opts: noatime
     state: mounted
 
-- name: auto.master
-  lineinfile: 
-    path: /etc/autofs/auto.master
-    regexp: "^{{ shared_mounts }}"
-    line: "{{ shared_mounts }} /etc/autofs/gluster.autofs"
-    backup: yes
-
 - name: ensure required directories exist
   file:
     path: "{{ item.path }}"
@@ -62,6 +55,18 @@
       perm: u=rwx,g=rx,o=rx
     - path: /usr/local/share/ca-certificates/
       perm: u=rwx,g=rx,o=rx
+    - path: "{{ gluster_directory }}/bricks"
+      perm: u=rwx,g=rx,o=rx
+    - path: /etc/autofs
+      perm: u=rwx,g=rx,o=rx
+
+- name: auto.master
+  lineinfile: 
+    path: /etc/autofs/auto.master
+    regexp: "^{{ shared_mounts }}"
+    line: "{{ shared_mounts }} /etc/autofs/gluster.autofs"
+    backup: yes
+    create: true
 
 - name: symlinks for CA
   file:
@@ -139,7 +144,7 @@
     - file: patches
       dest: /etc/portage/
     - file: portage/package.accept_keywords
-      dest: /etc/portage
+      dest: /etc/portage/package.accept_keywords
     - file: portage/package.use
       dest: /etc/portage/package.use
     - file: portage/package.mask
@@ -198,6 +203,19 @@
     - src: net.lo
       dest: /etc/init.d/net.wlan0
 
+- name: emerge sync
+  shell: emerge --sync
+  ignore_errors: true
+  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
+  
+- name: emerge build
+  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+ 
+- name: emerge deploy
+  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+
 - name: enable services
   service:
     name: "{{ item }}"
@@ -221,20 +239,9 @@
     - cronie
     - wait_for_internet
     - set_cpu_performance
+    - sshd
   ignore_errors: yes
 
 - name: gluster
   import_tasks: gluster.yml
-
-- name: emerge sync
-  shell: emerge --sync
-  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
-  
-- name: emerge build
-  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
-  when: gentoo_build is defined and 'emerge' in ansible_run_tags
- 
-- name: emerge deploy
-  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
-  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
   

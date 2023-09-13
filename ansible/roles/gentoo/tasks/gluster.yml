@@ -14,8 +14,6 @@
   vars:
     outside_k8s: true
   with_items: "{{ gluster_vols }}"
-#    - name: registry
-#      size: 5G
   loop_control:
     loop_var: storage
 
@@ -24,9 +22,6 @@
   vars:
     outside_k8s: true
   with_items: "{{ gluster_vols }}"
-#    - name: registry
   loop_control:
     loop_var: storage
   run_once: true
-
-

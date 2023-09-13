@@ -3,6 +3,12 @@
 Usage example: 
     `# ansible-playbook  -i $PWD/inventory $PWD/site.yml --skip-tags k8s_images`
 
+
+New install:
+- stage3+portage+git-clone-firmware
+- enable net.end0+sshd
+- sync /lib/firmware/bmrc and /cypress and /var/db/repos/gentoo
+
 Notes:
 - trying to run on one host only using run_once/delegate_to did only work having a hostname set as fact not with a variable. It seems like vars are re-evaluated when accessed, but facts remain constant
 - uninstall of kubernetes is triggered using "--tags=all,force_reinstall", otherwise force_reinstall is skipped
@@ -70,3 +76,7 @@ TODO:
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - rename git repo
 - /etc/localtime + /etc/timezone
+- gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
+- replace my roles/gentoo/files/init.d/set_cpu_performanc with gentoo cpupower
+- /var/db/repos - local on build, gluster vol for others
+- gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
