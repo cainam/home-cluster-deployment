@@ -90,6 +90,14 @@ applications:
         prefix: /
         svcPort: 8123
         gateway: ha-gw
+      requires:
+        - db:
+            service: postgresql
+            namespace: db
+            config:
+              database: ha
+              username: ha
+              password: same
   tools:
     jaeger:
       git: https://github.com/jaegertracing/helm-charts.git
@@ -182,7 +190,6 @@ applications:
       network:
         svcName: prometheus-server
         rewrite: /prometheus
-
   db:
     postgresql:
       git: https://github.com/cainam/k8s_at_home.git

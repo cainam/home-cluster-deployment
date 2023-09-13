@@ -16,6 +16,7 @@ alias helmx="podman run ${podman_options} myregistry.adm13:443/helm:v3.10.2 $hel
 function helm(){
   export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
   echo "podman_options:${podman_options}"
+  [ "${category}" != "" ] && helm_options="${helm_options} -n ${category}"
   podman run ${podman_options} ${registry}/helm:3.12.2 $helm_options $*
 }
 export -f helm

@@ -1,4 +1,4 @@
-- name: prepare applications
+- name: print deployment information
   debug:
     msg: "namespace: {{ item }} application: {{ applications[item] }}" 
   with_items: "{{ applications.keys() | list }}"
