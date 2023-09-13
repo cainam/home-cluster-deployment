@@ -7,7 +7,7 @@
   shell: |
     set -e;
     # exit if gluster volume exists already, better: do it upfront and outside
-    gluster vol list | grep "^{{ storage.name }}$" && exit
+    #gluster vol list | grep "^{{ storage.name }}$" && exit
     echo "brick: {{ brick }}\ndisk: {{ disk }}"
     if [ ! -f "{{ disk }}" ]; then
       mkdir -p "{{ gluster_directory }}/disks"
