@@ -69,3 +69,4 @@ TODO:
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - rename git repo
+- /etc/localtime + /etc/timezone
