@@ -1,12 +1,5 @@
 ---
 
-#- name: fstab
-#  lineinfile: 
-#    path: /etc/fstab
-#    regexp: "^/dev/sda1"
-#    line: "/dev/sda1               /data   ext4            noatime         0 1"
-#    backup: yes
-
 - name: groups
   group:
     name: "{{ item.name }}"
@@ -172,8 +165,17 @@
     - file: syslog-ng.conf
       dest: /etc/syslog-ng/
 
-- name: include wlan secrets
-  include_vars: ../wlan
+- name: include secrets (wlan, ssh_host_keys)
+  include_vars: "{{ local_only }}/secrets"
+
+- name: create /etc/ssh/known_hosts
+  copy:
+    content: |
+      {% for a in ssh_host_keys %}
+      {{ a }}
+      {% endfor %}
+    dest: /etc/ssh/ssh_known_hosts
+
 
 - name: make.conf, wpa_supplicant.conf, /etc/conf.d/net
   template:
@@ -238,7 +240,7 @@
     - lighttpd
     - cronie
     - wait_for_internet
-    - set_cpu_performance
+    - cpupower
     - sshd
   ignore_errors: yes
 

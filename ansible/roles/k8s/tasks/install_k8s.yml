@@ -25,13 +25,9 @@
 
 - name: install flannel pod network
   shell: |
-    #sed -i -e 's#image: .*\/.*\/#image: myregistry.adm13:443/k8s/#g' kube-flannel.yml 
-    #sed -i -e '/ip-masq/a\ \ \ \ \ \ \ \ - --iface=end0' kube-flannel.yml # Erzwingen von eth0 Netzwerk
     . set_env.sh kube-flannel
     kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
     kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
-    # kubectl apply -f kube-flannel.yml  
-    # helm upgrade --install -n kube-flannel kube-flannel kube-flannel/flannel --set "flannel.args[2]=--iface=end0" --set flannel.image_cni.repository=k8s/flannel-cni-plugin
     helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
   # when: not etc_k8s.stat.exists and inventory_hostname == selected_host
   when: inventory_hostname == selected_host
