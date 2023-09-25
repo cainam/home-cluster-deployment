@@ -1,0 +1,72 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+  vars:
+    k8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
+    new_version: v1.28.2
+
+  tasks:
+    - name: livez check
+      shell: |
+        curl -k https://localhost:6443/livez 
+      failed_when: false
+      register: livez
+
+    - name: k8s version
+      shell: |
+        curl -k -s https://localhost:6443/version | jq -r .gitVersion
+      failed_when: false
+      register: k8s_version
+
+    - name: re-set k8s version
+      set_fact:
+        k8s_version: "{{ k8s_version.stdout }}"
+        
+    - name: set k8s_upgrade to false
+      set_fact:
+        k8s_upgrade: false
+
+    - name: set k8s_upgrade to true if version is lower than new version
+      set_fact:
+        k8s_upgrade: true
+      when: not k8s_version|length == 0 and k8s_version is version(new_version, '<')
+
+    - name: check if k8s is installed
+      stat:
+        path: "{{ k8s_check_file }}"
+      register: etc_k8s
+
+    - name: dbg etc_k8s + livez
+      debug:
+        msg: "etc:{{ etc_k8s.stat.exists }} livez:{{ livez.rc }}"
+
+    - name: re-set etc_k8s and kubernetes healthy flag
+      set_fact:
+        etc_k8s: "{{ etc_k8s.stat.exists }}"
+        k8s_healthy: true
+
+    - name: dbg etc_k8s
+      debug:
+        msg: "etc:{{ etc_k8s }}"
+
+    - block: # this block is to look through the hostvars and see if the nodes are healthy on which a k8s configuration exists
+      - name: check if k8s operation possible
+        debug: 
+          msg: "k8s operation not possible, cluster is not stable"
+
+      - name: set unhealthy
+        set_fact: 
+          k8s_healthy: false
+        delegate_to: "{{ item }}"
+        delegate_facts: true
+        loop: "{{ groups['all'] }}"
+      when: etc_k8s and livez.rc != 0
+
+    - name: set k8s_exists
+      set_fact: 
+        k8s_init_done: "{{ groups.all | map('extract',hostvars,'etc_k8s') | or_array }}"
+
+    - name: check result
+      debug:
+        msg: "livez:{{ livez.rc }} k8s installed:{{ etc_k8s}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} k8s_version:{{k8s_version}} k8s_upgrade:{{k8s_upgrade}}"
