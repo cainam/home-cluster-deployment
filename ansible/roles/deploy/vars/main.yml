@@ -9,10 +9,11 @@ applications:
       git: https://github.com/istio/istio.git
       branch: 1.18.1
       subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
+      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
       git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.18.1 --fix_source=.global.proxy.image=istio/proxyv2:1.18.1 --fix_source=.global.proxy_init.image=istio/proxyv2:1.18.1
       files:
-        config:
+        values:
           file: istiod-mesh.yaml
     auth-policy:
       git: https://github.com/cainam/k8s_at_home.git
@@ -28,9 +29,10 @@ applications:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
-      helm_options: --set proxyVarsAsSecrets=false {% raw %} {% if applications['auth']['oauth2-proxy']['files']['config']['tempfile'] is defined %}  --values {{ applications['auth']['oauth2-proxy']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      helm_options: --set proxyVarsAsSecrets=false 
+      ##xhelm_options: --set proxyVarsAsSecrets=false {% raw %} {% if applications['auth']['oauth2-proxy']['files']['config']['tempfile'] is defined %}  --values {{ applications['auth']['oauth2-proxy']['files']['config']['tempfile'] }}  {% endif %}   {% endraw %}
       files:
-        config:
+        values:
           file: oauth2-proxy-config.yaml
       network:
         svcPort: 80

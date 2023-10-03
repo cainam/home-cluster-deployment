@@ -23,7 +23,7 @@
     - force_reinstall
 
 - name: check kubernetes status
-  import_tasks: k8s-status.yml
+  import_tasks: k8s-status.yaml
 
 - name: prepare images
   import_tasks: prepare_images.yml
@@ -34,7 +34,7 @@
 
 - name: install cluster if needed
   include_tasks: init.yml
-  when: not etc_k8s.stat.exists and inventory_hostname == selected_host
+  when: not k8s_init_done and inventory_hostname == selected_host
 
 - name: install flannel pod network
   shell: |
@@ -42,31 +42,75 @@
     kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
     kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
     helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
-  # when: not etc_k8s.stat.exists and inventory_hostname == selected_host
-  when: inventory_hostname == selected_host
-
-- name: join nodes if needed
-  include_tasks: join.yml
-  when: not etc_k8s.stat.exists and inventory_hostname != selected_host
-
-- name: taint to allow master nodes to run pods
-  shell: |
-    kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
-    kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e control-plane:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
-    true
-  when: inventory_hostname == selected_host
-
-# update if version is newer 
-- name: get k8s version
-  shell: "grep image: {{ k8s_check_file }} | cut -d : -f 4"
-  register: current_k8s_version
+  register: flannel_install
+  when: inventory_hostname == healthy_node
   
-- debug:
-    msg: "installed k8s version: {{ current_k8s_version }}"
+- name: output flannel install
+  debug:
+      msg: "{{flannel_install}}"
+
+- block:
+  - name: get token
+    #shell: kubeadm token create --print-join-command
+    shell: kubeadm token create
+    register: token
+    #when: k8s_healthy and k8s_installed
+
+  - name: get certificate key
+    shell: kubeadm init phase upload-certs --upload-certs | grep -v upload-certs
+    register: cert_key
+    #when: k8s_healthy and k8s_installed
+
+  # Get cert info
+  - name: Get CA certificate hash
+    community.crypto.x509_certificate_info:
+      path: /etc/kubernetes/pki/ca.crt
+    register: __k8s_pki_ca
+
+  # Use the info
+  - name: debug
+    debug:
+      msg: 'sha256:{{ __k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}'
+
+  - name: dbg
+    debug:
+      msg: "cert_key:{{cert_key}} token:{{token}}"
+
+  - name: populate join vars to all hosts
+    set_fact: 
+      #join_command: "{{hostvars[healthy_node].join_command}}"
+      cert_key: "{{hostvars[healthy_node].cert_key.stdout}}"
+      token: "{{ hostvars[healthy_node].token.stdout }}"
+      discovery_token_ca_cert_hash: 'sha256:{{ hostvars[healthy_node].__k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}'
+    delegate_to: "{{ item }}"
+    delegate_facts: true
+    loop: "{{ groups['all'] }}"
+  when: inventory_hostname == healthy_node
+
+- name: debug join command
+  debug:
+    msg: "cert_key:{{cert_key}} token:{{token}} discovery_token_ca_cert_hash:{{ discovery_token_ca_cert_hash | default('none') }}"
   
-- debug: 
-    msg: update
-  when: current_k8s_version.stdout is version( k8s_version, '<')
+- block:
+  - name: tempfile for kubeadm
+    tempfile:
+      state: file
+      suffix: temp
+    register: kubeadm_tmp
+  - name: copy tempfile for kubeadm
+    template:
+      src: kubeadm.yaml
+      dest: "{{ kubeadm_tmp.path }}"
+    vars: 
+      join_ip: "{{ my_cluster_ip }}"
+      cert_key: cert_key.stdout
+  - name: joining nodes
+#    shell: '{{ join_command.stdout }} --control-plane --certificate-key {{ cert_key.stdout }} --config "{{ kubeadm_tmp.path }}"'
+    shell: kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}"
+    throttle: 1
+  when: k8s_healthy and not k8s_installed
+
+# update if version is newer   
 - block:
   - name: scale down application deployments
     shell: |
@@ -80,18 +124,24 @@
   - name: scale up application deployments
     shell: |
       for ns in $(kubectl get ns  | grep -v -e ^NAME -e ^kube | awk '{print $1}'); do echo "namespace: $ns";for x in $(kubectl get deploy -n $ns | grep -v NAME | awk '{print $1}'); do kubectl scale --replicas=1 deploy -n $ns $x ; done; done
-  when: current_k8s_version.stdout is version( k8s_version, '<')
-
-- name: ca template
-  template:
-    src: ca
-    dest: /tmp/myca
-
-- name: create CA configmap
-  shell: |
-    kubectl apply -f /tmp/myca
-
+  when: k8s_upgrade
+  
 - block:
+  - name: taint to allow master nodes to run pods
+    shell: |
+      kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
+      kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e control-plane:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+      true
+
+  - name: ca template
+    template:
+      src: ca
+      dest: /tmp/myca
+
+  - name: create CA configmap
+    shell: |
+      kubectl apply -f /tmp/myca
+
   - name: coredns configmap template
     template:
       src: coredns.cm.yaml
@@ -103,5 +153,5 @@
       # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 my-lb.adm13\n\1    fallthrough\n\1}/g' | kubectl replace -f -
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
-  run_once: true
+  when: inventory_hostname == healthy_node
      

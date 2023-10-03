@@ -12,6 +12,25 @@
     - line: 'rc_cgroup_controllers=""'
       setting: rc_cgroup_controllers
 
+- name: /var/lib/kubelet/config.yaml
+  lineinfile:
+    path: /var/lib/kubelet/config.yaml
+    regexp: "^{{ item.setting }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.setting }}"
+    backup: yes
+    create: true
+  loop:
+    - line: 'cgroupDriver: cgroupfs'
+      setting: 'cgroupDriver:'
+    - line: 'staticPodPath: /etc/kubernetes/manifests'
+      setting: 'staticPodPath:'
+    - line: 'kind: KubeletConfiguration'
+      setting: 'kind:'
+    - line: 'apiVersion: kubelet.config.k8s.io/v1beta1'
+      setting: 'apiVersion:'
+  when: false
+
 - name: deploy configuration files
   copy:
     src: "{{ item }}"
@@ -26,6 +45,7 @@
   service:
     name: kubelet
     enabled: yes
+    state: started
 
 - name: check /var/lib/etcd
   stat:

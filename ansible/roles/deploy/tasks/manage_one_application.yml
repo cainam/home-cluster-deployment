@@ -19,7 +19,11 @@
     - name: .{{ name_prefix }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
-         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} {{ application.value.git_to_local_params | default("") }} 
+        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
+        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} \
+        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
+        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
+        {{ application.value.git_to_local_params | default("") }} 
       register: build_out
   
     - name: .{{ name_prefix }} build output
@@ -45,7 +49,10 @@
 - name: .{{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
-     helm upgrade --install --reset-values -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} {{ applications[namespace.key][application.key].helm_options | default('') }}
+    set -x
+     helm upgrade --install --reset-values -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
+     {{ applications[namespace.key][application.key].helm_options | default('') }} \
+     {% if applications.value['files']['values']['file'] is defined %}  --values {{ application.value['files']['values']['tempfile'] }}  {% endif %}
   register: out
   when: "application.value.install | default(true)"
   

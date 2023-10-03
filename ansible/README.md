@@ -33,6 +33,7 @@ etcd:
 # etcdctl endpoint status
 # etcdctl endpoint health
 # etcdctl defrag
+# if failure - restore or clean nodes manually and restart one with existing db using --force-new-cluster into manifest (see https://itnext.io/breaking-down-and-fixing-etcd-cluster-d81e35b9260d) 
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -81,3 +82,4 @@ TODO:
 - replace my roles/gentoo/files/init.d/set_cpu_performanc with gentoo cpupower
 - /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
+- k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new

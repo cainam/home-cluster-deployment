@@ -67,6 +67,6 @@
       set_fact: 
         k8s_init_done: "{{ groups.all | map('extract',hostvars,'etc_k8s') | or_array }}"
 
-    - name: check result
+    - name: print status
       debug:
         msg: "livez:{{ livez.rc }} k8s installed:{{ etc_k8s}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} k8s_version:{{k8s_version}} k8s_upgrade:{{k8s_upgrade}}"

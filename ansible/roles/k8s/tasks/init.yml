@@ -5,30 +5,26 @@
     suffix: temp
   register: kubeadm_tmp
 
-- name: get internal IP
-  shell: getent hosts $(hostname) | awk '{print $1}'
-  register: internal_first_master_ip_cmd
+#- name: set internal_first_master_ip
+#  shell: getent hosts $(hostname) | awk '{print $1}'
+#  register: internal_first_master_ip_cmd
+#  set_fact:
   
 - name: copy tempfile for kubeadm
   template:
     src: kubeadm.yaml
     dest: "{{ kubeadm_tmp.path }}"
   vars: 
-    internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
-    
+    #internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
+    internal_first_master_ip: "{{ my_cluster_ip }}"
 - name: install k8s
   shell: ETCD_DATA_DIR=/data/etcd kubeadm init --upload-certs --config "{{ kubeadm_tmp.path }}"
-  vars: 
-    internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
+#  vars: 
+#    internal_first_master_ip: "{{ internal_first_master_ip_cmd.stdout }}"
   register: init_out
   
+- name: set k8s_installed for this nodes now
+  set_fact:
+    k8s_installed: true
+    
 - debug: var=init_out
-
-- name: get join command
-  shell: kubeadm token create --print-join-command
-  register: join_command
-  
-- name: get certificate key
-  shell: kubeadm init phase upload-certs --upload-certs | grep -v upload-certs
-  register: cert_key
-

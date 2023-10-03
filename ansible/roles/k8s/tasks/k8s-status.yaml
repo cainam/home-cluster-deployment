@@ -8,11 +8,11 @@
   shell: |
     curl -k -s https://localhost:6443/version | jq -r .gitVersion
   failed_when: false
-  register: k8s_version
+  register: current_k8s_version
 
 - name: re-set k8s version
   set_fact:
-    k8s_version: "{{ k8s_version.stdout }}"
+    current_k8s_version: "{{ current_k8s_version.stdout }}"
     
 - name: set k8s_upgrade to false
   set_fact:
@@ -21,7 +21,7 @@
 - name: set k8s_upgrade to true if version is lower than new version
   set_fact:
     k8s_upgrade: true
-  when: not k8s_version|length == 0 and k8s_version is version(new_version, '<')
+  when: not current_k8s_version|length == 0 and current_k8s_version is version(k8s_version, '<')
 
 - name: check if k8s is installed
   stat:
@@ -34,12 +34,8 @@
 
 - name: re-set etc_k8s and kubernetes healthy flag
   set_fact:
-    etc_k8s: "{{ etc_k8s.stat.exists }}"
+    k8s_installed: "{{ etc_k8s.stat.exists }}"
     k8s_healthy: true
-
-- name: dbg etc_k8s
-  debug:
-    msg: "etc:{{ etc_k8s }}"
 
 - block: # this block is to look through the hostvars and see if the nodes are healthy on which a k8s configuration exists
   - name: check if k8s operation possible
@@ -52,12 +48,41 @@
     delegate_to: "{{ item }}"
     delegate_facts: true
     loop: "{{ groups['all'] }}"
-  when: etc_k8s and livez.rc != 0
+  when: k8s_installed and livez.rc != 0
 
 - name: set k8s_exists
   set_fact: 
-    k8s_init_done: "{{ groups.all | map('extract',hostvars,'etc_k8s') | or_array }}"
+    k8s_init_done: "{{ groups.all | map('extract',hostvars,'k8s_installed') | or_array }}"
+
+- set_fact:
+    healthy_node: "{{selected_host}}"
+
+- set_fact: # highlight
+    aaa: "{{ (groups.all|
+                       map('extract', hostvars)|
+                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn') ) }}"
+  run_once: true
+
+- debug:
+    msg: "aaa: {{aaa}}"
+
+- set_fact: # highlight
+    xxx: "{{ (groups.all|
+                       map('extract', hostvars)|
+                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn')| default(['m'])) }}"
+  run_once: true
+
+- debug:
+    msg: "xxx: {{xxx}}"
+
+- set_fact: # highlight
+    healthy_node: "{{ (groups.all|
+                       map('extract', hostvars)|
+                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn')| default([selected_host])
+                       |shuffle)[0] }}"
+  run_once: true
+  when: k8s_init_done
 
 - name: check result
   debug:
-    msg: "livez:{{ livez.rc }} k8s installed:{{ etc_k8s}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} k8s_version:{{k8s_version}} k8s_upgrade:{{k8s_upgrade}}"
+    msg: "livez:{{ livez.rc }} k8s_installed:{{k8s_installed}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} current_k8s_version:{{current_k8s_version}} k8s_upgrade:{{k8s_upgrade}} healthy node: {{healthy_node}}"
