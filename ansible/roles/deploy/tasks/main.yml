@@ -15,12 +15,38 @@
   set_fact:
     keep_volumes: "{{ volumes_to_exempt }}"
 
+- name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
+  set_fact: 
+    applications: "{{ applications | combine(
+       {gateway.value.namespace | default(default_gateway_namespace): 
+         {gateway.key: gateway_install | combine({'ports': gateway.value.additional_ports | default({}) | list, 'type': 'gateway' }, list_merge='append', recursive=true)}}, recursive=true)}}"
+  loop: "{{gateways | dict2items}}"
+  loop_control:
+    loop_var: gateway
+
+- name: print updated applications
+  debug:
+    msg: 'applications: {{ applications | to_yaml }}'
+  when: "'debug' in ansible_run_tags"
+  run_once: true
+    
 - name: prepare application prerequisites
   include_tasks: prepare_by_namespace.yml
   when: (limit_namespace is not defined or namespace.key == limit_namespace)
   loop: "{{ applications | dict2items }}"
   loop_control:
     loop_var: namespace
+
+- name: print updated applications before execution
+  debug:
+    msg: 'applications: {{ applications | to_yaml }}'
+  when: "'debug' in ansible_run_tags"
+  run_once: true
+
+- name: Example using fail and when together
+  ansible.builtin.fail:
+    msg: let's stop here
+  when: false
 
 - name: run per namespace
   include_tasks: manage_applications.yml
@@ -30,6 +56,64 @@
     loop_var: namespace
   run_once: true
 
+- name: Example using fail and when together
+  ansible.builtin.fail:
+    msg: let's stop here
+  when: false
+
 - name: post installation
   include_tasks: post_installation.yml
+  loop: "{{ applications | dict2items }}"
+  loop_control:
+    loop_var: namespace
   run_once: true
+
+- name: "{{ post_inst }}list volumes to keep"
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ keep_volumes }}"
+  run_once: true
+
+- name: "{{ post_inst }}list of existing volumes"
+  shell: gluster vol list
+  run_once: true
+  register: existing_volumes
+
+- name: "{{ post_inst }}determine volumes for deletion"
+  set_fact:
+    volume2delete: "{{ existing_volumes.stdout_lines | difference(keep_volumes) }}"
+  run_once: true
+
+- name: "{{ post_inst }}list volumes to delete"
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ volume2delete }}"
+  run_once: true
+
+- block:
+    - name: "{{ post_inst }}purge volumes - get bricks"
+      shell: |
+        gluster vol info "{{ item }}" | grep "^Brick[0-9]" | cut -d : -f 3- | sort -u
+      loop: "{{ volume2delete }}"
+      run_once: true
+      register: get_bricks_out
+
+    - debug: var=get_bricks_out
+
+    - name: purge volumes - delete volume
+      gluster.gluster.gluster_volume:
+        state: absent
+        name: "{{ item }}"
+      loop: "{{ volume2delete }}"
+      run_once: true
+
+    - name: purge volumes - delete bricks
+      shell: |
+        umount -v "{{ item.1 }}"
+        echo "{{ item.1 }}" | grep -q "^/data/gluster/bricks/" && rm -rfv "{{ item.1 }}"
+      #loop: "{{ get_bricks_out.stdout_lines }}"
+      with_subelements:
+         - "{{ get_bricks_out.results }}"
+         - stdout_lines
+
+  when: "'purge_volumes' in ansible_run_tags"

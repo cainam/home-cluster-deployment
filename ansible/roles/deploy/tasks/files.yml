@@ -25,19 +25,7 @@
     set_fact:
       applications: "{{ applications | combine({namespace.key: {application.key: {'helm_options': app_data.helm_options,'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
 
-  - set_fact:
-      x: '{{ app_data.helm_options }}'
-
-
-  - set_fact:
-      y: "{{ x }}"
-
-  - name: app_data
-    debug:
-      msg: "y: {{ y }} x: {{ x }} app_data:{{ app_data }}"
-
   - name: applications.ns.app
     debug:
       msg: "{{ applications[namespace.key][application.key] }}"
 
-  when: false

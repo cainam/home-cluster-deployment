@@ -11,3 +11,22 @@
       loop_var: storage
   when: application.value.storage is defined
 
+- block: # generate helm_options from applications for gateways 
+  - name: print application.value {{ app }}
+    debug:
+      msg: "{{ application.value }}"
+    when: "'debug' in ansible_run_tags"
+      
+  - name: generate helm_options from applications for gateways # from ports array
+    set_fact: 
+      applications: "{{ applications | combine(
+         {namespace.key : 
+           {application.key: 
+              {'helm_options': (applications[namespace.key][application.key].helm_options | default('--set name='~application.key))~' --set service.ports['~port_idx~'].name='~port.name~',service.ports['~port_idx~'].port='~port.port~',service.ports['~port_idx~'].protocol='~port.protocol~',service.ports['~port_idx~'].targetPort='~port.targetPort~' ' } 
+          }}, recursive=true)}}"
+    loop: "{{ application.value.ports }}"
+    loop_control:
+      loop_var: port
+      index_var: port_idx
+  when: application.value.type is defined and application.value.type=='gateway'
+  run_once: true

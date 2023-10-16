@@ -129,8 +129,8 @@
 - block:
   - name: taint to allow master nodes to run pods
     shell: |
-      kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
-      kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].effect | grep -e control-plane:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+      # kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].key,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
+      kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
       true
 
   - name: ca template

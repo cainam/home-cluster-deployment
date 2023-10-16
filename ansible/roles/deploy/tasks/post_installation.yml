@@ -1,76 +1,41 @@
-- name: determine namespaces of gateways
-  shell: kubectl get pods --selector=istio="{{ item.key }}" -A -o jsonpath='{.items[*].metadata.namespace}'
-  register: ns_gw
-  failed_when: ns_gw.stdout == ""
-  loop: "{{ gateways | dict2items }}"
-
-- debug: 
-    msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
-  loop: "{{ ns_gw.results  }}"
-  when: "'debug' in ansible_run_tags"
-
-- name: extend gateways by discovered namespaces
+- name: set app fact
   set_fact:
-    gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
-  loop: "{{ ns_gw.results  }}"
+    post_inst: "post_installation {{ namespace.key}} - "
 
-- debug: 
-    msg: "gateways: {{ gateways}}"
+#- name: "{{ post_inst }}determine namespaces of gateways"
+  #shell: kubectl get pods --selector=istio="{{ item.key }}" -A -o jsonpath='{.items[*].metadata.namespace}'
+  #register: ns_gw
+  ## failed_when: ns_gw.stdout == ""
+  #loop: "{{ gateways | dict2items }}"
+
+#- name: "{{ post_inst }}output: determine namespaces of gateways"
+  #debug: 
+    #msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
+  #loop: "{{ ns_gw.results  }}"
+  #when: "'debug' in ansible_run_tags"
+
+#- name: "{{ post_inst }}debug: determine namespaces of gateways"
+  #debug:
+    #msg: "item.item.key: {{ item.item.key | to_yaml }} item.stdout:{{ item.stdout| to_yaml }}"
+  #loop: "{{ ns_gw.results  }}"
+
+#- name: "{{ post_inst }}extend gateways by discovered namespaces - default gateway"
+  #set_fact:
+    #gateways: "{{ gateways | combine({item.gw_name: {'namespace': item.namespace }}, recursive=True) }}"
+##    gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
+##  loop: "{{ ns_gw.results  }}"
+  #loop:
+  #- gw_name: gateway
+    #namespace: istio-ingress
+
+- name: "{{ post_inst }}debug gateways"
+  debug: 
+    msg: "namespace.value | dict2items: {{ namespace.value | dict2items| to_yaml}}"
   when: "'debug' in ansible_run_tags"
 
-- name: .{{ name_prefix }} gateways
+- name: "{{ post_inst }}implement gateways"
   include_tasks: post_gateway.yml
-  loop: "{{ gateways | dict2items }}"
+  loop: "{{ namespace.value | dict2items }}"
+  when: gateway.value.type is defined and gateway.value.type == 'gateway'
   loop_control:
     loop_var: gateway
-
-- name: list volumes to keep
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ keep_volumes }}"
-  run_once: true
-
-- name: list of existing volumes
-  shell: gluster vol list
-  run_once: true
-  register: existing_volumes
-
-- name: determine volumes for deletion
-  set_fact:
-    volume2delete: "{{ existing_volumes.stdout_lines | difference(keep_volumes) }}"
-  run_once: true
-
-- name: list volumes to delete
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ volume2delete }}"
-  run_once: true
-
-- block:
-    - name: purge volumes - get bricks
-      shell: |
-        gluster vol info "{{ item }}" | grep "^Brick[0-9]" | cut -d : -f 3- | sort -u
-      loop: "{{ volume2delete }}"
-      run_once: true
-      register: get_bricks_out
-
-    - debug: var=get_bricks_out
-
-    - name: purge volumes - delete volume
-      gluster.gluster.gluster_volume:
-        state: absent
-        name: "{{ item }}"
-      loop: "{{ volume2delete }}"
-      run_once: true
-
-    - name: purge volumes - delete bricks
-      shell: |
-        umount -v "{{ item.1 }}"
-        echo "{{ item.1 }}" | grep -q "^/data/gluster/bricks/" && rm -rfv "{{ item.1 }}"
-      #loop: "{{ get_bricks_out.stdout_lines }}"
-      with_subelements:
-         - "{{ get_bricks_out.results }}"
-         - stdout_lines
-
-  when: "'purge_volumes' in ansible_run_tags"
-

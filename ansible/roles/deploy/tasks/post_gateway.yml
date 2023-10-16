@@ -1,51 +1,76 @@
+- name: set app fact
+  set_fact:
+    gw_title: "post_gateway - gateway:{{ gateway.key }} namespace:{{ namespace.key }} "
 
-  - name: configure external IP of load-balancer
-    shell: |
-      kubectl patch svc "{{ gateway.key }}" --namespace "{{ gateway.value.namespace }}" --patch '{"spec": { "externalIPs": ["{{ gateway.value.external_ip }}"] }}'
+- name: "{{ gw_title }} - configure external IP of load-balancer"
+  shell: |
+    kubectl patch svc "{{ gateway.key }}" --namespace "{{ namespace.key }}" --patch '{"spec": { "externalIPs": ["{{ gateways[gateway.key].external_ip }}"] }}'
 
-  - name: tls certificates for ingress gateway
-    shell: |
-      kubectl get secret --ignore-not-found=false -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" 2>/dev/null >> /dev/null || kubectl create -n "{{ gateway.value.namespace }}" secret tls "{{ gateway.key }}"  --key="{{ cert_path }}/my-lb.adm13.key" --cert="{{ cert_path }}/my-lb.adm13.crt"
+- name: "{{ gw_title }} - tls certificates for ingress gateway"
+  shell: |
+    kubectl get secret --ignore-not-found=false -n "{{ namespace.key }}" "{{ gateway.key }}" 2>/dev/null >> /dev/null || kubectl create -n "{{ namespace.key }}" secret tls "{{ gateway.key }}"  --key="{{ cert_path }}/my-lb.adm13.key" --cert="{{ cert_path }}/my-lb.adm13.crt"
 
-  - name: .{{ name_prefix }} => configure Gateway
-    shell: |
-      cmd=replace; kubectl get gw -n {{ gateway.value.namespace }} {{ gateway.key }} 2>> /dev/null >> /dev/null || cmd=apply
-      echo -e "apiVersion: networking.istio.io/v1beta1\nkind: Gateway\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ gateway.value.namespace }}\nspec:\n  selector:\n    istio: {{ gateway.key }}\n  servers:\n  - hosts:\n    - '{{ gateway.value.domain }}'\n    port:\n      name: https\n      number: 443\n      protocol: HTTPS\n    tls:\n      credentialName: {{ gateway.key }}\n      mode: SIMPLE" | kubectl ${cmd} -f -
+- name: "{{ gw_title }} - configure Gateway"
+  shell: |
+    cmd=replace; kubectl get gw -n {{ namespace.key }} {{ gateway.key }} 2>> /dev/null >> /dev/null || cmd=apply
+    echo -e "apiVersion: networking.istio.io/v1beta1\nkind: Gateway\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  selector:\n    istio: {{ gateway.key }}\n  servers:\n  - hosts:\n    - '{{ gateways[gateway.key].domain }}'\n    port:\n      name: https\n      number: 443\n      protocol: HTTPS\n    tls:\n      credentialName: {{ gateway.key }}\n      mode: SIMPLE" | kubectl ${cmd} -f -
 
-  - name: .{{ name_prefix }} - ensure VirtualService exists
+- name: "{{ gw_title }} - ensure VirtualService exists"
 #      kubectl get vs -n istio-ingress main || echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: main\n  namespace: istio-ingress\nspec:\n  gateways:\n  - istio-ingress/main\n  hosts:\n  - "*.my-lb.adm13"\n  - my-lb.adm13\n  http:\n  - name: "dummy"\n    match:\n    - uri:\n       prefix: /dummy\n    directResponse:\n      status: 404\n' | kubectl apply -f -
-    shell: |
-      exists=1; kubectl get vs --ignore-not-found=false -n {{ gateway.value.namespace }} {{ gateway.key }} 2>> /dev/null >> /dev/null || exists=0
-      if [ $exists -eq 0 ]; then
-        echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ gateway.value.namespace }}\nspec:\n  gateways:\n  - {{ gateway.value.namespace }}/{{ gateway.key }}\n  hosts:\n  - {{ gateway.value.domain }}\n  {{ gateway.value.virtualservice_inject |to_nice_yaml(indent=4) | trim | indent(4) }}\n' > /tmp/a 
-        kubectl apply -f /tmp/a
-      fi
-    register: vs_setup
+  shell: |
+    exists=1; kubectl get vs --ignore-not-found=false -n {{ namespace.key }} {{ gateway.key }} 2>> /dev/null >> /dev/null || exists=0
+    if [ $exists -eq 0 ]; then
+      echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  gateways:\n  - {{ namespace.key }}/{{ gateway.key }}\n  hosts:\n  - {{ gateways[gateway.key].domain }}\n  {{ gateways[gateway.key].virtualservice_inject |to_nice_yaml(indent=4) | trim | indent(4) }}\n' > /tmp/a 
+      kubectl apply -f /tmp/a
+    fi
+  register: vs_setup
 
-  - debug:
-      msg: "result: {{ vs_setup.rc }} out: {{ vs_setup.stdout }}"  # for: {{ vs_setup.item.key }}"
+- name: "{{ gw_title }} - output of ensure VirtualService exists"
+  debug:
+    msg: "result: {{ vs_setup.rc }} out: {{ vs_setup.stdout }}"  # for: {{ vs_setup.item.key }}"
 #    loop: "{{ vs_setup.results  }}"
-    when: "'debug' in ansible_run_tags"
+  when: "'debug' in ansible_run_tags"
 
-  - name: .{{ name_prefix }} - apply VirtualService basic configuration
-    shell: |
-      kubectl get vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" -o yaml | yq -y '.spec.hosts = ["{{ gateway.value.domain }}"]' | kubectl apply -f -
-      kubectl get vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" -o yaml | yq -y 'del(.spec.http[]? | select(.name=="dummy"))' | yq -y '.spec.http += {{ gateway.value.virtualservice_inject.http | regex_replace("'", '"') }}' | kubectl apply -f - # tricky: to manage the quotes, regex_replace() is used but not elegant
-    register: vs_basic
+- name: "{{ gw_title }} - apply VirtualService basic configuration"
+  shell: |
+    kubectl get vs -n "{{ namespace.key }}" "{{ gateway.key }}" -o yaml | yq -y '.spec.hosts = ["{{ gateways[gateway.key].domain }}"]' | kubectl apply -f -
+    kubectl get vs -n "{{ namespace.key }}" "{{ gateway.key }}" -o yaml | yq -y 'del(.spec.http[]? | select(.name=="dummy"))' | yq -y '.spec.http += {{ gateways[gateway.key].virtualservice_inject.http | regex_replace("'", '"') }}' | kubectl apply -f - # tricky: to manage the quotes, regex_replace() is used but not elegant
+  register: vs_basic
 
-  - name: debug - output of before
-    debug:
-      msg: "result: {{ vs_basic.rc }} out: {{ vs_basic.stdout }}" # for: {{ item.item.key }}"
+- name: "{{ gw_title }} - debug - output of before"
+  debug:
+    msg: "result: {{ vs_basic.rc }} out: {{ vs_basic.stdout }}" # for: {{ item.item.key }}"
 #    loop: "{{ vs_basic.results  }}"
-    when: "'debug' in ansible_run_tags"
+  when: "'debug' in ansible_run_tags"
 
-  - debug:
-      msg: "gateway: {{ gateway }}"
-    when: "'debug' in ansible_run_tags"
+- debug:
+    msg: "gateway: {{ gateway }}"
+  when: "'debug' in ansible_run_tags"
 
-  - name: .{{ name_prefix }} - apply VirtualService application configurations
-    include_tasks: post_virtualservice.yml
-    loop: "{{ gateway.value.applications | dict2items}}"
-    loop_control:
-      loop_var: app_ns
-    when: gateway.value.applications is defined
+- name: "{{ gw_title }} - apply VirtualService application configurations"
+  include_tasks: post_virtualservice.yml
+  loop: "{{ gateway.value.applications | dict2items}}"
+  loop_control:
+    loop_var: app_ns
+  when: gateway.value.applicationsXX is defined
+
+- name: "{{ vs_title }} - apply VirtualService application configuration"
+  shell: |
+    echo  "update gateway {{ gateway.key }} in namespace {{ namespace.key }} with application {{ gateway.value.VirtualService }} in namespace {{ app_ns.key }}"
+    kubectl get -o yaml vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" | \
+    yq -y 'del(.spec.http[]? | select(.name=="'"{{ app_vs.key }}"'"))' | \
+    yq -y '.spec.http += [{"name":"{{ vs.value.application }}","rewrite":{"uri":"{{ vs.value.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ vs.value.network.svcName | default(vs.value.application) }}.{{ vs.value.namespace }}.svc.cluster.local"{% if vs.value.network.svcPort is defined %},"port":{"number":{{ vs.value.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ vs.value.network.prefix | default("/" + vs.value.application) }}"}}] {% if vs.value.network.addition is defined %},{{ vs.value.network.addition }} {% endif %} }]' | \
+    kubectl apply -f -
+  register: vs_setup
+  loop: "{{ gateway.value.VirtualService | dict2items}}"
+  loop_control:
+    loop_var: vs
+##    loop_var: app_ns
+  when: gateway.value.VirtualService is defined
+
+- name: "{{ vs_title }} - output of VirtualService application configuration"
+  debug:
+    msg: "{{ vs_setup }}"
+#    msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
+#  loop: "{{ vs_setup.results | dict2items }}"
+  when: "'debug' in ansible_run_tags"    

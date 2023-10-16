@@ -10,7 +10,7 @@ applications:
       branch: 1.18.1
       subdir: manifests/charts/istio-control/istio-discovery
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
-      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+#      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
       git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.18.1 --fix_source=.global.proxy.image=istio/proxyv2:1.18.1 --fix_source=.global.proxy_init.image=istio/proxyv2:1.18.1
       files:
         values:
@@ -19,12 +19,12 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
-  istio-ingress:
-    gateway:
-      git: https://github.com/istio/istio.git
-      subdir: manifests/charts/gateway
-      branch: 1.18.1
-      helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
+#  istio-ingress:
+#    gateway:
+#     git: https://github.com/istio/istio.git
+#      subdir: manifests/charts/gateway
+#      branch: 1.18.1
+#      helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
   auth:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
@@ -45,8 +45,8 @@ applications:
       - name: keycloak
         size: 1Gi
       network:
-        gwPort: 2005
-        targetPort: 12005
+        prefix: /
+        gateway: kc-gw
         svcPort: 1121
   home:
     common:
@@ -54,16 +54,16 @@ applications:
       subdir: charts/stable/common
       branch: common-4.5.2
       install: false
-    gateway:
-      git: https://github.com/istio/istio.git
-      subdir: manifests/charts/gateway
-      branch: 1.18.1
-      helm_options: --set 'service.externalIPs={"192.168.4.101"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=ha-gw
-    deconz-gw:
-      git: https://github.com/istio/istio.git
-      subdir: manifests/charts/gateway
-      helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
-      chart: gateway
+    #ha-gw:
+      #git: https://github.com/istio/istio.git
+      #subdir: manifests/charts/gateway
+      #branch: 1.18.1
+      #helm_options: --set 'service.externalIPs={"192.168.4.101"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=ha-gw
+    #deconz-gw:
+      #git: https://github.com/istio/istio.git
+      #subdir: manifests/charts/gateway
+      #helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
+      #chart: gateway
     deconz:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz
@@ -129,9 +129,9 @@ applications:
         prefix: /kiali
         rewrite: /kiali
       #helm_options:  --set auth.strategy=anonymous --set istio_namespace=istio-system --set external_services.prometheus.url="http://prometheus-server.tools/" --set external_services.prometheus.auth.insecure_skip_verify=true  --set external_services.tracing.in_cluster_url=http://jaeger-query.tools:16685/jaeger --set external_services.tracing.enabled=true --set external_services.tracing.url=https://my-lb.adm13/jaeger --set external_services.istio.root_namespace=istio-system --set external_services.istio.component_status.components
-      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system  {% raw %} {% if applications['tools']['kiali-server']['files']['config']['tempfile'] is defined %}  --values {{ applications['tools']['kiali-server']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system
       files:
-        config:
+        values:
           file: kiali-config.yaml
 #    kiali-operator:
 #      git: https://github.com/kiali/helm-charts.git

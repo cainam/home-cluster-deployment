@@ -3,7 +3,7 @@
     ns: "{{ namespace.key }}"
 
 - block:
-  - name: namespace:{{ ns }} - configure
+  - name: namespace:{{ ns }} - configure namespaces to enable istio-injection
     shell: |
       kubectl apply -f - <<EOF
       apiVersion: v1
@@ -18,7 +18,9 @@
     debug:
       msg: "output: item: {{ item }}"
     loop: "{{ namespace_out  | dict2items }}"
-  
+
+-   
+
 - name: prepare by application
   include_tasks: prepare_application.yml
   loop: "{{ namespace.value | dict2items }}"
