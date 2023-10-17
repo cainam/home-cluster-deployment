@@ -49,9 +49,9 @@ spec:
           - name: X_KC_HOSTNAME_PORT
             value: "2005"
           - name: KC_HOSTNAME_URL
-            value: "https://my-lb.adm13:2005/"
+            value: "https://keycloak.my-lb.adm13/"
           - name: KC_HOSTNAME_ADMIN_URL
-            value: "https://my-lb.adm13:2005/"
+            value: "https://keycloak.my-lb.adm13/"
           - name: KC_HOSTNAME_STRICT
             value: "false"
           - name: KC_HOSTNAME_STRICT_HTTPS

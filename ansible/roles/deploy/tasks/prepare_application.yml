@@ -1,6 +1,7 @@
 - name: set app fact
   set_fact:
     app: "{{ application.key }}"
+  run_once: true
 
 - block:
   - name: app:{{ app }} storage

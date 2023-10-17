@@ -2,6 +2,7 @@
   debug:
     msg: "namespace: {{ item }} application: {{ applications[item] }}" 
   with_items: "{{ applications.keys() | list }}"
+  run_once: true
   
 - name: check if container registry is available
   shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
@@ -14,15 +15,37 @@
 - name: init required volumes
   set_fact:
     keep_volumes: "{{ volumes_to_exempt }}"
+  run_once: true
+  
+- name: apply default_gateway_namespace to all gateways missing it
+  set_fact:
+    gateways: "{{ gateways | combine({gateway.key: {'namespace': default_gateway_namespace }}, recursive=true) }}"
+  loop: "{{gateways | dict2items}}"
+  loop_control:
+    loop_var: gateway
+  when: gateway.value.namespace is not defined
+  run_once: true
+
+- name: gateway_default_namespace populated to all gateways (to avoid checking this over and over again)
+  debug:
+    msg: 'gateways: {{ gateways | to_yaml }}'
+  when: "'debug' in ansible_run_tags"
+  run_once: true
+
+- name: Example using fail and when together
+  ansible.builtin.fail:
+    msg: let's stop here
+  when: false
 
 - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
-  set_fact: 
+  set_fact:
     applications: "{{ applications | combine(
-       {gateway.value.namespace | default(default_gateway_namespace): 
+       {gateway.value.namespace: 
          {gateway.key: gateway_install | combine({'ports': gateway.value.additional_ports | default({}) | list, 'type': 'gateway' }, list_merge='append', recursive=true)}}, recursive=true)}}"
   loop: "{{gateways | dict2items}}"
   loop_control:
     loop_var: gateway
+  run_once: true
 
 - name: print updated applications
   debug:
