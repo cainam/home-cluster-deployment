@@ -3,15 +3,15 @@ applications:
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
-      branch: 1.18.1
+      branch: 1.19.3
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
-      branch: 1.18.1
+      branch: 1.19.3
       subdir: manifests/charts/istio-control/istio-discovery
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
 #      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.18.1 --fix_source=.global.proxy.image=istio/proxyv2:1.18.1 --fix_source=.global.proxy_init.image=istio/proxyv2:1.18.1
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.19.3 --fix_source=.global.proxy.image=istio/proxyv2:1.19.3 --fix_source=.global.proxy_init.image=istio/proxyv2:1.19.3
       files:
         values:
           file: istiod-mesh.yaml
@@ -72,7 +72,7 @@ applications:
       git_to_local_params: --fix_source=.image.tag=2.21.02 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=1
       storage:
       - name: deconz-config
-        size: 5Mi
+        size: 10Mi
       network:
         svcPort: 80
         prefix: /
