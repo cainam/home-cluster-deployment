@@ -1,0 +1,39 @@
+- set_fact:
+    app_cfg_templates_path: "{{ role_path }}/templates/{{ storage.name }}"
+    app_cfg_files_path: "{{ role_path }}/files/{{ storage.name}}"
+    dest_base_dir: "{{ shared_mounts }}/{{ storage.name }}"
+
+- block:
+  - name: ensure destination directory exists for templates
+    file:
+      path: "{{ dest_base_dir }}{{ item | replace (app_cfg_templates_path,'') }}"
+      recurse: true
+      state: directory
+      owner: root
+      group: root
+      mode: u=rwx,g=rx,o=rx
+    loop: "{{ lookup('pipe', 'find '+ app_cfg_templates_path +' -type d').split('\n') }}"
+
+  - name: ensure destination directory exists for files
+    file:
+      path: "{{ dest_base_dir }}{{ item | replace (app_cfg_files_path,'') }}"
+      recurse: true
+      state: directory
+      owner: root
+      group: root
+      mode: u=rwx,g=rx,o=rx
+    loop: "{{ lookup('pipe', 'find '+ app_cfg_files_path +' -type d').split('\n') }}"
+
+  - name: create config from templates
+    template:
+      src: "{{ item }}"
+      dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }}"
+    loop: "{{ lookup('pipe', 'find '+ app_cfg_templates_path +' -type f').split('\n') }}"
+
+  - name: create config from files
+    copy:
+      src: "{{ item }}"
+      dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }}"
+    loop: "{{ lookup('pipe', 'find '+ app_cfg_files_path +' -type f').split('\n') }}"
+  
+  run_once: true

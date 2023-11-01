@@ -1,6 +1,6 @@
 - name: set app fact
   set_fact:
-    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} "
+    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} - "
     app: "{{ application.key }}"
         
 - name: .{{ name_prefix }} status
@@ -19,7 +19,11 @@
     - name: .{{ name_prefix }} build and fill
       shell: |
         . set_env.sh "{{ namespace.key }}"
-         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} {{ application.value.git_to_local_params | default("") }} 
+        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
+        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} \
+        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
+        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
+        {{ application.value.git_to_local_params | default("") }} 
       register: build_out
   
     - name: .{{ name_prefix }} build output
@@ -45,15 +49,18 @@
 - name: .{{ name_prefix }} install or upgrade
   shell: |
     . set_env.sh "{{ namespace.key }}"
-     helm upgrade --install --reset-values -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} {{ applications[namespace.key][application.key].helm_options | default('') }}
+    set -x
+     helm upgrade --install --reset-values -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
+     {{ applications[namespace.key][application.key].helm_options | default('') }} \
+     {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
   register: out
   when: "application.value.install | default(true)"
   
 - name: .{{ name_prefix }} output
   debug:
-    msg: "output: item: {{ item }}"
+    msg: "{{ item | to_yaml }}"
   loop: "{{ out  | dict2items }}"
-
+  
 - block:
   - name: .{{ name_prefix }} install storage content
     include_tasks: storage_content.yml
@@ -63,15 +70,26 @@
       loop_var: storage
   when: application.value.storage is defined
     
-- name: record application with gateway for VirtualService
+- name: "{{ name_prefix }} debug before vs preparation"
+  debug:
+    msg: "network defined?: {{ application.value.network | default('no') }} and install?: {{(application.value.install | default(true))}}"
+  loop: "{{ out  | dict2items }}"
+  
+- name: "{{ name_prefix }}  record application with gateway for VirtualService"
   set_fact:
     # gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
-    gateways: "{{ gateways | combine({application.value.network.gateway | default(default_gateway): {'applications': {namespace.key: {application.key: application.value}    }  }  }, recursive=True) }}"
+#    gateways: "{{ gateways | combine({application.value.network.gateway | default(default_gateway): {'applications': {namespace.key: {application.key: application.value}    }  }  }, recursive=True) }}"
+    gateways: "{{ gateways | combine(
+      {application.value.network.gateway | default(default_gateway): 
+        {'VirtualService': [{
+          'namespace': namespace.key,
+          'application': application.key,
+          'network': application.value.network}] } }, list_merge='append', recursive=True) }}"
   when: application.value.network is defined and (application.value.install | default(true))
 
-- name: .{{ name_prefix }} debug gateways
+- name: "{{ name_prefix }} debug gateways"
   debug:
-    msg: "gateways: {{ gateways}}"
+    msg: "gateways: {{ gateways | to_yaml}}"
 
 - block:
   - name: .{{ name_prefix }} => affinity - label node

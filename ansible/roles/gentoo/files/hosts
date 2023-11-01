@@ -39,3 +39,4 @@
 192.168.4.100 my-lb.adm13
 192.168.4.101 ha.my-lb.adm13
 192.168.4.102 deconz.my-lb.adm13
+192.168.4.103 keycloak.my-lb.adm13

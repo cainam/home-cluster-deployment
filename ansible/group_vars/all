@@ -21,12 +21,35 @@ volumes_to_exempt:
   - startseite
 
 default_gateway: gateway
+default_gateway_namespace: istio-ingress
 
 external_coredns_ip: 192.168.4.111
+
+gateway_install:
+  git: https://github.com/istio/istio.git
+  subdir: manifests/charts/gateway
+  branch: 1.18.1
+  chart: gateway
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+
+test:
+#  helm_options: --set name={% raw %}{% raw %} {{ gateway.key }}   {% endraw %}{% endraw %}
+#  helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
+#  helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
+
 gateways:
   gateway:
     domain: "{{ base_domain }}"
     external_ip: 192.168.4.100
+    additional_ports:
+    - name: keycloak
+      port: 2005
+      protocol: TCP
+      targetPort: 12005
     virtualservice_inject:
       http:
       - name: dummy
@@ -38,6 +61,7 @@ gateways:
   deconz-gw:
     domain: "deconz.{{ base_domain }}"
     external_ip: 192.168.4.102
+    namespace: home
     virtualservice_inject:
       http:
       - name: dummy
@@ -54,6 +78,17 @@ gateways:
       - name: dummy
         directResponse:
           status: 592
+        match:
+        - uri:
+            prefix: /dummy
+  kc-gw:
+    domain: "keycloak.{{ base_domain }}"
+    external_ip: 192.168.4.103
+    virtualservice_inject:
+      http:
+      - name: dummy
+        directResponse:
+          status: 593
         match:
         - uri:
             prefix: /dummy

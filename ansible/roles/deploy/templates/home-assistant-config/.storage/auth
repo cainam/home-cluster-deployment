@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "auth",
+  "data": {
+    "users": [
+      {
+        "id": "abb72e90ee69419ca5f02d6373646fcd",
+        "group_ids": [
+          "system-read-only"
+        ],
+        "is_owner": false,
+        "is_active": true,
+        "name": "Home Assistant Content",
+        "system_generated": true,
+        "local_only": false
+      },
+      {
+        "id": "1e3d128e31a34f458f33b473c37725fd",
+        "group_ids": [
+          "system-admin"
+        ],
+        "is_owner": true,
+        "is_active": true,
+        "name": "x",
+        "system_generated": false,
+        "local_only": false
+      }
+    ],
+    "groups": [
+      {
+        "id": "system-admin",
+        "name": "Administrators"
+      },
+      {
+        "id": "system-users",
+        "name": "Users"
+      },
+      {
+        "id": "system-read-only",
+        "name": "Read Only"
+      }
+    ],
+    "credentials": [
+      {
+        "id": "44185af1c0074ab683ff4185e81fb37f",
+        "user_id": "1e3d128e31a34f458f33b473c37725fd",
+        "auth_provider_type": "homeassistant",
+        "auth_provider_id": null,
+        "data": {
+          "username": "x"
+        }
+      }
+    ],
+    "refresh_tokens": [
+      {
+        "id": "743e9a3448f44813b49fd77c7e1f847b",
+        "user_id": "1e3d128e31a34f458f33b473c37725fd",
+        "client_id": null,
+        "client_name": "tk1",
+        "client_icon": null,
+        "token_type": "long_lived_access_token",
+        "created_at": "2023-07-02T07:14:26.374038+00:00",
+        "access_token_expiration": 315360000.0,
+        "token": "38074da349d7c89fe5354831cf2497f927169671ea768783239b15d1b22a9f3925a58a4fdf0d27bd37d5e85b38391a1f2908eb2bd5358c15d155a1c6251cf2a2",
+        "jwt_key": "6707d2f97730e0de3a07f9d626f1daff376f0d0258571ed0de7848659e4799826307e58dfa598bc159a099112948e0a05627de069ec418dad785a550417699d4",
+        "last_used_at": "2023-07-02T07:14:26.374531+00:00",
+        "last_used_ip": null,
+        "credential_id": null,
+        "version": "2023.5.3"
+      }
+    ]
+  }
+}

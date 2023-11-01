@@ -1,0 +1,23 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+  vars:
+    k8s_check_file: /tmp/kh
+
+  tasks:
+  # Get cert info
+  - name: Get CA certificate hash
+    #delegate_to: "{{ groups.k8s_master }}"
+    delegate_to: k8s-2-int.adm13
+    community.crypto.x509_certificate_info:
+      path: /etc/kubernetes/pki/ca.crt
+    register: __k8s_pki_ca
+
+  - set_fact:
+      discovery_token_ca_cert_hash: 'sha256:{{ __k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}'
+# Use the info
+  - name: debug
+    debug:
+      msg: 'sha256:{{ __k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}'
+

@@ -3,7 +3,7 @@
     ns: "{{ namespace.key }}"
 
 - block:
-  - name: namespace:{{ ns }} - configure
+  - name: namespace:{{ ns }} - configure namespaces to enable istio-injection
     shell: |
       kubectl apply -f - <<EOF
       apiVersion: v1
@@ -18,17 +18,8 @@
     debug:
       msg: "output: item: {{ item }}"
     loop: "{{ namespace_out  | dict2items }}"
-  
-#  - name: create VirtualService for redirections
-#    shell: |
-#      kubectl get vs -n istio-ingress main || echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: main\n  namespace: istio-ingress\nspec:\n  gateways:\n  - istio-ingress/main\n  hosts:\n  - "*.my-lb.adm13"\n  - my-lb.adm13\n  http:\n  - name: "dummy"\n    match:\n    - uri:\n       prefix: /dummy\n    directResponse:\n      status: 404\n' | kubectl apply -f -
-#    when: namespace.key == "istio-ingress"
-  
-#  - name: create Gateway for redirections
-#    shell: |
-#      kubectl get gw -n istio-ingress main 2>/dev/null || echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: Gateway\nmetadata:\n  name: main\n  namespace: istio-ingress\nspec:\n  selector:\n    istio: gateway\n  servers:\n  - hosts:\n    - my-lb.adm13\n    port:\n      name: https\n      number: 443\n      protocol: HTTPS\n    tls:\n      credentialName: istio-ingress\n      mode: SIMPLE\n' | kubectl apply -f -
-#    when: namespace.key == "istio-ingress"
-#  run_once: true
+
+-   
 
 - name: prepare by application
   include_tasks: prepare_application.yml

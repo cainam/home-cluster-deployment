@@ -7,12 +7,32 @@
       - name: set
         set_fact:
           a: "{{ x }}"
+          ab: "b-{{ x }}"
       - name: x
         debug:
-          msg: '{{ a }}'
+          msg: 'a: {{ a }} ab:{{ab}} x:{{x}} blao:{{blao}} y:{{ y | default("undefined") }}'
       - name: y
         debug:
-          msg: '{{ lookup("vars", "a"+"") }}'
+          msg: '{{ lookup("vars", "a"+"b") }}'
+      - name: y
+        debug:
+          msg: 'blao: {{ lookup("vars", "blao") }}'
+      - name: set blao_res and b
+        set_fact:
+          blao_res: '{{ lookup("vars", "blao") }}'
+          blao: "{{ blao }}"
+          b: "{{ blao }}"
+      - name: debug blao_res and b
+        debug:
+          msg: "blao_res: {{ blao_res }} b:{{ b }}"
+      - set_fact:
+          y: "YYYY"
+      - set_fact:
+          c: "{{ blao }}"
+      - debug:
+          msg: "blao: {{ blao }} blao_res: {{ blao_res }} b:{{ b }}"
+
     vars:
-      blao: !nonlazy "{% raw %} {{ x }} {% endraw %}"
+      # blao: !nonlazy "{% raw %} {{ x }} {% endraw %}"
+      blao: '{% raw %} {{ y | default("in raw") }} {% endraw %}'
       x: 'kljasdlkfjlkjsadflkj'

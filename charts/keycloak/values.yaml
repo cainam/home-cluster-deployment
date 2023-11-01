@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: myregistry.adm13:443/auth/keycloak
+  repository: auth/keycloak
   tag: 20.0.2
   pullPolicy: IfNotPresent
 

@@ -13,6 +13,7 @@ Notes:
 - trying to run on one host only using run_once/delegate_to did only work having a hostname set as fact not with a variable. It seems like vars are re-evaluated when accessed, but facts remain constant
 - uninstall of kubernetes is triggered using "--tags=all,force_reinstall", otherwise force_reinstall is skipped
 - calling Ansible example: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=deploy,build --extra-vars 'limit_namespace="istio-ingress"
+- ANSIBLE_HOME to use /plugin/filters for custom filters and local_only: ANSIBLE_HOME=$PWD ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory standalone/k8s-status.yaml --extra-vars local_only=/data/mine/git 
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - create token: kubectl create token -n tools kiali-service-account
@@ -28,10 +29,11 @@ Istio with prefix:
 - loadbalancer: 443=>main gw(tls)=>VirtualService with prefixes
 
 etcd:
-# alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
+# alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379,k8s-3-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
 # etcdctl endpoint status
 # etcdctl endpoint health
 # etcdctl defrag
+# if failure - restore or clean nodes manually and restart one with existing db using --force-new-cluster into manifest (see https://itnext.io/breaking-down-and-fixing-etcd-cluster-d81e35b9260d) 
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -80,3 +82,10 @@ TODO:
 - replace my roles/gentoo/files/init.d/set_cpu_performanc with gentoo cpupower
 - /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
+- k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
+- treat default gateway like all other gateways (e.g. remove ns_gw query from post_gateways)
+- custom filter: depenencies (db + gateway)
+- keycloak: from port to dedicated gw
+- dependencies: limit_XXXX => build array and check if item is in array
+- update haproxy: logrotate + dynamic hosts
+
