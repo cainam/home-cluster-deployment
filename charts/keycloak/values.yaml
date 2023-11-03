@@ -6,7 +6,6 @@ replicaCount: 1
 
 image:
   repository: auth/keycloak
-  tag: 22.0.5
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

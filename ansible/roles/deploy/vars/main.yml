@@ -40,7 +40,7 @@ applications:
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/keycloak
-      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=21.1.1
+      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=22.0.5
       storage:
       - name: keycloak
         size: 1Gi
@@ -201,4 +201,9 @@ applications:
         size: 2Gi
       - name: pg-config
         size: 4Mi
-
+  kube-system:
+    descheduler:
+      git: https://github.com/kubernetes-sigs/descheduler.git
+      subdir: charts/descheduler
+      xbranch: v0.28.0
+      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=50 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="@hourly"

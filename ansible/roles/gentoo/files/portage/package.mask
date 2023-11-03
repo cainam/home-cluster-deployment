@@ -1,4 +1,4 @@
->dev-lang/rust-1.69.0
->sys-devel/gcc-12.2.1_p20230304
-<sys-devel/gcc-12.2.1_p20230304
+>sys-devel/gcc-13.2.1_p20230826
+<sys-devel/gcc-13.2.1_p20230826
+
 >dev-libs/boost-1.82.0

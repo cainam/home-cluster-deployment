@@ -83,9 +83,7 @@ TODO:
 - /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
-- treat default gateway like all other gateways (e.g. remove ns_gw query from post_gateways)
 - custom filter: depenencies (db + gateway)
-- keycloak: from port to dedicated gw
 - dependencies: limit_XXXX => build array and check if item is in array
 - update haproxy: logrotate + dynamic hosts
 - create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
