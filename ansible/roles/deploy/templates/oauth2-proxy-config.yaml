@@ -14,7 +14,8 @@ alphaConfig:
       clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider
-      loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
+      #loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
+      loginURL: https://keycloak.my-lb.adm13/realms/test/protocol/openid-connect/auth
       redeemURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/token
       profileURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
       validateURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
@@ -35,7 +36,8 @@ alphaConfig:
         audienceClaims:
         - aud
         skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
-        issuerURL: https://my-lb.adm13:2005/realms/test
+        # issuerURL: https://my-lb.adm13:2005/realms/test
+        issuerURL: https://keycloak.my-lb.adm13/realms/test
         jwksURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/certs
     upstreamConfig:
       upstreams:

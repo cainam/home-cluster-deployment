@@ -92,8 +92,8 @@ function pull_local(){
     #[ "${chart_version}" != "" ] && echo "updating chart_version" && yq -yi  '.version="'"${chart_version}"'"' Chart.yaml
     set -x
     helm dependency build $PWD
-
     helm package -d $helm_repo_dir/ $PWD
+    helm repo add "${category}" "${helm_url}"
     helm repo index "${helm_repo_dir}" --url $helm_url
     helm repo update
     set +x

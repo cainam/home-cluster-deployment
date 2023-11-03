@@ -2,7 +2,7 @@
   set_fact:
     ns: "{{ namespace.key }}"
   
-- name: manage application in {{ ns }}
+- name: "namespace: {{ ns }} - manage applications"
   include_tasks: manage_one_application.yml
   when: (limit_application is not defined or application.key == limit_application) 
   loop: "{{ namespace.value | dict2items }}"
