@@ -20,7 +20,7 @@
       shell: |
         . set_env.sh "{{ namespace.key }}"
         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
-        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir }} \
+        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
         --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
         --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
         {{ application.value.git_to_local_params | default("") }} 
@@ -70,6 +70,14 @@
       loop_var: storage
   when: application.value.storage is defined
     
+- block:
+  - name: "{{ name_prefix }}manage application requirements"
+    include_tasks: manage_application_requirements.yaml
+    with_items: "{{ application.value.requires }}"
+    loop_control:
+      loop_var: requires
+  when: application.value.requires is defined
+
 - name: "{{ name_prefix }} debug before vs preparation"
   debug:
     msg: "network defined?: {{ application.value.network | default('no') }} and install?: {{(application.value.install | default(true))}}"

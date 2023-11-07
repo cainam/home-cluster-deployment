@@ -33,7 +33,5 @@
     debug:
       msg: "my_cluster_ip:{{ my_cluster_ip }}"
 
-- name: set fact for var
-  set_fact:
-    t: fact
-
+  - name: "include secrets"
+    include_vars: "{{ local_only }}/secrets"

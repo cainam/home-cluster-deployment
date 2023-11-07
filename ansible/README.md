@@ -87,3 +87,4 @@ TODO:
 - dependencies: limit_XXXX => build array and check if item is in array
 - update haproxy: logrotate + dynamic hosts
 - create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
+- replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml

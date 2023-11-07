@@ -13,8 +13,15 @@ fi
 echo "$0: directory: $PWD"
 #git clone   --depth 1    --filter=blob:none    --no-checkout  "${git_source}"
 #git clone --depth 1 --filter=blob:none --no-checkout "${git_source}"
-git clone ${git_branch} --depth 1 --filter=blob:none --sparse "${git_source}"
+
+if [ "${git_subdir}" = "" ]; then
+  git clone "${git_source}"
+else
+  git clone ${git_branch} --depth 1 --filter=blob:none --sparse "${git_source}"
+fi
 cd *
 # git checkout --quiet $(git branch --show-current) --  "${git_subdir}" &> /dev/null
-git sparse-checkout set "${git_subdir}"
+if [ "${git_subdir}" != "" ]; then
+  git sparse-checkout set "${git_subdir}"
+fi
 echo "subdir checkout done"

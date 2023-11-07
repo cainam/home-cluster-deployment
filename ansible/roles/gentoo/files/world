@@ -13,7 +13,6 @@ app-portage/gentoolkit
 app-text/tree
 dev-db/etcd
 dev-embedded/rpi-eeprom
-dev-libs/boost
 dev-util/strace
 dev-vcs/git
 net-analyzer/traceroute

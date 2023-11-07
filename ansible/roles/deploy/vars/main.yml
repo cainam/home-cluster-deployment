@@ -19,12 +19,6 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
-#  istio-ingress:
-#    gateway:
-#     git: https://github.com/istio/istio.git
-#      subdir: manifests/charts/gateway
-#      branch: 1.18.1
-#      helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
   auth:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
@@ -54,16 +48,6 @@ applications:
       subdir: charts/stable/common
       branch: common-4.5.2
       install: false
-    #ha-gw:
-      #git: https://github.com/istio/istio.git
-      #subdir: manifests/charts/gateway
-      #branch: 1.18.1
-      #helm_options: --set 'service.externalIPs={"192.168.4.101"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=ha-gw
-    #deconz-gw:
-      #git: https://github.com/istio/istio.git
-      #subdir: manifests/charts/gateway
-      #helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
-      #chart: gateway
     deconz:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz
@@ -93,8 +77,8 @@ applications:
         svcPort: 8123
         gateway: ha-gw
       requires:
-        - db:
-            service: postgresql
+          - type: postgresql
+            name: postgresql
             namespace: db
             config:
               database: ha
@@ -128,7 +112,6 @@ applications:
         svcName: kiali
         prefix: /kiali
         rewrite: /kiali
-      #helm_options:  --set auth.strategy=anonymous --set istio_namespace=istio-system --set external_services.prometheus.url="http://prometheus-server.tools/" --set external_services.prometheus.auth.insecure_skip_verify=true  --set external_services.tracing.in_cluster_url=http://jaeger-query.tools:16685/jaeger --set external_services.tracing.enabled=true --set external_services.tracing.url=https://my-lb.adm13/jaeger --set external_services.istio.root_namespace=istio-system --set external_services.istio.component_status.components
       helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system
       files:
         values:
@@ -194,11 +177,14 @@ applications:
         rewrite: /prometheus
   db:
     postgresql:
-      git: https://github.com/cainam/k8s_at_home.git
-      subdir: charts/postgresql
+      #git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cetic/helm-postgresql.git
+      #subdir: charts/postgresql
+      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
+      git_to_local_params: --fix_source=.image.tag=15.4 --fix_source=.volumePermissions.image.tag=12.2-slim
       storage: 
-      - name: data-postgresql-postgresql-0
-        size: 2Gi
+      - name: data-postgresql-0
+        size: 11Gi
       - name: pg-config
         size: 4Mi
   kube-system:
