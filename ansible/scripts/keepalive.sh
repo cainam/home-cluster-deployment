@@ -19,3 +19,7 @@ if [ "$2" = "k8s" ]; then
     done
   fi
 fi
+#if [ "$3" = "MASTER" ]; then
+#  /etc/init.d/run-registry restart
+#  /etc/init.d/lighttpd restart 
+#fi
