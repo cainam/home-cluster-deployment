@@ -229,7 +229,6 @@
     - ntp-client
     - brickmount
     - keepalived
-    - registry
     - haproxy
     - autofs
     - crio
@@ -237,11 +236,12 @@
     - kubelet
     - lighttpd
     - syslog-ng
-    - lighttpd
     - cronie
     - wait_for_internet
     - cpupower
     - sshd
+#    - registry
+#    - lighttpd
   ignore_errors: yes
 
 - name: gluster

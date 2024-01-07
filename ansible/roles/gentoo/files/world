@@ -13,6 +13,7 @@ app-portage/gentoolkit
 app-text/tree
 dev-db/etcd
 dev-embedded/rpi-eeprom
+dev-python/psycopg
 dev-util/strace
 dev-vcs/git
 net-analyzer/traceroute
@@ -30,6 +31,7 @@ sys-apps/ethtool
 sys-apps/i2c-tools
 sys-apps/ifplugd
 sys-apps/usbutils
+sys-block/fio
 sys-cluster/glusterfs
 sys-cluster/keepalived
 sys-cluster/kubeadm
@@ -44,4 +46,3 @@ www-servers/lighttpd
 sys-kernel/linux-firmware
 net-fs/autofs
 net-fs/nfs-utils
-sys-block/fio

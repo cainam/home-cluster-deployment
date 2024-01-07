@@ -1,0 +1,27 @@
+---
+applications:
+  istio-system:
+    base: 
+      git: https://github.com/istio/istio.git
+      branch: 1.18.1
+      subdir: manifests/charts/base
+    istiod: 
+      git: https://github.com/istio/istio.git
+      branch: 1.18.1
+      subdir: manifests/charts/istio-control/istio-discovery
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
+      #xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.18.1 --fix_source=.global.proxy.image=istio/proxyv2:1.18.1 --fix_source=.global.proxy_init.image=istio/proxyv2:1.18.1
+      files:
+        values:
+          file: istiod-mesh.yaml
+    auth-policy:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/auth-policy
+      helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
+  istio-ingress:
+    gateway:
+      git: https://github.com/istio/istio.git
+      subdir: manifests/charts/gateway
+      branch: 1.18.1
+      helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005

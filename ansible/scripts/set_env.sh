@@ -24,4 +24,6 @@ export helm_repo=${category}
 export helm_url=https://helm.adm13:9443/$helm_repo
 export helm_repo_dir=$helm_dir/$helm_repo
 
+export my_ansible="ANSIBLE_NO_TARGET_SYSLOG=True ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook --extra-vars local_only=/data/mine/git -i inventory"
+
 export env_is_set=1

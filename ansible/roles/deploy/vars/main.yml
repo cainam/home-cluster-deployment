@@ -52,8 +52,11 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz
       affinity: k8s-2-int.adm13
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='"0"' --set env.DEBUG_HTTP='"0"' --set env.DEBUG_APS='"1"' --set env.DEBUG_ZCL='"1"' --set env.DEBUG_ZDP='"1"' --set env.DEBUG_DDF='"1"' --set env.DEBUG_DEV='"1"' --set env.DEBUG_OTA='"1"' --set env.DEBUG_ERROR='"1"'
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='0' --set env.DEBUG_HTTP='0' --set env.DEBUG_APS='1' --set env.DEBUG_ZCL='1' --set env.DEBUG_ZDP='1' --set env.DEBUG_DDF='1' --set env.DEBUG_DEV='1' --set env.DEBUG_OTA='1' --set env.DEBUG_ERROR='1'
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='\0' --set env.DEBUG_HTTP='\0' --set env.DEBUG_APS='\1' --set env.DEBUG_ZCL='\1' --set env.DEBUG_ZDP='\1' --set env.DEBUG_DDF='\1' --set env.DEBUG_DEV='\1' --set env.DEBUG_OTA='\1' --set env.DEBUG_ERROR='\1'
       helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi
-      git_to_local_params: --fix_source=.image.tag=2.21.02 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=1
+      git_to_local_params: --fix_source=.image.tag=2.25.0 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=0 --fix_source=.env.DEBUG_APS=1 --fix_source=.env.DEBUG_ZCL=1 --fix_source=.env.DEBUG_ZDP=1 --fix_source=.env.DEBUG_DDF=1 --fix_source=.env.DEBUG_DEV=1 --fix_source=.env.DEBUG_OTA=1 --fix_source=.env.DEBUG_ERROR=1 --fix_source=.env.DECONZ_VNC_DISABLE_PASSWORD=1
       storage:
       - name: deconz-config
         size: 10Mi
@@ -64,7 +67,7 @@ applications:
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag=2023.7.2
+      git_to_local_params: --fix_source=.image.tag=2023.11.1 --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
       cm_helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap --set persistence.config.name=home-assistant-configuration --set configmap.config.enabled=true
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values

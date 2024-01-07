@@ -18,7 +18,6 @@ volumes_to_exempt:
   - keycloak_data
   - meinKram
   - registry
-  - startseite
 
 default_gateway: gateway
 default_gateway_namespace: istio-ingress
@@ -35,11 +34,6 @@ gateway_install:
     port: 443
     protocol: TCP
     targetPort: 443
-
-test:
-#  helm_options: --set name={% raw %}{% raw %} {{ gateway.key }}   {% endraw %}{% endraw %}
-#  helm_options: --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set service.ports[1].name=keycloak,service.ports[1].port=2005,service.ports[1].protocol=TCP,service.ports[1].targetPort=12005
-#  helm_options: --set 'service.externalIPs={"192.168.4.102"}' --set service.ports[0].name=https,service.ports[0].port=443,service.ports[0].protocol=TCP,service.ports[0].targetPort=443 --set name=deconz-gw
 
 gateways:
   gateway:

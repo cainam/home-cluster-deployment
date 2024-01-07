@@ -6,7 +6,6 @@ depend()
 {
         local opts mywant=""
         after glusterd
-        after keepalived
         need glusterd
         after brickmount
         want $mywant

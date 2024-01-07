@@ -1,0 +1,18 @@
+- name: prepare by application
+  include_tasks: create_helm_options.yaml
+  loop: "{{ namespace.value | dict2items }}"
+  loop_control:
+    loop_var: application
+
+- block:
+  - name: print application.value {{ app }} -2
+    debug:
+      msg: "{{ namespace.value | dict2items | map(attribute='value') }}"
+  - name: app:{{ app }} helm_options -2
+    debug:
+      msg: "0:{{ gw.0 }}, 1: {{ gw.1 }}"
+    loop: "{{ namespace.value | dict2items | map(attribute='value') | subelements('ports', 'skip_missing=True')}}"
+    loop_control:
+      loop_var: gw
+    when: gw.0.type is defined and gw.0.type=='gateway'
+  when: false

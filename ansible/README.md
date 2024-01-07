@@ -12,7 +12,7 @@ New install:
 Notes:
 - trying to run on one host only using run_once/delegate_to did only work having a hostname set as fact not with a variable. It seems like vars are re-evaluated when accessed, but facts remain constant
 - uninstall of kubernetes is triggered using "--tags=all,force_reinstall", otherwise force_reinstall is skipped
-- calling Ansible example: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=deploy,build --extra-vars 'limit_namespace="istio-ingress"
+- calling Ansible example: eval $my_ansible site.yml --tags=deploy,build --extra-vars limit_application=deconz site.yml --tags=deploy,build --extra-vars 'limit_namespace="istio-ingress"
 - ANSIBLE_HOME to use /plugin/filters for custom filters and local_only: ANSIBLE_HOME=$PWD ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory standalone/k8s-status.yaml --extra-vars local_only=/data/mine/git 
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
@@ -33,7 +33,13 @@ etcd:
 # etcdctl endpoint status
 # etcdctl endpoint health
 # etcdctl defrag
-# if failure - restore or clean nodes manually and restart one with existing db using --force-new-cluster into manifest (see https://itnext.io/breaking-down-and-fixing-etcd-cluster-d81e35b9260d) 
+if failure - restore or clean nodes manually and restart one with existing db using --force-new-cluster into manifest (see https://itnext.io/breaking-down-and-fixing-etcd-cluster-d81e35b9260d) 
+failure: "snap: snapshot file doesn't exist", "failed to recover v3 backend from snapshot", "failed to find database snapshot file (snap: snapshot file doesn't exist)": fixed on faulty node by:
+1. stop kubelet
+2. backup
+3. delete member/snap/*snap and member/*/*wal
+4. start kubelet
+
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -45,7 +51,7 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
 
 
 home-assistant:
-  - DB, mariaDB to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
+  - DB, postgreSQL to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
   - not possible to change webroot, so subdomain used instead
   - only managed to get it manually from a running instance
     # llt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3NDNlOWEzNDQ4ZjQ0ODEzYjQ5ZmQ3N2M3ZTFmODQ3YiIsImlhdCI6MTY4ODI4MjA2NiwiZXhwIjoyMDAzNjQyMDY2fQ.vdlnHJWNoIaXaxbf3UF1sIxgEi1rOMbAdAh2kctiQt0"
@@ -65,6 +71,14 @@ home-assistant:
 VPN wireguard (Fritzbox + Android):
   - tunnel created
   - external coredns service interface used as DNS in wireguard
+
+Deconz:
+flash:
+# # git clone https://github.com/dresden-elektronik/gcfflasher.git
+# git checkout v4.3.0-beta
+# ./build_cmake.sh
+# kubectl scale --replicas=0 -n home deploy deconz
+# build/GCFFlasher -d /dev/ttyAMA0 -f /root/deCONZ_RaspBeeII_0x26780700.bin.GCF
 
 
 Networking:

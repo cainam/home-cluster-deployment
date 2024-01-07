@@ -1,0 +1,51 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+
+  vars:
+    auto_legacy_silent: true
+    auto_silent: true
+    ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
+  tasks:
+
+  - block:
+      - name: "purge volumes - get bricks"
+        shell: |
+          gluster vol info "{{ purge_volume }}" | grep "^Brick[0-9]" | cut -d : -f 3- | sort -u
+        run_once: true
+        register: get_bricks_out
+  
+      - debug: var=get_bricks_out
+ 
+      - name: set brick
+        set_fact:
+          brick: "{{ get_bricks_out.stdout }}"
+          
+      - name: purge volumes - get disk
+        shell: |
+          mount | grep "{{ brick }} on" | awk '{print $1}'
+        register: volume_out
+
+      - name: set vol
+        set_fact:
+          vol: "{{ volume_out.stdout }}"
+          
+      - debug:
+          msg: "brick: {{ brick }} volume: {{ vol }}"
+          
+      - name: purge volumes - delete volume
+        gluster.gluster.gluster_volume:
+          state: absent
+          name: "{{ purge_volume }}"
+        run_once: true
+        when: force_purge is defined
+
+      - name: purge volumes - delete bricks
+        shell: |
+          umount -v "{{ brick }}"
+          echo "{{ brick }}" | grep -q "^/data/gluster/bricks/" && rm -rfv "{{ brick }}"
+          echo "{{ vol }}" | grep -q "^/data/gluster/disks/" && rm -fv "{{ vol }}"
+        when: force_purge is defined
+  
+    when: purge_volume is defined
