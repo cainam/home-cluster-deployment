@@ -48,6 +48,13 @@ applications:
       subdir: charts/stable/common
       branch: common-4.5.2
       install: false
+    mosquitto:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/mosquitto
+      git_to_local_params: --fix_source=.image.tag=2.0.18 --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
+      storage:
+      - name: mosquitto
+        size: 1Gi
     deconz:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz

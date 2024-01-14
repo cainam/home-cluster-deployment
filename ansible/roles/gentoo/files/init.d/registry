@@ -5,9 +5,7 @@ description="run registry"
 depend()
 {
         local opts mywant=""
-        after glusterd
         need glusterd
-        after brickmount
         want $mywant
         use dns
         use root
