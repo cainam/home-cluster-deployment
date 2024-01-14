@@ -10,6 +10,7 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
     PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
+    registry: "{{ registry }}"
 #  tasks:
 #  - name: "include secrets"
 #    include_vars: "{{ local_only }}/secrets"

@@ -10,11 +10,7 @@ depend()
 {
         local opts mywant=""
         after root
-	need net.end0
         want $mywant
-        before glusterd
-        before registry
-        before lighttpd
         use dns
         use root
 }
@@ -52,57 +48,4 @@ start()
 stop()
 {
   action_on_bricks umount
-}
-
-
-old_start()
-{
-        ebegin "Mounting bricks"
-
-          for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do 
-             for loc in $(find ${glusterconf}/vols/${v}/bricks/  -maxdepth 1 -mindepth 1 -type f -printf "%f\n"); do 
-               einfo "found volume $v and brick $loc"
-               node=$(echo $loc|cut -d : -f 1);
-               node_ip=$(getent hosts ${node}|awk '{print $1}');
-               if $(echo "$my_ips" | grep -q  "${node_ip}" ); then 
-                 mp=$(echo ${loc} | cut -d : -f 2- | sed -e 's#-#/#g' );
-		 sub_path=$(echo ${mp} | sed -e "s#^${gluster_dir}/bricks##" -e 's#^/##')
-                 app_name=$(echo "${sub_path}" | cut -d / -f 1)
-		 vol_name=$(echo "${sub_path}" | cut -d / -f 2)
-		 disk="${brick_disk}/app:${app_name}-vol:${vol_name}" 
-
-	         einfo "mounting ${disk} ${mp} (sub_path=${sub_path} app_name=${app_name} vol=${vol_name}"
-                 mount ${disk} ${mp}
-	       else
-                 einfo "my_ips: "$(echo "$my_ips" | xargs)" but node_ip: $node_ip doesn't match, skip"
-	       fi
-             done ;
-          done
-          rc=0
-        eend "Done"
-        return $rc
-}
-
-old_stop()
-{
-  ebegin "Unmounting bricks"
-          for v in $(find ${glusterconf}/vols/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do 
-             for loc in $(find ${glusterconf}/vols/${v}/bricks/  -maxdepth 1 -mindepth 1 -type f -printf "%f\n"); do 
-               einfo "found volume $v and brick $loc"
-               node=$(echo $loc|cut -d : -f 1);
-               node_ip=$(getent hosts ${node}|awk '{print $1}');
-               if $(echo "$my_ips" | grep -q  "${node_ip}" ); then 
-	         mp=$(echo ${loc} | cut -d : -f 2- | sed -e 's#-#/#g');
-                 brickname=$(echo ${mp} | cut -d _ -f 2-);
-                 einfo "unmounting ${gluster_dir}/brick_$brickname"
-                 umount ${gluster_dir}/brick_$brickname;
-               else
-                 einfo "my_ips: "$(echo "$my_ips" | xargs)" but node_ip: $node_ip doesn't match, skip"
-               fi
-             done ;
-          done
-          rc=0
-
-        eend "Done"
-        return $rc 
 }
