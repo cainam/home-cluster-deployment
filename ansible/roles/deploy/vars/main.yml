@@ -55,6 +55,7 @@ applications:
       storage:
       - name: mosquitto
         size: 1Gi
+      network: x
     deconz:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/deconz
