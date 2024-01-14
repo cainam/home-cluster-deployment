@@ -6,7 +6,6 @@ metadata:
   labels: {{- include "mosquitto.labels" . | nindent 4 }}
 data:
   mosquitto.conf: {{- toYaml .Values.config | nindent 2 }}
-    password_file {{ .Values.authentication.passwordFilePath }}
   {{- if .Values.authentication.passwordFilePath -}}
     password_file {{ .Values.authentication.passwordFilePath }}
   {{- end }}
