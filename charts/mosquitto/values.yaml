@@ -108,10 +108,11 @@ config: |
   log_dest stdout
   listener 1883
   socket_domain ipv4
+  log_type all
   listener 9090
   socket_domain ipv4
-  protocol websockets
   log_type all
+  protocol websockets
 
 ## Additional volumes.
 extraVolumes: []
