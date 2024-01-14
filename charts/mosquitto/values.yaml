@@ -109,6 +109,8 @@ config: |
   listener 1883
   listener 9090
   protocol websockets
+  socket_domain ipv4
+  log_type all
 
 ## Additional volumes.
 extraVolumes: []
