@@ -18,8 +18,7 @@
     debug:
       msg: "output: item: {{ item }}"
     loop: "{{ namespace_out  | dict2items }}"
-
--   
+  run_once: true
 
 - name: prepare by application
   include_tasks: prepare_application.yml

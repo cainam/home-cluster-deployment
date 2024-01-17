@@ -3,6 +3,15 @@
     app_cfg_files_path: "{{ role_path }}/files/{{ storage.name}}"
     dest_base_dir: "{{ shared_mounts }}/{{ storage.name }}"
 
+- name: set directories
+  set_fact:
+    templates_dirs: "{{  lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type d').split('\n')|reject('match', '^$')  }}"
+    files_dirs: "{{      lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" -type d').split('\n')|reject('match', '^$')  }}"
+    templates_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type f').split('\n')|reject('match', '^$')  }}"
+    files_files: "{{     lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" -type f').split('\n')|reject('match', '^$')  }}"
+#    list_templates: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
+#    list_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_files_path +'\" ] || find \"'+ app_cfg_files_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
+
 - block:
   - name: ensure destination directory exists for templates
     file:
@@ -12,7 +21,7 @@
       owner: root
       group: root
       mode: u=rwx,g=rx,o=rx
-    loop: "{{ lookup('pipe', 'find '+ app_cfg_templates_path +' -type d').split('\n') }}"
+    loop: "{{ templates_dirs }}"
 
   - name: ensure destination directory exists for files
     file:
@@ -22,18 +31,35 @@
       owner: root
       group: root
       mode: u=rwx,g=rx,o=rx
-    loop: "{{ lookup('pipe', 'find '+ app_cfg_files_path +' -type d').split('\n') }}"
+    loop: "{{ files_dirs }}"
+
+  - name: dbg files_dirs
+    debug:
+      msg: "loop var: {{ item }} app_cfg_files_path: {{ app_cfg_files_path }} dest: {{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }} count: {{ files_dirs| length}}"
+    loop: "{{ files_dirs }}"
+    when: "'debug' in ansible_run_tags"
+
+  - name: dbg templates_dirs
+    debug:
+      msg: "loop var: -{{ item }}- app_cfg_templates_path: {{ app_cfg_templates_path }} dest: {{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }} count: {{ templates_dirs| length}}"
+    loop: "{{ templates_dirs }}"
+    when: "'debug' in ansible_run_tags"
 
   - name: create config from templates
     template:
       src: "{{ item }}"
       dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }}"
-    loop: "{{ lookup('pipe', 'find '+ app_cfg_templates_path +' -type f').split('\n') }}"
+    loop: "{{ templates_files }}"
 
   - name: create config from files
     copy:
       src: "{{ item }}"
       dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }}"
-    loop: "{{ lookup('pipe', 'find '+ app_cfg_files_path +' -type f').split('\n') }}"
+    loop: "{{ files_files }}"
   
   run_once: true
+
+- name: Example using fail and when together
+  ansible.builtin.fail:
+    msg: let's stop here
+  when: false

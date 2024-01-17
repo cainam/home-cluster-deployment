@@ -1,0 +1,13 @@
+{{- if .Values.persistent.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "zigbee2mqtt.pvc.name" . }}
+spec:
+  accessModes:
+  {{- toYaml .Values.persistent.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistent.capacity | quote }}
+  storageClassName: {{ .Values.persistent.storageClass | quote }}
+{{- end }}
