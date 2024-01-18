@@ -81,7 +81,7 @@ spec:
               name: zigbee2mqtt-config
               subPath: initconfig.sh
           {{- if .Values.zigbee2mqtt.deployment.devicePath }}
-            - mountPath: "/dev/ttyACM0"
+            - mountPath: {{ .Values.zigbee2mqtt.deployment.devicePath | quote }}
               name: zigbeedongle
           {{- end }}
           {{- end }}

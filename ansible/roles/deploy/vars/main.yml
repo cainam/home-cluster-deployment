@@ -49,10 +49,10 @@ applications:
       branch: common-4.5.2
       install: false
     zigbee2mqtt:
-      git: https://github.com/vanohaker/zigbee2mqtt-helm.git
-      subdir: zigbee2mqtt
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
-      helm_options: --set zigbee2mqtt.deployment.image.tag=1.35.1 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi --set zigbee2mqtt.deployment.debug=true
+      helm_options: --set zigbee2mqtt.deployment.image.tag=1.35.1 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi
       git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag=1.35.1 
       network: yes
       storage:
