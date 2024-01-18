@@ -83,7 +83,7 @@ spec:
           {{- if .Values.zigbee2mqtt.deployment.devicePath }}
             - mountPath: {{ .Values.zigbee2mqtt.deployment.devicePath | quote }}
               name: zigbeedongle
-          {{- end }}
+          {{- end }} 
           {{- end }}
       {{- with .Values.zigbee2mqtt.deployment.nodeSelector }}
       nodeSelector:
