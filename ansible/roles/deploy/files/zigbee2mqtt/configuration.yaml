@@ -1,29 +1,38 @@
-homeassistant: true
-
-# Enable the frontend, runs on port 8080 by default
-frontend: true
-
-# MQTT settings
+homeassistant: false
+frontend:
+  port: 8080
+  host: 0.0.0.0
+  url: https://zigbee2mqtt.home
 mqtt:
-  # MQTT base topic for zigbee2mqtt MQTT messages
   base_topic: zigbee2mqtt
-  # MQTT server URL
-  server: 'mqtt://mosquitto'
-  # MQTT server authentication, uncomment if required:
-  # user: my_user
-  # password: my_password
-
-# Serial settings
+  server: mqtt://localhost:1883
 serial:
-  # Location of CC2531 USB sniffer
-  port: /dev/ttyACM0
-
-# Advanced settings
+  port: /dev/ttyUSB0
 advanced:
-  # Let Zigbee2MQTT generate a network key on first start
-  network_key: GENERATE
-  # Let Zigbee2MQTT generate a pan_id on first start
-  pan_id: GENERATE
-  # Let Zigbee2MQTT generate a ext_pan_id on first start
-  ext_pan_id: GENERATE
-
+  network_key:
+    - 254
+    - 203
+    - 130
+    - 96
+    - 114
+    - 45
+    - 67
+    - 185
+    - 112
+    - 166
+    - 83
+    - 170
+    - 121
+    - 196
+    - 119
+    - 60
+  pan_id: 48330
+  ext_pan_id:
+    - 174
+    - 114
+    - 181
+    - 197
+    - 217
+    - 227
+    - 168
+    - 8

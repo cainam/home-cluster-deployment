@@ -55,23 +55,6 @@ spec:
           resources:
             {{- toYaml .Values.zigbee2mqtt.deployment.resources | nindent 12 }}
           {{- end }}
-          env:
-          - name: ZIGBEE2MQTT_CONFIG_HOMEASSISTANT
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.homeassistant | quote }}
-          - name: ZIGBEE2MQTT_CONFIG_PERMITJOIN
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.permitjoin | quote }}
-          - name: ZIGBEE2MQTT_CONFIG_MQTT_BASETOPIC
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.baseTopicName | quote }}
-          - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.mqttServerName | quote }}
-          - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.serialport | quote }}
-          - name: ZIGBEE2MQTT_CONFIG_ADVANCED_PANID
-            value: {{ .Values.zigbee2mqtt.deployment.configuration.panid | quote }}
-          {{- if .Values.zigbee2mqtt.deployment.frontend.enabled }}
-          - name: ZIGBEE2MQTT_CONFIG_FRONTEND_PORT
-            value: {{ .Values.zigbee2mqtt.deployment.frontend.port | quote }}
-          {{- end }}
           {{- if or .Values.persistent.enabled .Values.zigbee2mqtt.deployment.devicePath }}
           volumeMounts:
             - mountPath: "/app/data"
