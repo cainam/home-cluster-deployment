@@ -7,8 +7,10 @@ mqtt:
   base_topic: zigbee2mqtt
   server: mqtt://localhost:1883
 serial:
-  port: /dev/ttyUSB0
+ port: /dev/ttyUSB0
+ adapter: deconz
 advanced:
+  log_level: debug
   network_key:
     - 254
     - 203

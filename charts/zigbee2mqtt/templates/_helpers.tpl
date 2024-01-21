@@ -79,5 +79,5 @@ image name
 service name
 */}}
 {{- define "zigbee2mqtt.frontend.service.name" -}}
-{{ printf "%s-fronetnd" (include "zigbee2mqtt.fullname" .)}}
+{{ printf "%s" (include "zigbee2mqtt.fullname" .)}}
 {{- end }}
