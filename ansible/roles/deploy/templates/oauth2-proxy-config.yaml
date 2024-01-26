@@ -6,6 +6,8 @@ config:
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
         cookie_secret = "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU="
         ssl_insecure_skip_verify = true
+        redirect_url = "https://my-lb.adm13/oauth2/callback"
+
 alphaConfig:
   enabled: true
   configData:

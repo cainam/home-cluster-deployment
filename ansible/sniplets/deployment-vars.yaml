@@ -1,0 +1,20 @@
+applications:
+  istio-system:
+    base:
+#      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
+      ##xhelm_options: --set proxyVarsAsSecrets=false {% raw %} {% if applications['auth']['oauth2-proxy']['files']['config']['tempfile'] is defined %}  --values {{ applications['auth']['oauth2-proxy']['files']['config']['tempfile'] }}  {% endif %}   {% endraw %}
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='"0"' --set env.DEBUG_HTTP='"0"' --set env.DEBUG_APS='"1"' --set env.DEBUG_ZCL='"1"' --set env.DEBUG_ZDP='"1"' --set env.DEBUG_DDF='"1"' --set env.DEBUG_DEV='"1"' --set env.DEBUG_OTA='"1"' --set env.DEBUG_ERROR='"1"'
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='0' --set env.DEBUG_HTTP='0' --set env.DEBUG_APS='1' --set env.DEBUG_ZCL='1' --set env.DEBUG_ZDP='1' --set env.DEBUG_DDF='1' --set env.DEBUG_DEV='1' --set env.DEBUG_OTA='1' --set env.DEBUG_ERROR='1'
+      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='\0' --set env.DEBUG_HTTP='\0' --set env.DEBUG_APS='\1' --set env.DEBUG_ZCL='\1' --set env.DEBUG_ZDP='\1' --set env.DEBUG_DDF='\1' --set env.DEBUG_DEV='\1' --set env.DEBUG_OTA='\1' --set env.DEBUG_ERROR='\1'
+#    kiali-operator:
+#      git: https://github.com/kiali/helm-charts.git
+#      subdir: kiali-operator 
+#      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
+#      network:
+#        svcPort: 20001
+#        svcName: kiali
+#        prefix: /kiali
+#        rewrite: /kiali
+#      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
+      xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
+

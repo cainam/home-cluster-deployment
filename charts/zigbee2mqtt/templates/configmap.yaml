@@ -7,6 +7,6 @@ metadata:
 data:
   initconfig.sh: |
     #!/bin/sh
-    
+    # export DEBUG=zigbee-herdsman* 
     cd /app
     node index.js

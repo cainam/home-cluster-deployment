@@ -11,13 +11,13 @@ images:
   - name: oauth2-proxy
     source: https://github.com/oauth2-proxy/oauth2-proxy.git
     dockerfile: Dockerfile
-    branch: v7.4.0
+    branch: v7.5.1
     build_args: --from=docker.io/golang:1.19-buster --build-arg TARGETPLATFORM=linux/{{ default_platform }} --build-arg BUILDPLATFORM=linux/{{ default_platform }} --build-arg VERSION=7.4.0
     section: /auth/
   - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
-    branch: 21.1.1
+    branch: 22.0.5
     section: /auth/
   - name: mypython
     source: local

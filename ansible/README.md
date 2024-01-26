@@ -25,9 +25,6 @@ Manage Registry:
 - delete physically: # podman exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml
 - additionally sometimes structures have to be removed in /var/lib/registry/docker/registry/v2/repositories when no image version is shown
 
-Istio with prefix:
-- loadbalancer: 443=>main gw(tls)=>VirtualService with prefixes
-
 etcd:
 # alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379,k8s-3-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
 # etcdctl endpoint status
@@ -40,6 +37,8 @@ failure: "snap: snapshot file doesn't exist", "failed to recover v3 backend from
 3. delete member/snap/*snap and member/*/*wal
 4. start kubelet
 
+keycloak:
+- error "Caused by: org.h2.mvstore.MVStoreException: The write format 2 is smaller than the supported format 3 [2.2.220/5]" => fix by migrating the DB to a newer version: java -jar H2MigrationTool-1.4-all.jar -d keycloakdb.mv.db -f 2.0.202 -t 2.2.220 --user sa --password password
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -48,7 +47,6 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
       auth:
         insecure_skip_verify: true
       url: http://prometheus-server.tools/prometheus/
-
 
 home-assistant:
   - DB, postgreSQL to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
@@ -79,6 +77,7 @@ flash:
 # ./build_cmake.sh
 # kubectl scale --replicas=0 -n home deploy deconz
 # build/GCFFlasher -d /dev/ttyAMA0 -f /root/deCONZ_RaspBeeII_0x26780700.bin.GCF
+- conbee III: stty -F /dev/ttyUSB0 115200 is crucial
 
 
 Networking:
@@ -103,3 +102,4 @@ TODO:
 - create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
+- gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
