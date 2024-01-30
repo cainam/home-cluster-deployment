@@ -1,40 +1,33 @@
-homeassistant: false
+homeassistant: true
+permit_join: true
 frontend:
   port: 8080
   host: 0.0.0.0
-  url: https://zigbee2mqtt.home
+  url: https://open.my-lb.adm13/zigbee2mqtt
 mqtt:
   base_topic: zigbee2mqtt
-  server: mqtt://localhost:1883
+  server: mqtt://mosquitto.home:1883
+  user: x
+  password: x
 serial:
- port: /dev/ttyUSB0
- adapter: deconz
+  port: /dev/ttyUSB0
+  adapter: deconz
+  baudrate: 115200
 advanced:
   log_level: debug
-  network_key:
-    - 254
-    - 203
-    - 130
-    - 96
-    - 114
-    - 45
-    - 67
-    - 185
-    - 112
-    - 166
-    - 83
-    - 170
-    - 121
-    - 196
-    - 119
-    - 60
-  pan_id: 48330
-  ext_pan_id:
-    - 174
-    - 114
-    - 181
-    - 197
-    - 217
-    - 227
-    - 168
-    - 8
+  log_syslog:
+    app_name: Zigbee2MQTT
+    eol: /n
+    host: localhost
+    localhost: localhost
+    path: /dev/log
+    pid: process.pid
+    port: 514
+    protocol: udp4
+    type: '5424'
+  channel: 20
+devices:
+  '0x7cb94c76e5d50000':
+    friendly_name: Steckdose
+  '0x00158d0007bde782':
+    friendly_name: Temperatur

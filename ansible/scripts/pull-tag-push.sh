@@ -20,12 +20,13 @@ while read arch img section comments; do
   version=${image_only#*:}
   section=${section#/*}
   section=${section%/*}
-  mine=$registry/$section/$bname:$version; 
+  mine=$registry/$section/$bname:$version 
+  manifest=$(echo "https://${registry}/v2/$section/$bname/manifests/$version" | sed -e 's#/\+#/#g')
 
   if [ ${force} -eq 1 ]; then
     echo "enforcing new image"
   else
-    curl -s -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Accept: application/vnd.oci.image.manifest.v1+json"  https://${registry}/v2/$section/$bname/manifests/$version --fail-with-body > /dev/null && continue
+    curl -s -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Accept: application/vnd.oci.image.manifest.v1+json"  "${manifest}" --fail-with-body > /dev/null && continue
   fi
 
   echo "pulling $arch $img $section basename:$bname version:$version upload to section:$section/$bname:$version #$comments pushing as $mine";

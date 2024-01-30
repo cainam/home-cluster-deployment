@@ -60,7 +60,7 @@ home-assistant:
     2. add token manually again
     3. if ok, add automatically
     4. use it! => yeah, works, but no straight forward automation, at least using copy of manual config can be reused for full automation
-
+  - MQTT integration: manually added
   - install fusion solar => add HACS:
     - user profile: extended modus
   - in HACS: install FusionSolar, configure with Kiosk URL from Huawei
@@ -70,6 +70,11 @@ VPN wireguard (Fritzbox + Android):
   - tunnel created
   - external coredns service interface used as DNS in wireguard
 
+Fritz.Box: 
+  - configure floating IP: stop floating IP in network, flush cache by changing the DHCP range, add portfreigabe an start floating IP again
+  - DYNDNS: dyndns domain added to certificates as alt-names
+
+
 Deconz:
 flash:
 # # git clone https://github.com/dresden-elektronik/gcfflasher.git
@@ -77,7 +82,9 @@ flash:
 # ./build_cmake.sh
 # kubectl scale --replicas=0 -n home deploy deconz
 # build/GCFFlasher -d /dev/ttyAMA0 -f /root/deCONZ_RaspBeeII_0x26780700.bin.GCF
-- conbee III: stty -F /dev/ttyUSB0 115200 is crucial
+- conbee III: stty -F /dev/ttyUSB0 115200 is crucial; startup debugging: DEBUG=zigbee-herdsman*
+- Woolley BSD29/BSD59: issues: offline suddenly and autonomous power-off after few secs, got it working with config adapter_delay=350 plus "Min rep change" to 29 and then to 0 (yes, strange!)
+- Zigbee is sensible: stay away from USB devices (use cable) and use a Zigbee channel far away from 2.4GHz WLAN channel you use
 
 
 Networking:

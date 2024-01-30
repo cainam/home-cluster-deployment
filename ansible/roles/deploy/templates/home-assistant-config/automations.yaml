@@ -1,1 +1,22 @@
-[]
+- id: '1706637332761'
+  alias: Warmwasserpumpe ON
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.warmwasserpumpe
+    from:
+    to: 'on'
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - service: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.warmwasserpumpe
+  mode: single
