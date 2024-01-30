@@ -1,5 +1,9 @@
 ---
 applications:
+  anon:
+    tor:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/tor
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
