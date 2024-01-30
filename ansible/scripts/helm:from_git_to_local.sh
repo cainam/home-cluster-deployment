@@ -93,8 +93,9 @@ function pull_local(){
     set -x
     helm dependency build $PWD
     helm package -d $helm_repo_dir/ $PWD
+    helm repo index ${helm_repo_dir} --url ${helm_url}
     helm repo add "${category}" "${helm_url}"
-    helm repo index "${helm_repo_dir}" --url $helm_url
+    #helm repo index "${helm_repo_dir}" --url $helm_url
     helm repo update
     set +x
     cd -

@@ -99,7 +99,6 @@ TODO:
 - rename git repo
 - /etc/localtime + /etc/timezone
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
-- replace my roles/gentoo/files/init.d/set_cpu_performanc with gentoo cpupower
 - /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
@@ -110,3 +109,5 @@ TODO:
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
+- set limit_namespace if limit_application is set
+- nodeselector: purge configs on nodes not required anymore
