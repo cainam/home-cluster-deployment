@@ -1,47 +1,49 @@
-- name: images
-  debug:
-    msg: "img: {{ item }}"
-  loop: "{{ images  }}"
+- block:
+  - name: images
+    debug:
+      msg: "img: {{ item }}"
+    loop: "{{ images  }}"
+#    run_once: true
+  
+  - name: tempdir for build
+    tempfile:
+      state: directory
+      suffix: "-build-image"
+    register: build_dir
+  
+  - name: fine local dockerfiles
+    set_fact:
+      docker_files: "{{ lookup('pipe', '[ ! -d \"'+ role_path +'/files/\" ] || find \"'+ role_path +'/files/\" -type f').split('\n')|reject('match', '^$')  }}"
+  
+  - name: copy local dockerfiles
+    copy:
+      src: "{{ item }}"
+      dest: "{{ build_dir.path }}"
+      mode: 0644
+    loop: "{{ docker_files }}"
+
+  - name: build
+    shell: |
+      set -x
+      if [ "{{ item.dockerfile | default('') }}" = "" ]; then # nothing to build, try pull-push
+        echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.branch | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
+        exit $?
+      fi
+      if [ "{{ item.source }}" != "local" ]; then
+        git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
+        git_dir=$(basename "{{ item.source }}")
+        git_dir=${git_dir%%.git}
+        cd "${git_dir}"
+      fi
+      image="{{ registry }}{{ item.section | default('/')}}{{ item.name }}:{{ item.branch | default('latest') }}"
+      podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default('whoCares') }}" --tag "${image}"
+      podman push "${image}"
+    args:
+      chdir: "{{ build_dir.path }}"
+    register: build_out
+    when: image is not defined or item.name == image
+    loop: "{{ images  }}"
+  
+  - debug: var=build_out
   run_once: true
-
-- name: tempdir for build
-  tempfile:
-    state: directory
-    suffix: "-build-image"
-  register: build_dir
-
-- name: copy local dockerfiles
-  copy:
-    src: "{{ item }}"
-    dest: "{{ build_dir.path }}"
-    mode: 0644
-  loop:
-    - mypython.dockerfile
-    - keycloak.dockerfile
-
-- name: build
-  # include_tasks: build.yml
-  shell: |
-    set -x
-    if [ "{{ item.dockerfile | default('') }}" = "" ]; then # nothing to build, try pull-push
-      echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.branch }} {{ item.section | default("") }}" | pull-tag-push.sh
-      exit $?
-    fi
-    if [ "{{ item.source }}" != "local" ]; then
-      git clone --branch "{{ item.branch }}" "{{ item.source }}"
-      git_dir=$(basename "{{ item.source }}")
-      git_dir=${git_dir%%.git}
-      cd "${git_dir}"
-    fi
-    image="{{ registry }}{{ item.section | default('/')}}{{ item.name }}:{{ item.branch }}"
-    podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default('whoCares') }}" --tag "${image}"
-    podman push "${image}"
-  args:
-    chdir: "{{ build_dir.path }}"
-  register: build_out
-  when: image is not defined or item.name == image
-  loop: "{{ images  }}"
-  run_once: true
-
-- debug: var=build_out
 
