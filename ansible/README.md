@@ -61,10 +61,14 @@ home-assistant:
     3. if ok, add automatically
     4. use it! => yeah, works, but no straight forward automation, at least using copy of manual config can be reused for full automation
   - MQTT integration: manually added
-  - install fusion solar => add HACS (scripts/get_hacs.sh): in HACS: install FusionSolar, configure with Kiosk URL from Huawei
+  - install fusion solar => 
+    - no need to add HACS (scripts/get_hacs.sh): in HACS
+    - git clone https://github.com/tijsverkoyen/HomeAssistant-FusionSolar.git, move custom_component to HA and add integration 
+    - configure with Kiosk URL from Huawei
   - Settings -> Energy Dashboard
 
 VPN wireguard (Fritzbox + Android):
+f
   - tunnel created
   - external coredns service interface used as DNS in wireguard
 

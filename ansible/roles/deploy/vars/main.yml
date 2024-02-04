@@ -4,6 +4,9 @@ applications:
     tor:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/tor
+      storage:
+      - name: tor
+        size: 10Mi
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
