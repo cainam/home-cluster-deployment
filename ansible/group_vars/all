@@ -63,18 +63,18 @@ gateways:
         match:
         - uri:
             prefix: /dummy
-  deconz-gw:
-    domain: "deconz.{{ base_domain }}"
-    external_ip: 192.168.4.102
-    namespace: home
-    virtualservice_inject:
-      http:
-      - name: dummy
-        directResponse:
-          status: 591
-        match:
-        - uri:
-            prefix: /dummy
+#  deconz-gw:
+#    domain: "deconz.{{ base_domain }}"
+#    external_ip: 192.168.4.102
+#    namespace: home
+#    virtualservice_inject:
+#      http:
+#      - name: dummy
+#        directResponse:
+#          status: 591
+#        match:
+#        - uri:
+#            prefix: /dummy
   ha-gw:
     domain: "ha.{{ base_domain }}"
     external_ip: 192.168.4.101

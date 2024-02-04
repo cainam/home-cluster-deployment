@@ -61,9 +61,7 @@ home-assistant:
     3. if ok, add automatically
     4. use it! => yeah, works, but no straight forward automation, at least using copy of manual config can be reused for full automation
   - MQTT integration: manually added
-  - install fusion solar => add HACS:
-    - user profile: extended modus
-  - in HACS: install FusionSolar, configure with Kiosk URL from Huawei
+  - install fusion solar => add HACS (scripts/get_hacs.sh): in HACS: install FusionSolar, configure with Kiosk URL from Huawei
   - Settings -> Energy Dashboard
 
 VPN wireguard (Fritzbox + Android):

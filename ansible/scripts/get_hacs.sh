@@ -10,7 +10,7 @@ hacs_path="${path}/custom_components/hacs"
 
 rm -rf "${hacs_path}" && mkdir "${hacs_path}" 
 
-curl -L "https://github.com/hacs/integration/releases/${version}/download/${file}" --output ./${file}-${version}
+curl -L "https://github.com/hacs/integration/releases/download/${version}/${file}" --output ./${file}-${version}
 
-unzip ./${file}-${version} -d "${hacs_path}"
+unzip ./${file}-${version} -d "${hacs_path}" && rm ./${file}-${version}
 

@@ -2,8 +2,7 @@
   - name: images
     debug:
       msg: "img: {{ item }}"
-    loop: "{{ images  }}"
-#    run_once: true
+    loop: "{{ images }}"
   
   - name: tempdir for build
     tempfile:
