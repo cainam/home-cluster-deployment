@@ -20,9 +20,9 @@ spec:
     {{- end }}
       serviceAccountName: {{ include "alpine-tor.serviceAccountName" . }}
       volumes:
-        - name: alpine-tor-storage
+        - name: tor-config
           persistentVolumeClaim:
-            claimName: {{ include "alpine-tor.fullname" . }}-volumeclaim
+            claimName: {{ include "alpine-tor.fullname" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -32,8 +32,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
-            - mountPath: "/tor"
-              name: alpine-tor-storage
+            - mountPath: "/etc/tor"
+              name: tor-config
           env:
             - name: mode
               value: {{ .Values.mode }}
