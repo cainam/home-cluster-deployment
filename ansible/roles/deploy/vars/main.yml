@@ -93,7 +93,7 @@ applications:
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag=2024.1 --fix_source=.postgresql.image= 
+      git_to_local_params: --fix_source=.image.tag=2024.2 --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
       storage:

@@ -48,6 +48,11 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
         insecure_skip_verify: true
       url: http://prometheus-server.tools/prometheus/
 
+tor:
+  - test socks5 cluster internally: curl -L  socks5://tor.anon:9050 http://tagesschau.de
+  - disable istio sidecar by:         sidecar.istio.io/inject: "false" 
+
+
 home-assistant:
   - DB, postgreSQL to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
   - not possible to change webroot, so subdomain used instead
@@ -65,10 +70,13 @@ home-assistant:
     - no need to add HACS (scripts/get_hacs.sh): in HACS
     - git clone https://github.com/tijsverkoyen/HomeAssistant-FusionSolar.git, move custom_component to HA and add integration 
     - configure with Kiosk URL from Huawei
+  - data is outdated (max 30min late) so connection via Modbus
+    - enabled via FusionSolar webpage (device: SDongleA-05)
+    - Modbus could be also taken via efin converter on Smart Meter or on RS485 ports on Inverter, but SDongleA-05 required no additional hardware and is wireless
+    - Home-Assistant: https://github.com/wlcrs/huawei_solar to custom_components/
   - Settings -> Energy Dashboard
 
 VPN wireguard (Fritzbox + Android):
-f
   - tunnel created
   - external coredns service interface used as DNS in wireguard
 

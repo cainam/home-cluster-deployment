@@ -38,6 +38,8 @@ gateway_install:
 gateways:
   gateway:
     domain: "{{ base_domain }}"
+    hosts:
+    - "{{ base_domain }}"
     external_ip: 192.168.4.100
     additional_ports:
     - name: keycloak
@@ -54,6 +56,8 @@ gateways:
             prefix: /dummy
   open:
     domain: "open.{{ base_domain }}"
+    hosts:
+    - "{{ base_domain }}"
     external_ip: 192.168.4.104
     virtualservice_inject:
       http:
@@ -77,6 +81,9 @@ gateways:
 #            prefix: /dummy
   ha-gw:
     domain: "ha.{{ base_domain }}"
+    hosts:
+    - "{{ base_domain }}"
+    - adm13.dnshome.de
     external_ip: 192.168.4.101
     virtualservice_inject:
       http:
@@ -88,6 +95,8 @@ gateways:
             prefix: /dummy
   kc-gw:
     domain: "keycloak.{{ base_domain }}"
+    hosts:
+    - "{{ base_domain }}"
     external_ip: 192.168.4.103
     virtualservice_inject:
       http:
