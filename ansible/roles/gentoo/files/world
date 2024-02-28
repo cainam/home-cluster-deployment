@@ -14,7 +14,7 @@ app-text/tree
 dev-db/etcd
 dev-embedded/rpi-eeprom
 dev-python/psycopg
-dev-util/strace
+dev-debug/strace
 dev-vcs/git
 net-analyzer/traceroute
 net-dns/bind-tools
@@ -38,7 +38,7 @@ sys-cluster/kubeadm
 sys-cluster/kubectl
 sys-cluster/kubelet
 sys-devel/bc
-sys-devel/gdb
+dev-debug/gdb
 sys-kernel/linux-headers
 sys-power/cpupower
 sys-process/iotop
