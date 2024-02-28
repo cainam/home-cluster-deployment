@@ -25,9 +25,6 @@ Manage Registry:
 - delete physically: # podman exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml
 - additionally sometimes structures have to be removed in /var/lib/registry/docker/registry/v2/repositories when no image version is shown
 
-Istio with prefix:
-- loadbalancer: 443=>main gw(tls)=>VirtualService with prefixes
-
 etcd:
 # alias etcdctl="etcdctl --write-out=table --endpoints=k8s-1-int.adm13:2379,k8s-2-int.adm13:2379,k8s-3-int.adm13:2379  --insecure-skip-tls-verify=true --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
 # etcdctl endpoint status
@@ -40,6 +37,8 @@ failure: "snap: snapshot file doesn't exist", "failed to recover v3 backend from
 3. delete member/snap/*snap and member/*/*wal
 4. start kubelet
 
+keycloak:
+- error "Caused by: org.h2.mvstore.MVStoreException: The write format 2 is smaller than the supported format 3 [2.2.220/5]" => fix by migrating the DB to a newer version: java -jar H2MigrationTool-1.4-all.jar -d keycloakdb.mv.db -f 2.0.202 -t 2.2.220 --user sa --password password
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -48,6 +47,10 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
       auth:
         insecure_skip_verify: true
       url: http://prometheus-server.tools/prometheus/
+
+tor:
+  - test socks5 cluster internally: curl -L  socks5://tor.anon:9050 http://tagesschau.de
+  - disable istio sidecar by:         sidecar.istio.io/inject: "false" 
 
 
 home-assistant:
@@ -62,15 +65,25 @@ home-assistant:
     2. add token manually again
     3. if ok, add automatically
     4. use it! => yeah, works, but no straight forward automation, at least using copy of manual config can be reused for full automation
-
-  - install fusion solar => add HACS:
-    - user profile: extended modus
-  - in HACS: install FusionSolar, configure with Kiosk URL from Huawei
+  - MQTT integration: manually added
+  - install fusion solar => 
+    - no need to add HACS (scripts/get_hacs.sh): in HACS
+    - git clone https://github.com/tijsverkoyen/HomeAssistant-FusionSolar.git, move custom_component to HA and add integration 
+    - configure with Kiosk URL from Huawei
+  - data is outdated (max 30min late) so connection via Modbus
+    - enabled via FusionSolar webpage (device: SDongleA-05)
+    - Modbus could be also taken via efin converter on Smart Meter or on RS485 ports on Inverter, but SDongleA-05 required no additional hardware and is wireless
+    - Home-Assistant: https://github.com/wlcrs/huawei_solar to custom_components/
   - Settings -> Energy Dashboard
 
 VPN wireguard (Fritzbox + Android):
   - tunnel created
   - external coredns service interface used as DNS in wireguard
+
+Fritz.Box: 
+  - configure floating IP: stop floating IP in network, flush cache by changing the DHCP range, add portfreigabe an start floating IP again
+  - DYNDNS: dyndns domain added to certificates as alt-names
+
 
 Deconz:
 flash:
@@ -79,6 +92,9 @@ flash:
 # ./build_cmake.sh
 # kubectl scale --replicas=0 -n home deploy deconz
 # build/GCFFlasher -d /dev/ttyAMA0 -f /root/deCONZ_RaspBeeII_0x26780700.bin.GCF
+- conbee III: stty -F /dev/ttyUSB0 115200 is crucial; startup debugging: DEBUG=zigbee-herdsman*
+- Woolley BSD29/BSD59: issues: offline suddenly and autonomous power-off after few secs, got it working with config adapter_delay=350 plus "Min rep change" to 29 and then to 0 (yes, strange!)
+- Zigbee is sensible: stay away from USB devices (use cable) and use a Zigbee channel far away from 2.4GHz WLAN channel you use
 
 
 Networking:
@@ -93,13 +109,16 @@ TODO:
 - rename git repo
 - /etc/localtime + /etc/timezone
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
-- replace my roles/gentoo/files/init.d/set_cpu_performanc with gentoo cpupower
 - /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - custom filter: depenencies (db + gateway)
 - dependencies: limit_XXXX => build array and check if item is in array
+- dependencies: generalize waitdb initcontainer 
 - update haproxy: logrotate + dynamic hosts
 - create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
-- replace my own script for hacs by the download one
+- consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
+- gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
+- set limit_namespace if limit_application is set
+- nodeselector: purge configs on nodes not required anymore

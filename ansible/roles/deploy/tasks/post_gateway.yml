@@ -10,17 +10,17 @@
   shell: |
     kubectl get secret --ignore-not-found=false -n "{{ namespace.key }}" "{{ gateway.key }}" 2>/dev/null >> /dev/null || kubectl create -n "{{ namespace.key }}" secret tls "{{ gateway.key }}"  --key="{{ cert_path }}/my-lb.adm13.key" --cert="{{ cert_path }}/my-lb.adm13.crt"
 
-- name: "{{ gw_title }} - configure Gateway"
+- name: "{{ gw_title }} - configure gateway"
   shell: |
     cmd=replace; kubectl get gw -n {{ namespace.key }} {{ gateway.key }} 2>> /dev/null >> /dev/null || cmd=apply
-    echo -e "apiVersion: networking.istio.io/v1beta1\nkind: Gateway\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  selector:\n    istio: {{ gateway.key }}\n  servers:\n  - hosts:\n    - '{{ gateways[gateway.key].domain }}'\n    port:\n      name: https\n      number: 443\n      protocol: HTTPS\n    tls:\n      credentialName: {{ gateway.key }}\n      mode: SIMPLE" | kubectl ${cmd} -f -
+    echo "cmd: ${cmd}" > /tmp/cmd
+    echo -e "apiVersion: networking.istio.io/v1beta1\nkind: Gateway\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  selector:\n    istio: {{ gateway.key }}\n  servers:\n  - hosts:\n    {{ gateways[gateway.key].hosts |to_nice_yaml(indent=4) | trim | indent(4) }}\n    port:\n      name: https\n      number: 443\n      protocol: HTTPS\n    tls:\n      credentialName: {{ gateway.key }}\n      mode: SIMPLE" | kubectl ${cmd} -f -
 
 - name: "{{ gw_title }} - ensure VirtualService exists"
-#      kubectl get vs -n istio-ingress main || echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: main\n  namespace: istio-ingress\nspec:\n  gateways:\n  - istio-ingress/main\n  hosts:\n  - "*.my-lb.adm13"\n  - my-lb.adm13\n  http:\n  - name: "dummy"\n    match:\n    - uri:\n       prefix: /dummy\n    directResponse:\n      status: 404\n' | kubectl apply -f -
   shell: |
     exists=1; kubectl get vs --ignore-not-found=false -n {{ namespace.key }} {{ gateway.key }} 2>> /dev/null >> /dev/null || exists=0
     if [ $exists -eq 0 ]; then
-      echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  gateways:\n  - {{ namespace.key }}/{{ gateway.key }}\n  hosts:\n  - {{ gateways[gateway.key].domain }}\n  {{ gateways[gateway.key].virtualservice_inject |to_nice_yaml(indent=4) | trim | indent(4) }}\n' > /tmp/a 
+      echo -e 'apiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: {{ gateway.key }}\n  namespace: {{ namespace.key }}\nspec:\n  gateways:\n  - {{ namespace.key }}/{{ gateway.key }}\n  hosts:\n  {{ gateways[gateway.key].hosts |to_nice_yaml(indent=2) | trim | indent(2) }}\n  {{ gateways[gateway.key].virtualservice_inject |to_nice_yaml(indent=4) | trim | indent(4) }}\n' > /tmp/a 
       kubectl apply -f /tmp/a
     fi
   register: vs_setup
@@ -33,7 +33,6 @@
 
 - name: "{{ gw_title }} - apply VirtualService basic configuration"
   shell: |
-    kubectl get vs -n "{{ namespace.key }}" "{{ gateway.key }}" -o yaml | yq -y '.spec.hosts = ["{{ gateways[gateway.key].domain }}"]' | kubectl apply -f -
     kubectl get vs -n "{{ namespace.key }}" "{{ gateway.key }}" -o yaml | yq -y 'del(.spec.http[]? | select(.name=="dummy"))' | yq -y '.spec.http += {{ gateways[gateway.key].virtualservice_inject.http | regex_replace("'", '"') }}' | kubectl apply -f - # tricky: to manage the quotes, regex_replace() is used but not elegant
   register: vs_basic
 

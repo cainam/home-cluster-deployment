@@ -1,12 +1,12 @@
-FROM docker.io/library/debian:11.7-slim
+FROM docker.io/library/debian:12.4-slim
 
-ENV KEYCLOAK_VERSION 21.1.1
+ENV KEYCLOAK_VERSION 22.0.5
 ENV LANG en_US.UTF-8
 
 ARG KEYCLOAK_DIST=https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 USER root 
-RUN apt -y update && apt -y upgrade && apt -y install  openjdk-11-jre-headless  curl
+RUN apt -y update && apt -y upgrade && apt -y install  openjdk-17-jre-headless  curl
 #RUN groupadd keycloak && useradd --home-dir /opt --gid keycloak --no-create-home keycloak && chown -R -h keycloak:keycloak /opt
 RUN chown -R -h 100200:100200  /opt
 USER 100200

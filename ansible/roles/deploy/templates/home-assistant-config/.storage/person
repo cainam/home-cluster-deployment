@@ -8,7 +8,16 @@
         "id": "x",
         "name": "x",
         "user_id": "1e3d128e31a34f458f33b473c37725fd",
-        "device_trackers": []
+        "device_trackers": [
+          "device_tracker.andi"
+        ]
+      },
+      {
+        "id": "u",
+        "name": "u",
+        "device_trackers": [],
+        "user_id": "3cddac5925894752ad1e6cb50b967bc0",
+        "picture": null
       }
     ]
   }
