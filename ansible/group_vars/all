@@ -27,7 +27,7 @@ external_coredns_ip: 192.168.4.111
 gateway_install:
   git: https://github.com/istio/istio.git
   subdir: manifests/charts/gateway
-  branch: 1.18.1
+  branch: 1.20.2
   chart: gateway
   ports:
   - name: https
@@ -38,6 +38,8 @@ gateway_install:
 gateways:
   gateway:
     domain: "{{ base_domain }}"
+    hosts:
+    - "{{ base_domain }}"
     external_ip: 192.168.4.100
     additional_ports:
     - name: keycloak
@@ -52,20 +54,36 @@ gateways:
         match:
         - uri:
             prefix: /dummy
-  deconz-gw:
-    domain: "deconz.{{ base_domain }}"
-    external_ip: 192.168.4.102
-    namespace: home
+  open:
+    domain: "open.{{ base_domain }}"
+    hosts:
+    - open."{{ base_domain }}"
+    external_ip: 192.168.4.104
     virtualservice_inject:
       http:
       - name: dummy
         directResponse:
-          status: 591
+          status: 590
         match:
         - uri:
             prefix: /dummy
+#  deconz-gw:
+#    domain: "deconz.{{ base_domain }}"
+#    external_ip: 192.168.4.102
+#    namespace: home
+#    virtualservice_inject:
+#      http:
+#      - name: dummy
+#        directResponse:
+#          status: 591
+#        match:
+#        - uri:
+#            prefix: /dummy
   ha-gw:
     domain: "ha.{{ base_domain }}"
+    hosts:
+    - ha."{{ base_domain }}"
+    - adm13.dnshome.de
     external_ip: 192.168.4.101
     virtualservice_inject:
       http:
@@ -77,6 +95,8 @@ gateways:
             prefix: /dummy
   kc-gw:
     domain: "keycloak.{{ base_domain }}"
+    hosts:
+    - keycloak."{{ base_domain }}"
     external_ip: 192.168.4.103
     virtualservice_inject:
       http:
@@ -86,5 +106,4 @@ gateways:
         match:
         - uri:
             prefix: /dummy
-
 

@@ -1,17 +1,23 @@
 ---
 applications:
+  anon:
+    tor:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/tor
+      storage:
+      - name: tor
+        size: 10Mi
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
-      branch: 1.19.3
+      branch: 1.20.2
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
-      branch: 1.19.3
+      branch: 1.20.2
       subdir: manifests/charts/istio-control/istio-discovery
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
-#      xhelm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi {% raw %} {% if applications['istio-system']['istiod']['files']['config']['tempfile'] is defined %}  --values {{ applications['istio-system']['istiod']['files']['config']['tempfile'] }}  {% endif %}  {% endraw %}
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.19.3 --fix_source=.global.proxy.image=istio/proxyv2:1.19.3 --fix_source=.global.proxy_init.image=istio/proxyv2:1.19.3
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.20.2 --fix_source=.global.proxy.image=istio/proxyv2:1.20.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.20.2
       files:
         values:
           file: istiod-mesh.yaml
@@ -24,7 +30,8 @@ applications:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
       helm_options: --set proxyVarsAsSecrets=false 
-      ##xhelm_options: --set proxyVarsAsSecrets=false {% raw %} {% if applications['auth']['oauth2-proxy']['files']['config']['tempfile'] is defined %}  --values {{ applications['auth']['oauth2-proxy']['files']['config']['tempfile'] }}  {% endif %}   {% endraw %}
+      git_to_local_params: --fix_source=.image.tag=v7.5.1
+      remove_dependencies: redis
       files:
         values:
           file: oauth2-proxy-config.yaml
@@ -34,7 +41,7 @@ applications:
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/keycloak
-      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=22.0.5
+      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=23.0.4 --set resources.limits.memory=600Mi
       storage:
       - name: keycloak
         size: 1Gi
@@ -48,6 +55,20 @@ applications:
       subdir: charts/stable/common
       branch: common-4.5.2
       install: false
+    zigbee2mqtt:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/zigbee2mqtt
+      affinity: k8s-2-int.adm13
+      helm_options: --set zigbee2mqtt.deployment.image.tag=1.35.3 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
+      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag=1.35.3
+      network:
+        prefix: /
+        gateway: open
+        svcPort: 8080
+      storage:
+      - name: zigbee2mqtt
+        size: 100Mi
+        config: true
     mosquitto:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/mosquitto
@@ -56,28 +77,11 @@ applications:
       - name: mosquitto
         size: 1Gi
       network: x
-    deconz:
-      git: https://github.com/cainam/k8s_at_home.git
-      subdir: charts/deconz
-      affinity: k8s-2-int.adm13
-      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='"0"' --set env.DEBUG_HTTP='"0"' --set env.DEBUG_APS='"1"' --set env.DEBUG_ZCL='"1"' --set env.DEBUG_ZDP='"1"' --set env.DEBUG_DDF='"1"' --set env.DEBUG_DEV='"1"' --set env.DEBUG_OTA='"1"' --set env.DEBUG_ERROR='"1"'
-      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='0' --set env.DEBUG_HTTP='0' --set env.DEBUG_APS='1' --set env.DEBUG_ZCL='1' --set env.DEBUG_ZDP='1' --set env.DEBUG_DDF='1' --set env.DEBUG_DEV='1' --set env.DEBUG_OTA='1' --set env.DEBUG_ERROR='1'
-      #helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi --set env.DECONZ_VNC_MODE='\0' --set env.DEBUG_HTTP='\0' --set env.DEBUG_APS='\1' --set env.DEBUG_ZCL='\1' --set env.DEBUG_ZDP='\1' --set env.DEBUG_DDF='\1' --set env.DEBUG_DEV='\1' --set env.DEBUG_OTA='\1' --set env.DEBUG_ERROR='\1'
-      helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi
-      git_to_local_params: --fix_source=.image.tag=2.25.0 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=0 --fix_source=.env.DEBUG_APS=1 --fix_source=.env.DEBUG_ZCL=1 --fix_source=.env.DEBUG_ZDP=1 --fix_source=.env.DEBUG_DDF=1 --fix_source=.env.DEBUG_DEV=1 --fix_source=.env.DEBUG_OTA=1 --fix_source=.env.DEBUG_ERROR=1 --fix_source=.env.DECONZ_VNC_DISABLE_PASSWORD=1
-      storage:
-      - name: deconz-config
-        size: 10Mi
-      network:
-        svcPort: 80
-        prefix: /
-        gateway: deconz-gw
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag=2023.11.1 --fix_source=.postgresql.image= 
+      git_to_local_params: --fix_source=.image.tag=2024.2 --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      cm_helm_options: --set persistence.config.enabled=true --set persistence.config.type=configMap --set persistence.config.name=home-assistant-configuration --set configmap.config.enabled=true
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
       storage:
       - name: home-assistant-config
@@ -105,7 +109,7 @@ applications:
         svcName: jaeger-query
         rewrite: /jaeger
         svcPort: 16686
-      git_to_local_params: --fix_source=.allInOne.tag=1.45.0 --fix_source=.schema.image= --fix_source=.ingester.image= --fix_source=.agent.image=  --fix_source=.collector.image= --fix_source=.query.oAuthSidecar.image= --fix_source=.query.image= --fix_source=.spark.image= --fix_source=.esIndexCleaner.image= --fix_source=.esRollover.image= --fix_source=.esLookback.image= --fix_source=.hotrod.image.repository=
+      git_to_local_params: --fix_source=.allInOne.tag=1.54.0 --fix_source=.schema.image= --fix_source=.ingester.image= --fix_source=.agent.image=  --fix_source=.collector.image= --fix_source=.query.oAuthSidecar.image= --fix_source=.query.image= --fix_source=.spark.image= --fix_source=.esIndexCleaner.image= --fix_source=.esRollover.image= --fix_source=.esLookback.image= --fix_source=.hotrod.image.repository=
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/infopage
@@ -117,7 +121,7 @@ applications:
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-server
-      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag=v1.71.0 --fix_source=.deployment.version_label=v1.71.0 --fix_source=.deployment.image_version=v1.71.0
+      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag=v1.80.0 --fix_source=.deployment.version_label=v1.80.0 --fix_source=.deployment.image_version=v1.80.0
       network:
         svcPort: 20001
         svcName: kiali
@@ -127,16 +131,6 @@ applications:
       files:
         values:
           file: kiali-config.yaml
-#    kiali-operator:
-#      git: https://github.com/kiali/helm-charts.git
-#      subdir: kiali-operator 
-#      helm_options:  --set cr.create=true --set cr.spec.auth.strategy=anonymous --set cr.namespace=tools --set cr.spec.istio_namespace=istio-system --set allowAdHocKialiImage=true --set cr.spec.deployment.image_name=tools/kiali --set cr.spec.deployment.image_version=v1.68.0 --set cr.spec.external_services.prometheus.url="http://prometheus-server.tools/" --set cr.spec.external_services.prometheus.auth.insecure_skip_verify=true
-#      network:
-#        svcPort: 20001
-#        svcName: kiali
-#        prefix: /kiali
-#        rewrite: /kiali
-#      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       branch: v2.7.0
@@ -151,33 +145,29 @@ applications:
     kube-state-metrics:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/kube-state-metrics
-      xbranch: kube-state-metrics-5.8.2
-      branch: prometheus-23.1.0
-      git_to_local_params: --fix_source=.image.tag=v2.9.2
+      branch: kube-state-metrics-5.16.1
+      git_to_local_params: --fix_source=.image.tag=v2.10.1
       #git_to_local_params: --fix_source=.autosharding.enabled=false
       install: false
     prometheus-node-exporter:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus-node-exporter
-      xbranch: prometheus-node-exporter-4.18.1
-      branch: prometheus-23.1.0
+      branch: prometheus-node-exporter-4.30.3
       git_to_local_params: --fix_source=.image.tag=v1.6.1
       install: false
     prometheus-pushgateway:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus-pushgateway
-      xbranch: prometheus-pushgateway-2.4.0
-      branch: prometheus-23.1.0
-      git_to_local_params: --fix_source=.image.tag=v1.6.0
+      branch: prometheus-pushgateway-2.7.1
+      git_to_local_params: --fix_source=.image.tag=v1.6.2
       install: false
     prometheus:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/prometheus
-      branch: prometheus-23.1.0
-      xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
+      branch: prometheus-25.15.0
       helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false
       remove_dependencies: alertmanager
-      git_to_local_params: --fix_source=.server.image.tag=v2.45.0
+      git_to_local_params: --fix_source=.server.image.tag=v2.50.1
       storage: 
       - name: storage-prometheus-alertmanager-0
         size: 2Gi
@@ -188,10 +178,8 @@ applications:
         rewrite: /prometheus
   db:
     postgresql:
-      #git: https://github.com/cainam/k8s_at_home.git
       git: https://github.com/cetic/helm-postgresql.git
-      #subdir: charts/postgresql
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
+      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }} " --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       git_to_local_params: --fix_source=.image.tag=15.4 --fix_source=.volumePermissions.image.tag=12.2-slim
       storage: 
       - name: data-postgresql-0
@@ -202,5 +190,7 @@ applications:
     descheduler:
       git: https://github.com/kubernetes-sigs/descheduler.git
       subdir: charts/descheduler
-      xbranch: v0.28.0
-      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=50 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="@hourly"
+      branch: v0.29.0
+      git_to_local_params: --fix_source=.image.tag=v0.29.0
+      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=50 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
+

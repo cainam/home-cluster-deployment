@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zigbee2mqtt.fullname" . }}
+  labels:
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.zigbee2mqtt.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "zigbee2mqtt.selectorLabels" . | nindent 6 }}
+  strategy:
+    {{- toYaml .Values.zigbee2mqtt.deployment.strategy | nindent 4 }}
+  template:
+    metadata:
+      annotations:
+        zigbee2mqtt/configmap:  {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.zigbee2mqtt.deployment.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "zigbee2mqtt.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.zigbee2mqtt.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "zigbee2mqtt.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- if .Values.zigbee2mqtt.deployment.podSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.zigbee2mqtt.deployment.podSecurityContext | nindent 12 }}
+          {{- end }}
+          image: {{ include "zigbee2mqtt.image.name" . }}
+          imagePullPolicy: {{ .Values.zigbee2mqtt.deployment.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+            - "-c"
+          args:
+          {{- if .Values.zigbee2mqtt.deployment.debug }}
+            - "sleep infinity"
+          {{- else }}
+            - "/initconfig.sh"
+          {{- end }}
+          {{- if .Values.zigbee2mqtt.deployment.frontend.enabled }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.zigbee2mqtt.deployment.frontend.port }}
+              protocol: TCP
+          {{- end }}
+          {{- if .Values.zigbee2mqtt.deployment.resources }}
+          resources:
+            {{- toYaml .Values.zigbee2mqtt.deployment.resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.persistent.enabled .Values.zigbee2mqtt.deployment.devicePath }}
+          volumeMounts:
+            - mountPath: "/app/data"
+              name: zigbee2mqtt-data
+              readOnly: false
+            - mountPath: "/initconfig.sh"
+              name: zigbee2mqtt-config
+              subPath: initconfig.sh
+          {{- if .Values.zigbee2mqtt.deployment.devicePath }}
+            - mountPath: {{ .Values.zigbee2mqtt.deployment.devicePath | quote }}
+              name: zigbeedongle
+          {{- end }} 
+          {{- end }}
+      {{- with .Values.zigbee2mqtt.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zigbee2mqtt.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zigbee2mqtt.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: zigbee2mqtt-config
+        configMap:
+          name: {{ include "zigbee2mqtt.fullname" . }}
+          defaultMode: 0755
+      {{- if or .Values.persistent.enabled .Values.zigbee2mqtt.deployment.devicePath }}
+      - name: zigbee2mqtt-data
+      {{- if .Values.persistent.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "zigbee2mqtt.pvc.name" . }}
+      {{- else }}
+        emptyDir:
+          sizeLimit: 500Mi
+      {{- end }}
+      {{- if .Values.zigbee2mqtt.deployment.devicePath }}
+      - name: zigbeedongle
+        hostPath:
+          path: {{ .Values.zigbee2mqtt.deployment.devicePath }}
+          type: CharDevice
+      {{- end }}
+      {{- end }}

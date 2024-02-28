@@ -1,1 +1,46 @@
-[]
+- id: '1706637332761'
+  alias: Warmwasserpumpe ON
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.warmwasserpumpe
+    from:
+    to: 'on'
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - service: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.warmwasserpumpe
+  mode: single
+- id: '1708883845408'
+  alias: Licht einschalten nach 1min
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.licht_weg
+  - platform: device
+    type: turned_off
+    device_id: 7b2db77c2fc19923a28b42651875faca
+    entity_id: 43d6e09dd9ee435608d5a59a9a12f51f
+    domain: switch
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - type: turn_on
+    device_id: 7b2db77c2fc19923a28b42651875faca
+    entity_id: 43d6e09dd9ee435608d5a59a9a12f51f
+    domain: switch
+  mode: single

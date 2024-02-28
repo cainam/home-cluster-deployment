@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
 from ansible.errors import AnsibleError
+import re
 class FilterModule(object):
     def filters(self):
         return {
-            'or_array': self.or_array
+            'or_array': self.or_array,
+            'uquote': self.uquote
         }
 
     def or_array(self, bool_array):
