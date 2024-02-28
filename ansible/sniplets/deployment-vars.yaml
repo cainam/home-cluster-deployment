@@ -18,3 +18,17 @@ applications:
 #      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
       xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
 
+#    deconz:
+#      git: https://github.com/cainam/k8s_at_home.git
+#      subdir: charts/deconz
+#      affinity: k8s-2-int.adm13
+#      helm_options: --set nodeSelector.deconz=deconz --set securityContext.privileged=true --set env.DECONZ_DEVICE=/dev/ttyAMA0 --set persistence.config.enabled=true --set persistence.config.size=5Mi
+#      git_to_local_params: --fix_source=.image.tag=2.25.1 --fix_source=.env.DECONZ_VNC_MODE=0 --fix_source=.env.DEBUG_HTTP=0 --fix_source=.env.DEBUG_APS=0 --fix_source=.env.DEBUG_ZCL=0 --fix_source=.env.DEBUG_ZDP=0 --fix_source=.env.DEBUG_DDF=0 --fix_source=.env.DEBUG_DEV=1 --fix_source=.env.DEBUG_OTA=0 --fix_source=.env.DEBUG_ERROR=1  --fix_source=.env.DEBUG_INFO=1 --fix_source=.env.DECONZ_VNC_DISABLE_PASSWORD=1
+#      storage:
+#      - name: deconz-config
+#        size: 10Mi
+#      network:
+#        svcPort: 80
+#        prefix: /
+#        gateway: deconz-gw
+

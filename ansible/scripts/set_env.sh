@@ -17,7 +17,7 @@ function helm(){
   export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
   echo "podman_options:${podman_options}"
   [ "${category}" != "" ] && helm_options="${helm_options} -n ${category}"
-  podman run ${podman_options} ${registry}/helm:3.12.2 $helm_options $*
+  podman run ${podman_options} ${registry}/helm:3.12.2 $helm_options "$@"
 }
 export -f helm
 export helm_repo=${category}

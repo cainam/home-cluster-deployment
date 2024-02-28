@@ -11,6 +11,13 @@
         "device_trackers": [
           "device_tracker.andi"
         ]
+      },
+      {
+        "id": "u",
+        "name": "u",
+        "device_trackers": [],
+        "user_id": "3cddac5925894752ad1e6cb50b967bc0",
+        "picture": null
       }
     ]
   }

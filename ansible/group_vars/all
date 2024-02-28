@@ -57,7 +57,7 @@ gateways:
   open:
     domain: "open.{{ base_domain }}"
     hosts:
-    - "{{ base_domain }}"
+    - open."{{ base_domain }}"
     external_ip: 192.168.4.104
     virtualservice_inject:
       http:
@@ -82,7 +82,7 @@ gateways:
   ha-gw:
     domain: "ha.{{ base_domain }}"
     hosts:
-    - "{{ base_domain }}"
+    - ha."{{ base_domain }}"
     - adm13.dnshome.de
     external_ip: 192.168.4.101
     virtualservice_inject:
@@ -96,7 +96,7 @@ gateways:
   kc-gw:
     domain: "keycloak.{{ base_domain }}"
     hosts:
-    - "{{ base_domain }}"
+    - keycloak."{{ base_domain }}"
     external_ip: 192.168.4.103
     virtualservice_inject:
       http:
