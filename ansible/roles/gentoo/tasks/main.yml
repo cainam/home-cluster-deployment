@@ -217,6 +217,12 @@
 - name: emerge deploy
   shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+ 
+- name: eclean distfiles
+  shell: eclean distfiles
+ 
+- name: eclean packages
+  shell: eclean packages
 
 - name: enable services
   service:

@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: mypython
+  repository: tools/fastapi
   tag: 3.10.5-slim
   pullPolicy: IfNotPresent
 

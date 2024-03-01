@@ -106,7 +106,6 @@ TODO:
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
-- rename git repo
 - /etc/localtime + /etc/timezone
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - /var/db/repos - local on build, gluster vol for others
@@ -121,4 +120,3 @@ TODO:
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
 - set limit_namespace if limit_application is set
-- nodeselector: purge configs on nodes not required anymore

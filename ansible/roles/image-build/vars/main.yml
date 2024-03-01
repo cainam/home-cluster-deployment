@@ -31,3 +31,8 @@ images:
   - name: tor
     source: local
     dockerfile: tor.dockerfile
+  - name: fastapi
+    source: local
+    branch: 3.10.5-slim
+    dockerfile: fastapi.dockerfile
+    section: /tools/

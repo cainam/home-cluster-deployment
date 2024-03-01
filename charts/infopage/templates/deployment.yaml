@@ -33,11 +33,16 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          command: ["python"]
-          args:
-          - /app/list_entry_points.py
-          - --port={{ .Values.service.targetPort }}
-
+        - args:
+          - /usr/local/bin/uvicorn
+          - main:app
+          - --host
+          - 0.0.0.0
+          - --port
+          - "{{ .Values.service.targetPort }}"
+          - --reload
+          command:
+          - python
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

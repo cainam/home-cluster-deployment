@@ -5,7 +5,6 @@ registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
 cert_path: /data/mine/certs
-#local_ca_file: /data/mine/certs/myCA.pem
 local_ca_file: "{{ cert_path }}/myCA.pem"
 local_ca: "{{ lookup('file', local_ca_file) }}"
 base_domain: my-lb.adm13
