@@ -59,8 +59,8 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
-      helm_options: --set zigbee2mqtt.deployment.image.tag=1.35.3 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
-      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag=1.35.3
+      helm_options: --set zigbee2mqtt.deployment.image.tag=1.36.0 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
+      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag=1.36.0
       network:
         prefix: /
         gateway: open

@@ -213,11 +213,22 @@
 - name: emerge build
   shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
+
+- name: link deploy cron
+  file:
+    src: /usr/local/bin/deploy_gentoo.sh
+    dest: /etc/cron.daily/deploy_gentoo.sh
+    state: link
  
 - name: emerge deploy
   shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
- 
+
+- name: unlink deploy cron
+  file:
+    dest: /etc/cron.daily/deploy_gentoo.sh
+    state: absent
+
 - name: eclean distfiles
   shell: eclean distfiles
  
