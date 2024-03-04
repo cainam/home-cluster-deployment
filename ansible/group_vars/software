@@ -1,0 +1,7 @@
+software:
+  istio:
+    version: 1.20.2
+    latest:
+      type: github
+      params:
+        repo: istio/istio
