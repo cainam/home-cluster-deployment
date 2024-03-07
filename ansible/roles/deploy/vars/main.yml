@@ -10,14 +10,14 @@ applications:
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
-      branch: 1.20.2
+      branch: "{{ software.istio.version }}"
       subdir: manifests/charts/base
     istiod: 
       git: https://github.com/istio/istio.git
-      branch: 1.20.2
+      branch: "{{ software.istio.version }}"
       subdir: manifests/charts/istio-control/istio-discovery
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:1.20.2 --fix_source=.global.proxy.image=istio/proxyv2:1.20.2 --fix_source=.global.proxy_init.image=istio/proxyv2:1.20.2
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
       files:
         values:
           file: istiod-mesh.yaml
@@ -30,7 +30,7 @@ applications:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
       helm_options: --set proxyVarsAsSecrets=false 
-      git_to_local_params: --fix_source=.image.tag=v7.5.1
+      git_to_local_params: --fix_source=.image.tag="{{ software.oauth2_proxy.version }}"
       remove_dependencies: redis
       files:
         values:
@@ -41,7 +41,7 @@ applications:
     keycloak:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/keycloak
-      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag=23.0.4 --set resources.limits.memory=600Mi
+      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag="{{ software.keycloak.version }}" --set resources.limits.memory=600Mi
       storage:
       - name: keycloak
         size: 1Gi
@@ -60,7 +60,7 @@ applications:
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
       helm_options: --set zigbee2mqtt.deployment.image.tag=1.36.0 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
-      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag=1.36.0
+      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}"
       network:
         prefix: /
         gateway: open
@@ -72,7 +72,7 @@ applications:
     mosquitto:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/mosquitto
-      git_to_local_params: --fix_source=.image.tag=2.0.18 --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
+      git_to_local_params: --fix_source=.image.tag="{{ software.mosquitto.version }}" --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
       storage:
       - name: mosquitto
         size: 1Gi
@@ -80,7 +80,7 @@ applications:
     home-assistant:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag=2024.2 --fix_source=.postgresql.image= 
+      git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
       helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
       storage:
@@ -121,7 +121,7 @@ applications:
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-server
-      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag=v1.80.0 --fix_source=.deployment.version_label=v1.80.0 --fix_source=.deployment.image_version=v1.80.0
+      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag="{{ software.kiali.version }}" --fix_source=.deployment.version_label="{{ software.kiali.version }}" --fix_source=.deployment.image_version="{{ software.kiali.version }}"
       network:
         svcPort: 20001
         svcName: kiali

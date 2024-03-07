@@ -1,4 +1,4 @@
-{{- if and .Values.persistence.enabled (eq .Values.persistence.type "configMap" }}
+{{- if and .Values.persistence.enabled (eq .Values.persistence.type "configMap") }}
 {{- include "common.values.setup" . -}}
 ---
 apiVersion: monitoring.coreos.com/v1

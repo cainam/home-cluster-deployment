@@ -1,9 +1,16 @@
+- name: load software var
+  include_vars: software
+
 - name: print deployment information
   debug:
     msg: "namespace: {{ item }} application: {{ applications[item] }}" 
   with_items: "{{ applications.keys() | list }}"
   run_once: true
   
+- name: x
+  debug:
+    msg: 'software: {{ applications["istio-system"].base.branch }}'
+
 - name: check if container registry is available
   shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
   register: check_registry

@@ -1,0 +1,45 @@
+software:
+  istio:
+    version: 1.20.3
+    latest:
+      type: github
+      params:
+        repo: istio/istio
+  oauth2_proxy:
+    version: v7.6.0
+    latest:
+      type: github
+      params:
+        repo: oauth2-proxy/oauth2-proxy
+  keycloak:
+    version: 24.0.1
+    latest:
+      type: github
+      params:
+        repo: keycloak/keycloak
+  zigbee2mqtt:
+    version: 1.36.0
+    latest:
+      type: github
+      params:
+        repo: koenkk/zigbee2mqtt
+  mosquitto:
+    version: 2.0.18
+    latest:
+      type: dockerhub
+      params:
+        repo: library/eclipse-mosquitto
+        arch: arm64
+  home_assistant:
+    version: "2024.2"
+    latest:
+      type: dockerhub
+      params:
+        repo: homeassistant/home-assistant
+        arch: arm64
+  kiali:
+    version: v1.81.0
+    latest:
+      type: quay
+      params:
+        repo: kiali/kiali

@@ -219,6 +219,7 @@
     src: /usr/local/bin/deploy_gentoo.sh
     dest: /etc/cron.daily/deploy_gentoo.sh
     state: link
+  when: gentoo_build is defined
  
 - name: emerge deploy
   shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
@@ -228,6 +229,7 @@
   file:
     dest: /etc/cron.daily/deploy_gentoo.sh
     state: absent
+  when: gentoo_build is not defined
 
 - name: eclean distfiles
   shell: eclean distfiles

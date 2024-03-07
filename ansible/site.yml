@@ -32,6 +32,13 @@
         - never
         - gentoo
     - role: deploy
+#      - name: sw
+#
+      vars_file: group_vars/01_software
+      vars_file:
+      - ./group_vars/01_software
+      include_vars: 01_software
+      include_vars: group_vars/software
       tags:
         - never
         - deploy
