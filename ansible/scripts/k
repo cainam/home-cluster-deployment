@@ -11,7 +11,7 @@ elif (echo "$action" | grep -q ^g); then
   action="get -o yaml"
 elif (echo "$action" | grep -q ^e); then
   action="exec -it "
-  add="$3"
+  add="-- $3"
   search=$2
   [ "$add" == "" ] && add="-- bash"
   atype=pod

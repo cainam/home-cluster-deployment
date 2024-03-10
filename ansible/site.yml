@@ -11,9 +11,12 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
     PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
     registry: "{{ registry }}"
-#  tasks:
-#  - name: "include secrets"
-#    include_vars: "{{ local_only }}/secrets"
+  pre_tasks:
+  - name: include software
+    include_vars: vars/software
+    tags:
+    - image-build
+    - deploy
 
   roles:
     - role: always
@@ -32,13 +35,6 @@
         - never
         - gentoo
     - role: deploy
-#      - name: sw
-#
-      vars_file: group_vars/01_software
-      vars_file:
-      - ./group_vars/01_software
-      include_vars: 01_software
-      include_vars: group_vars/software
       tags:
         - never
         - deploy

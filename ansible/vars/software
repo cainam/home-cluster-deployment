@@ -19,6 +19,7 @@ software:
         repo: keycloak/keycloak
   zigbee2mqtt:
     version: 1.36.0
+    oversion: 1.35.1
     latest:
       type: github
       params:
@@ -31,7 +32,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.2"
+    version: "2024.3"
     latest:
       type: dockerhub
       params:
@@ -43,3 +44,10 @@ software:
       type: quay
       params:
         repo: kiali/kiali
+  python:
+    version: 3.12.2-slim
+    latest:
+      type: dockerhub
+      params:
+        repo: library/python
+        arch: arm64

@@ -1,6 +1,3 @@
-- name: load software var
-  include_vars: software
-
 - name: print deployment information
   debug:
     msg: "namespace: {{ item }} application: {{ applications[item] }}" 
@@ -14,6 +11,7 @@
 - name: check if container registry is available
   shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
   register: check_registry
+  #failed_when: true
   
 - name: restart registry
   shell: /etc/init.d/registry restart

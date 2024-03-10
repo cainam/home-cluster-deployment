@@ -37,4 +37,14 @@ devices:
     state_action: false
   '0x70b3d52b60076b69':
     friendly_name: '0x70b3d52b60076b69'
+  '0x94deb8fffe41e447':
+    friendly_name: '0x94deb8fffe41e447'
+  '0x842e14fffef15323':
+    friendly_name: '0x842e14fffef15323'
+  '0x70b3d52b60025cfa':
+    friendly_name: '0x70b3d52b60025cfa'
+  '0xb4e3f9fffeaaa2c5':
+    friendly_name: Küche
+  '0xa4c1384521e152f5':
+    friendly_name: Hintertür
 availability: true

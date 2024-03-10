@@ -10,12 +10,12 @@
       suffix: "-build-image"
     register: build_dir
   
-  - name: fine local dockerfiles
+  - name: find local dockerfiles
     set_fact:
-      docker_files: "{{ lookup('pipe', '[ ! -d \"'+ role_path +'/files/\" ] || find \"'+ role_path +'/files/\" -type f').split('\n')|reject('match', '^$')  }}"
+      docker_files: "{{ lookup('pipe', '[ ! -d \"'+ role_path +'/templates/\" ] || find \"'+ role_path +'/templates/\" -type f').split('\n')|reject('match', '^$')  }}"
   
   - name: copy local dockerfiles
-    copy:
+    template:
       src: "{{ item }}"
       dest: "{{ build_dir.path }}"
       mode: 0644
