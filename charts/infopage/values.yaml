@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: tools/fastapi
-  tag: 3.10.5-slim
+#  repository: tools/fastapi
+#  tag: 3.10.5-slim
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

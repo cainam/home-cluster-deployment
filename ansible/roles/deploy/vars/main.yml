@@ -113,11 +113,11 @@ applications:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/infopage
+      helm_options: --set image.repository=mypy --set image.tag={{ software.python.version }}
       storage:
       - name: infopage
         size: 5Mi
-      network:
-        xsvcPort: 1111
+      network: true
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-server
