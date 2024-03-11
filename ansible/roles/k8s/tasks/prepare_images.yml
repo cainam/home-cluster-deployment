@@ -22,7 +22,16 @@
 - name: prepare flannel
   shell: |
     . set_env.sh kube-flannel
-    helm:from_git_to_local.sh --platform=arm64 --git_source=https://github.com/flannel-io/flannel.git
-    helm repo add kube-flannel https://helm.adm13:9443/kube-flannel
-    helm repo index "${helm_repo_dir}" --url $helm_url
+    helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git
+    helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
+    helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
 
+- name: image2local
+  shell: |
+    set -x
+    echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.tag | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
+  register: image2local
+  loop: "{{ images  }}"
+
+- debug:
+    msg: "{{ image2local }}"

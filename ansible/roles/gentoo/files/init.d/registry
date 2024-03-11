@@ -14,7 +14,7 @@ depend()
 start()
 {
         ebegin "Starting registry"
-	einfo "registry: ${service_hostname} host_volume: ${host_volume=}"
+	einfo "registry: ${service_hostname} host_volume: ${host_volume=} image:${service_image}"
 	hn=$(echo "${service_hostname}" | cut -d : -f 1)
 
         ip=$(getent hosts "${hn}" | awk '{print $1}')
@@ -35,7 +35,7 @@ start()
                 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
                 -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \
                 -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/myregistry.adm13.key \
-        myregistry.adm13:443/registry:2.8.3
+        "${service_image}"
 
         rc=0
         eend "Done"

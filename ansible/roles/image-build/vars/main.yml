@@ -1,19 +1,5 @@
 ---
 images:
-  - name: jaeger-agent
-    source: docker.io/jaegertracing/jaeger-agent
-    branch: 1.39.0
-    section: /tools/
-  - name: alpine
-    source: docker.io/alpine
-    section: /
-    branch: 3.19.1
-  - name: oauth2-proxy
-    source: https://github.com/oauth2-proxy/oauth2-proxy.git
-    dockerfile: Dockerfile
-    branch: v7.5.1
-    build_args: --from=docker.io/golang:1.19-buster --build-arg TARGETPLATFORM=linux/{{ default_platform }} --build-arg BUILDPLATFORM=linux/{{ default_platform }} --build-arg VERSION=7.4.0
-    section: /auth/
   - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
@@ -24,15 +10,6 @@ images:
     dockerfile: mypy.dockerfile
     branch: "{{ software.python.version }}"
     build_args: --from docker.io/python:{{ software.python.version }}
-  - name: helm
-    source: docker.io/alpine/helm
-    branch: 3.14.2
-    section: /
   - name: tor
     source: local
     dockerfile: tor.dockerfile
-  - name: fastapi
-    source: local
-    branch: 3.10.5-slim
-    dockerfile: fastapi.dockerfile
-    section: /tools/

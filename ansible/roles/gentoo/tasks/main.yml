@@ -177,7 +177,7 @@
     dest: /etc/ssh/ssh_known_hosts
 
 
-- name: make.conf, wpa_supplicant.conf, /etc/conf.d/net
+- name: deploy templates
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
@@ -190,6 +190,8 @@
     - file: net
       dest: "/etc/conf.d/net"
     - file: conf.d/registry
+      dest: /etc/conf.d/
+    - file: conf.d/helm
       dest: /etc/conf.d/
 
 - name: symlinks for services

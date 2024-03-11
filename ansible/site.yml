@@ -17,6 +17,8 @@
     tags:
     - image-build
     - deploy
+    - k8s
+    - gentoo
 
   roles:
     - role: always

@@ -123,6 +123,6 @@ TODO:
 - gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
 - set limit_namespace if limit_application is set
 - infopage to git
-- software list: inclued in deploy but also needed for image-build
-- image-build: image-build in common
+- image-build: image-build move to deploy and delete
 - build all images from gentoo
+- remove registry from runlevel: only controlle by keepalived

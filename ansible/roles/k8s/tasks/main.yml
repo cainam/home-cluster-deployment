@@ -10,7 +10,6 @@
 - debug: 
     msg: "selected_host:{{ selected_host }}"
 
-
 - name: system configurations
   import_tasks: system.yml
 
