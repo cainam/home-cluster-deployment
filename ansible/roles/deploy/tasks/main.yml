@@ -4,10 +4,6 @@
   with_items: "{{ applications.keys() | list }}"
   run_once: true
   
-- name: x
-  debug:
-    msg: 'software: {{ applications["istio-system"].base.branch }}'
-
 - name: check if container registry is available
   shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
   register: check_registry
@@ -87,7 +83,7 @@
 - name: Example using fail and when together
   ansible.builtin.fail:
     msg: let's stop here
-  when: false
+  when: true
 
 - name: post installation
   include_tasks: post_installation.yml

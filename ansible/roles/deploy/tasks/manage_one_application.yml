@@ -16,27 +16,62 @@
   when: application.value.storage is defined
     
 - block:
-    - name: "{{ name_prefix }}build and fill"
-      shell: |
-        . set_env.sh "{{ namespace.key }}"
-        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
-        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
-        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
-        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
-        {{ application.value.git_to_local_params | default("") }} 
-      register: build_out
-  
-    - name: "{{ name_prefix }}build output"
-      debug:
-        msg: "{{ item }}"
-      loop: "{{ build_out  | dict2items }}"
+  - block:
+    - name: "{{ name_prefix }}tempdir for image build"
+      tempfile:
+        state: directory
+        suffix: "-build-image"
+      register: build_dir
 
-    - name: "{{ name_prefix }}helm repo refresh"
+    - name: "{{ name_prefix }}copy dockerfile"
+      template:
+        src: "{{ item.dockerfile | default(item.name~'.dockerfile') }}"
+        dest: "{{ build_dir.path }}"
+        mode: 0644
+      loop: "{{ application.value.image_build }}"
+
+    - name: "{{ name_prefix }}build image"
       shell: |
-        . set_env.sh "{{ namespace.key }}"
-        helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
-        helm repo index "${helm_repo_dir}" --url $helm_url
-        helm repo update
+        set -x
+        if [ "{{ item.source }}" != "local" ]; then
+          git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
+          git_dir=$(basename "{{ item.source }}")
+          git_dir=${git_dir%%.git}
+          cd "${git_dir}"
+        fi
+        image="{{ registry }}{{ item.section | default('/')}}{{ item.name }}:{{ item.tag | default('latest') }}"
+        podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default(item.name~'.dockerfile') }}" --tag "${image}"
+        podman push "${image}"
+      args:
+        chdir: "{{ build_dir.path }}"
+      register: build_out
+      loop: "{{ application.value.image_build }}"
+  
+    - debug: var=build_out
+      failed_when: false
+    when: application.value.image_build is defined
+    
+  - name: "{{ name_prefix }}build helm"
+    shell: |
+      . set_env.sh "{{ namespace.key }}"
+      helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
+      --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
+      --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
+      --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
+      {{ application.value.git_to_local_params | default("") }} 
+    register: build_out
+
+  - name: "{{ name_prefix }}build output"
+    debug:
+      msg: "{{ item }}"
+    loop: "{{ build_out  | dict2items }}"
+
+  - name: "{{ name_prefix }}helm repo refresh"
+    shell: |
+      . set_env.sh "{{ namespace.key }}"
+      helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
+      helm repo index "${helm_repo_dir}" --url "${helm_url}"
+      helm repo update
   when: "'build' in ansible_run_tags" 
 
 - name: "{{ name_prefix }}files"
@@ -55,6 +90,7 @@
      {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
   register: out
   when: "application.value.install | default(true)"
+  failed_when: true
   
 - name: "{{ name_prefix }}output"
   debug:
