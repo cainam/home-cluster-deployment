@@ -1,9 +1,240 @@
+- block:
+   # testing examples: '\{\"limit_application\":[\"x\",\"y\"]}'  '\{\"limit_application\":\"x1y\"}' '{"limit_application":[infopage,tor],"limit_namespace":[tools]}'
+
+  - set_fact:
+      apps: "{{ a2 }}"
+
+  - name: assign Ansible extra-vars values to be manipulable
+    set_fact:
+      only_ns: "{{ limit_namespace }}"
+    when: limit_namespace is defined
+
+  - name: assign Ansible extra-vars values to be manipulable
+    set_fact:
+      only_apps: "{{ limit_application }}"
+    when: limit_application is defined
+    
+  - debug:
+      msg: "only_apps:{{ only_apps }}"
+    when: only_apps is defined
+
+  - set_fact:
+      only_apps: "{{[only_apps,]}}"
+    when: only_apps is string
+    
+  - set_fact:
+      only_ns: "{{[only_ns,]}}"
+    when: only_ns is string
+    
+  - debug:
+      msg: "only_ns:{{ only_ns }}"
+    when: only_ns is defined
+
+# namespace and names as attributes to application flat list
+  - debug: 
+      msg: "{{item.key}}: {{ item.value }}\n{{ names | zip(item.value| dict2items| map(attribute='value') ) | to_nice_yaml }}" # create array from names and application values
+    vars:
+      app_name: "{{ item.value | dict2items | map(attribute='key') }}" # get application name
+      names: "{{ (app_name) | zip(([item.key]*(app_name|length))   ) }}" # create array of application and namespace name
+    loop: "{{ apps |dict2items}}"
+
+  - name: set app_temp
+    set_fact:
+      app_temp: "{{ app_temp | default([]) + (names | zip(item.value| dict2items| map(attribute='value') )) }}" # create array from names and application values
+    vars:
+      app_name: "{{ item.value | dict2items | map(attribute='key') }}" # get application name
+      names: "{{ (app_name) | zip(([item.key]*(app_name|length))   ) }}" # create array of application and namespace name
+    loop: "{{ apps |dict2items}}"
+
+  - name: debug app_temp
+    debug:
+      msg: "{{ app_temp  }}"
+
+  - name: app_temp 2 dict
+    vars:
+      y: "{{ {'namespace':item[0][1],'name':item[0][0]} | combine(item[1]) }}" # turn names array item into dict
+    set_fact:
+      app_list: "{{ (app_list|default([])) + [y] }}"
+    loop: "{{ app_temp }}"
+
+  - name: app_list
+    debug: 
+      msg: "{{ item }}"
+    loop: "{{ app_list }}"
+
+  - name: apps from limit_namespace
+    block:
+    - debug: 
+       msg: "{{ item }}: apps: {{ app_list | selectattr('namespace', 'eq', item)| map(attribute='name') }}"
+      loop: "{{ only_ns }}"
+    - set_fact:
+        only_apps: "{{ (only_apps|default([])) + app_list | selectattr('namespace', 'eq', item)| map(attribute='name') }}"
+      loop: "{{ only_ns }}"
+    when: only_ns is defined
+
+  - debug:
+      msg: "only_apps:{{ only_apps }}"
+    when: only_apps is defined
+
+## prepare: add multi-level requirements
+# didn't get recursion to work out: 
+# - strange values set
+# - strange iteration length
+# - item. var overwritten
+# requested_by not tried out
+  - name: test how to apply nested requirements
+    when: false
+    block:
+    - name: requires
+      debug: 
+        msg: "{{ app_list | selectattr('requires', 'defined') }}"
+
+    - name: requires
+      vars:
+        dep_idx: "{{ app_list | ansible.utils.index_of('eq', item.1.name, 'name') }}"
+        dep_idx_chk: "{{ app_list | ansible.utils.index_of('eq', item.1.namespace, 'namespace') }}"
+        # ensure required_by exist
+        y: "{{ app_list[dep_idx|int] | combine({'required_byx': ''}, list_merge='keep') }}"
+        z: "{{ y | combine({'required_by': (y.required_by | default([]))+[{'name': item.0.name,'namespace': item.0.namespace}]   }, list_merge='replace') }}"
+        z2: "{{ z | combine({'required_by': (z.required_by | default([]))+[{'name': item.0.name}]   }, list_merge='replace') }}"
+        # remove maybe with [i for i in list1 if i not in list2] or better: set _ = my_list.pop(index) 
+        #n: "{% [app_list[i] for i in range(len(app_list)) ] %}" # if i != %}{{dep_idx}}{% ] %}"
+        #n: "{{ [i for i in range(len(app_list)) ] }}" # if i != %}{{dep_idx}}{% ] %}"
+        n: "{%- set a = [] %}
+            {%- for i in range(app_list | length): %}
+            {%-   set _ = a.append(i) if i != dep_idx|int %} 
+            {%- endfor %}
+            {%- set b = a  %}
+            {{b}}"
+        m: "{%- set _ = app_list.pop(dep_idx|int) %}"
+      debug: 
+        msg: "item: {{ item }}\nitem.0:{{ item.0 }}\nitem.1:{{ item.1 }}\ndep_idx:{{dep_idx}} ({{dep_idx_chk}})\ny:{{y}}\nz:{{z}}\nz2:{{z2}}\nn:{{n}}\nm:{{m}}"
+      loop: "{{ app_list| selectattr('requires', 'defined') | subelements('requires') }}"
+
+    - name: add required_by
+      vars:
+        dep_idx: "{{ app_list | ansible.utils.index_of('eq', item.1.name, 'name') }}"
+        old_entry: "{{ app_list[dep_idx|int] }}"
+        new_entry: "{{ old_entry | combine({'required_by': (old_entry.required_by | default([]))+[{'name': item.0.name,'namespace': item.0.namespace}]   }, list_merge='replace') }}"
+      set_fact:
+        app_list: "{%- set _ = app_list.pop(dep_idx|int) %}{{app_list+[new_entry]}}"
+      loop: "{{ app_list| selectattr('requires', 'defined') | subelements('requires') }}"
+
+    - name: app_temp 2 dict
+      debug: 
+        msg: "{{ item }}"
+      loop: "{{ app_list}}"
+
+  #recursive
+  #2. remove items with no "requires"
+  #3. move requires of item to required_by item
+  #end option1 if requires exists only for item that have no requested_by anymore
+  #end option2 no number of moves is 0
+
+    - name: recursive move
+      vars:
+        my_idx: "{{ app_list | ansible.utils.index_of('eq', item.0.name, 'name') }}"
+      include_tasks: lift_reqs.yaml
+      loop: "{{ app_list| selectattr('requires', 'defined') | subelements('requires') }}"
+      # lift_reqs:
+      # loop with idx
+      # 1. add requires of requirement to idx
+      # 2. new include 
+
+    - name: using fail and when together
+      ansible.builtin.fail:
+        msg: let's stop here 
+
+  - name: build list of what can be removed
+    vars:
+      current_ns:
+        ns: "{{ item.ns }}"
+        apps: "{{ item.app | dict2items(key_name='app', value_name='data') }}"
+        apps2: "{{ item.app | dict2items | map(attribute='key') | product([item.ns]) }}" # but only_apps has no namespace, so difference cannot be made
+        apps3: "{{ item.app | dict2items | map(attribute='key') | difference(only_apps) }}"
+    debug:
+      msg: "transform: ns {{ current_ns.ns }} apps: {{ current_ns.apps }} apps2: {{ current_ns.apps2 | to_nice_yaml }} apps3: {{ current_ns.apps3 }}"
+    loop: "{{ apps | dict2items(key_name='ns', value_name='app') }}"
+
+  - debug:
+      msg: "only_apps:=> {{ apps | list }}"
+
+  - debug:
+      msg: "ns_loop list list => {{ apps[item] | list }}"
+    loop: "{{ apps | list }}"
+
+  - debug:
+      msg: "dict2items => {{ apps | dict2items | map(attribute='value') }}"
+ 
+  - debug:
+      msg: "dict2items loop => {{ item }}"
+    loop: "{{ apps | dict2items | map(attribute='value') }}" # loops over namespaces
+ 
+  - name: only with requires
+    debug:
+      msg: "dict2items lists_union => {{ {} | combine( apps | dict2items | map(attribute='value') | community.general.lists_union(flatten=true) ) }}"
+       
+  - name: only with requires # only checks first level of dependencies
+    debug:
+      msg: "dict2items => {{ apps | dict2items | map(attribute='value') | join() | selectattr('requires', 'defined')}}"
+    when: item.key in only_apps
+    loop: "{{ {} | combine( apps | dict2items | map(attribute='value') | community.general.lists_union(flatten=true) ) | dict2items }}"
+ 
+  - debug:
+      msg: "dict2items => {{ apps | dict2items | map(attribute='value')| selectattr('requires', 'defined') }}"
+ 
+  - vars:
+      reqs: "{{ item.value }}"
+    debug:
+      msg: "ns_loop dict2items =>item:  {{item }} reqs: {{ reqs }}"
+    loop: "{{ apps | dict2items }}"
+ 
+  - debug:
+      msg: "only => {{ apps [item] | dict2items | map(attribute='key') | intersect(only_apps) }}"
+    loop: "{{ apps | list }}"
+ 
+  - name: build list of what can be removed
+    vars:
+      current_ns:
+        ns: "{{ item.ns }}"
+        apps: "{{ item.app | dict2items(key_name='app', value_name='data') }}"
+        apps2: "{{ item.app | dict2items | map(attribute='key') | product([item.ns]) }}" # but only_apps has no namespace, so difference cannot be made
+        apps3: "{{ item.app | dict2items | map(attribute='key') | difference(only_apps) }}"
+    set_fact:
+      removal_list: "{{ removal_list | default([]) + current_ns.apps3 }}"
+      removal_list_products: "{{ removal_list_products | default([]) + current_ns.apps2 }}"
+#    debug:
+#      msg: "transform: ns {{ current_ns.ns }} apps: {{ current_ns.apps }} apps2: {{ current_ns.apps2 }} apps3: {{ current_ns.apps3 }}"
+    loop: "{{ apps | dict2items(key_name='ns', value_name='app') }}"
+
+  - debug:
+      msg: "removal_list=> {{ removal_list }}"
+
+  - debug:
+      msg: "removal_list_products=> {{ removal_list_products }}"
+
+  - name: remove items which are not required
+    debug:
+      msg: "remove_keys: {{ apps | ansible.utils.remove_keys(removal_list) }}"
+
+  - debug:
+      msg: "only_apps item: {{ item }}"
+    loop: "{{ only_apps }}"
+
+# next: 1. map apps with ns into namepace, 2. map apps off namespace into contruct, 3. add gateway , 4. add dependencies
+
+  - name: using fail and when together
+    ansible.builtin.fail:
+      msg: let's stop here
+  when: true
+  run_once: true
+
 - name: print deployment information
   debug:
     msg: "namespace: {{ item }} application: {{ applications[item] }}" 
   with_items: "{{ applications.keys() | list }}"
   run_once: true
-  
+    
 - name: check if container registry is available
   shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
   register: check_registry
