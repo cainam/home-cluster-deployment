@@ -19,10 +19,6 @@ software:
         repo: keycloak/keycloak
   zigbee2mqtt:
     version: 1.36.1
-<<<<<<<< HEAD:ansible/roles/deploy/vars/software-old
-========
-    oversion: 1.35.1
->>>>>>>> 06cf4cdc6d9a56244613d5c457a940ed026e979d:ansible/vars/software
     latest:
       type: github
       params:
