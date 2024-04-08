@@ -1,12 +1,12 @@
 ---
 applications:
-  anon:
-    tor:
-      git: https://github.com/cainam/k8s_at_home.git
-      subdir: charts/tor
-      storage:
-      - name: tor
-        size: 10Mi
+#  anon:
+#    tor:
+#      git: https://github.com/cainam/k8s_at_home.git
+#      subdir: charts/tor
+#      storage:
+#      - name: tor
+#        size: 10Mi
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
@@ -59,7 +59,7 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
-      helm_options: --set zigbee2mqtt.deployment.image.tag=1.36.0 --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
+      helm_options: --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
       git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}"
       network:
         prefix: /
@@ -78,11 +78,11 @@ applications:
         size: 1Gi
       network: x
     home-assistant:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/home-assistant
       git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --reset-values
+      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:15.4
       storage:
       - name: home-assistant-config
         size: 100Mi
@@ -92,13 +92,13 @@ applications:
         svcPort: 8123
         gateway: ha-gw
       requires:
-          - type: postgresql
-            name: postgresql
-            namespace: db
-            config:
-              database: ha
-              username: ha
-              password: same
+      - type: postgresql
+        name: postgresql
+        namespace: db
+        config:
+          database: ha
+          username: ha
+          password: same
   tools:
     jaeger:
       git: https://github.com/jaegertracing/helm-charts.git
@@ -113,11 +113,16 @@ applications:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/infopage
+      helm_options: --set image.repository=mypy --set image.tag={{ software.python.version }}
+      image_build:
+      - name: mypy
+        source: local
+        tag: "{{ software.python.version }}"
+        build_args: --from docker.io/python:{{ software.python.version }}
       storage:
       - name: infopage
         size: 5Mi
-      network:
-        xsvcPort: 1111
+      network: true
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-server
@@ -147,7 +152,6 @@ applications:
       subdir: charts/kube-state-metrics
       branch: kube-state-metrics-5.16.1
       git_to_local_params: --fix_source=.image.tag=v2.10.1
-      #git_to_local_params: --fix_source=.autosharding.enabled=false
       install: false
     prometheus-node-exporter:
       git: https://github.com/prometheus-community/helm-charts.git

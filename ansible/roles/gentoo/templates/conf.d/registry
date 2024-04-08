@@ -1,4 +1,5 @@
 service_hostname="{{ registry }}"
+service_image="${service_hostname}/local/registry:{{ software.registry.version}}"
 # ipconf="192.168.4.99/16"
 host_volume="{{ shared_mounts }}/registry"
 

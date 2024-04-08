@@ -10,12 +10,12 @@
       suffix: "-build-image"
     register: build_dir
   
-  - name: fine local dockerfiles
+  - name: find local dockerfiles
     set_fact:
-      docker_files: "{{ lookup('pipe', '[ ! -d \"'+ role_path +'/files/\" ] || find \"'+ role_path +'/files/\" -type f').split('\n')|reject('match', '^$')  }}"
+      docker_files: "{{ lookup('pipe', '[ ! -d \"'+ role_path +'/templates/\" ] || find \"'+ role_path +'/templates/\" -type f').split('\n')|reject('match', '^$')  }}"
   
   - name: copy local dockerfiles
-    copy:
+    template:
       src: "{{ item }}"
       dest: "{{ build_dir.path }}"
       mode: 0644
@@ -24,10 +24,6 @@
   - name: build
     shell: |
       set -x
-      if [ "{{ item.dockerfile | default('') }}" = "" ]; then # nothing to build, try pull-push
-        echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.branch | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
-        exit $?
-      fi
       if [ "{{ item.source }}" != "local" ]; then
         git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
         git_dir=$(basename "{{ item.source }}")

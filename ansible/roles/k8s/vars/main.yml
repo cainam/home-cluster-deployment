@@ -1,4 +1,12 @@
 ---
 k8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
-k8s_version: v1.29.1
+k8s_version: v1.29.2
 controlPlaneEndpoint: "k8s.adm13:7443"
+
+images:
+- source: docker.io/alpine/helm
+  tag: "{{ software.helm.version }}"
+  section: /local
+- source: docker.io/library/registry
+  tag: "{{ software.registry.version }}"
+  section: /local

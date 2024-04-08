@@ -69,7 +69,7 @@ function pull_local(){
         image_entry=$(echo "$platform ${rem_reg}$fetch_img /$category/" | sed -e 's#/\+#/#' -e 's#^/\+##' )
         (echo "$image_entry" | pull-tag-push.sh ) || true
       done
-      echo "update image informations in chart"
+      echo "update image informations in chart: ${image_attr}=\"${category}/${real_image_only}\""
       yq -yi "${image_attr}=\"${category}/${real_image_only}\"" "${input}"
       [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' "${input}"
       [[ ! -v ${image_registry} ]] && echo "replacing by default at ${match}.registry=${registry}" && yq -yi '.'"${match}"'.registry="'${registry}'"' "${input}" # replaces the following to ensure the value is empty instead of deleted: yq -yi 'del(.'"${match}"'.registry)' values.yaml
