@@ -2,7 +2,7 @@
 
 pw="$1"
 
-old_version=15.4-alpine
+old_version=15.6-alpine
 new_version=16.1-alpine
 
 pg_image="myregistry.adm13:443/db/postgres"

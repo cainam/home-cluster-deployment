@@ -104,6 +104,14 @@ Networking:
 - Gateway <=> VirtualService: one to one relationship
 - VirtualService <=> Application: one to many relationship
 
+Database:
+- PostgreSQL update:
+  1. scale down: kubectl scale --replicas=0 -n db statefulset postgresql
+  2. run ./scripts/migrate_postgresql.sh
+  3. move old data (e.g. mv /shared/data-postgresql-0/pgdata/ /shared/data-postgresql-0/pgdata.15.6)
+  4. copy new data in place (e.g. cp -rdp /tmp/pg_new/ /shared/data-postgresql-0/pgdata/)
+  5. deploy update postgreSQL
+
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
