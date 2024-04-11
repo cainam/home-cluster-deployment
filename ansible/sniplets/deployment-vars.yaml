@@ -32,3 +32,14 @@ applications:
 #        prefix: /
 #        gateway: deconz-gw
 
+#    jaeger:
+#      git: https://github.com/jaegertracing/helm-charts.git
+#      subdir: charts/jaeger
+#      remove_dependencies: kafka,elasticsearch,cassandra,common
+#      helm_options: --set provisionDataStore.cassandra=false --set allInOne.enabled=true --set storage.type=none --set agent.enabled=false --set collector.enabled=false --set query.enabled=false --set allInOne.args[0]="--query.base-path=/jaeger"
+#      network:
+#        svcName: jaeger-query
+#        rewrite: /jaeger
+#        svcPort: 16686
+#      git_to_local_params: --fix_source=.allInOne.tag=1.54.0 --fix_source=.schema.image= --fix_source=.ingester.image= --fix_source=.agent.image=  --fix_source=.collector.image= --fix_source=.query.oAuthSidecar.image= --fix_source=.query.image= --fix_source=.spark.image= --fix_source=.esIndexCleaner.image= --fix_source=.esRollover.image= --fix_source=.esLookback.image= --fix_source=.hotrod.image.repository=
+

@@ -74,6 +74,15 @@
       helm repo update
   when: "'build' in ansible_run_tags" 
 
+- block:
+  - name: "{{ name_prefix }}install storage content"
+    include_tasks: storage_content.yml
+    when: storage.config is defined and storage.config
+    with_items: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+  when: application.value.storage is defined
+    
 - name: "{{ name_prefix }}files"
   include_tasks: files.yml
   loop: "{{ application.value.files | dict2items }}"
@@ -97,15 +106,6 @@
     msg: "{{ item | to_yaml }}"
   loop: "{{ out  | dict2items }}"
   
-- block:
-  - name: "{{ name_prefix }}install storage content"
-    include_tasks: storage_content.yml
-    when: storage.config is defined and storage.config
-    with_items: "{{ application.value.storage }}"
-    loop_control:
-      loop_var: storage
-  when: application.value.storage is defined
-    
 - block:
   - name: "{{ name_prefix }}manage application requirements"
     include_tasks: manage_application_requirements.yaml
