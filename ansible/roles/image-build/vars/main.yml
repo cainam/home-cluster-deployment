@@ -1,6 +1,5 @@
 ---
 images:
-  - name: keycloak
     source: local
     dockerfile: keycloak.dockerfile
     branch: 24.0.1

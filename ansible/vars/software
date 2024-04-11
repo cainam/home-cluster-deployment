@@ -64,4 +64,16 @@ software:
       params:
         repo: library/registry
         arch: arm64
-
+  postgresql:
+    version: 16.1-alpine
+    latest:
+      type: dockerhub
+      params:
+        repo: library/postgres
+        arch: arm64
+  descheduler:
+    version: v0.28.1
+    latest:
+      type: github
+      params: 
+        repo: kubernetes-sigs/descheduler

@@ -38,14 +38,6 @@
         - never
         - gentoo
     - role: deploy
-<<<<<<< HEAD
-#      vars_file: group_vars/01_software
-#      vars_file:
-#      - ./group_vars/01_software
-#      include_vars: 01_software
-#      include_vars: group_vars/software
-=======
->>>>>>> 06cf4cdc6d9a56244613d5c457a940ed026e979d
       tags:
         - never
         - deploy

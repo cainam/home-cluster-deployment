@@ -42,6 +42,11 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/keycloak
       helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag="{{ software.keycloak.version }}" --set resources.limits.memory=600Mi
+      image_build:
+      - name: keycloak
+        source: local
+        tag: "{{ software.keycloak.version }}"
+        build_args: --from docker.io/library/debian:12.5-slim
       storage:
       - name: keycloak
         size: 1Gi
@@ -183,8 +188,8 @@ applications:
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }} " --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-      git_to_local_params: --fix_source=.image.tag=15.4 --fix_source=.volumePermissions.image.tag=12.2-slim
+      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
+      git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres
       storage: 
       - name: data-postgresql-0
         size: 11Gi

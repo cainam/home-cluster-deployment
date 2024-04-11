@@ -33,7 +33,7 @@
   when: "'debug' in ansible_run_tags"
   run_once: true
 
-- name: Example using fail and when together
+- name: just fail
   ansible.builtin.fail:
     msg: let's stop here
   when: false
@@ -67,7 +67,7 @@
   when: "'debug' in ansible_run_tags"
   run_once: true
 
-- name: Example using fail and when together
+- name: just fail
   ansible.builtin.fail:
     msg: let's stop here
   when: false
@@ -79,11 +79,6 @@
   loop_control:
     loop_var: namespace
   run_once: true
-
-- name: Example using fail and when together
-  ansible.builtin.fail:
-    msg: let's stop here
-  when: true
 
 - name: post installation
   include_tasks: post_installation.yml

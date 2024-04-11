@@ -130,3 +130,4 @@ TODO:
 - image-build: image-build move to deploy and delete
 - build all images from gentoo
 - remove registry from runlevel: only controlle by keepalived
+- replace cgroup v1 by cgroup v2: 1st, replace /etc/rc.conf, rc_cgroup_mode="legacy" with ="unified"

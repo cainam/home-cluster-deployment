@@ -39,7 +39,7 @@
           git_dir=${git_dir%%.git}
           cd "${git_dir}"
         fi
-        image="{{ registry }}{{ item.section | default('/')}}{{ item.name }}:{{ item.tag | default('latest') }}"
+        image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name }}:{{ item.tag | default('latest') }}"
         podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default(item.name~'.dockerfile') }}" --tag "${image}"
         podman push "${image}"
       args:
@@ -90,7 +90,7 @@
      {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
   register: out
   when: "application.value.install | default(true)"
-  failed_when: true
+  #failed_when: true
   
 - name: "{{ name_prefix }}output"
   debug:
