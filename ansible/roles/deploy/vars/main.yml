@@ -122,6 +122,7 @@ applications:
       storage:
       - name: infopage
         size: 5Mi
+        config: true
       network: true
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
@@ -194,7 +195,7 @@ applications:
     descheduler:
       git: https://github.com/kubernetes-sigs/descheduler.git
       subdir: charts/descheduler
-      branch: v0.29.0
-      git_to_local_params: --fix_source=.image.tag=v0.29.0
+      branch: "{{ software.descheduler.version }}"
+      git_to_local_params: --fix_source=.image.tag={{ software.descheduler.version }}
       helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=50 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
 

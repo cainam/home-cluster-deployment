@@ -58,24 +58,6 @@
     healthy_node: "{{selected_host}}"
 
 - set_fact: # highlight
-    aaa: "{{ (groups.all|
-                       map('extract', hostvars)|
-                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn') ) }}"
-  run_once: true
-
-- debug:
-    msg: "aaa: {{aaa}}"
-
-- set_fact: # highlight
-    xxx: "{{ (groups.all|
-                       map('extract', hostvars)|
-                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn')| default(['m'])) }}"
-  run_once: true
-
-- debug:
-    msg: "xxx: {{xxx}}"
-
-- set_fact: # highlight
     healthy_node: "{{ (groups.all|
                        map('extract', hostvars)|
                        selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn')| default([selected_host])

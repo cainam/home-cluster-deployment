@@ -1,6 +1,6 @@
 software:
   istio:
-    version: 1.21.0
+    version: 1.21.1
     latest:
       type: github
       params:
@@ -51,7 +51,7 @@ software:
         repo: library/python
         arch: arm64
   helm:
-    version: 3.14.2
+    version: 3.14.4
     latest:
       type: dockerhub
       params:
@@ -72,7 +72,7 @@ software:
         repo: library/postgres
         arch: arm64
   descheduler:
-    version: v0.28.1
+    version: "v0.29.0"
     latest:
       type: github
       params: 

@@ -9,12 +9,13 @@ run_file="/var/run/${my_name}"
 . /usr/local/bin/set_env.sh 
 cd /data/mine/git/ansible/
 
-[ -f "${run_file}" ] && exit 0
-touch "${run_file}"
+#[ -f "${run_file}" ] && exit 0
+#touch "${run_file}"
+pgrep "${my_name}" && exit 0
 
 logger "starting $my_name"
 
 eval $my_ansible /data/mine/git/ansible/site.yml --tags=gentoo,emerge
 
-rm "${run_file}"
+#rm "${run_file}"
 logger "finished $my_name"

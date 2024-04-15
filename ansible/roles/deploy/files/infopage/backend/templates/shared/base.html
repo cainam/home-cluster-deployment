@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <base href="https://my-lb.adm13/infopage" target="_blank">
+    <script>
+    const currentUrl = window.location.href;
+document.addEventListener('DOMContentLoaded', ()=> {
+    ItemElems = document.querySelectorAll("[itemprop='load']");
+    for (let i = 0; i < ItemElems.length; i++) {
+//      alert("currentUrl:"+currentUrl+"\nvalue: "+ItemElems[i].getAttribute('value')+"\n fetch: "+currentUrl+ItemElems[i].getAttribute('value'));
+      fetch(currentUrl+ItemElems[i].getAttribute('value'))
+      .then(response => response.text())
+      .then(html => {ItemElems[i].innerHTML = html;})
+      .catch(error => {console.log(error);});
+    }
+
+});
+
+function trigger_backend(action, data){
+  // alert("backend!"+"\n action"+action+"\ndata: "+data);
+  // alert("image:"+data.image+"\ntag: "+data.tag);
+  fetch(currentUrl+"/"+action, { method: 'POST',
+    body: JSON.stringify({ image: data.image, tag: data.tag }),
+    headers: { 'Content-type': 'application/json; charset=UTF-8', }
+  })
+
+}
+
+    </script>
+    <style>
+      table {
+        border-collapse:collapse;
+      }
+
+      .iTable table,.iTable td,.iTable th,.iTable tr{
+        border: 1px solid;
+        border-collapse:collapse;
+      }
+      .oTable td{
+	vertical-align: top;
+      }
+    </style>
+
+    {% block title %}
+    {% endblock %}
+</head>
+
+<body>
+    {% block content %}
+    {% endblock %}
+
+    {% block scripts %}
+    {% endblock %}
+
+
+</body>
+</html>
