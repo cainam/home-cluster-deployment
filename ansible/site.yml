@@ -20,6 +20,10 @@
     - k8s
     - gentoo
     - testing
+  - name: setup
+    setup:
+    tags:
+    - gentoo
 
   roles:
     - role: always
