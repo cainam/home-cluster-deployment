@@ -1,0 +1,19 @@
+{% extends "shared/base.html" %}
+
+
+{% block title %} 
+  <title>Infopage</title>
+{% endblock %} 
+
+{% block content %} 
+  <table class="oTable"><tr>
+    <td><div itemprop="load" value="/node_status"> </div></td>
+    <td><div itemprop="load" value="/services_status"> </div></td>
+  </tr></table>
+  <table class="oTable"><tr>
+    <td><div itemprop="load" value="/virtual_services"> </div></td>
+    <td><div itemprop="load" value="/registry_images"> </div></td>
+    <td><div itemprop="load" value="/software"> </div> </td>
+  </tr></table>
+  <iframe name="null"  style="display: none;"></iframe> {# used as target for form actions #}
+{% endblock %} 

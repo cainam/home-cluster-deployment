@@ -15,24 +15,18 @@
   - name: include software
     include_vars: vars/software
     tags:
-    - image-build
     - deploy
     - k8s
-    - gentoo
     - testing
-  - name: setup
+  - name: setup # to gather facts only when needed
     setup:
     tags:
     - gentoo
-
+    - k8s
   roles:
     - role: always
       tags:
         - always
-    - role: image-build
-      tags:
-        - never
-        - image-build
     - role: k8s
       tags: 
         - never
