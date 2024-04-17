@@ -235,6 +235,7 @@
 
 - name: eclean distfiles
   shell: eclean distfiles
+  when: gentoo_build is defined and 'emerge' in ansible_run_tags
  
 - name: eclean packages
   shell: eclean packages
