@@ -489,13 +489,13 @@ addons:
     # -- OpenVPN specific configuration
     # @default -- See below
     openvpn:
-      image:
+    #  image:
         # -- Specify the openvpn client image
-        repository: dperson/openvpn-client
+    #    repository: dperson/openvpn-client
         # -- Specify the openvpn client image tag
-        tag: latest
+    #    tag: latest
         # -- Specify the openvpn client image pull policy
-        pullPolicy: IfNotPresent
+    #    pullPolicy: IfNotPresent
 
       # -- Credentials to connect to the VPN Service (used with -a)
       auth:  # "user;password"
@@ -505,26 +505,26 @@ addons:
 
     # -- WireGuard specific configuration
     # @default -- See below
-    wireguard:
-      image:
+    #wireguard:
+    #  image:
         # -- Specify the WireGuard image
-        repository: ghcr.io/k8s-at-home/wireguard
+    #    repository: ghcr.io/k8s-at-home/wireguard
         # -- Specify the WireGuard image tag
-        tag: v1.0.20210914
+    #    tag: v1.0.20210914
         # -- Specify the WireGuard image pull policy
-        pullPolicy: IfNotPresent
+    #    pullPolicy: IfNotPresent
 
     # -- Gluetun specific configuration
     # -- Make sure to read the [documentation](https://github.com/qdm12/gluetun/wiki) to see how to configure this addon!
     # @default -- See below
-    gluetun:
-      image:
+    #gluetun:
+    #  image:
         # -- Specify the Gluetun image
-        repository: docker.io/qmcgaw/gluetun
+    #    repository: docker.io/qmcgaw/gluetun
         # -- Specify the Gluetun image tag
-        tag: v3.30.0
+    #    tag: v3.30.0
         # -- Specify the Gluetun image pull policy
-        pullPolicy: IfNotPresent
+    #    pullPolicy: IfNotPresent
 
     # -- Set the VPN container securityContext
     # @default -- See values.yaml
@@ -615,13 +615,13 @@ addons:
     # -- Enable running a code-server container in the pod
     enabled: false
 
-    image:
+    #image:
       # -- Specify the code-server image
-      repository: ghcr.io/coder/code-server
+    #  repository: ghcr.io/coder/code-server
       # -- Specify the code-server image tag
-      tag: 4.5.1
+    #  tag: 4.5.1
       # -- Specify the code-server image pull policy
-      pullPolicy: IfNotPresent
+    #  pullPolicy: IfNotPresent
 
     # -- Set any environment variables for code-server here
     env: {}
@@ -708,13 +708,13 @@ addons:
     # -- Enable running a promtail container in the pod
     enabled: false
 
-    image:
+    #image:
       # -- Specify the promtail image
-      repository: docker.io/grafana/promtail
+      #repository: docker.io/grafana/promtail
       # -- Specify the promtail image tag
-      tag: 2.6.1
+      #tag: 2.6.1
       # -- Specify the promtail image pull policy
-      pullPolicy: IfNotPresent
+      #pullPolicy: IfNotPresent
 
     # -- Set any environment variables for promtail here
     env: {}
@@ -746,13 +746,13 @@ addons:
     # -- Enable running a netshoot container in the pod
     enabled: false
 
-    image:
+    #image:
       # -- Specify the netshoot image
-      repository: ghcr.io/nicolaka/netshoot
+      #repository: ghcr.io/nicolaka/netshoot
       # -- Specify the netshoot image tag
-      tag: v0.7
+      #tag: v0.7
       # -- Specify the netshoot image pull policy
-      pullPolicy: IfNotPresent
+      #pullPolicy: IfNotPresent
 
     # -- Set any environment variables for netshoot here
     env: {}
