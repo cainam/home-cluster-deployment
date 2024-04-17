@@ -1,22 +1,23 @@
 - block:
    # testing examples: '\{\"limit_application\":[\"x\",\"y\"]}'  '\{\"limit_application\":\"x1y\"}' '{"limit_application":[infopage,tor],"limit_namespace":[tools]}'
+   # '{"limit_application":[1a1],"limit_namespace":[ns2]}'
 
   - set_fact:
       apps: "{{ a2 }}"
 
-  - name: assign Ansible extra-vars values to be manipulable
+  - name: assign Ansible extra-vars values to be manipulabled
     set_fact:
       only_ns: "{{ limit_namespace }}"
     when: limit_namespace is defined
 
-  - name: assign Ansible extra-vars values to be manipulable
+  - name: assign Ansible extra-vars values to be manipulabled
     set_fact:
       only_apps: "{{ limit_application }}"
     when: limit_application is defined
     
   - debug:
       msg: "only_apps:{{ only_apps }}"
-    when: only_apps is defined
+    when: only_apps is defined and "'debug_only' in ansible_run_tags"
 
   - set_fact:
       only_apps: "{{[only_apps,]}}"
@@ -28,9 +29,46 @@
     
   - debug:
       msg: "only_ns:{{ only_ns }}"
-    when: only_ns is defined
+    when: only_ns is defined and "'debug_only' in ansible_run_tags"
 
-# namespace and names as attributes to application flat list
+# add gateways to applications
+  - name: apply default_gateway_namespace to all gateways missing it
+    set_fact:
+      gateways: "{{ gateways | combine({gateway.key: {'namespace': default_gateway_namespace }}, recursive=true) }}"
+    loop: "{{gateways | dict2items}}"
+    loop_control:
+      loop_var: gateway
+    when: gateway.value.namespace is not defined
+
+  - name: gateway_default_namespace populated to all gateways (to avoid checking this over and over again)
+    debug:
+      msg: 'gateways: {{ gateways | to_yaml }}'
+    when: "'debug_gw' in ansible_run_tags"
+
+  - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
+    set_fact:
+      apps: "{{ apps | combine(
+         {gateway.value.namespace: 
+           {gateway.key: gateway_install | combine({'ports': gateway.value.additional_ports | default({}) | list, 'type': 'gateway' }, list_merge='append', recursive=true)}}, recursive=true)}}"
+    loop: "{{gateways | dict2items}}"
+    loop_control:
+      loop_var: gateway
+
+  - name: application list with gateways added
+    debug:
+      msg: 'apps: {{ apps | to_yaml }}'
+    when: "'debug_gw' in ansible_run_tags"
+
+  - name: just fail
+    ansible.builtin.fail:
+      msg: let's stop here
+    when: false
+
+### add gateway in requires to application
+
+
+# continue with the rest
+
   - debug: 
       msg: "{{item.key}}: {{ item.value }}\n{{ names | zip(item.value| dict2items| map(attribute='value') ) | to_nice_yaml }}" # create array from names and application values
     vars:
@@ -73,7 +111,7 @@
     when: only_ns is defined
 
   - debug:
-      msg: "only_apps:{{ only_apps }}"
+      msg: "only_apps prepared:{{ only_apps }}"
     when: only_apps is defined
 
 ## prepare: add multi-level requirements

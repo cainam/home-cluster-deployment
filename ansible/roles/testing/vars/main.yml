@@ -25,31 +25,36 @@ applications:
       k: k
 a2:
   ns1:
-    ns1tor1:
+    1a1:
       requires:
-      - name: ns2tor3
+      - name: 3a5
         namespace: ns2
-      - name: ns2a2
+      - name: 2a4
         namespace: ns2
-      git: tor1.git
-    ns1tor2:
+      v: m
+      network: 
+        gateway: open
+    1a2:
       git: tor2.git
       requires:
-      - name: ns1a3
+      - name: 1a3
         namespace: ns1
-    ns1a3:
+    1a3:
       v: v
       requires:
-      - name: ns2a2
+      - name: 2a4
         namespace: ns2
   ns2:
-    ns2tor3:
-      git: tor3.git
+    2a4:
+      v: o
       requires:
-      - name: ns1tor2
+      - name: 1a2
         namespace: ns1
   ns3:
-    ns2a2:
-      v: vv
+    3a5:
+      e: e
+    3a6:
+      f: f
+      network: true
   
 
