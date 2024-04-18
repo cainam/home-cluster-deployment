@@ -1,28 +1,5 @@
 ---
-applications:
-  anon_ns:
-    tor:
-      git: k8s_at_home.git
-    tor2:
-      requires:
-      - type: t
-        name: n
-        namespace: tor2ns
-      git: k8s_at_home.git
-  tools:
-    jaeger:
-      git: helm-charts.git
-      j: j
-    infopage:
-      git: k8s_at_home.git
-      i: i
-      requires:
-          - type: postgresql
-            name: postgresql
-            namespace: db
-    kiali-server:
-      git: helm-charts.git
-      k: k
+
 a2:
   ns1:
     1a1:

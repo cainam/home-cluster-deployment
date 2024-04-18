@@ -59,16 +59,7 @@
       msg: 'apps: {{ apps | to_yaml }}'
     when: "'debug_gw' in ansible_run_tags"
 
-  - name: just fail
-    ansible.builtin.fail:
-      msg: let's stop here
-    when: false
-
-### add gateway in requires to application
-
-
-# continue with the rest
-
+# flatten app list and make namespace an attribute
   - debug: 
       msg: "{{item.key}}: {{ item.value }}\n{{ names | zip(item.value| dict2items| map(attribute='value') ) | to_nice_yaml }}" # create array from names and application values
     vars:
@@ -76,7 +67,7 @@
       names: "{{ (app_name) | zip(([item.key]*(app_name|length))   ) }}" # create array of application and namespace name
     loop: "{{ apps |dict2items}}"
 
-  - name: set app_temp
+  - name: flatten app list - add arrays of namespace and application name to each application dict
     set_fact:
       app_temp: "{{ app_temp | default([]) + (names | zip(item.value| dict2items| map(attribute='value') )) }}" # create array from names and application values
     vars:
@@ -86,9 +77,9 @@
 
   - name: debug app_temp
     debug:
-      msg: "{{ app_temp  }}"
+      msg: "app_temp:\n{{ app_temp  }}"
 
-  - name: app_temp 2 dict
+  - name: flatten app list - transform temporary array values of namespace and application name into dict items
     vars:
       y: "{{ {'namespace':item[0][1],'name':item[0][0]} | combine(item[1]) }}" # turn names array item into dict
     set_fact:
@@ -97,9 +88,37 @@
 
   - name: app_list
     debug: 
-      msg: "{{ item }}"
-    loop: "{{ app_list }}"
+      msg: "app_list:\n{{ app_list | to_nice_yaml }}"
 
+# add gateways to requires:
+  - name: debug - add gateways as application requirements
+    vars:
+      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
+      gw: "{{ app.network.gateway | default(default_gateway) }}"
+      rq: "{{ app.requires|default([])+[{'name': gw, 'namespace': gateways[gw].namespace}] }}"
+    debug: 
+      msg: "my_idx:{{ my_idx }}\ngateway:{{ gw }}\nrq: {{rq}}\ngw_ns: {{gateways[gw].namespace}}\nnew app: {{ app  | combine({'requires': rq }, recursive=true) | to_nice_yaml}}"
+    loop: "{{ app_list | selectattr('network', 'defined')  }}"
+    loop_control:
+      loop_var: app
+
+  - name: debug - add gateways as application requirements
+    vars:
+      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
+      gw: "{{ app.network.gateway | default(default_gateway) }}"
+      rq: "{{ app.requires|default([])+[{'name': gw, 'namespace': gateways[gw].namespace}] }}"
+      new_entry: "{{app  | combine({'requires': rq }, recursive=true) }}"
+    set_fact:
+      app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_entry]}}"
+    loop: "{{ app_list | selectattr('network', 'defined')  }}"
+    loop_control:
+      loop_var: app
+
+  - name: app_list
+    debug: 
+      msg: "app_list:\n{{ app_list | to_nice_yaml }}"
+
+# if namespace limitation given, add all applications of the namespace(s) to the list of limited applications
   - name: apps from limit_namespace
     block:
     - debug: 
@@ -120,6 +139,70 @@
 # - strange iteration length
 # - item. var overwritten
 # requested_by not tried out
+
+# new idea: {%- set _ - style:
+# 1. init array with app
+# 2. loop until array is empty
+# 3. pop(0) first item
+# 4. add requires of item to list of requires
+# 5. add requires of item to loop array
+# 6. end-loop
+
+## testing Jinja2: https://j2live.ttl255.com/
+# script:
+#{%- set loop_data={"reqs":[app.name],"app": app} -%}
+#{%- set a=3 -%}
+#length: {{ loop_data.reqs|length }}
+#app: {{ loop_data.app}}
+#{%- for b in range(0,1000,1)  if (loop_data.reqs|length|int > 0) %} 
+#v: {{ i }} {{ a }} app: {{loop_data.app}}
+#{%- if loop_data.update({"reqs": [] }) %} {%- endif %}
+#{%- endfor %} 
+#a={{ a }}
+
+#{% endfor %} 
+#a={{ a }}
+
+#data: 
+#app:
+  #name: a
+  #req: 
+  #- n: x
+    #y: y
+
+
+
+  - name: debug - recursive requirements
+    vars:
+      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
+      # s1: "{%- r_list=[app.name]\nset x1='sdf' %}{{x1}}"
+      s1: |
+        {% set testing = 'it worked' %}
+        {% set another = testing %}
+        {{ another }}
+      s2: |
+        {%- set loop_data={"reqs":["a"],"app_list": app_list} -%}
+        {%- set a=3 -%}
+        length: {{ loop_data.reqs|length }}
+        loop_data: {{ loop_data}}
+        {%- for b in range(0,1000,1)  if (loop_data.reqs|length|int > 0) %} 
+        {%- set me=loop_data.reqs.pop() %}
+        a:{{ a }}  me:{{me}}
+
+        {%- endfor %} 
+        a={{ a }}
+    debug: 
+      msg: "my_idx:{{ my_idx }}\ns1:{{s1}}\ns2:{{s2}}"
+    loop: "{{ app_list | selectattr('requires', 'defined')  }}"
+    loop_control:
+      loop_var: app
+
+  - name: just fail
+    ansible.builtin.fail:
+      msg: let's stop here
+    when: true
+
+
   - name: test how to apply nested requirements
     when: false
     block:

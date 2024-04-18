@@ -18,6 +18,7 @@
     - deploy
     - k8s
     - testing
+    - gentoo
   - name: setup # to gather facts only when needed
     setup:
     tags:
