@@ -87,7 +87,7 @@ applications:
       subdir: charts/home-assistant
       git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:15.4
+      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }}
       storage:
       - name: home-assistant-config
         size: 100Mi
@@ -140,7 +140,6 @@ applications:
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
       branch: v2.7.0
-      xsubdir: charts/helm-chart/kubernetes-dashboard
       subdir: aio/deploy/helm-chart/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
       remove_dependencies: metrics-server

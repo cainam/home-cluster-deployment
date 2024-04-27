@@ -1,3 +1,4 @@
+supervisor="supervise-daemon"
 rc_need=crio
 
 # Kubernetes Kubelet (worker) config

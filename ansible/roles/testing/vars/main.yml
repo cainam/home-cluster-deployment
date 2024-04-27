@@ -4,7 +4,7 @@ a2:
   ns1:
     1a1:
       requires:
-      - name: 3a5
+      - name: 3a6
         namespace: ns2
       - name: 2a4
         namespace: ns2
@@ -27,10 +27,16 @@ a2:
       requires:
       - name: 1a2
         namespace: ns1
+  
+    2a5:
+      v: o
+      requires:
+      - name: 3a6
+        namespace: ns1
   ns3:
-    3a5:
-      e: e
     3a6:
+      e: e
+    3a7:
       f: f
       network: true
   

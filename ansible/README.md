@@ -71,7 +71,7 @@ home-assistant:
     - git clone https://github.com/tijsverkoyen/HomeAssistant-FusionSolar.git, move custom_component to HA and add integration 
     - configure with Kiosk URL from Huawei
   - data is outdated (max 30min late) so connection via Modbus
-    - enabled via FusionSolar webpage (device: SDongleA-05)
+    - enabled via FusionSolar webpage (device: SDongleA-05) - just configure device with port (502)
     - Modbus could be also taken via efin converter on Smart Meter or on RS485 ports on Inverter, but SDongleA-05 required no additional hardware and is wireless
     - Home-Assistant: https://github.com/wlcrs/huawei_solar to custom_components/
   - Settings -> Energy Dashboard
@@ -139,3 +139,4 @@ TODO:
 - replace cgroup v1 by cgroup v2: 1st, replace /etc/rc.conf, rc_cgroup_mode="legacy" with ="unified"
 - configure tempo in kiali
 - install grafana
+- ensure that kubelet and crio are always running
