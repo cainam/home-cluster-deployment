@@ -1,2 +1,2 @@
 supervisor="supervise-daemon"
-rc_need=ntp-client
+#rc_need=ntp-client
