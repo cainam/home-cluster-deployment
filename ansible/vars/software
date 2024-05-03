@@ -1,6 +1,6 @@
 software:
   istio:
-    version: 1.21.1
+    version: 1.21.2
     latest:
       type: github
       params:
@@ -18,7 +18,7 @@ software:
       params:
         repo: keycloak/keycloak
   zigbee2mqtt:
-    version: 1.36.1
+    version: 1.37.0
     latest:
       type: github
       params:
@@ -31,7 +31,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.4"
+    version: "2024.5"
     latest:
       type: dockerhub
       params:
