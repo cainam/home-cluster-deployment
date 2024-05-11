@@ -39,7 +39,7 @@ applications:
         svcPort: 80
         prefix: /oauth2
     keycloak:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/keycloak
       helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag="{{ software.keycloak.version }}" --set resources.limits.memory=600Mi
       image_build:
@@ -56,12 +56,14 @@ applications:
         svcPort: 1121
   home:
     common:
-      git: https://github.com/k8s-at-home/library-charts.git
-      subdir: charts/stable/common
-      branch: common-4.5.2
+      gitx: https://github.com/k8s-at-home/library-charts.git
+      subdirx: charts/stable/common
+      git: https://github.com/cainam/krysyntyz.git
+      subdir: charts/common
+      #branch: common-4.5.2
       install: false
     zigbee2mqtt:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
       helm_options: --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
@@ -75,7 +77,7 @@ applications:
         size: 100Mi
         config: true
     mosquitto:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/mosquitto
       git_to_local_params: --fix_source=.image.tag="{{ software.mosquitto.version }}" --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
       storage:

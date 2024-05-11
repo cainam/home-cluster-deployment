@@ -1,5 +1,3 @@
-#route_homepage.py
-
 from fastapi import APIRouter
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -14,7 +12,6 @@ import infopage
 #logger = logging.getLogger('uvicorn.error')
 logger = logging.getLogger(__name__)
 logging.basicConfig(level = logging.DEBUG)
-logger = logging.getLogger()
 
 def log(func):
     @functools.wraps(func)
@@ -36,8 +33,9 @@ templates = Jinja2Templates(directory="templates")
 general_pages_router = APIRouter()
 registry = "https://10.10.10.10:443"
 	
+loglev = logging.getLogger("uvicorn.access").level
+logging.getLogger("uvicorn.access").setLevel(logging.CRITICAL)
 @general_pages_router.get("/")
-#@log
 async def home(request: Request):
 	return templates.TemplateResponse("general_pages/homepage.html",{"request":request})
 
@@ -45,6 +43,8 @@ async def home(request: Request):
 #@log
 async def check(request: Request):
     return "ok"
+
+#logging.getLogger("uvicorn.access").setLevel(logging.DEBUG)
 
 @general_pages_router.get("/node_status")
 #@log

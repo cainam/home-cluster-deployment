@@ -7,7 +7,7 @@ from apis.general_pages.route_homepage import general_pages_router
 import logging
 import re
 
-logger = logging.getLogger('uvicorn.error')
+logger = logging.getLogger(__name__)
 repeated_slashes = re.compile(r'//+')
 
 def include_router(app):

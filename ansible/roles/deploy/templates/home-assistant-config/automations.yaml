@@ -22,16 +22,13 @@
   mode: single
 - id: '1708883845408'
   alias: Licht einschalten nach 1min
-  description: ''
+  description: wieder einschalten
   trigger:
   - platform: state
     entity_id:
     - switch.wegbeleuchtung
-  - platform: device
-    type: turned_off
-    device_id: 7b2db77c2fc19923a28b42651875faca
-    entity_id: 43d6e09dd9ee435608d5a59a9a12f51f
-    domain: switch
+    from: 'on'
+    to: 'off'
   condition: []
   action:
   - delay:
@@ -40,8 +37,8 @@
       seconds: 0
       milliseconds: 0
   - type: turn_on
-    device_id: 7b2db77c2fc19923a28b42651875faca
-    entity_id: 43d6e09dd9ee435608d5a59a9a12f51f
+    device_id: 434f60fb5e854625ac045ffdf0ba3aae
+    entity_id: 818385a76ca7a6f0526c123e9177982d
     domain: switch
   mode: single
 - id: '1710074182742'
@@ -51,14 +48,23 @@
   - platform: numeric_state
     entity_id:
     - sensor.power_meter_wirkleistung
-    above: 0
+    above: 100
   condition: []
   action:
+  - type: turn_on
+    device_id: 19230fc9ff185c3707d1d8a1625f5b83
+    entity_id: 3a087fe13640dc833d07ef98da0fbfc1
+    domain: switch
+  - type: turn_on
+    device_id: 52070036c70f4c68e6f18cf6809afbd5
+    entity_id: 8c48a2c7e50d15363de4343686855e1c
+    domain: switch
   - service: notify.persistent_notification
     metadata: {}
     data:
       message: Stromertrag
       title: Stromertrag
+    enabled: false
   mode: single
 - id: '1710074233128'
   alias: Stromverlust
@@ -70,9 +76,18 @@
     below: 0
   condition: []
   action:
+  - type: turn_off
+    device_id: 19230fc9ff185c3707d1d8a1625f5b83
+    entity_id: 3a087fe13640dc833d07ef98da0fbfc1
+    domain: switch
+  - type: turn_off
+    device_id: 52070036c70f4c68e6f18cf6809afbd5
+    entity_id: 8c48a2c7e50d15363de4343686855e1c
+    domain: switch
   - service: notify.persistent_notification
     metadata: {}
     data:
       message: Stromverlust
       title: Stromverlust
+    enabled: false
   mode: single
