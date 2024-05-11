@@ -57,7 +57,7 @@
   - name: "{{ title_app_reqs }}create database"
     postgresql_db:
       login_host: localhost
-      port: "{{ read_port.stdout }}"
+      port: "{{ read_port.stdout|int }}"
       login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
       name: "{{ requires.config.database }}"
