@@ -11,7 +11,8 @@ import functools
 
 import infopage
 
-logger = logging.getLogger('uvicorn.error')
+#logger = logging.getLogger('uvicorn.error')
+logger = logging.getLogger(__name__)
 logging.basicConfig(level = logging.DEBUG)
 logger = logging.getLogger()
 
