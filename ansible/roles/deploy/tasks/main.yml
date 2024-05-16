@@ -4,14 +4,14 @@
   with_items: "{{ applications.keys() | list }}"
   run_once: true
   
-- name: check if container registry is available
-  shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
-  register: check_registry
-  #failed_when: true
-  
-- name: restart registry
-  shell: /etc/init.d/registry restart
-  when: check_registry.stdout != "true"
+#- name: check if container registry is available
+#  shell: curl -s -X GET https://myregistry.adm13:443/v2/_catalog | jq 'has("repositories")'
+#  register: check_registry
+#  #failed_when: true
+#  
+#- name: restart registry
+#  shell: /etc/init.d/registry restart
+#  when: check_registry.stdout != "true"
 
 - name: init required volumes
   set_fact:

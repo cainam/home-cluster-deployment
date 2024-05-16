@@ -7,7 +7,7 @@
     insertafter: "{{ item.setting }}"
     backup: yes
   loop:
-    - line: 'rc_cgroup_mode="legacy"'
+    - line: 'rc_cgroup_mode="unified"'
       setting: rc_cgroup_mode
     - line: 'rc_cgroup_controllers=""'
       setting: rc_cgroup_controllers

@@ -164,6 +164,8 @@
       dest: /etc/autofs/
     - file: syslog-ng.conf
       dest: /etc/syslog-ng/
+    - file: haproxy.logrotate
+      dest: /etc/logrotate.d/haproxy
 
 - name: include secrets (wlan, ssh_host_keys)
   include_vars: "{{ local_only }}/secrets"

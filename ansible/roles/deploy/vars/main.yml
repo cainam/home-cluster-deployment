@@ -190,8 +190,6 @@ applications:
       storage: 
       - name: data-postgresql-0
         size: 11Gi
-      - name: pg-config
-        size: 4Mi
   kube-system:
     descheduler:
       git: https://github.com/kubernetes-sigs/descheduler.git

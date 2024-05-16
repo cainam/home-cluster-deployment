@@ -111,6 +111,7 @@ Database:
   3. move old data (e.g. mv /shared/data-postgresql-0/pgdata/ /shared/data-postgresql-0/pgdata.15.6)
   4. copy new data in place (e.g. cp -rdp /tmp/pg_new/ /shared/data-postgresql-0/pgdata/)
   5. deploy update postgreSQL
+- tuning auf gluster: gluster vol set data-postgresql-0 group db-workload
 
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
@@ -140,3 +141,4 @@ TODO:
 - configure tempo in kiali
 - install grafana
 - ensure that kubelet and crio are always running
+- replace gluster by ??? openebs is not yet compatible with Raspberry

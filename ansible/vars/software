@@ -1,6 +1,6 @@
 software:
   istio:
-    version: 1.21.2
+    version: 1.22.0
     latest:
       type: github
       params:
@@ -38,7 +38,7 @@ software:
         repo: homeassistant/home-assistant
         arch: arm64
   kiali:
-    version: v1.82.0
+    version: v1.84.0
     latest:
       type: quay
       params:
@@ -65,7 +65,7 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 16.1-alpine
+    version: 16.3-alpine
     latest:
       type: dockerhub
       params:
