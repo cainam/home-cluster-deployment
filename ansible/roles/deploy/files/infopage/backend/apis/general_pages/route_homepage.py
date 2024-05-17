@@ -9,9 +9,9 @@ import functools
 
 import infopage
 
-#logger = logging.getLogger('uvicorn.error')
-logger = logging.getLogger(__name__)
 logging.basicConfig(level = logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 
 def log(func):
     @functools.wraps(func)
@@ -34,7 +34,7 @@ general_pages_router = APIRouter()
 registry = "https://10.10.10.10:443"
 	
 loglev = logging.getLogger("uvicorn.access").level
-logging.getLogger("uvicorn.access").setLevel(logging.CRITICAL)
+#logging.getLogger("uvicorn.access").setLevel(logging.CRITICAL)
 @general_pages_router.get("/")
 async def home(request: Request):
 	return templates.TemplateResponse("general_pages/homepage.html",{"request":request})
@@ -60,7 +60,8 @@ async def vs(request: Request):
 
 @general_pages_router.get("/services_status")
 #@log
-async def services_status(request: Request):
+#async def services_status(request: Request):
+def services_status(request: Request):
     output={}
     output["registry"] = subprocess.run(["curl","-k","-s","-X","GET","-I",registry+"/v2/_catalog"], capture_output=True).stdout.decode('ascii')
     output["helm"] = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:9443"], capture_output=True).stdout.decode('ascii')
@@ -88,7 +89,8 @@ async def delete_image(request: Request):
     return ""
 
 @general_pages_router.get("/registry_images")
-async def registry_images(request: Request):
+#async def registry_images(request: Request):
+def registry_images(request: Request):
   import requests
 
   serviceaccount = "/var/run/secrets/kubernetes.io/serviceaccount"
@@ -110,7 +112,8 @@ async def registry_images(request: Request):
   return templates.TemplateResponse("general_pages/images_list.html",{"request":request, "images_list": images_list, "name": "registry images" } )
 
 @general_pages_router.get("/software")
-async def software(request: Request):
+#async def software(request: Request):
+def software(request: Request):
     raw, content = infopage.software()
     return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
 
