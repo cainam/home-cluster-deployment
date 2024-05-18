@@ -11,12 +11,12 @@ if [ "$2" = "k8s" ]; then
     for service in registry lighttpd; do
       #restart_out=$(/etc/init.d/${service} restart 2>&1)
       #restart_out=$(rc-service {service} restart 2>&1)
-      echo "$d - restart output: $(rc-service {service} restart 2>&1)" >> "${logf}"
+      echo "$d - restart output: $(rc-service ${service} restart 2>&1)" >> "${logf}"
       echo "$d - service status: ${service}: $( rc-service ${service} status | cat )" >> "${logf}"
     done
   else
     for service in registry lighttpd; do
-      echo "$d - stop output: $(rc-service stop 2>&1)" >> "${logf}"
+      echo "$d - stop output: $(rc-service ${service} stop 2>&1)" >> "${logf}"
       echo "$d - service status: ${service}: $( rc-service ${service} status | cat )" >> "${logf}"
     done
   fi
