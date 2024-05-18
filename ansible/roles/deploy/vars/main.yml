@@ -115,7 +115,7 @@ applications:
     infopage:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/infopage
-      helm_options: --set image.repository=mypy --set image.tag={{ software.python.version }}
+      helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
       image_build:
       - name: mypy
         source: local

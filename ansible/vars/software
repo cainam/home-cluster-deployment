@@ -44,7 +44,7 @@ software:
       params:
         repo: kiali/kiali
   python:
-    version: 3.12.2-slim
+    version: 3.12.3-slim
     latest:
       type: dockerhub
       params:

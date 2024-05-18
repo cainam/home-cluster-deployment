@@ -9,12 +9,14 @@ exec >> $logf
 if [ "$2" = "k8s" ]; then
   if [ "$3" = "MASTER" ]; then
     for service in registry lighttpd; do
-      /etc/init.d/${service} restart
+      restart_out=$(/etc/init.d/${service} restart 2>&1)
+      echo "$d - restart output: ${restart_out}" >> "${logf}"
       echo "$d - service status: ${service}: $( /etc/init.d/${service} status | cat )" >> "${logf}"
     done
   else
     for service in registry lighttpd; do
-      /etc/init.d/${service} stop
+      stop_out=$(/etc/init.d/${service} stop 2>&1)
+      echo "$d - stop output: ${stop_out}" >> "${logf}"
       echo "$d - service status: ${service}: $( /etc/init.d/${service} status | cat )" >> "${logf}"
     done
   fi
