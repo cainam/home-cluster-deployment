@@ -45,44 +45,107 @@
   alias: Stromertrag
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id:
-    - sensor.power_meter_wirkleistung
-    above: 100
+  - platform: time_pattern
+    minutes: /5
+    seconds: '1'
   condition: []
   action:
-  - type: turn_on
-    device_id: 19230fc9ff185c3707d1d8a1625f5b83
-    entity_id: 3a087fe13640dc833d07ef98da0fbfc1
-    domain: switch
-  - type: turn_on
-    device_id: 52070036c70f4c68e6f18cf6809afbd5
-    entity_id: 8c48a2c7e50d15363de4343686855e1c
-    domain: switch
-  - service: notify.persistent_notification
-    metadata: {}
-    data:
-      message: Stromertrag
-      title: Stromertrag
-    enabled: false
+  - condition: numeric_state
+    entity_id: sensor.power_meter_wirkleistung
+    above: 100
+  - repeat:
+      while:
+      - condition: state
+        entity_id: switch.teich2
+        state: 'off'
+      sequence:
+      - type: turn_on
+        device_id: 52070036c70f4c68e6f18cf6809afbd5
+        entity_id: 8c48a2c7e50d15363de4343686855e1c
+        domain: switch
+      - service: notify.persistent_notification
+        metadata: {}
+        data:
+          message: Stromertrag
+          title: Stromertrag
+        enabled: false
+      - delay: 00:00:15
+  - condition: numeric_state
+    entity_id: sensor.power_meter_wirkleistung
+    above: 100
   mode: single
 - id: '1710074233128'
   alias: Stromverlust
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id:
-    - sensor.power_meter_wirkleistung
-    below: 0
+  - platform: time_pattern
+    minutes: /5
+    seconds: '30'
   condition: []
   action:
-  - type: turn_off
-    device_id: 19230fc9ff185c3707d1d8a1625f5b83
-    entity_id: 3a087fe13640dc833d07ef98da0fbfc1
-    domain: switch
+  - service: notify.persistent_notification
+    metadata: {}
+    data:
+      message: Stromverlust
+      title: Stromverlust
+    enabled: false
+  - condition: numeric_state
+    entity_id: sensor.power_meter_wirkleistung
+    below: 0
   - type: turn_off
     device_id: 52070036c70f4c68e6f18cf6809afbd5
     entity_id: 8c48a2c7e50d15363de4343686855e1c
+    domain: switch
+  mode: single
+- id: '1716202078969'
+  alias: Stromertrag Hintertür
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.power_meter_wirkleistung
+    above: 100
+  - platform: time_pattern
+    seconds: '1'
+    minutes: /5
+  condition: []
+  action:
+  - condition: numeric_state
+    entity_id: sensor.power_meter_wirkleistung
+    above: 100
+  - repeat:
+      while:
+      - condition: state
+        entity_id: switch.hintertur
+        state: 'off'
+      sequence:
+      - type: turn_on
+        device_id: 19230fc9ff185c3707d1d8a1625f5b83
+        entity_id: 3a087fe13640dc833d07ef98da0fbfc1
+        domain: switch
+      - service: notify.persistent_notification
+        metadata: {}
+        data:
+          message: Stromertrag
+          title: Stromertrag
+        enabled: false
+      - delay: 00:00:15
+  mode: single
+- id: '1716202427354'
+  alias: Stromverlust Hintertür
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+    seconds: '30'
+  condition: []
+  action:
+  - condition: numeric_state
+    entity_id: sensor.power_meter_wirkleistung
+    below: 0
+  - type: turn_off
+    device_id: 19230fc9ff185c3707d1d8a1625f5b83
+    entity_id: 3a087fe13640dc833d07ef98da0fbfc1
     domain: switch
   - service: notify.persistent_notification
     metadata: {}
