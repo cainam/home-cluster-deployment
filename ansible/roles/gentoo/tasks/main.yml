@@ -124,9 +124,9 @@
       dest: /etc/crio/crio.conf.d/
     - file: scripts/
       dest: /usr/local/bin/
-    - file: cmdline.txt
-      dest: /boot/
-      backup: no
+#    - file: cmdline.txt
+#      dest: /boot/
+#      backup: no
     - file: world
       dest: /var/lib/portage/
     - file: gentoo.conf
@@ -201,12 +201,25 @@
       {% endfor %}
     dest: /etc/ssh/ssh_known_hosts
 
+- name: get root device
+  shell: |
+    l=$(blkid --output export --match-token LABEL=root | grep ^PARTUUID=)
+    n_l=$(echo "${l}" | wc -l )
+    if [ $n_l -eq 0 ];then
+      echo "/dev/mmcblk0p2"
+    elif [ $n_l -eq 1 ];then
+      echo "${l}"
+    else
+      exit -1
+    fi
+  changed_when: false
+  register: root_dev
 
 - name: deploy templates
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
-    backup: yes 
+    backup: "{{ item.backup | default('yes') }}"
   loop:
     - file: make.conf
       dest: "/etc/portage/make.conf"
@@ -218,6 +231,9 @@
       dest: /etc/conf.d/
     - file: conf.d/helm
       dest: /etc/conf.d/
+    - file: cmdline.txt
+      dest: /boot/
+      backup: no
 
 - name: symlinks for services
   file:
