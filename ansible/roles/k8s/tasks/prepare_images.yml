@@ -14,6 +14,13 @@
   shell: /etc/init.d/registry restart
   when: check_registry.stdout != "true"
 
+- name: image2local
+  shell: |
+    set -x
+    echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.tag | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
+  register: image2local
+  loop: "{{ images  }}"
+
 - name: pull, tag and push k8s images
   shell: |
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
@@ -25,13 +32,6 @@
     helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git
     helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
     helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
-
-- name: image2local
-  shell: |
-    set -x
-    echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.tag | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
-  register: image2local
-  loop: "{{ images  }}"
 
 - debug:
     msg: "{{ image2local }}"

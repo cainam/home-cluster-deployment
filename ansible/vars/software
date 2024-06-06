@@ -18,7 +18,7 @@ software:
       params:
         repo: keycloak/keycloak
   zigbee2mqtt:
-    version: 1.37.1
+    version: 1.38.0
     latest:
       type: github
       params:
@@ -77,6 +77,12 @@ software:
       type: github
       params: 
         repo: kubernetes-sigs/descheduler
+  hydra:
+    version: "v2.1.2"
+    latest:
+      type: github
+      params:
+        repo: ory/hydra
   tempo:
     version: 2.4.0
     latest:

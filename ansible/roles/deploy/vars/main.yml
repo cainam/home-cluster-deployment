@@ -26,6 +26,11 @@ applications:
       subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
   auth:
+    hydra:
+      git: https://github.com/ory/k8s.git
+      subdir: helm/charts/hydra
+      git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
+      remove_dependencies: hydra-maester
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
