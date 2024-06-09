@@ -205,7 +205,7 @@
   shell: |
     l=$(blkid --output export --match-token LABEL=root | grep ^PARTUUID=)
     n_l=$(echo "${l}" | wc -l )
-    if [ $n_l -eq 0 ];then
+    if [ "${l}" = "" ];then
       echo "/dev/mmcblk0p2"
     elif [ $n_l -eq 1 ];then
       echo "${l}"
