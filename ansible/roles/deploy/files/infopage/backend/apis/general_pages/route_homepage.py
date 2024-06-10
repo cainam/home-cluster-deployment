@@ -113,7 +113,17 @@ def registry_images(request: Request):
 
 @general_pages_router.get("/software")
 #async def software(request: Request):
-def software(request: Request):
+def software(request: Request, name: str | None = None):
     raw, content = infopage.software()
     return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
+
+@general_pages_router.get("/soft_ng")
+#async def software(request: Request):
+def software(request: Request, software: str | None = None):
+    raw, content = infopage.soft_ng(software)
+    if (software is None ):
+      return templates.TemplateResponse("general_pages/soft_ng.html",{"request":request, "content": content, "raw": raw, "name": "soft_ng"})
+    else:
+      logger.info("software: "+software+" content:"+str(content))
+      return templates.TemplateResponse("general_pages/software_versions.html",{"request":request, "content": content, "raw": raw})
 

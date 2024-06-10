@@ -18,6 +18,11 @@ Notes:
 - remove claimRef: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - create token: kubectl create token -n tools kiali-service-account
 - gluster - change size: use "vol replace-brick" and replace brick by brick 
+- gluster repair - split-brain: 
+    brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
+    backupdir=/
+    for a in auth.session ; do cp $brickdir/$a $backupdir/$a; inum=$(ls -ain $brickdir/.storage/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
+
 
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh

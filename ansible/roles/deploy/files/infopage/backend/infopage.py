@@ -35,6 +35,85 @@ def node_info():
     content.append([ info, cond  ] )
   return content
 
+def soft_ng(name):
+  import yaml
+  import requests
+  import re
+  from packaging.specifiers import SpecifierSet
+
+  software_file = "software"
+  with open(software_file, 'r') as file:
+    sw = yaml.safe_load(file)
+  if name is None:
+    return "",list(sw["software"].keys())
+  else:
+    raw = "" #str(sw)
+    item = name
+    raw+="\n"+item+"\n  current version: "+sw["software"][item]["version"]
+
+    installed=["unknn"]
+    if True:
+      installed=[]
+      installed_type = "k8s"
+      installed_pattern = item+":"
+      if "installed" in sw["software"][item]:
+        if "type" in sw["software"][item]["installed"]:
+          installed_type = sw["software"][item]["installed"]["type"]
+        if "pattern" in sw["software"][item]["installed"]:
+          installed_pattern = sw["software"][item]["installed"]["pattern"]
+      pods = requests.get(apiserver+"/api/v1/pods/", verify=cacert, headers=headers).json()
+      for pod in pods["items"]:
+        for x in pod["spec"]["containers"]:
+          if re.search(installed_pattern, x["image"]) and x["image"] not in installed:
+            installed.append(x["image"]);
+    content_item=[item,installed,sw["software"][item]["version"]]
+
+    if sw["software"][item]["latest"]["type"] == "github":
+      try:
+        vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/releases/latest") # | jq .tag_name
+        vers.raise_for_status()
+        raw += "\n  github version: "+str(vers.json()["tag_name"] )
+        content_item.append([vers.json()["tag_name"]])
+      except requests.exceptions.HTTPError as exc:
+        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        raw += "\n error while fetching information: "+str(exc.response.status_code)
+
+
+    elif sw["software"][item]["latest"]["type"] == "dockerhub":
+      dockerhub_base_url = "https://hub.docker.com/v2/repositories/"
+      digest = requests.get(dockerhub_base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tags/latest")
+      for image in digest.json()["images"]:
+        if image["architecture"] == sw["software"][item]["latest"]["params"]["arch"]:
+          digest = image["digest"]
+          break
+      raw += "\n  latest digest: "+digest
+      all_tags = requests.get(dockerhub_base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tags/?page_size=500")
+      versions = []
+      for tag in all_tags.json()["results"]:
+        if tag["name"] == "latest": continue
+        for image in tag["images"]:
+          if not "digest" in image:
+            raw += "\n  no digest for image of tag named "+tag["name"]
+            continue
+          if image["digest"] == digest:
+            versions.append(tag["name"])
+      content_item.append(versions)
+
+    elif sw["software"][item]["latest"]["type"] == "quay":
+      base_url = "https://quay.io/api/v1/repository/"
+      results = requests.get(base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tag/?onlyActiveTags=true")
+      vspec = SpecifierSet(">="+sw["software"][item]["version"])
+      versions = []
+      for v in results.json()["tags"]:
+        name = v["name"]
+        if name[0:6] != "latest" and name.split("-")[0] in vspec:
+          versions.append(name)
+      content_item.append(versions)
+
+    else:
+      content_item.append("no clue")
+    return raw, content_item
+
 def software():
   import yaml
   import requests

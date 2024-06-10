@@ -7,14 +7,27 @@
 document.addEventListener('DOMContentLoaded', ()=> {
     ItemElems = document.querySelectorAll("[itemprop='load']");
     for (let i = 0; i < ItemElems.length; i++) {
-//      alert("currentUrl:"+currentUrl+"\nvalue: "+ItemElems[i].getAttribute('value')+"\n fetch: "+currentUrl+ItemElems[i].getAttribute('value'));
       fetch(currentUrl+ItemElems[i].getAttribute('value'))
       .then(response => response.text())
       .then(html => {ItemElems[i].innerHTML = html;})
-      .catch(error => {console.log(error);});
+      .catch(error => {console.log(error);})
+      .then(function(){if(ItemElems[i].getAttribute('value')=="/soft_ng"){load_sw_details(ItemElems[i]);} })
+      ;
     }
-
 });
+function load_sw_details(element){
+  console.log("sw details"+element);
+  inner_elems = element.querySelectorAll("[itemprop='inner_load']");
+  for (let i = 0; i < inner_elems.length; i++) {
+    console.log("load: "+inner_elems[i].getAttribute('value'));
+    // eval(inner_elems[i].innerHTML);
+    fetch(currentUrl+"/soft_ng"+"?software="+inner_elems[i].getAttribute('value'))
+    .then(response => response.text())
+      .then(html => {inner_elems[i].innerHTML = html;})
+      .catch(error => {console.log(error);})
+
+  }
+}
 
 function trigger_backend(action, data){
   // alert("backend!"+"\n action"+action+"\ndata: "+data);
@@ -25,21 +38,9 @@ function trigger_backend(action, data){
   })
 
 }
-
     </script>
-    <style>
-      table {
-        border-collapse:collapse;
-      }
-
-      .iTable table,.iTable td,.iTable th,.iTable tr{
-        border: 1px solid;
-        border-collapse:collapse;
-      }
-      .oTable td{
-	vertical-align: top;
-      }
-    </style>
+    {% block style %}
+    {% endblock %}
 
     {% block title %}
     {% endblock %}
@@ -49,9 +50,21 @@ function trigger_backend(action, data){
     {% block content %}
     {% endblock %}
 
+<script>
+const dContainer = document.querySelector('#TabsSystem')
+
+dContainer
+.querySelectorAll('.TabButton')
+.forEach( tab =>
+  tab.onclick =_=>
+    {
+    dContainer.dataset.tab = tab.dataset.tab
+    }
+  )
+</script>
+
     {% block scripts %}
     {% endblock %}
-
 
 </body>
 </html>

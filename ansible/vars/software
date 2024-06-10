@@ -1,12 +1,16 @@
 software:
   istio:
     version: 1.22.0
+    installed:
+      pattern: "istio"
     latest:
       type: github
       params:
         repo: istio/istio
   oauth2_proxy:
     version: v7.6.0
+    installed:
+      pattern: "oauth2-proxy:"
     latest:
       type: github
       params:
@@ -31,7 +35,9 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.5"
+    version: "2024.6"
+    installed:
+      pattern: "home-assistant:"
     latest:
       type: dockerhub
       params:
@@ -45,6 +51,8 @@ software:
         repo: kiali/kiali
   python:
     version: 3.12.3-slim
+    installed:
+      pattern: mypy
     latest:
       type: dockerhub
       params:
@@ -66,6 +74,9 @@ software:
         arch: arm64
   postgresql:
     version: 16.3-alpine
+    installed:
+      type: k8s
+      pattern: "postgres:"
     latest:
       type: dockerhub
       params:
