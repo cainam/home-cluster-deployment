@@ -48,17 +48,15 @@ devices:
     friendly_name: Werkstatt
   '0x94deb8fffe41e447':
     friendly_name: Wegbeleuchtung
-  '0xb4e3f9fffeaaa2c5':
-    friendly_name: ImStein
   '0x00158d0007bde782':
     friendly_name: Temperatur
   '0xa4c1384521e152f5':
-    friendly_name: Teich
+    friendly_name: Pool
   '0xa4c1383fcaf256b0':
     friendly_name: Terrasse
   '0xa4c138d122942108':
-    friendly_name: Teich2
+    friendly_name: Teich
   '0xf0d1b8be24084e34':
     friendly_name: Lyra
   '0xa4c138e2bc190354':
-    friendly_name: Hintertüür
+    friendly_name: Carport
