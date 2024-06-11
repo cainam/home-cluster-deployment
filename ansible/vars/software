@@ -108,3 +108,9 @@ software:
       params:
         repo: grafana/tempo-query
         arch: arm64
+  dashboard:
+    version: kubernetes-dashboard-7.5.0
+    latest:
+      type: github
+      params:
+        repo: kubernetes/dashboard

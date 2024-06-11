@@ -21,7 +21,7 @@
       entity_id: switch.warmwasserpumpe
   mode: single
 - id: '1708883845408'
-  alias: Licht einschalten nach 1min
+  alias: Licht einschalten nach 2min
   description: wieder einschalten
   trigger:
   - platform: state
@@ -33,7 +33,7 @@
   action:
   - delay:
       hours: 0
-      minutes: 1
+      minutes: 2
       seconds: 0
       milliseconds: 0
   - type: turn_on
@@ -42,21 +42,22 @@
     domain: switch
   mode: single
 - id: '1710074182742'
-  alias: Stromertrag
+  alias: Stromertrag Teich
   description: ''
   trigger:
   - platform: time_pattern
     minutes: /5
     seconds: '1'
+    enabled: true
   condition: []
   action:
   - condition: numeric_state
     entity_id: sensor.power_meter_wirkleistung
-    above: 100
+    above: 101
   - repeat:
       while:
       - condition: state
-        entity_id: switch.teich2
+        entity_id: switch.teich
         state: 'off'
       sequence:
       - type: turn_on
@@ -70,12 +71,9 @@
           title: Stromertrag
         enabled: false
       - delay: 00:00:15
-  - condition: numeric_state
-    entity_id: sensor.power_meter_wirkleistung
-    above: 100
   mode: single
 - id: '1710074233128'
-  alias: Stromverlust
+  alias: Stromverlust Teich
   description: ''
   trigger:
   - platform: time_pattern
@@ -98,7 +96,7 @@
     domain: switch
   mode: single
 - id: '1716202078969'
-  alias: Stromertrag Hintertür
+  alias: Stromertrag Pool
   description: ''
   trigger:
   - platform: numeric_state
@@ -116,8 +114,8 @@
   - repeat:
       while:
       - condition: state
-        entity_id: switch.hintertur
         state: 'off'
+        entity_id: switch.pool
       sequence:
       - type: turn_on
         device_id: 19230fc9ff185c3707d1d8a1625f5b83
@@ -132,7 +130,7 @@
       - delay: 00:00:15
   mode: single
 - id: '1716202427354'
-  alias: Stromverlust Hintertür
+  alias: Stromverlust Pool
   description: ''
   trigger:
   - platform: time_pattern

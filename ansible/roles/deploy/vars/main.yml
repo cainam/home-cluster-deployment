@@ -146,10 +146,11 @@ applications:
           file: kiali-config.yaml
     kubernetes-dashboard:
       git: https://github.com/kubernetes/dashboard.git
-      branch: v2.7.0
-      subdir: aio/deploy/helm-chart/kubernetes-dashboard
+      branch: "{{ software.dashboard.version }}"
+      subdir: charts/kubernetes-dashboard
       helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
-      remove_dependencies: metrics-server
+      git_to_local_params: --fix_source=.metricsScraper.image= --fix_source=.metricsScraper.enabled=false --fix_source=.kong.image= --fix_source=.kong.enabled=false
+      remove_dependencies: metrics-server,ingress-nginx,cert-manager,kong
       network:
         prefix: /kubernetes-dashboard/
         svcPort: 9090
