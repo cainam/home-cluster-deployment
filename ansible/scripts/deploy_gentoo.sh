@@ -6,6 +6,9 @@
 my_name=$(basename $0)
 run_file="/var/run/${my_name}"
 
+#exec 1>>"/var/log/${my_name}"
+#exec 2>&1
+
 . /usr/local/bin/set_env.sh 
 cd /data/mine/git/ansible/
 
