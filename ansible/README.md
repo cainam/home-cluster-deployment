@@ -105,6 +105,9 @@ flash:
 Mosquitto:
 - remove messages flagged for retain: # mosquitto_sub -h localhost -u x -P x -v --retained-only --remove-retained -t 'zigbee2mqtt/Zimmertr/availability' -E
 
+Kubernetes Dashboard:
+- with update, skip-login was no longer possible, seems Authorization Header is required (https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md ), set-authorization-header can nolonger be used (https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config/) 
+
 Networking:
 - Load-balancer <=> Gateway: one to one relationship
 - Gateway <=> VirtualService: one to one relationship

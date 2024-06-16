@@ -148,13 +148,16 @@ applications:
       git: https://github.com/kubernetes/dashboard.git
       branch: "{{ software.dashboard.version }}"
       subdir: charts/kubernetes-dashboard
-      helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true
+      helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true --set metricsScraper.enabled=false --set web.containers.args[0]="--v=2" --set auth.containers.args[0]="--v=2"
       git_to_local_params: --fix_source=.metricsScraper.image= --fix_source=.metricsScraper.enabled=false --fix_source=.kong.image= --fix_source=.kong.enabled=false
       remove_dependencies: metrics-server,ingress-nginx,cert-manager,kong
       network:
-        prefix: /kubernetes-dashboard/
-        svcPort: 9090
-        addition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
+        #prefix: /kubernetes-dashboard/
+        prefix: /
+        gateway: dashboard-gw
+        svcPort: 8000
+        svcName: kubernetes-dashboard-web
+        #addition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
     kube-state-metrics:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/kube-state-metrics
