@@ -1,14 +1,14 @@
 - name: set app fact
   set_fact:
-    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} - "
+    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
         
-- name: "{{ name_prefix }}status"
+- name: "{{ name_prefix }} status"
   debug:
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
 
 - block:
-  - name: "{{ name_prefix }}storage"
+  - name: "{{ name_prefix }} storage"
     include_tasks: common/storage.yml
     with_items: "{{ application.value.storage }}"
     loop_control:
@@ -17,20 +17,20 @@
     
 - block:
   - block:
-    - name: "{{ name_prefix }}tempdir for image build"
+    - name: "{{ name_prefix }} tempdir for image build"
       tempfile:
         state: directory
         suffix: "-build-image"
       register: build_dir
 
-    - name: "{{ name_prefix }}copy dockerfile"
+    - name: "{{ name_prefix }} copy dockerfile"
       template:
         src: "{{ item.dockerfile | default(item.name~'.dockerfile') }}"
         dest: "{{ build_dir.path }}"
         mode: 0644
       loop: "{{ application.value.image_build }}"
 
-    - name: "{{ name_prefix }}build image"
+    - name: "{{ name_prefix }} build image"
       shell: |
         set -x
         if [ "{{ item.source }}" != "local" ]; then
@@ -51,7 +51,7 @@
       failed_when: false
     when: application.value.image_build is defined
     
-  - name: "{{ name_prefix }}build helm"
+  - name: "{{ name_prefix }} build helm"
     shell: |
       . set_env.sh "{{ namespace.key }}"
       helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
@@ -61,12 +61,12 @@
       {{ application.value.git_to_local_params | default("") }} 
     register: build_out
 
-  - name: "{{ name_prefix }}build output"
+  - name: "{{ name_prefix }} build output"
     debug:
       msg: "{{ item }}"
     loop: "{{ build_out  | dict2items }}"
 
-  - name: "{{ name_prefix }}helm repo refresh"
+  - name: "{{ name_prefix }} helm repo refresh"
     shell: |
       . set_env.sh "{{ namespace.key }}"
       helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
@@ -75,7 +75,7 @@
   when: "'build' in ansible_run_tags" 
 
 - block:
-  - name: "{{ name_prefix }}install storage content"
+  - name: "{{ name_prefix }} install storage content"
     include_tasks: storage_content.yml
     when: storage.config is defined and storage.config
     with_items: "{{ application.value.storage }}"
@@ -83,14 +83,14 @@
       loop_var: storage
   when: application.value.storage is defined
     
-- name: "{{ name_prefix }}files"
+- name: "{{ name_prefix }} files"
   include_tasks: files.yml
   loop: "{{ application.value.files | dict2items }}"
   loop_control:
     loop_var: file
   when: application.value.files is defined
 
-- name: "{{ name_prefix }}install or upgrade"
+- name: "{{ name_prefix }} install or upgrade"
   shell: |
     . set_env.sh "{{ namespace.key }}"
     set -x
@@ -101,13 +101,13 @@
   when: "application.value.install | default(true)"
   #failed_when: true
   
-- name: "{{ name_prefix }}output"
+- name: "{{ name_prefix }} output"
   debug:
     msg: "{{ item | to_yaml }}"
   loop: "{{ out  | dict2items }}"
   
 - block:
-  - name: "{{ name_prefix }}manage application requirements"
+  - name: "{{ name_prefix }} manage application requirements"
     include_tasks: manage_application_requirements.yaml
     with_items: "{{ application.value.requires }}"
     loop_control:
@@ -119,7 +119,7 @@
     msg: "network defined?: {{ application.value.network | default('no') }} and install?: {{(application.value.install | default(true))}}"
   loop: "{{ out  | dict2items }}"
   
-- name: "{{ name_prefix }}  record application with gateway for VirtualService"
+- name: "{{ name_prefix }} record application with gateway for VirtualService"
   set_fact:
     # gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
 #    gateways: "{{ gateways | combine({application.value.network.gateway | default(default_gateway): {'applications': {namespace.key: {application.key: application.value}    }  }  }, recursive=True) }}"
@@ -136,7 +136,7 @@
     msg: "gateways: {{ gateways | to_yaml}}"
 
 - block:
-  - name: "{{ name_prefix }}affinity - label node"
+  - name: "{{ name_prefix }} affinity - label node"
     shell: |
       kubectl label node {{ application.value.affinity }} {{ application.key }}={{ application.key }}
   when: application.value.affinity is defined

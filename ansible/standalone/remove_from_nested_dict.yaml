@@ -1,0 +1,55 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    limit_apps:
+    - a1_2
+    - a2_3
+    - aa
+    apps:
+      ns1:
+        a1_1:
+          git: g1
+        a2_1:
+          git: g2
+        aa:
+          git: g2
+      ns2:
+        a1_2:
+          git: g1
+        a2_2:
+          git: g2
+      ns3:
+        a1_3:
+          git: g1
+        a2_3:
+          git: g2
+        aa:
+          git: g2
+  tasks:
+  - debug:
+      msg: "{{ apps | dictsort }}"
+
+  - name: Initialize the modified dictionary
+    set_fact:
+      napps: {}
+
+  - name: Process each outer key
+    set_fact:
+      napps: >-
+        {{
+          napps | combine({ item.key: item.value | dict2items | selectattr('key', 'in', limit_apps) | items2dict })
+        }}
+    loop: "{{ apps | dict2items }}"
+    loop_control:
+      loop_var: item
+
+  - name: Update the original dictionary
+    set_fact:
+      apps: "{{ napps }}"
+
+  - name: Show updated dictionary
+    debug:
+      var: apps

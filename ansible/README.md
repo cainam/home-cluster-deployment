@@ -21,7 +21,7 @@ Notes:
 - gluster repair - split-brain: 
     brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
     backupdir=/
-    for a in auth.session ; do cp $brickdir/$a $backupdir/$a; inum=$(ls -ain $brickdir/.storage/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
+    mkdir -p "$backupdir";for a in auth.session ;do cp -rdp $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
 
 
 Manage Registry:

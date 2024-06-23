@@ -152,12 +152,13 @@ applications:
       git_to_local_params: --fix_source=.metricsScraper.image= --fix_source=.metricsScraper.enabled=false --fix_source=.kong.image= --fix_source=.kong.enabled=false
       remove_dependencies: metrics-server,ingress-nginx,cert-manager,kong
       network:
-        #prefix: /kubernetes-dashboard/
-        prefix: /
         gateway: dashboard-gw
+        xxprefix: /kubernetes-dashboard/
+        prefix: /
+        xgateway: dashboard-gw
         svcPort: 8000
         svcName: kubernetes-dashboard-web
-        #addition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
+        xxaddition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
     kube-state-metrics:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/kube-state-metrics
@@ -205,5 +206,5 @@ applications:
       subdir: charts/descheduler
       branch: "{{ software.descheduler.version }}"
       git_to_local_params: --fix_source=.image.tag={{ software.descheduler.version }}
-      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=50 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
+      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
 
