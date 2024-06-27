@@ -42,4 +42,5 @@
 192.168.4.103 keycloak.my-lb.adm13
 192.168.4.104  open.my-lb.adm13
 192.168.4.105  dashboard.my-lb.adm13
+192.168.4.106 hydra.my-lb.adm13
 

@@ -92,6 +92,20 @@ gateways:
         match:
         - uri:
             prefix: /dummy
+  hydra-gw:
+    domain: "hydra.{{ base_domain }}"
+    hosts:
+    - "hydra.{{ base_domain }}"
+    - adm13.dnshome.de
+    external_ip: 192.168.4.106
+    virtualservice_inject:
+      http:
+      - name: dummy
+        directResponse:
+          status: 592
+        match:
+        - uri:
+            prefix: /dummy
   ha-gw:
     domain: "ha.{{ base_domain }}"
     hosts:
