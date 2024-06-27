@@ -40,7 +40,7 @@ case "$atype" in
 esac
 
 read i n < <(
-for label in app app.kubernetes.io/name; do
+for label in app.kubernetes.io/instance app app.kubernetes.io/name; do
 kubectl get $atype -A -l $label=$search --no-headers=true  -o jsonpath="{..metadata.name} {..metadata.namespace}" | grep -v "^ $" 
 done
 )

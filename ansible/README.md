@@ -144,3 +144,7 @@ TODO:
 - install grafana
 - ensure that kubelet and crio are always running
 - replace gluster by ??? openebs is not yet compatible with Raspberry
+
+auth update:
+- Authorization policy per gateway
+- oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
