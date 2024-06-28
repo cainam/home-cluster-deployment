@@ -13,7 +13,6 @@ for i in "$@"; do
   esac
 done
 
-
 while read arch img section comments; do
   image_only=$(basename ${img})
   bname=${image_only%%:*}
@@ -30,7 +29,7 @@ while read arch img section comments; do
   fi
 
   echo "pulling $arch $img $section basename:$bname version:$version upload to section:$section/$bname:$version #$comments pushing as $mine";
-  podman pull --arch=$arch $img;
+  podman pull --quiet --arch=$arch $img;
   podman tag $img $mine; 
   podman push $mine; 
   podman image rm $img #)|| true

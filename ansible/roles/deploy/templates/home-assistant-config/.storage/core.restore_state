@@ -1,0 +1,485 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "core.restore_state",
+  "data": [
+    {
+      "state": {"entity_id":"person.x","state":"unknown","attributes":{"editable":true,"id":"x","device_trackers":["device_tracker.andi"],"user_id":"1e3d128e31a34f458f33b473c37725fd","friendly_name":"x"},"last_changed":"2024-06-11T17:12:20.477674+00:00","last_reported":"2024-06-11T17:12:25.179380+00:00","last_updated":"2024-06-11T17:12:25.179380+00:00","context":{"id":"01J044JRAVQPAYKS23C44XJCGH","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"person.u","state":"unknown","attributes":{"editable":true,"id":"u","device_trackers":[],"user_id":"3cddac5925894752ad1e6cb50b967bc0","friendly_name":"u"},"last_changed":"2024-06-11T17:12:20.478454+00:00","last_reported":"2024-06-11T17:12:25.179716+00:00","last_updated":"2024-06-11T17:12:25.179716+00:00","context":{"id":"01J044JRAVT0575WRMQXQZC7CF","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"conversation.home_assistant","state":"unknown","attributes":{"friendly_name":"Home Assistant"},"last_changed":"2024-06-11T17:12:24.480802+00:00","last_reported":"2024-06-11T17:12:24.480802+00:00","last_updated":"2024-06-11T17:12:24.480802+00:00","context":{"id":"01J044JQN0YV3JD3JEQK2MG0J4","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.warmwasserpumpe_on","state":"on","attributes":{"id":"1706637332761","last_triggered":null,"mode":"single","current":0,"friendly_name":"Warmwasserpumpe ON"},"last_changed":"2024-06-11T17:41:46.582123+00:00","last_reported":"2024-06-11T17:41:46.582123+00:00","last_updated":"2024-06-11T17:41:46.582123+00:00","context":{"id":"01J0468GENXB9Q0MM6KBN8Y4D2","parent_id":null,"user_id":"1e3d128e31a34f458f33b473c37725fd"}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"binary_sensor.zigbee2mqtt_bridge_connection_state","state":"on","attributes":{"device_class":"connectivity","friendly_name":"Zigbee2MQTT Bridge Connection state"},"last_changed":"2024-06-11T19:06:24.982233+00:00","last_reported":"2024-06-11T19:06:24.982233+00:00","last_updated":"2024-06-11T19:06:24.982233+00:00","context":{"id":"01J04B3FTPMQDZ9G3M2DNAYD21","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"button.zigbee2mqtt_bridge_restart","state":"unknown","attributes":{"device_class":"restart","friendly_name":"Zigbee2MQTT Bridge Restart"},"last_changed":"2024-06-11T19:06:24.982466+00:00","last_reported":"2024-06-11T19:06:24.982466+00:00","last_updated":"2024-06-11T19:06:24.982466+00:00","context":{"id":"01J04B3FTPF4HZRBTCHEZ17YAW","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.zigbee2mqtt_bridge_log_level","state":"debug","attributes":{"options":["error","warning","info","debug"],"friendly_name":"Zigbee2MQTT Bridge Log level"},"last_changed":"2024-06-11T19:06:24.982595+00:00","last_reported":"2024-06-11T19:06:24.982595+00:00","last_updated":"2024-06-11T19:06:24.982595+00:00","context":{"id":"01J04B3FTPQZ3YN7M8C0NDH46Z","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.zigbee2mqtt_bridge_version","state":"1.38.0","attributes":{"icon":"mdi:zigbee","friendly_name":"Zigbee2MQTT Bridge Version"},"last_changed":"2024-06-11T19:06:24.982753+00:00","last_reported":"2024-06-11T19:06:24.982753+00:00","last_updated":"2024-06-11T19:06:24.982753+00:00","context":{"id":"01J04B3FTP9089NGAYGDHBEQAJ","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "1.38.0",
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.temperatur_battery","state":"83","attributes":{"state_class":"measurement","battery":83,"humidity":62.84,"last_seen":"2024-06-11T19:05:30.828Z","linkquality":190,"power_outage_count":248,"pressure":1012.4,"temperature":19.61,"voltage":2975,"unit_of_measurement":"%","device_class":"battery","friendly_name":"Temperatur Batterie"},"last_changed":"2024-06-11T19:06:24.982899+00:00","last_reported":"2024-06-11T19:06:24.982899+00:00","last_updated":"2024-06-11T19:06:24.982899+00:00","context":{"id":"01J04B3FTPBKHY0G1YC4FAJA77","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "83",
+        "native_unit_of_measurement": "%"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.werkstatt_power_on_behavior","state":"unknown","attributes":{"options":["off","previous","on"],"indicator_mode":null,"last_seen":"2024-06-11T19:22:26.837Z","linkquality":165,"power_on_behavior":null,"icon":"mdi:power-settings","friendly_name":"Werkstatt Power-on behavior"},"last_changed":"2024-06-11T19:06:24.983000+00:00","last_reported":"2024-06-11T19:22:26.771204+00:00","last_updated":"2024-06-11T19:22:26.771204+00:00","context":{"id":"01J04C0V2KJC7R8YFTJ9REQVZM","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.temperatur_temperature","state":"19.61","attributes":{"state_class":"measurement","battery":83,"humidity":62.84,"last_seen":"2024-06-11T19:05:30.828Z","linkquality":190,"power_outage_count":248,"pressure":1012.4,"temperature":19.61,"voltage":2975,"unit_of_measurement":"°C","device_class":"temperature","friendly_name":"Temperatur Temperatur"},"last_changed":"2024-06-11T19:06:24.983130+00:00","last_reported":"2024-06-11T19:06:24.983130+00:00","last_updated":"2024-06-11T19:06:24.983130+00:00","context":{"id":"01J04B3FTQTTNW6ZB2XX8FAZQM","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "19.61",
+        "native_unit_of_measurement": "°C"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.werkstatt_indicator_mode","state":"unknown","attributes":{"options":["off","off/on","on/off","on"],"indicator_mode":null,"last_seen":"2024-06-11T19:22:26.837Z","linkquality":165,"power_on_behavior":null,"friendly_name":"Werkstatt Indicator mode"},"last_changed":"2024-06-11T19:06:24.983225+00:00","last_reported":"2024-06-11T19:22:26.772109+00:00","last_updated":"2024-06-11T19:22:26.772109+00:00","context":{"id":"01J04C0V2MQG4E5517M5PBG2F6","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.temperatur_humidity","state":"62.84","attributes":{"state_class":"measurement","battery":83,"humidity":62.84,"last_seen":"2024-06-11T19:05:30.828Z","linkquality":190,"power_outage_count":248,"pressure":1012.4,"temperature":19.61,"voltage":2975,"unit_of_measurement":"%","device_class":"humidity","friendly_name":"Temperatur Luftfeuchtigkeit"},"last_changed":"2024-06-11T19:06:24.983343+00:00","last_reported":"2024-06-11T19:06:24.983343+00:00","last_updated":"2024-06-11T19:06:24.983343+00:00","context":{"id":"01J04B3FTQQVQFF4YPWEF3KDY9","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "62.84",
+        "native_unit_of_measurement": "%"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.wegbeleuchtung_power_on_behavior","state":"on","attributes":{"options":["off","on","toggle","previous"],"last_seen":"2024-06-11T19:16:12.440Z","linkquality":169,"power_on_behavior":"on","update":{"installed_version":4110,"latest_version":4110,"state":"idle"},"update_available":null,"icon":"mdi:power-settings","friendly_name":"Wegbeleuchtung Power-on behavior"},"last_changed":"2024-06-11T19:06:24.983437+00:00","last_reported":"2024-06-11T19:16:12.378024+00:00","last_updated":"2024-06-11T19:16:12.378024+00:00","context":{"id":"01J04BNDETP0CW8GJVV6SRJ58C","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.zigbee2mqtt_bridge_permit_join_timeout","state":"unknown","attributes":{"unit_of_measurement":"s","device_class":"duration","friendly_name":"Zigbee2MQTT Bridge Permit join timeout"},"last_changed":"2024-06-11T19:06:24.983538+00:00","last_reported":"2024-06-11T19:06:24.983538+00:00","last_updated":"2024-06-11T19:06:24.983538+00:00","context":{"id":"01J04B3FTQRWSNG5TH0GMVQ00T","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": null,
+        "native_unit_of_measurement": "s"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.temperatur_pressure","state":"1012.4","attributes":{"state_class":"measurement","battery":83,"humidity":62.84,"last_seen":"2024-06-11T19:05:30.828Z","linkquality":190,"power_outage_count":248,"pressure":1012.4,"temperature":19.61,"voltage":2975,"unit_of_measurement":"hPa","device_class":"atmospheric_pressure","friendly_name":"Temperatur Luftdruck"},"last_changed":"2024-06-11T19:06:24.983653+00:00","last_reported":"2024-06-11T19:06:24.983653+00:00","last_updated":"2024-06-11T19:06:24.983653+00:00","context":{"id":"01J04B3FTQA5K27HYRM0CQACMF","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "1012.4",
+        "native_unit_of_measurement": "hPa"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.terrasse_power_outage_memory","state":"off","attributes":{"options":["on","off","restore"],"child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"icon":"mdi:power-settings","friendly_name":"Terrasse Power outage memory"},"last_changed":"2024-06-11T19:06:24.983747+00:00","last_reported":"2024-06-11T19:24:52.744330+00:00","last_updated":"2024-06-11T19:24:52.744330+00:00","context":{"id":"01J04C59M8EGC731R8S1D6KK84","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.warmwasserpumpe_power","state":"0","attributes":{"state_class":"measurement","current":0,"last_seen":"2024-06-11T19:27:21.963Z","linkquality":165,"power":0,"voltage":234.61,"unit_of_measurement":"W","device_class":"power","friendly_name":"Warmwasserpumpe Leistung"},"last_changed":"2024-06-11T19:06:24.983863+00:00","last_reported":"2024-06-11T19:27:21.892059+00:00","last_updated":"2024-06-11T19:27:21.892059+00:00","context":{"id":"01J04C9V94MSCK7H5KDVE5S260","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "0",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.terrasse_indicator_mode","state":"off/on","attributes":{"options":["off","off/on","on/off","on"],"child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"friendly_name":"Terrasse Indicator mode"},"last_changed":"2024-06-11T19:06:24.983966+00:00","last_reported":"2024-06-11T19:24:52.744458+00:00","last_updated":"2024-06-11T19:24:52.744458+00:00","context":{"id":"01J04C59M8Z9AAW7EJJSS01YWQ","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.temperatur_last_seen","state":"2024-06-11T19:05:30+00:00","attributes":{"battery":83,"humidity":62.84,"last_seen":"2024-06-11T19:05:30.828Z","linkquality":190,"power_outage_count":248,"pressure":1012.4,"temperature":19.61,"voltage":2975,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Temperatur Last seen"},"last_changed":"2024-06-11T19:06:24.984157+00:00","last_reported":"2024-06-11T19:06:24.984157+00:00","last_updated":"2024-06-11T19:06:24.984157+00:00","context":{"id":"01J04B3FTR29TRAP5F18ZXSQYF","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:05:30.828000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.warmwasserpumpe_last_seen","state":"2024-06-11T19:27:21+00:00","attributes":{"current":0,"last_seen":"2024-06-11T19:27:21.963Z","linkquality":165,"power":0,"voltage":234.61,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Warmwasserpumpe Last seen"},"last_changed":"2024-06-11T19:27:21.892668+00:00","last_reported":"2024-06-11T19:27:21.892668+00:00","last_updated":"2024-06-11T19:27:21.892668+00:00","context":{"id":"01J04C9V94MFHK04X2S7BYSS2C","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:27:21.963000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.carport_power_outage_memory","state":"unavailable","attributes":{"options":["on","off","restore"],"icon":"mdi:power-settings","friendly_name":"Carport Power outage memory"},"last_changed":"2024-06-11T18:55:47.164672+00:00","last_reported":"2024-06-11T18:55:47.164672+00:00","last_updated":"2024-06-11T18:55:47.164672+00:00","context":{"id":"01J04AG0YWWZPY65C0YZF2NPBZ","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.werkstatt_last_seen","state":"2024-06-11T19:22:26+00:00","attributes":{"indicator_mode":null,"last_seen":"2024-06-11T19:22:26.837Z","linkquality":165,"power_on_behavior":null,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Werkstatt Last seen"},"last_changed":"2024-06-11T19:22:26.771964+00:00","last_reported":"2024-06-11T19:22:26.771964+00:00","last_updated":"2024-06-11T19:22:26.771964+00:00","context":{"id":"01J04C0V2KJCY005YD6XTG4FZ4","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:22:26.837000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.carport_indicator_mode","state":"unavailable","attributes":{"options":["off","off/on","on/off","on"],"friendly_name":"Carport Indicator mode"},"last_changed":"2024-06-11T18:55:47.165458+00:00","last_reported":"2024-06-11T18:55:47.165458+00:00","last_updated":"2024-06-11T18:55:47.165458+00:00","context":{"id":"01J04AG0YXRKCT0SJGBXHP6M4Q","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.wegbeleuchtung_last_seen","state":"2024-06-11T19:16:12+00:00","attributes":{"last_seen":"2024-06-11T19:16:12.440Z","linkquality":169,"power_on_behavior":"on","update":{"installed_version":4110,"latest_version":4110,"state":"idle"},"update_available":null,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Wegbeleuchtung Last seen"},"last_changed":"2024-06-11T19:16:12.377758+00:00","last_reported":"2024-06-11T19:16:12.377758+00:00","last_updated":"2024-06-11T19:16:12.377758+00:00","context":{"id":"01J04BNDESBHN3RBHA6RFWCGVS","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:16:12.440000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.terrasse_power","state":"0","attributes":{"state_class":"measurement","child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"unit_of_measurement":"W","device_class":"power","friendly_name":"Terrasse Leistung"},"last_changed":"2024-06-11T19:06:24.984813+00:00","last_reported":"2024-06-11T19:24:52.743539+00:00","last_updated":"2024-06-11T19:24:52.743539+00:00","context":{"id":"01J04C59M7TMNTN4XH2R1VJ3TG","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "0",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.terrasse_energy","state":"26.26","attributes":{"state_class":"total_increasing","child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"unit_of_measurement":"kWh","device_class":"energy","friendly_name":"Terrasse Energie"},"last_changed":"2024-06-11T19:06:24.985015+00:00","last_reported":"2024-06-11T19:24:52.743826+00:00","last_updated":"2024-06-11T19:24:52.743826+00:00","context":{"id":"01J04C59M7FDNCF83XJM8ES4KJ","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "26.26",
+        "native_unit_of_measurement": "kWh"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.terrasse_last_seen","state":"2024-06-11T19:24:52+00:00","attributes":{"child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Terrasse Last seen"},"last_changed":"2024-06-11T19:24:52.010594+00:00","last_reported":"2024-06-11T19:24:52.744177+00:00","last_updated":"2024-06-11T19:24:52.744177+00:00","context":{"id":"01J04C59M8KQN2WY9JJC96RYWD","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:24:52.795000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.lyra_last_seen","state":"2024-06-11T19:25:53+00:00","attributes":{"last_seen":"2024-06-11T19:25:53.070Z","linkquality":164,"update":{"installed_version":-1,"latest_version":-1,"state":"idle"},"update_available":null,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Lyra Last seen"},"last_changed":"2024-06-11T19:25:53.044896+00:00","last_reported":"2024-06-11T19:25:53.044896+00:00","last_updated":"2024-06-11T19:25:53.044896+00:00","context":{"id":"01J04C74GMP876PRD9KN2VK4V6","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:25:53.070000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.carport_power","state":"unavailable","attributes":{"state_class":"measurement","unit_of_measurement":"W","device_class":"power","friendly_name":"Carport Leistung"},"last_changed":"2024-06-11T18:55:47.165628+00:00","last_reported":"2024-06-11T18:55:47.165628+00:00","last_updated":"2024-06-11T18:55:47.165628+00:00","context":{"id":"01J04AG0YXY3Y3G8C6J8SM6EKN","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "0",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.carport_energy","state":"unavailable","attributes":{"state_class":"total_increasing","unit_of_measurement":"kWh","device_class":"energy","friendly_name":"Carport Energie"},"last_changed":"2024-06-11T18:55:47.166230+00:00","last_reported":"2024-06-11T18:55:47.166230+00:00","last_updated":"2024-06-11T18:55:47.166230+00:00","context":{"id":"01J04AG0YYPJ0CDWC0AAQ5QVNX","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "0",
+        "native_unit_of_measurement": "kWh"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.carport_last_seen","state":"unavailable","attributes":{"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Carport Last seen"},"last_changed":"2024-06-11T18:55:47.165287+00:00","last_reported":"2024-06-11T18:55:47.165287+00:00","last_updated":"2024-06-11T18:55:47.165287+00:00","context":{"id":"01J04AG0YX7170WDCM3341YTSF","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T18:45:18.572000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.zigbee2mqtt_bridge_permit_join","state":"on","attributes":{"icon":"mdi:human-greeting-proximity","friendly_name":"Zigbee2MQTT Bridge Permit join"},"last_changed":"2024-06-11T19:06:24.985598+00:00","last_reported":"2024-06-11T19:06:24.985598+00:00","last_updated":"2024-06-11T19:06:24.985598+00:00","context":{"id":"01J04B3FTSSVKPF68DE3JGTE4E","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.warmwasserpumpe","state":"off","attributes":{"current":0,"last_seen":"2024-06-11T19:27:21.963Z","linkquality":165,"power":0,"voltage":234.61,"friendly_name":"Warmwasserpumpe"},"last_changed":"2024-06-11T19:06:24.985710+00:00","last_reported":"2024-06-11T19:27:21.892271+00:00","last_updated":"2024-06-11T19:27:21.892271+00:00","context":{"id":"01J04C9V94W1CZGQJQ5GA54RCP","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.werkstatt","state":"on","attributes":{"indicator_mode":null,"last_seen":"2024-06-11T19:22:26.837Z","linkquality":165,"power_on_behavior":null,"friendly_name":"Werkstatt"},"last_changed":"2024-06-11T19:06:24.985832+00:00","last_reported":"2024-06-11T19:22:26.771711+00:00","last_updated":"2024-06-11T19:22:26.771711+00:00","context":{"id":"01J04C0V2KA0YHZE3BKGQJJ911","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.lyra","state":"off","attributes":{"last_seen":"2024-06-11T19:25:53.070Z","linkquality":164,"update":{"installed_version":-1,"latest_version":-1,"state":"idle"},"update_available":null,"friendly_name":"Lyra"},"last_changed":"2024-06-11T19:25:53.038566+00:00","last_reported":"2024-06-11T19:25:53.044458+00:00","last_updated":"2024-06-11T19:25:53.044458+00:00","context":{"id":"01J04C74GMBFJHTY6HCATVVH8D","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.wegbeleuchtung","state":"on","attributes":{"last_seen":"2024-06-11T19:16:12.440Z","linkquality":169,"power_on_behavior":"on","update":{"installed_version":4110,"latest_version":4110,"state":"idle"},"update_available":null,"friendly_name":"Wegbeleuchtung"},"last_changed":"2024-06-11T19:06:24.986035+00:00","last_reported":"2024-06-11T19:16:12.378205+00:00","last_updated":"2024-06-11T19:16:12.378205+00:00","context":{"id":"01J04BNDETBF9DPXSSCSJAP5N0","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.carport","state":"unavailable","attributes":{"friendly_name":"Carport"},"last_changed":"2024-06-11T18:55:47.165069+00:00","last_reported":"2024-06-11T18:55:47.165069+00:00","last_updated":"2024-06-11T18:55:47.165069+00:00","context":{"id":"01J04AG0YXP6KR09XS92HKT8EC","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.terrasse","state":"off","attributes":{"child_lock":"UNLOCK","current":0,"energy":26.26,"indicator_mode":"off/on","last_seen":"2024-06-11T19:24:52.795Z","linkquality":166,"power":0,"power_outage_memory":"off","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"friendly_name":"Terrasse"},"last_changed":"2024-06-11T19:06:24.986204+00:00","last_reported":"2024-06-11T19:24:52.743985+00:00","last_updated":"2024-06-11T19:24:52.743985+00:00","context":{"id":"01J04C59M70T1VJQ701J7MJGPK","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.wegbeleuchtung","state":"off","attributes":{"auto_update":false,"installed_version":"4110","in_progress":false,"latest_version":"4110","release_summary":null,"release_url":null,"skipped_version":null,"title":null,"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Wegbeleuchtung","supported_features":1},"last_changed":"2024-06-11T19:06:24.986408+00:00","last_reported":"2024-06-11T19:06:24.986408+00:00","last_updated":"2024-06-11T19:06:24.986408+00:00","context":{"id":"01J04B3FTT3P2YR9QJWEQAJD9H","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.carport","state":"unavailable","attributes":{"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Carport","supported_features":1},"last_changed":"2024-06-11T18:55:47.165880+00:00","last_reported":"2024-06-11T18:55:47.165880+00:00","last_updated":"2024-06-11T18:55:47.165880+00:00","context":{"id":"01J04AG0YXNM6X7EE15PYKWC1B","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.terrasse","state":"off","attributes":{"auto_update":false,"installed_version":"192","in_progress":false,"latest_version":"192","release_summary":null,"release_url":null,"skipped_version":null,"title":null,"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Terrasse","supported_features":1},"last_changed":"2024-06-11T19:06:24.986638+00:00","last_reported":"2024-06-11T19:06:24.986638+00:00","last_updated":"2024-06-11T19:06:24.986638+00:00","context":{"id":"01J04B3FTT7ERYAXH4SQM6TWJT","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.lyra","state":"off","attributes":{"auto_update":false,"installed_version":"-1","in_progress":false,"latest_version":"-1","release_summary":null,"release_url":null,"skipped_version":null,"title":null,"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Lyra","supported_features":1},"last_changed":"2024-06-11T19:25:53.039359+00:00","last_reported":"2024-06-11T19:25:53.039359+00:00","last_updated":"2024-06-11T19:25:53.039359+00:00","context":{"id":"01J04C74GFY71PTMS33MSA3MQK","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.licht_einschalten_nach_1min","state":"on","attributes":{"id":"1708883845408","last_triggered":null,"mode":"single","current":0,"friendly_name":"Licht einschalten nach 2min"},"last_changed":"2024-06-11T17:43:18.074225+00:00","last_reported":"2024-06-11T17:43:18.074225+00:00","last_updated":"2024-06-11T17:43:18.074225+00:00","context":{"id":"01J046B9STJ0BGSGBEN9S5KRP6","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.pool","state":"off","attributes":{"child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"friendly_name":"Pool"},"last_changed":"2024-06-11T19:06:24.987079+00:00","last_reported":"2024-06-11T19:25:30.457654+00:00","last_updated":"2024-06-11T19:25:30.457654+00:00","context":{"id":"01J04C6E4CTFXHG6QDZP5A81YF","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"number.pool_countdown","state":"0","attributes":{"min":0.0,"max":43200.0,"step":1.0,"mode":"auto","child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"unit_of_measurement":"s","friendly_name":"Pool Countdown"},"last_changed":"2024-06-11T19:06:24.987250+00:00","last_reported":"2024-06-11T19:25:30.458267+00:00","last_updated":"2024-06-11T19:25:30.458267+00:00","context":{"id":"01J04C6EETKCMNK5TPHA4209CS","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_max_value": 43200.0,
+        "native_min_value": 0.0,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "s",
+        "native_value": 0
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.pool_power_outage_memory","state":"restore","attributes":{"options":["on","off","restore"],"child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"icon":"mdi:power-settings","friendly_name":"Pool Power outage memory"},"last_changed":"2024-06-11T19:06:24.987377+00:00","last_reported":"2024-06-11T19:25:30.457540+00:00","last_updated":"2024-06-11T19:25:30.457540+00:00","context":{"id":"01J04C6EESF5EHM86T78XRKNWY","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.pool_indicator_mode","state":"off/on","attributes":{"options":["off","off/on","on/off","on"],"child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"friendly_name":"Pool Indicator mode"},"last_changed":"2024-06-11T19:06:24.987484+00:00","last_reported":"2024-06-11T19:25:30.457749+00:00","last_updated":"2024-06-11T19:25:30.457749+00:00","context":{"id":"01J04C6EES0ZPBMS7AT123TPPC","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.pool_power","state":"0","attributes":{"state_class":"measurement","child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"unit_of_measurement":"W","device_class":"power","friendly_name":"Pool Leistung"},"last_changed":"2024-06-11T19:06:24.993019+00:00","last_reported":"2024-06-11T19:25:30.458135+00:00","last_updated":"2024-06-11T19:25:30.458135+00:00","context":{"id":"01J04C6EET9MY5WBXDYQE81E09","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "0",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.pool_energy","state":"29.65","attributes":{"state_class":"total_increasing","child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"unit_of_measurement":"kWh","device_class":"energy","friendly_name":"Pool Energie"},"last_changed":"2024-06-11T19:06:24.993276+00:00","last_reported":"2024-06-11T19:25:30.457350+00:00","last_updated":"2024-06-11T19:25:30.457350+00:00","context":{"id":"01J04C6EESA2W5GJ7EQ55H1RTV","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "29.65",
+        "native_unit_of_measurement": "kWh"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.pool_last_seen","state":"2024-06-11T19:25:30+00:00","attributes":{"child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T19:25:30.526Z","linkquality":191,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":230,"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Pool Last seen"},"last_changed":"2024-06-11T19:25:30.400745+00:00","last_reported":"2024-06-11T19:25:30.458011+00:00","last_updated":"2024-06-11T19:25:30.458011+00:00","context":{"id":"01J04C6EETQKW5785BQRG5781M","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-11T19:25:30.526000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.pool","state":"off","attributes":{"auto_update":false,"installed_version":"192","in_progress":false,"latest_version":"192","release_summary":null,"release_url":null,"skipped_version":null,"title":null,"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Pool","supported_features":1},"last_changed":"2024-06-11T19:06:24.993770+00:00","last_reported":"2024-06-11T19:06:24.993770+00:00","last_updated":"2024-06-11T19:06:24.993770+00:00","context":{"id":"01J04B3FV1SMHPJM5CSCBJCDSX","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.teich","state":"unavailable","attributes":{"friendly_name":"Teich"},"last_changed":"2024-06-11T18:03:43.597813+00:00","last_reported":"2024-06-11T18:06:56.406530+00:00","last_updated":"2024-06-11T18:03:43.597813+00:00","context":{"id":"01J047GPKDRQB92AH2AJK7H1PX","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.teich_power_outage_memory","state":"unavailable","attributes":{"options":["on","off","restore"],"icon":"mdi:power-settings","friendly_name":"Teich Power outage memory"},"last_changed":"2024-06-11T18:03:43.608224+00:00","last_reported":"2024-06-11T18:06:56.406412+00:00","last_updated":"2024-06-11T18:03:43.608224+00:00","context":{"id":"01J047GPKREQ94DD4RVD5Q4PGT","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"select.teich_indicator_mode","state":"unavailable","attributes":{"options":["off","off/on","on/off","on"],"friendly_name":"Teich Indicator mode"},"last_changed":"2024-06-11T18:03:43.615485+00:00","last_reported":"2024-06-11T18:06:56.406317+00:00","last_updated":"2024-06-11T18:03:43.615485+00:00","context":{"id":"01J047GPKZHF19HKZJNGGW3C3W","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich_power","state":"unavailable","attributes":{"state_class":"measurement","unit_of_measurement":"W","device_class":"power","friendly_name":"Teich Leistung"},"last_changed":"2024-06-11T18:03:43.620080+00:00","last_reported":"2024-06-11T18:06:56.406222+00:00","last_updated":"2024-06-11T18:03:43.620080+00:00","context":{"id":"01J047GPM4A7DQN61T0A66VRF8","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "141",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich_energy","state":"unavailable","attributes":{"state_class":"total_increasing","unit_of_measurement":"kWh","device_class":"energy","friendly_name":"Teich Energie"},"last_changed":"2024-06-11T18:03:43.635954+00:00","last_reported":"2024-06-11T18:06:56.406367+00:00","last_updated":"2024-06-11T18:03:43.635954+00:00","context":{"id":"01J047GPMKGG2TK8AFBD6FGH6Q","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "13.15",
+        "native_unit_of_measurement": "kWh"
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich_last_seen","state":"unavailable","attributes":{"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Teich Last seen"},"last_changed":"2024-06-11T18:03:43.650514+00:00","last_reported":"2024-06-11T18:06:56.406677+00:00","last_updated":"2024-06-11T18:03:43.650514+00:00","context":{"id":"01J047GPN25PX51CH1K0F0DXPR","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-09T11:35:24.600000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"update.teich","state":"unavailable","attributes":{"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Teich","supported_features":1},"last_changed":"2024-06-11T18:03:43.667239+00:00","last_reported":"2024-06-11T18:06:56.406625+00:00","last_updated":"2024-06-11T18:03:43.667239+00:00","context":{"id":"01J047GPNKEN2YWX805TRA8JFS","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.stromertrag","state":"on","attributes":{"id":"1710074182742","last_triggered":"2024-06-11T19:25:01.431497+00:00","mode":"single","current":0,"friendly_name":"Stromertrag Teich"},"last_changed":"2024-06-11T18:07:40.906270+00:00","last_reported":"2024-06-11T19:25:01.433315+00:00","last_updated":"2024-06-11T19:25:01.433315+00:00","context":{"id":"01J04C5J3QFN6AP74EW6KZHBWX","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.stromertrag_hintertur","state":"on","attributes":{"id":"1716202078969","last_triggered":"2024-06-11T19:25:01.300108+00:00","mode":"single","current":0,"friendly_name":"Stromertrag Pool"},"last_changed":"2024-06-11T18:09:21.786469+00:00","last_reported":"2024-06-11T19:25:01.300881+00:00","last_updated":"2024-06-11T19:25:01.300881+00:00","context":{"id":"01J04C5HZKQWVHSTSD75XWGY3T","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.stromverlust","state":"on","attributes":{"id":"1710074233128","last_triggered":"2024-06-11T19:25:30.189531+00:00","mode":"single","current":0,"friendly_name":"Stromverlust Teich"},"last_changed":"2024-06-11T18:10:12.815645+00:00","last_reported":"2024-06-11T19:25:30.191454+00:00","last_updated":"2024-06-11T19:25:30.191454+00:00","context":{"id":"01J04C6E6CS023V876JN8YVK63","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"automation.stromverlust_hintertur","state":"on","attributes":{"id":"1716202427354","last_triggered":"2024-06-11T19:25:30.125043+00:00","mode":"single","current":0,"friendly_name":"Stromverlust Pool"},"last_changed":"2024-06-11T18:11:00.324147+00:00","last_reported":"2024-06-11T19:25:30.129381+00:00","last_updated":"2024-06-11T19:25:30.129381+00:00","context":{"id":"01J04C6E4CTFXHG6QDZP5A81YF","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T19:27:25.187469+00:00"
+    },
+    {
+      "state": {"entity_id":"number.teich_countdown","state":"0","attributes":{"min":0.0,"max":43200.0,"step":1.0,"mode":"auto","child_lock":"UNLOCK","countdown":0,"current":0,"energy":29.65,"indicator_mode":"off/on","last_seen":"2024-06-11T18:03:03.670Z","linkquality":192,"power":0,"power_outage_memory":"restore","update":{"installed_version":192,"latest_version":192,"state":"idle"},"update_available":null,"voltage":232,"unit_of_measurement":"s","friendly_name":"Teich Countdown"},"last_changed":"2024-06-11T17:36:35.936456+00:00","last_reported":"2024-06-11T18:03:07.694837+00:00","last_updated":"2024-06-11T18:03:07.694837+00:00","context":{"id":"01J047FKHEMF3QYY28X3CVN9D1","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_max_value": 43200.0,
+        "native_min_value": 0.0,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "s",
+        "native_value": 0
+      },
+      "last_seen": "2024-06-11T18:03:31.604451+00:00"
+    },
+    {
+      "state": {"entity_id":"switch.teich2","state":"unavailable","attributes":{"friendly_name":"Teich2"},"last_changed":"2024-06-11T17:36:06.329221+00:00","last_reported":"2024-06-11T17:36:54.571887+00:00","last_updated":"2024-06-11T17:36:06.329221+00:00","context":{"id":"01J045Y45S97JPCGHKKZ6B9CDV","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T18:03:41.689777+00:00"
+    },
+    {
+      "state": {"entity_id":"select.teich2_power_outage_memory","state":"unavailable","attributes":{"options":["on","off","restore"],"icon":"mdi:power-settings","friendly_name":"Teich2 Power outage memory"},"last_changed":"2024-06-11T17:36:05.936598+00:00","last_reported":"2024-06-11T17:36:54.572051+00:00","last_updated":"2024-06-11T17:36:05.936598+00:00","context":{"id":"01J045Y3SG1VYW5CYKGYV6MGZF","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T18:03:41.692430+00:00"
+    },
+    {
+      "state": {"entity_id":"select.teich2_indicator_mode","state":"unavailable","attributes":{"options":["off","off/on","on/off","on"],"friendly_name":"Teich2 Indicator mode"},"last_changed":"2024-06-11T17:36:05.953643+00:00","last_reported":"2024-06-11T17:36:54.572003+00:00","last_updated":"2024-06-11T17:36:05.953643+00:00","context":{"id":"01J045Y3T1A36PK8JNS6HENDXQ","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T18:03:41.699943+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich2_power","state":"unavailable","attributes":{"state_class":"measurement","unit_of_measurement":"W","device_class":"power","friendly_name":"Teich2 Leistung"},"last_changed":"2024-06-11T17:36:06.153364+00:00","last_reported":"2024-06-11T17:36:54.571824+00:00","last_updated":"2024-06-11T17:36:06.153364+00:00","context":{"id":"01J045Y409P6W33K905GVN07E1","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "141",
+        "native_unit_of_measurement": "W"
+      },
+      "last_seen": "2024-06-11T18:03:41.701960+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich2_energy","state":"unavailable","attributes":{"state_class":"total_increasing","unit_of_measurement":"kWh","device_class":"energy","friendly_name":"Teich2 Energie"},"last_changed":"2024-06-11T17:36:06.170438+00:00","last_reported":"2024-06-11T17:36:54.571557+00:00","last_updated":"2024-06-11T17:36:06.170438+00:00","context":{"id":"01J045Y40TRMXDMY03QTMPAFAX","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": "13.15",
+        "native_unit_of_measurement": "kWh"
+      },
+      "last_seen": "2024-06-11T18:03:41.714589+00:00"
+    },
+    {
+      "state": {"entity_id":"sensor.teich2_last_seen","state":"unavailable","attributes":{"device_class":"timestamp","icon":"mdi:clock","friendly_name":"Teich2 Last seen"},"last_changed":"2024-06-11T17:36:06.188204+00:00","last_reported":"2024-06-11T17:36:54.571666+00:00","last_updated":"2024-06-11T17:36:06.188204+00:00","context":{"id":"01J045Y41C114CT56E3JFM5W4T","parent_id":null,"user_id":null}},
+      "extra_data": {
+        "native_value": {
+          "__type": "<class 'datetime.datetime'>",
+          "isoformat": "2024-06-09T11:35:24.600000+00:00"
+        },
+        "native_unit_of_measurement": null
+      },
+      "last_seen": "2024-06-11T18:03:41.723073+00:00"
+    },
+    {
+      "state": {"entity_id":"update.teich2","state":"unavailable","attributes":{"device_class":"firmware","entity_picture":"https://github.com/Koenkk/zigbee2mqtt/raw/master/images/logo.png","friendly_name":"Teich2","supported_features":1},"last_changed":"2024-06-11T17:36:06.444833+00:00","last_reported":"2024-06-11T17:36:54.571764+00:00","last_updated":"2024-06-11T17:36:06.444833+00:00","context":{"id":"01J045Y49CV6E9G86S3B5XM147","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-06-11T18:03:41.750184+00:00"
+    }
+  ]
+}
