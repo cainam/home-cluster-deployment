@@ -25,10 +25,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "infopage.serviceAccountName" . }}
-      volumes:
-      - name: {{ .Chart.Name }}
-        persistentVolumeClaim:
-          claimName: {{ .Chart.Name }}
+ #     volumes:
+ #     - name: {{ .Chart.Name }}
+ #       persistentVolumeClaim:
+ #         claimName: {{ .Chart.Name }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -42,9 +42,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          volumeMounts:
-          - mountPath: /app
-            name: {{ .Chart.Name }}
+ #         volumeMounts:
+ #         - mountPath: /app
+ #           name: {{ .Chart.Name }}
           ports:
             - name: {{ .Chart.Name }}
               containerPort: {{ .Values.service.targetPort }}
