@@ -53,6 +53,7 @@ spec:
           env:
           - name: PYTHONPATH
             value: /app/backend
+          workingDir: /app/backend
           ports:
             - name: {{ .Chart.Name }}
               containerPort: {{ .Values.service.targetPort }}
