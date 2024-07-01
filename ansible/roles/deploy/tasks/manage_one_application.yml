@@ -25,7 +25,7 @@
 
     - name: "{{ name_prefix }} copy dockerfile"
       template:
-        src: "{{ item.dockerfile | default(item.name~'.dockerfile') }}"
+        src: "{{ item.dockerfile | default(item.name| default(application.key)~'.dockerfile') }}"
         dest: "{{ build_dir.path }}"
         mode: 0644
       loop: "{{ application.value.image_build }}"
