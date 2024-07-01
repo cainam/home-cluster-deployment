@@ -11,9 +11,15 @@ Device     Boot  Start      End  Sectors  Size Id Type
 /dev/sde1  *      2048   309247   307200  150M  c W95 FAT32 (LBA)
 /dev/sde2       309248 62333951 62024704 29.6G 83 Linux
 
+firmware_version=1.20240529
+curl -L https://github.com/raspberrypi/firmware/archive/refs/tags/"${firmware_version}".tar.gz --output firmware-"${firmware_version}".tar.gz
+tar xfz firmware-"${firmware_version}".tar.gz
+
+cp -rdp firmware-"${firmware_version}"/boot/* firmware-"${firmware_version}"/extra/* /boot/
+cp -rdp firmware-"${firmware_version}"/modules/* /lib/modules/
 
 # install /boot
-cp -rdp firmware-1.20221104/boot/* /mnt/boot/
+cp -rdp firmware-"${firmware_version}"/boot/* /mnt/boot/
 
 # install gentoo
 cd /mnt/root && tar xfJ ~/rp64/stage3-arm64-openrc-20221106T214655Z.tar.xz && cp -rdp ~/rp64/firmware-1.20221104/opt/* opt/

@@ -1,6 +1,7 @@
 software:
   istio:
-    version: 1.22.2
+    version: 1.21.2
+    attention: version 1.22.x leads to error tcmalloc 
     installed:
       pattern: "istio"
     latest:
@@ -50,7 +51,7 @@ software:
       params:
         repo: kiali/kiali
   python:
-    version: 3.12.3-slim
+    version: 3.12.4-slim
     installed:
       pattern: mypy
     latest:

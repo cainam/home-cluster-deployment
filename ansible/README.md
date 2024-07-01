@@ -15,7 +15,7 @@ Notes:
 - calling Ansible example: eval $my_ansible site.yml --tags=deploy,build --extra-vars limit_application=deconz site.yml --tags=deploy,build --extra-vars 'limit_namespace="istio-ingress"
 - ANSIBLE_HOME to use /plugin/filters for custom filters and local_only: ANSIBLE_HOME=$PWD ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory standalone/k8s-status.yaml --extra-vars local_only=/data/mine/git 
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
-- remove claimRef: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
+- remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - create token: kubectl create token -n tools kiali-service-account
 - gluster - change size: use "vol replace-brick" and replace brick by brick 
 - gluster repair - split-brain: 
