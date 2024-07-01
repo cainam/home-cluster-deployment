@@ -25,7 +25,7 @@
 
     - name: "{{ name_prefix }} copy dockerfile"
       template:
-        src: "{{ item.dockerfile | default(item.name| default(application.key)~'.dockerfile') }}"
+        src: "{{ item.dockerfile | default(item.name|default(application.key)~'.dockerfile') }}"
         dest: "{{ build_dir.path }}"
         mode: 0644
       loop: "{{ application.value.image_build }}"
@@ -35,12 +35,17 @@
         set -x
         if [ "{{ item.source }}" != "local" ]; then
           git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
-          git_dir=$(basename "{{ item.source }}")
-          git_dir=${git_dir%%.git}
+          bdir="${PWD}"
+          if [ "{{ item.subdir|default('') }}" != "" ]; then
+            git_dir="{{ item.subdir }}"
+          else
+            git_dir=$(basename "{{ item.source }}")
+            git_dir=${git_dir%%.git}
+          fi
           cd "${git_dir}"
         fi
         image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name | default(application.key) }}:{{ item.tag | default('latest') }}"
-        podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default(item.name~'.dockerfile') }}" --tag "${image}"
+        podman build . {{ item.build_args | default("--tls-verify") }} --file "${bdir}/{{ item.dockerfile | default(item.name|default(application.key)~'.dockerfile') }}" --tag "${image}"
         podman push "${image}"
       args:
         chdir: "{{ build_dir.path }}"
