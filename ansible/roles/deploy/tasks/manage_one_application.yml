@@ -39,7 +39,7 @@
           git_dir=${git_dir%%.git}
           cd "${git_dir}"
         fi
-        image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name }}:{{ item.tag | default('latest') }}"
+        image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name | default(application.key) }}:{{ item.tag | default('latest') }}"
         podman build . {{ item.build_args | default("--tls-verify") }} --file "{{ item.dockerfile | default(item.name~'.dockerfile') }}" --tag "${image}"
         podman push "${image}"
       args:

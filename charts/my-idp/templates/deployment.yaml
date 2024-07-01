@@ -34,15 +34,10 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-          - /usr/local/bin/uvicorn
-          - main:app
-          - --host
-          - 0.0.0.0
-          - --port
-          - "{{ .Values.service.targetPort }}"
-          - --reload
+          - run
+          - cmd/authc/main.go
           command:
-          - python
+          - go
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -50,10 +45,6 @@ spec:
           volumeMounts:
           - mountPath: /app
             name: {{ .Chart.Name }}
-          env:
-          - name: PYTHONPATH
-            value: /app/backend
-          workingDir: /app/backend
           ports:
             - name: {{ .Chart.Name }}
               containerPort: {{ .Values.service.targetPort }}

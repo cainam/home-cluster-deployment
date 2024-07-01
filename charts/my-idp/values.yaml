@@ -37,8 +37,8 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 1111
-  targetPort: 28381
+  port: 80
+  targetPort: 8000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
