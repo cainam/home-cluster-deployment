@@ -148,3 +148,11 @@ TODO:
 auth update:
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
+- hydra debug: add log.level: debug to hydra cm
+# manually edited and to be moved to ansible
+- 2nd AuthorizationPolicy
+- pod exec parameters:         - --cookie-domain=.my-lb.adm13,my-lb.adm13 (and same for white-list-domain)
+- 2nd extensionProviders: in istio cm
+# test hydra: https://hydra.my-lb.adm13/.well-known/openid-configuration
+
+

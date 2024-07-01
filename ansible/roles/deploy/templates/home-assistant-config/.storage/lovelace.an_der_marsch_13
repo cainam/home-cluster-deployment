@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.an_der_marsch_13",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Home",
+          "cards": [
+            {
+              "type": "history-graph",
+              "entities": [
+                {
+                  "entity": "switch.pool"
+                }
+              ],
+              "title": "Pool",
+              "hours_to_show": 48
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
