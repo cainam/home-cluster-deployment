@@ -5,4 +5,3 @@ FROM docker.io/golang:1.22.4
 ADD id-provider/ /app
 WORKDIR /app
 RUN go mod download
-RUN go build cmd/authc/main.go
