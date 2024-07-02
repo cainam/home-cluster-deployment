@@ -18,7 +18,7 @@ advanced:
   last_seen: ISO_8601
   legacy_availability_payload: false
   legacy_api: false
-  log_level: debug
+  log_level: info
   log_rotation: true
   log_syslog:
     app_name: Zigbee2MQTT
