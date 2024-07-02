@@ -40,12 +40,12 @@ applications:
     my-idp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/my-idp
-      helm_options: --set image.repository=auth/my-idp --set image.tag="1.0"
+      helm_options: --set image.repository=auth/my-idp --set image.tag="1.0.1"
       image_build:
       - source: https://github.com/cainam/krysyntyz.git
         branch: master
         subdir: krysyntyz/
-        tag: "1.0"
+        tag: "1.0.1"
         build_args: --from docker.io/golang:1.22.4
     oauth2-proxy-hydra:
       git: https://github.com/oauth2-proxy/manifests.git

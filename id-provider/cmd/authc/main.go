@@ -83,6 +83,7 @@ func main() {
 		Tracer: tracerService,
 	}))
 
+	e.GET("/check", controller.GetCheck)
 	e.GET("/authentication/login", controller.GetLogin)
 	e.POST("/authentication/login", controller.PostLogin)
 	e.GET("/authentication/consent", controller.GetConsent)
