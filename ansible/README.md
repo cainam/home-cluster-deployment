@@ -154,5 +154,14 @@ auth update:
 - pod exec parameters:         - --cookie-domain=.my-lb.adm13,my-lb.adm13 (and same for white-list-domain)
 - 2nd extensionProviders: in istio cm
 # test hydra: https://hydra.my-lb.adm13/.well-known/openid-configuration
-
-
+# create client: ~ $ hydra create oauth2-client -e http://localhost:4445 --name test --scope openid --secret oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0
+# or:  curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
+{
+    "client_name": "test",
+    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
+    "response_types": ["code", "id_token"],
+    "scope": "offline openid users.write users.read users.edit users.delete",
+    "token_endpoint_auth_method": "client_secret_post"
+}

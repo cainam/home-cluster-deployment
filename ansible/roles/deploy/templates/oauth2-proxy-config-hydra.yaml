@@ -6,21 +6,21 @@ config:
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
         cookie_secret = "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU="
         ssl_insecure_skip_verify = true
-        redirect_url = "https://my-lb.adm13/oauth2_hydra/callback"
+        redirect_url = "https://my-lb.adm13/oauth2-hydra/callback"
 
 alphaConfig:
   enabled: true
   configData:
     providers:
-    - clientID: "test"       # IdP Client ID
+    - clientID: "81ee4544-5d9d-4c4e-be57-7410f4fc7a25"       # IdP Client ID
       clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider
       #loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
-      loginURL: https://hydra.my-lb.adm13/realms/test/protocol/openid-connect/auth
-      redeemURL: http://hydra.auth:1121/realms/test/protocol/openid-connect/token
-      profileURL: http://hydra.auth:1121/realms/test/protocol/openid-connect/userinfo
-      validateURL: http://hydra.auth:1121/realms/test/protocol/openid-connect/userinfo
+      loginURL: https://hydra.my-lb.adm13/oauth2/auth
+      redeemURL: http://hydra.auth:1121/oauth2/token
+      profileURL: http://hydra.auth:1121/userinfo
+      validateURL: http://hydra.auth:1121/userinfo
       scope: "openid"
       # scope: "openid email profile groups"
 #      allowedGroups:

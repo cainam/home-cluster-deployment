@@ -30,7 +30,7 @@ applications:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/hydra
       git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
-      helm_options: --set hydra.config.urls.self.issuer=https://hydra.my-lb.adm13/ --set hydra.config.dsn=memory --set hydra.config.urls.consent=http://my-idp.auth/authentication/consent --set hydra.config.urls.login=http://my-idp.auth/authentication/login
+      helm_options: --set hydra.config.urls.self.issuer=https://hydra.my-lb.adm13/ --set hydra.config.dsn=memory --set hydra.config.urls.consent=https://open.my-lb.adm13/idp/authentication/consent --set hydra.config.urls.login=https://open.my-lb.adm13/idp/authentication/login --set hydra.config.urls.self.admin=http://hydra-admin.auth:4445
       remove_dependencies: hydra-maester
       network:
         gateway: hydra-gw
@@ -47,6 +47,9 @@ applications:
         subdir: krysyntyz/
         tag: "1.0.2"
         build_args: --from docker.io/golang:1.22.4
+      network:
+        gateway: open
+        prefix: idp
     oauth2-proxy-hydra:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
