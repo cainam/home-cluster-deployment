@@ -22,14 +22,7 @@ import (
 )
 
 var (
-	adminURL, _ = url.Parse("http://localhost:4445")
-	hydraClient = hydra.NewHTTPClientWithConfig(nil,
-		&hydra.TransportConfig{
-			Schemes:  []string{adminURL.Scheme},
-			Host:     adminURL.Host,
-			BasePath: adminURL.Path,
-		},
-	)
+ adminURLString string
 )
 
 var userInfo = []repouser.UserInfo{
@@ -46,6 +39,21 @@ var userInfo = []repouser.UserInfo{
 }
 
 func main() {
+
+   flag.StringVar(&adminURLString, "hydra_admin", "http://localhost:4445", "the hydra adminURL")
+   flag.Parse()
+  fmt.Println("hydra_admin is: ", adminURLString)
+
+   adminURL, _ = url.Parse(adminURLString)
+
+//	adminURL, _ = url.Parse("http://localhost:4445")
+	hydraClient = hydra.NewHTTPClientWithConfig(nil,
+		&hydra.TransportConfig{
+			Schemes:  []string{adminURL.Scheme},
+			Host:     adminURL.Host,
+			BasePath: adminURL.Path,
+		},
+	)
 
 	// Prepare Opentracing
 	var (

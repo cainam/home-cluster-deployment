@@ -36,6 +36,7 @@ spec:
           args:
           - run
           - cmd/authc/main.go
+          - --hydra-admin=http://hydra-admin.auth:4445
           command:
           - go
           securityContext:
