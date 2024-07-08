@@ -34,7 +34,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-          - --hydra-admin=http://hydra-admin.auth:4445
+          - --hydra_admin=http://hydra-admin.auth:4445
           command:
           - /app/my-idp
           securityContext:
