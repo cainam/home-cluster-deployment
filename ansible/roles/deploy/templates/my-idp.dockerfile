@@ -5,7 +5,7 @@ FROM docker.io/golang:1.22.4-alpine3.20 as build
 ADD id-provider/ /app
 WORKDIR /app
 RUN go mod download
-RUN go build -o my-idp cmd/authc/main.go
+RUN CGO_ENABLED=0 go build -o my-idp cmd/authc/main.go
 
 FROM docker.io/alpine:3.20.1
 RUN mkdir /app
