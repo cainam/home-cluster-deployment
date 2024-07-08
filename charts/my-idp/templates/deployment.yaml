@@ -34,11 +34,9 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-          - run
-          - cmd/authc/main.go
           - --hydra-admin=http://hydra-admin.auth:4445
           command:
-          - go
+          - /app/my-idp
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
