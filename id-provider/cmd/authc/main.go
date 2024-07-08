@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"flag"
 	"io"
 	"log"
 	"net/url"
@@ -23,6 +24,7 @@ import (
 
 var (
  adminURLString string
+ //adminURL URL
 )
 
 var userInfo = []repouser.UserInfo{
@@ -44,10 +46,10 @@ func main() {
    flag.Parse()
   fmt.Println("hydra_admin is: ", adminURLString)
 
-   adminURL, _ = url.Parse(adminURLString)
+   adminURL, _ := url.Parse(adminURLString)
 
 //	adminURL, _ = url.Parse("http://localhost:4445")
-	hydraClient = hydra.NewHTTPClientWithConfig(nil,
+	hydraClient := hydra.NewHTTPClientWithConfig(nil,
 		&hydra.TransportConfig{
 			Schemes:  []string{adminURL.Scheme},
 			Host:     adminURL.Host,

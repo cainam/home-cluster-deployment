@@ -7,3 +7,8 @@ WORKDIR /app
 RUN go mod download
 RUN go build -o my-idp cmd/authc/main.go
 
+FROM docker.io/alpine:3.20.1
+RUN mkdir /app
+WORKDIR /app
+COPY --from=build /app/my-idp /app/my-idp
+
