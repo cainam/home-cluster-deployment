@@ -30,8 +30,11 @@ applications:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/hydra
       git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
-      helm_options: --set hydra.config.urls.self.issuer=https://hydra.my-lb.adm13/ --set hydra.config.dsn=memory --set hydra.config.urls.consent=https://open.my-lb.adm13/idp/authentication/consent --set hydra.config.urls.login=https://open.my-lb.adm13/idp/authentication/login --set hydra.config.urls.self.admin=http://hydra-admin.auth:4445
+      helm_options: --set hydra.config.urls.self.issuer=https://hydra.my-lb.adm13/ --set hydra.config.dsn=memory --set hydra.config.urls.consent=https://open.my-lb.adm13/authentication/consent --set hydra.config.urls.login=https://open.my-lb.adm13/authentication/login --set hydra.config.urls.self.admin=http://hydra-admin.auth:4445
       remove_dependencies: hydra-maester
+      files:
+        values:
+          file: hydra-config.yaml
       network:
         gateway: hydra-gw
         svcPort: 4444
@@ -61,8 +64,10 @@ applications:
         values:
           file: oauth2-proxy-config-hydra.yaml
       network:
+        gateway: open
         svcPort: 80
         prefix: /oauth2-hydra
+        rewrite: /oauth2-hydra
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy

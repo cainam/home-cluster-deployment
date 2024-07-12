@@ -12,6 +12,10 @@ meshConfig:
       - content-type
       - set-cookie
       headersToUpstreamOnAllow:
+      - x-forwarded-access-token
+      - authorization
+      - x-auth-request-user
+      - x-auth-request-access-token
       - path
       - x-auth-request-email
       - x-auth-request-preferred-username
@@ -24,5 +28,26 @@ meshConfig:
       port: 80
       service: oauth2-proxy.auth.svc.cluster.local
     name: oauth2-proxy
+  - envoyExtAuthzHttp:
+      headersToDownstreamOnDeny:
+      - content-type
+      - set-cookie
+      headersToUpstreamOnAllow:
+      - x-forwarded-access-token
+      - authorization
+      - x-auth-request-user
+      - x-auth-request-access-token
+      - path
+      - x-auth-request-email
+      - x-auth-request-preferred-username
+      includeAdditionalHeadersInCheck:
+        X-Auth-Request-Redirect: https://%REQ(:authority)%%REQ(:path)%
+      includeRequestHeadersInCheck:
+      - authorization
+      - cookie
+      - x-auth-request-groups
+      port: 80
+      service: oauth2-proxy-hydra.auth.svc.cluster.local
+    name: oauth2-proxy-hydra
   rootNamespace: null
   trustDomain: cluster.local

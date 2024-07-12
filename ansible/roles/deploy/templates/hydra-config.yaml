@@ -1,0 +1,31 @@
+hydra:
+  config:
+    log:
+      level: debug
+      leak_sensitive_values: true
+    serve:
+      admin:
+        port: 4445
+      public:
+        cors:
+          enabled: true
+          allowed_origins:
+          - "*"
+          debug: true
+        request_log:
+          disable_for_health: true
+        port: 4444
+      cookies:
+        same_site_mode: None
+        secure: false
+      tls:
+        allow_termination_from:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+    urls:
+      consent: https://open.my-lb.adm13/authentication/consent
+      login: https://open.my-lb.adm13/authentication/login
+      self:
+        admin: http://hydra-admin.auth:4445
+        issuer: https://hydra.my-lb.adm13/
