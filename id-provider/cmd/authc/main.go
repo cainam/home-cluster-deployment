@@ -20,7 +20,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	hydra "github.com/ory/hydra-client-go/client"
-	"github.com/labstack/gommon/log"
 )
 
 var (
@@ -88,7 +87,6 @@ func main() {
 	t := &Template{}
 
 	e := echo.New()
-	e.Logger.SetLevel(log.DEBUG)
 	e.Renderer = t
 	e.Use(middleware.Logger())
 	e.Use(jaegertracing.TraceWithConfig(jaegertracing.TraceConfig{
