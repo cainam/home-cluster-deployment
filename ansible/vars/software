@@ -45,7 +45,7 @@ software:
         repo: homeassistant/home-assistant
         arch: arm64
   kiali:
-    version: v1.84.0
+    version: v1.87.0
     latest:
       type: quay
       params:

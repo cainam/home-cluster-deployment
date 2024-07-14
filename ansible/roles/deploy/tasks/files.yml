@@ -23,7 +23,8 @@
 
   - name: .{{ name_prefix }} reset applications to update helm_options
     set_fact:
-      applications: "{{ applications | combine({namespace.key: {application.key: {'helm_options': app_data.helm_options,'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
+      # applications: "{{ applications | combine({namespace.key: {application.key: {'helm_options': app_data.helm_options,'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
+      applications: "{{ applications | combine({namespace.key: {application.key: {'files': {file.key: {'tempfile': tmp_file.path} } }}}, recursive=True) }}"
 
   - name: applications.ns.app
     debug:

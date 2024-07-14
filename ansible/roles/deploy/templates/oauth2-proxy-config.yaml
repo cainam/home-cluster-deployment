@@ -21,7 +21,7 @@ alphaConfig:
       redeemURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/token
       profileURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
       validateURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
-      scope: "openid"
+      scope: "openid email"
       # scope: "openid email profile groups"
 #      allowedGroups:
 #      - admins # List all groups managed at our your IdP which should be allowed access

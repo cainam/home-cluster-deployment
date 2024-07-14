@@ -15,31 +15,29 @@ alphaConfig:
   enabled: true
   configData:
     providers:
-    - clientID: "e7f14f63-254f-4bc5-86c0-2e45dbe1e9b9"       # IdP Client ID
+    - clientID: "d3058a72-7386-4103-b0c0-062d5181a0f7"       # IdP Client ID
       clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider
       #loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
 #      loginURL: https://hydra.my-lb.adm13/oauth2/auth
 #      redeemURL: http://hydra.auth:1121/oauth2/token
-      profileURL: http://hydra.auth:1121/userinfo
+      profileURL: http://hydra-public.auth:4444/userinfo
 #      validateURL: http://hydra.auth:1121/userinfo
-      scope: "openid"
+      scope: "email openid"
       # scope: "openid email profile groups"
       #allowedGroups:
       #- admins # List all groups managed at our your IdP which should be allowed access
-      #- test
-    # - infrateam
-    # - anothergroup
       oidcConfig:
-#        userIDClaim: email  # Name of the claim in JWT containing the User ID
+        userIDClaim: email  # Name of the claim in JWT containing the User ID
         #emailClaim: email.  # Name of the clain in JWT containing the E-Mail
-#        emailClaim: email  # Name of the clain in JWT containing the E-Mail
+        emailClaim: email  # Name of the clain in JWT containing the E-Mail
 #        groupsClaim: groups # Name of the claim in JWT containing the Groups
 #        extraAudiences: 
-#        - test
+#        - email
         audienceClaims:
         - aud
+        - email
 #        skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
         issuerURL: https://hydra.my-lb.adm13/
         jwksURL: http://hydra.auth:1121/
@@ -51,13 +49,13 @@ alphaConfig:
 #          staticCode: 200
           uri: https://open.my-lb.adm13/dummy
     # Headers that should be added to responses from the proxy
-#    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
+    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
 #      - name: X-Auth-Request-Preferred-Username
 #        values:
 #          - claim: preferred_username
-#      - name: X-Auth-Request-Email
-#        values:
-#          - claim: email
+      - name: X-Auth-Request-Email
+        values:
+          - claim: email
 extraArgs:
   cookie-secure: "false"
   cookie-samesite: lax

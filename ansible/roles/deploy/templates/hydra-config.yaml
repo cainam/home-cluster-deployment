@@ -29,3 +29,14 @@ hydra:
       self:
         admin: http://hydra-admin.auth:4445
         issuer: https://hydra.my-lb.adm13/
+    webfinger:
+      oidc_discovery:
+        supported_claims:
+          - email
+        supported_scope:
+          - email
+    oauth2:
+      allowed_top_level_claims:
+      - email
+
+      

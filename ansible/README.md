@@ -165,3 +165,4 @@ auth update:
     "scope": "offline openid users.write users.read users.edit users.delete",
     "token_endpoint_auth_method": "client_secret_post"
 }
+- test /userinfo endpoint: curl -v http://hydra-public.auth:4444/userinfo -H "Authorization: Bearer ory_at_5CEmBYcSTKtbvUB6jCL3OpZrkOGdQ3H0yC1a6J3dees.l66_2V80ta5HRFHxHi1X6joSoTtI87pQR3isysJhjow"
