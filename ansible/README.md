@@ -145,6 +145,28 @@ TODO:
 - ensure that kubelet and crio are always running
 - replace gluster by ??? openebs is not yet compatible with Raspberry
 
+# oauth2 with curl
+1. curl -v -L --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy, notes:
+- last redirect: > GET /authentication/login?login_challenge=cc2ef20d32164703aa2a4c5dfb87fbbd HTTP/2
+<form class="form-signin" method="post" action="/authentication/login">
+
+
+
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <input type="hidden" name="login_challenge" value="cc2ef20d32164703aa2a4c5dfb87fbbd">
+    <label for="inputEmail" class="sr-only">Email address</label>
+    <input type="email" id="inputEmail" class="form-control" name="email" placeholder="Email address" required autofocus>
+    <label for="inputPassword" class="sr-only">Password</label>
+    <input type="password" id="inputPassword" class="form-control" name="password" placeholder="Password" required>
+    <div class="checkbox mb-3">
+        <label>
+            <input type="checkbox" name="remember_me" value="true"> Remember me
+        </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+2. submit login form like this: curl  --data-urlencode -H "Content-Type: application/x-www-form-urlencoded"  -X POST -v -L https://open.my-lb.adm13/authentication/login -d "login_challenge=9564b82da1184091a6f2d29befccb9ba&email=user2@example.com&password=password" 
+
+
 auth update:
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config

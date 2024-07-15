@@ -29,15 +29,14 @@ alphaConfig:
       #allowedGroups:
       #- admins # List all groups managed at our your IdP which should be allowed access
       oidcConfig:
-        userIDClaim: email  # Name of the claim in JWT containing the User ID
+        userIDClaim: sub  # Name of the claim in JWT containing the User ID
         #emailClaim: email.  # Name of the clain in JWT containing the E-Mail
-        emailClaim: email  # Name of the clain in JWT containing the E-Mail
+#        emailClaim: email  # Name of the clain in JWT containing the E-Mail
 #        groupsClaim: groups # Name of the claim in JWT containing the Groups
 #        extraAudiences: 
 #        - email
         audienceClaims:
         - aud
-        - email
 #        skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
         issuerURL: https://hydra.my-lb.adm13/
         jwksURL: http://hydra.auth:1121/
@@ -53,9 +52,9 @@ alphaConfig:
 #      - name: X-Auth-Request-Preferred-Username
 #        values:
 #          - claim: preferred_username
-      - name: X-Auth-Request-Email
-        values:
-          - claim: email
+#      - name: X-Auth-Request-Email
+#        values:
+#          - claim: email
 extraArgs:
   cookie-secure: "false"
   cookie-samesite: lax

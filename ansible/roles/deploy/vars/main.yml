@@ -41,6 +41,13 @@ applications:
         svcPort: 4444
         svcName: hydra-public
         prefix: /
+    idp:
+      git: https://github.com/ory/k8s.git
+      subdir: helm/charts/example-idp
+      git_to_local_params: --fix_source=auth/hydra-login-consent-node
+      network:
+        gateway: open
+        prefix: /idp
     my-idp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/my-idp
@@ -53,7 +60,8 @@ applications:
         build_args: --from docker.io/golang:1.22.4
       network:
         gateway: open
-        prefix: idp
+        prefix: /authentication
+        rewrite: /authentication
     oauth2-proxy-hydra:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
