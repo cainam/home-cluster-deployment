@@ -45,7 +45,7 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/mini-idp
       helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
-      image_build:
+      ximage_build:
       - name: mypy
         source: local
         tag: "{{ software.python.version }}"
