@@ -30,6 +30,7 @@ alphaConfig:
       #- admins # List all groups managed at our your IdP which should be allowed access
       oidcConfig:
         userIDClaim: sub  # Name of the claim in JWT containing the User ID
+        emailClaim: sub
         #emailClaim: email.  # Name of the clain in JWT containing the E-Mail
 #        emailClaim: email  # Name of the clain in JWT containing the E-Mail
 #        groupsClaim: groups # Name of the claim in JWT containing the Groups
@@ -44,9 +45,9 @@ alphaConfig:
       upstreams:
         - id: static_200
           path: /dummy
-#          static: true
-#          staticCode: 200
-          uri: https://open.my-lb.adm13/dummy
+          static: true
+          staticCode: 200
+#          uri: https://open.my-lb.adm13/dummy
     # Headers that should be added to responses from the proxy
     injectResponseHeaders: # Send this headers in responses from oauth2-proxy
 #      - name: X-Auth-Request-Preferred-Username

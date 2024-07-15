@@ -41,6 +41,22 @@ applications:
         svcPort: 4444
         svcName: hydra-public
         prefix: /
+    midp:
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/mini-idp
+      helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
+      image_build:
+      - name: mypy
+        source: local
+        tag: "{{ software.python.version }}"
+        build_args: --from docker.io/python:{{ software.python.version }}
+      storage:
+      - name: mini-idp
+        size: 5Mi
+        config: true
+      network: 
+        gateway: open
+        prefix: /mini-idp
     idp:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/example-idp
