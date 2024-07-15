@@ -37,7 +37,7 @@
           git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
           bdir="${PWD}"
           if [ "{{ item.subdir|default('') }}" != "" ]; then
-            git_dir="{{ item.subdir }}"
+            git_dir="{{ item.subdir|default('')  }}"
           else
             git_dir=$(basename "{{ item.source }}")
             git_dir=${git_dir%%.git}
