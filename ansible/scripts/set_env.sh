@@ -3,7 +3,7 @@
 . /etc/conf.d/helm
 
 export category=$1
-
+export KUBE_EDITOR=vi
 export KUBECONFIG=/etc/kubernetes/admin.conf
 
 export helm_dir=/shared/helm

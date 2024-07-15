@@ -44,7 +44,8 @@ applications:
     idp:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/example-idp
-      git_to_local_params: --fix_source=auth/hydra-login-consent-node
+      chart: example-idp
+      git_to_local_params: --fix_source=.image.repository=powerpixel01/hydra-login-consent-node --fix_source=.image.tag=2.2.0-arm64
       network:
         gateway: open
         prefix: /idp
