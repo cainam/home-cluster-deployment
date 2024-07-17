@@ -1,4 +1,4 @@
-FROM node:14.15-alpine3.12
+FROM docker.io/node:14.15-alpine3.12
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
