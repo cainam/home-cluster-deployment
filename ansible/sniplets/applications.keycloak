@@ -1,0 +1,17 @@
+    keycloak:
+      git: https://github.com/cainam/krysyntyz.git
+      subdir: charts/keycloak
+      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag="{{ software.keycloak.version }}" --set resources.limits.memory=600Mi
+      image_build:
+      - name: keycloak
+        source: local
+        tag: "{{ software.keycloak.version }}"
+        build_args: --from docker.io/library/debian:12.5-slim
+      storage:
+      - name: keycloak
+        size: 1Gi
+      network:
+        prefix: /
+        gateway: kc-gw
+        svcPort: 1121
+

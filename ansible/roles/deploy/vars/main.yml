@@ -45,6 +45,7 @@ applications:
       git: https://github.com/cainam/k8s_at_home.git
       subdir: charts/mini-idp
       helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
+      chart: mini-idp
       ximage_build:
       - name: mypy
         source: local
@@ -55,7 +56,6 @@ applications:
         size: 5Mi
         config: true
       network: 
-        gateway: open
         prefix: /mini-idp
     idp:
       git: https://github.com/ory/k8s.git
@@ -63,22 +63,8 @@ applications:
       chart: example-idp
       git_to_local_params: --fix_source=.image.repository=powerpixel01/hydra-login-consent-node --fix_source=.image.tag=2.2.0-arm64
       network:
-        gateway: open
-        prefix: /idp
-    my-idp:
-      git: https://github.com/cainam/krysyntyz.git
-      subdir: charts/my-idp
-      helm_options: --set image.repository=auth/my-idp --set image.tag="1.0.4"
-      image_build:
-      - source: https://github.com/cainam/krysyntyz.git
-        branch: master
-        subdir: krysyntyz/
-        tag: "1.0.4"
-        build_args: --from docker.io/golang:1.22.4
-      network:
-        gateway: open
-        prefix: /authentication
-        rewrite: /authentication
+        prefix: /idp/
+        svcName: idp-example-idp
     oauth2-proxy-hydra:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
@@ -90,38 +76,9 @@ applications:
         values:
           file: oauth2-proxy-config-hydra.yaml
       network:
-        gateway: open
         svcPort: 80
         prefix: /oauth2-hydra
         rewrite: /oauth2-hydra
-    oauth2-proxy:
-      git: https://github.com/oauth2-proxy/manifests.git
-      subdir: helm/oauth2-proxy
-      helm_options: --set proxyVarsAsSecrets=false 
-      git_to_local_params: --fix_source=.image.tag="{{ software.oauth2_proxy.version }}"
-      remove_dependencies: redis
-      files:
-        values:
-          file: oauth2-proxy-config.yaml
-      network:
-        svcPort: 80
-        prefix: /oauth2
-    keycloak:
-      git: https://github.com/cainam/krysyntyz.git
-      subdir: charts/keycloak
-      helm_options: --set securityContext.runAsUser=100200 --set server.securityContext.fsGroup=100200 --set image.tag="{{ software.keycloak.version }}" --set resources.limits.memory=600Mi
-      image_build:
-      - name: keycloak
-        source: local
-        tag: "{{ software.keycloak.version }}"
-        build_args: --from docker.io/library/debian:12.5-slim
-      storage:
-      - name: keycloak
-        size: 1Gi
-      network:
-        prefix: /
-        gateway: kc-gw
-        svcPort: 1121
   home:
     common:
       gitx: https://github.com/k8s-at-home/library-charts.git

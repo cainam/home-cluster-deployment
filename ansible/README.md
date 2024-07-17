@@ -144,6 +144,7 @@ TODO:
 - install grafana
 - ensure that kubelet and crio are always running
 - replace gluster by ??? openebs is not yet compatible with Raspberry
+- remove auth policy from helm and deploy via Ansible
 
 # oauth2 with curl
 1. curl -v -L --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy, notes:

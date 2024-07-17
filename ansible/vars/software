@@ -16,14 +16,8 @@ software:
       type: github
       params:
         repo: oauth2-proxy/oauth2-proxy
-  keycloak:
-    version: 24.0.4
-    latest:
-      type: github
-      params:
-        repo: keycloak/keycloak
   zigbee2mqtt:
-    version: 1.38.0
+    version: 1.39.0
     latest:
       type: github
       params:
