@@ -36,12 +36,8 @@
         if [ "{{ item.source }}" != "local" ]; then
           git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
           bdir="${PWD}"
-          if [ "{{ item.subdir|default('') }}" != "" ]; then
-            git_dir="{{ item.subdir|default('')  }}"
-          else
-            git_dir=$(basename "{{ item.source }}")
-            git_dir=${git_dir%%.git}
-          fi
+          git_dir=$(basename "{{ item.source }}")
+          git_dir="${git_dir%%.git}/{{ item.subdir|default('') }}""
           cd "${git_dir}"
         fi
         image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name | default(application.key) }}:{{ item.tag | default('latest') }}"
