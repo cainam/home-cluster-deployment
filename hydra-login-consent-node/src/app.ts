@@ -3,7 +3,7 @@
 
 import express, { NextFunction, Response, Request } from "express"
 import path from "path"
-import logger from "morgan"
+// import logger from "morgan"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 
@@ -13,6 +13,7 @@ import logout from "./routes/logout"
 import consent from "./routes/consent"
 
 const app = express()
+const morgan = require("morgan");
 
 // view engine setup
 app.set("views", path.join(__dirname, "..", "views"))
@@ -20,7 +21,29 @@ app.set("view engine", "pug")
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger("dev"))
+// app.use(logger("dev"))
+//
+morgan.token('id', function getId (req) {
+  return req.id
+})
+
+//app.use(morgan(':id :method :url :response-time'))
+
+app.use(
+morgan(function (tokens, req, res) {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ].join(' ')
+})
+)
+
+//app.use(morgan('combined'))
+
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())

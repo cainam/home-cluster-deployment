@@ -169,6 +169,7 @@ TODO:
 
 
 auth update:
+- initially keycloak but: no full featured idp required, huge resource consumption, corrupted DB, time to change: options seen: DEX and hydra, hydra selected because simple and separation with idp
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
 - hydra debug: add log.level: debug to hydra cm
