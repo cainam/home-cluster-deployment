@@ -12,6 +12,10 @@ import login from "./routes/login"
 import logout from "./routes/logout"
 import consent from "./routes/consent"
 
+import fs from 'node:fs';
+const data = fs.readFileSync('/Users/joe/test.txt', 'utf8');
+
+
 const app = express()
 const morgan = require("morgan");
 

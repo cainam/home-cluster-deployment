@@ -21,6 +21,8 @@ service:
   # kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
 
+mount_path: "/tmp" # where a secret might be found
+
 # hydraAdminUrl: ""
 # hydraPublicUrl: ""
 # baseUrl: ""

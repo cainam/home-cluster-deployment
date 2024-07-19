@@ -34,6 +34,8 @@ spec:
               value: {{ .Values.baseUrl }}
             - name: MOCK_TLS_TERMINATION
               value: {{ .Values.mockTlsTermination}}
+            - name: mount_path
+              value: {{ .Values.mount_path }}
             {{- with .Values.deployment.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -53,7 +55,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: {{ include "idp.fullname" . }}
-              mountPath: "/something_top_secret/"
+              mountPath: {{ .Values.mount_path }}
               readOnly: true
       volumes:
         - name: {{ include "idp.fullname" . }}
