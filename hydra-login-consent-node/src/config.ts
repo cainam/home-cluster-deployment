@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Configuration, V0alpha2Api } from "@ory/client"
+import fs from 'node:fs';
+
+const global.u = fs.readFileSync(process.env.mount_path+'/username', 'utf8');
+const global.p = fs.readFileSync(process.env.mount_path+'/password', 'utf8');
 
 const baseOptions: any = {}
 
