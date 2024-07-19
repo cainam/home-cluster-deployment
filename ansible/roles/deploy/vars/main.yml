@@ -63,7 +63,7 @@ applications:
       chart: example-idp
       agit_to_local_params: --fix_source=.image.repository=powerpixel01/hydra-login-consent-node --fix_source=.image.tag=2.2.0-arm64
       git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=latest
-      helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX
+      helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}"
       image_build:
       - source: https://github.com/cainam/k8s_at_home.git
         branch: master
