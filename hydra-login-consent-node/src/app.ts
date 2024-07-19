@@ -23,14 +23,14 @@ app.set("view engine", "pug")
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 // app.use(logger("dev"))
 //
-morgan.token('id', function getId (req) {
+morgan.token('id', function getId (req: Request) {
   return req.id
 })
 
 //app.use(morgan(':id :method :url :response-time'))
 
 app.use(
-morgan(function (tokens, req, res) {
+morgan(function (tokens, req: Request, res: Response<MyResponseBody, MyResponseLocals>) {
   return [
     tokens.method(req, res),
     tokens.url(req, res),
