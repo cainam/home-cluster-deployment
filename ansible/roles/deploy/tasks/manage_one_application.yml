@@ -41,8 +41,7 @@
           cd "${git_dir}"
         fi
         image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name | default(application.key) }}:{{ item.tag | default('latest') }}"
-        podman build . {{ item.build_args | default("--tls-verify") }} --file "${bdir}/{{ item.dockerfile | default(item.name|default(application.key)~'.dockerfile') }}" --tag "${image}"
-        podman push "${image}"
+        podman build . {{ item.build_args|default("--tls-verify") }} --file "${bdir}/{{ item.dockerfile|default(item.name|default(application.key)~'.dockerfile') }}" --tag "${image}" && podman push "${image}"
       args:
         chdir: "{{ build_dir.path }}"
       register: build_out
