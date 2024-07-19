@@ -41,7 +41,7 @@ export const oidcConformityMaybeFakeSession = (
   // If the email scope was granted, fake the email claims.
   if (grantScope.indexOf("email") > -1) {
     // But only do so if the email was requested!
-    idToken.email = "foo@bar.com"
+    idToken.email = u
     idToken.email_verified = true
   }
 

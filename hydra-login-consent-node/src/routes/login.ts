@@ -85,7 +85,7 @@ router.post("/", csrfProtection, (req, res, next) => {
 
   // Let's check if the user provided valid credentials. Of course, you'd use a database or some third-party service
   // for this!
-  if (!(req.body.email === "foo@bar.com" && req.body.password === "foobar")) {
+  if (!(req.body.email === u && req.body.password === p )) {
     // Looks like the user provided invalid credentials, let's show the ui again...
 
     res.render("login", {
@@ -105,7 +105,7 @@ router.post("/", csrfProtection, (req, res, next) => {
       hydraAdmin
         .adminAcceptOAuth2LoginRequest(challenge, {
           // Subject is an alias for user ID. A subject can be a random string, a UUID, an email address, ....
-          subject: "foo@bar.com",
+          subject: u,
 
           // This tells hydra to remember the browser and automatically authenticate the user in future requests. This will
           // set the "skip" parameter in the other route to true on subsequent requests!
