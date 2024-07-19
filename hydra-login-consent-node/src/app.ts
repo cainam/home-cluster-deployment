@@ -3,7 +3,7 @@
 
 import express, { NextFunction, Response, Request } from "express"
 import path from "path"
-// import logger from "morgan"
+import logger from "morgan"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 
@@ -21,9 +21,10 @@ app.set("view engine", "pug")
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-// app.use(logger("dev"))
+app.use(logger("dev"))
 //
-morgan.token('id', function getId (req: Request) {
+/*
+ * morgan.token('id', function getId (req: Request) {
   return req.id
 })
 
@@ -40,7 +41,7 @@ morgan(function (tokens, req: Request, res: Response<MyResponseBody, MyResponseL
   ].join(' ')
 })
 )
-
+*/
 //app.use(morgan('combined'))
 
 
