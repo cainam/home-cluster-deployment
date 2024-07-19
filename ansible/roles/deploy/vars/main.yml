@@ -58,10 +58,10 @@ applications:
       network: 
         prefix: /mini-idp
     idp:
-      git: https://github.com/ory/k8s.git
-      subdir: helm/charts/example-idp
-      chart: example-idp
-      agit_to_local_params: --fix_source=.image.repository=powerpixel01/hydra-login-consent-node --fix_source=.image.tag=2.2.0-arm64
+      ogit: https://github.com/ory/k8s.git
+      osubdir: helm/charts/example-idp
+      git: https://github.com/cainam/k8s_at_home.git
+      subdir: charts/idp
       git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=latest
       helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}"
       image_build:
