@@ -56,9 +56,9 @@ spec:
               mountPath: "/something_top_secret/"
               readOnly: true
       volumes:
-        - name: srt
+        - name: {{ include "idp.fullname" . }}
           secret:
-            secretName: secret-test
+            secretName: {{ include "idp.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
