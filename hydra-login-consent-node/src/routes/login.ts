@@ -8,6 +8,8 @@ import csrf from "csurf"
 import { hydraAdmin } from "../config"
 import { oidcConformityMaybeFakeAcr } from "./stub/oidc-cert"
 
+import { u, p  } from "../config"
+
 // Sets up csrf protection
 const csrfProtection = csrf({
   cookie: {
