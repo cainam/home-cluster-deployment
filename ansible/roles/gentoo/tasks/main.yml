@@ -281,6 +281,10 @@
 - name: eclean packages
   shell: eclean packages
 
+- name: install additional modules from Ansible Galaxy
+  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
+
+
 #- name: disable services
 #  service:
 #    name: "{{ item }}"

@@ -12,6 +12,14 @@
         "require_admin": false,
         "mode": "storage",
         "show_in_sidebar": true
+      },
+      {
+        "id": "an_der_marsch_13",
+        "show_in_sidebar": true,
+        "title": "An der Marsch 13",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "an-der-marsch-13"
       }
     ]
   }

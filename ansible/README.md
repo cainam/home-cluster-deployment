@@ -106,7 +106,10 @@ Mosquitto:
 - remove messages flagged for retain: # mosquitto_sub -h localhost -u x -P x -v --retained-only --remove-retained -t 'zigbee2mqtt/Zimmertr/availability' -E
 
 Kubernetes Dashboard:
-- with update, skip-login was no longer possible, seems Authorization Header is required (https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md ), set-authorization-header can nolonger be used (https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config/) 
+- with update, skip-login was no longer possible, seems Authorization Header is required (https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md ), set-authorization-header can nolonger be used (https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config/)  => somehow set bearer token in oauth2-proxy or istio, see: https://elastisys.com/istio-and-oauth2-proxy-in-kubernetes-for-microservice-authentication/
+- follow https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+- issue with publishing via HTTP => ISTIO (TLS), see https://github.com/kubernetes/dashboard/issues/9066 https://stackoverflow.com/questions/60281374/accessing-kubernetes-dashboard
+=> reject with version > 7.5.0 or alternatives
 
 Networking:
 - Load-balancer <=> Gateway: one to one relationship
@@ -190,3 +193,6 @@ auth update:
     "token_endpoint_auth_method": "client_secret_post"
 }
 - test /userinfo endpoint: curl -v http://hydra-public.auth:4444/userinfo -H "Authorization: Bearer ory_at_5CEmBYcSTKtbvUB6jCL3OpZrkOGdQ3H0yC1a6J3dees.l66_2V80ta5HRFHxHi1X6joSoTtI87pQR3isysJhjow"
+- hydra: sql lite: ~ $ hydra migrate sql -e -c /etc/config/hydra.yaml^C
+~ $ export DSN=sqlite:///dev/shm/some-db.sqlite?_fk=true^C
+ 

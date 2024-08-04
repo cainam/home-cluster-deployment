@@ -28,7 +28,6 @@ hydra:
       login: https://my-lb.adm13/idp/login
       self:
         admin: http://hydra-admin.auth:4445
-        #issuer: https://hydra.my-lb.adm13/
         issuer: https://my-lb.adm13/hydra
     webfinger:
       oidc_discovery:

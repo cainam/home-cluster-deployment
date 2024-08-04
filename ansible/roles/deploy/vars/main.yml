@@ -22,27 +22,31 @@ applications:
         values:
           file: istiod-mesh.yaml
     auth-policy:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
   auth:
+    hydra-pvc:
+      git: https://github.com/cainam/krysyntyz.git
+      subdir: charts/hydra-pvc
     hydra:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/hydra
       git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
-      xx_helm_options: --set hydra.config.urls.self.issuer=https://hydra.my-lb.adm13/ --set hydra.config.dsn=memory --set hydra.config.urls.consent=https://open.my-lb.adm13/authentication/consent --set hydra.config.urls.login=https://open.my-lb.adm13/authentication/login --set hydra.config.urls.self.admin=http://hydra-admin.auth:4445
-      helm_options: --set hydra.config.dsn=memory
+      helm_options: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra-shared --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra-shared --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra-shared
       remove_dependencies: hydra-maester
       files:
         values:
           file: hydra-config.yaml
+      storage:
+      - name: hydra-shared
+        size: 5Mi 
       network:
-        gateway: hydra-gw
         svcPort: 4444
         svcName: hydra-public
         prefix: /
     midp:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/mini-idp
       helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
       chart: mini-idp
@@ -60,17 +64,16 @@ applications:
     idp:
       ogit: https://github.com/ory/k8s.git
       osubdir: helm/charts/example-idp
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/idp
       git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=latest
       helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}" --set mount_path=/x
       image_build:
-      - source: https://github.com/cainam/k8s_at_home.git
+      - source: https://github.com/cainam/krysyntyz.git
         branch: master
         subdir: hydra-login-consent-node
       network:
         prefix: /idp/
-        svcName: idp-example-idp
     oauth2-proxy-hydra:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
@@ -144,7 +147,7 @@ applications:
       branch:  tempo-1.7.2
       git_to_local_params: --fix_source=.tempo.tag="{{ software.tempo.version }}" --fix_source=.tempoQuery.tag="{{ software.tempo_query.version }}"
     infopage:
-      git: https://github.com/cainam/k8s_at_home.git
+      git: https://github.com/cainam/krysyntyz.git
       subdir: charts/infopage
       helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
       image_build:
