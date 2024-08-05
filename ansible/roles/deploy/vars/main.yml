@@ -33,7 +33,8 @@ applications:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/hydra
       git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
-      helm_options: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra-shared --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra-shared --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra-shared
+      xhelm_options: --set hydra.config.dsn=memory
+      helm_options: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra-shared --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra-shared --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra-shared --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true
       remove_dependencies: hydra-maester
       files:
         values:
@@ -44,7 +45,7 @@ applications:
       network:
         svcPort: 4444
         svcName: hydra-public
-        prefix: /
+        prefix: /hydra/
     midp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/mini-idp

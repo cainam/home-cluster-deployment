@@ -15,7 +15,7 @@ alphaConfig:
   enabled: true
   configData:
     providers:
-    - clientID: "96c43d9d-160a-4894-9e2e-ebb96ed71dd5"       # IdP Client ID
+    - clientID: "bf6043ef-ffea-4db7-bfaf-d1bb23139d85"       # IdP Client ID
       clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider

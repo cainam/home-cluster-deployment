@@ -1,5 +1,8 @@
 hydra:
   config:
+    secrets:
+      system: 
+      - {{ hydra_system_secret }}
     log:
       level: debug
       leak_sensitive_values: true

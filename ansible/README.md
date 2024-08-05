@@ -147,7 +147,21 @@ TODO:
 - install grafana
 - ensure that kubelet and crio are always running
 - replace gluster by ??? openebs is not yet compatible with Raspberry
-- remove auth policy from helm and deploy via Ansible
+- remove auth policy from helm and deploy via Ansible (or merge with hydra chart)
+
+Manual steps to be automated:
+- client-in in oauth2-proxy is to be taken from hydra created by:
+curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
+{
+    "client_name": "test",
+    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
+    "response_types": ["code", "id_token"],
+    "scope": "offline openid users.write users.read users.edit users.delete",
+    "token_endpoint_auth_method": "client_secret_post"
+}
+
 
 # oauth2 with curl
 1. curl -v -L --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy, notes:
@@ -180,7 +194,7 @@ auth update:
 - 2nd AuthorizationPolicy
 - pod exec parameters:         - --cookie-domain=.my-lb.adm13,my-lb.adm13 (and same for white-list-domain)
 - 2nd extensionProviders: in istio cm
-# test hydra: https://hydra.my-lb.adm13/.well-known/openid-configuration
+# test hydra: https://my-lb.adm13/hydra/.well-known/openid-configuration
 # create client: ~ $ hydra create oauth2-client -e http://localhost:4445 --name test --scope openid --secret oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0
 # or:  curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
 {
@@ -195,4 +209,14 @@ auth update:
 - test /userinfo endpoint: curl -v http://hydra-public.auth:4444/userinfo -H "Authorization: Bearer ory_at_5CEmBYcSTKtbvUB6jCL3OpZrkOGdQ3H0yC1a6J3dees.l66_2V80ta5HRFHxHi1X6joSoTtI87pQR3isysJhjow"
 - hydra: sql lite: ~ $ hydra migrate sql -e -c /etc/config/hydra.yaml^C
 ~ $ export DSN=sqlite:///dev/shm/some-db.sqlite?_fk=true^C
- 
+ curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
+{
+    "client_name": "test",
+    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0", 
+    "grant_types": ["authorization_code", "refresh_token"],
+    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
+    "response_types": ["code", "id_token"],
+    "scope": "offline openid users.write users.read users.edit users.delete",
+    "token_endpoint_auth_method": "client_secret_post"
+}   
+
