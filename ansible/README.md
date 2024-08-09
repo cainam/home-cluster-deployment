@@ -135,7 +135,6 @@ TODO:
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - custom filter: depenencies (db + gateway)
-- dependencies: limit_XXXX => build array and check if item is in array
 - dependencies: generalize waitdb initcontainer 
 - create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
