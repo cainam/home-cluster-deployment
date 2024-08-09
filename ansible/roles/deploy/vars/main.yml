@@ -26,6 +26,10 @@ applications:
       subdir: charts/auth-policy
       helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
   auth:
+    ory-commons:
+      git: https://github.com/ory/k8s.git
+      subdir: helm/charts/ory-commons
+      install: false
     hydra-pvc:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-pvc
@@ -63,16 +67,15 @@ applications:
       network: 
         prefix: /mini-idp
     idp:
-      ogit: https://github.com/ory/k8s.git
-      osubdir: helm/charts/example-idp
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/idp
-      git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=latest
+      git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=1.0.0
       helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}" --set mount_path=/x
       image_build:
       - source: https://github.com/cainam/krysyntyz.git
         branch: master
         subdir: hydra-login-consent-node
+        tag: 1.0.0
       network:
         prefix: /idp/
     oauth2-proxy-hydra:
@@ -91,8 +94,6 @@ applications:
         rewrite: /oauth2-hydra
   home:
     common:
-      gitx: https://github.com/k8s-at-home/library-charts.git
-      subdirx: charts/stable/common
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/common
       #branch: common-4.5.2

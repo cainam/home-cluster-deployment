@@ -17,6 +17,26 @@
               ],
               "title": "Pool",
               "hours_to_show": 48
+            },
+            {
+              "type": "history-graph",
+              "entities": [
+                {
+                  "entity": "switch.lyra"
+                }
+              ],
+              "title": "Teich",
+              "hours_to_show": 48
+            },
+            {
+              "type": "history-graph",
+              "entities": [
+                {
+                  "entity": "sensor.power_meter_wirkleistung"
+                }
+              ],
+              "hours_to_show": 48,
+              "title": "Wirkleistung"
             }
           ]
         }
