@@ -141,7 +141,6 @@ TODO:
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook
 - build all images from gentoo
-- remove registry from runlevel: only controlle by keepalived
 - configure tempo in kiali
 - install grafana
 - ensure that kubelet and crio are always running

@@ -110,8 +110,8 @@ fs=$(echo "$out" | head -n 1 | cut -d "'" -f 2)
 
 if [ ${ret} -ne 0 ]; then
   log "NOT ok, trying umount"
-  umount /shared/*
-  out=$(ls -l /shared/* 2>&1)
+  out=$(for a in /shared/*; do umount "${a}"; done 2>&1 )
+  out=$(ls -l /shared/ 2>&1)
   ret=$?
   if [ ${ret} -ne 0 ]; then
     log "problem NOT fixed, trying restart autofs"
