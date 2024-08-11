@@ -36,12 +36,12 @@ fi
 
 # lighttpd
 name="lighttpd"
-out=$(curl -sov ${helm_repo_base} 2>&1)
+out=$(curl -sv ${helm_repo_base} 2>&1)
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
   rc-service lighttpd restart; sleep 5
-  out=$(curl -sov ${helm_repo_base} 2>&1)
+  out=$(curl -sv ${helm_repo_base} 2>&1)
   ret=$?
   if [ ${ret} -ne 0 ]; then
     log "problem NOT fixed"
@@ -49,19 +49,19 @@ if [ ${ret} -eq 35 ]; then
     log "problem fixed"
   fi
 elif [ ${ret} -ne 0 ]; then
-  log "NOT ok, unknown error code: ${ret}"
+  log "NOT ok, unknown error code: ${ret}: ${out}"
 else
   log "ok"
 fi
 
 # registry
 name="registry"
-out=$(curl -s  -X GET https://${registry}/v2/_catalog 2>&1)
+out=$(curl -s -X GET https://${registry}/v2/_catalog 2>&1)
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
   rc-service registry restart; sleep 60
-  out=$(curl -s  -X GET https://${registry}/v2/_catalog 2>&1)
+  out=$(curl -s -X GET https://${registry}/v2/_catalog 2>&1)
   ret=$?
   if [ ${ret} -ne 0 ]; then
     log "problem NOT fixed"
@@ -69,7 +69,7 @@ if [ ${ret} -eq 35 ]; then
     log "problem fixed"
   fi
 elif [ ${ret} -ne 0 ]; then
-  log "NOT ok, unknown error code: ${ret}"
+  log "NOT ok, unknown error code: ${ret}: ${out}"
 else
   log "ok"
 fi
