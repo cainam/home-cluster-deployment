@@ -1,12 +1,13 @@
 #!/bin/bash
+exec 2>> /var/log/${my_name}.log
+exec >> /var/log/${my_name}.log
+
+set -x
 
 # script addresses crashing services issues: detect them, log them, fix them
 . set_env.sh
 timestamp=$(date +'%Y-%m-%d %H:%M:%S')
 my_name=$(basename $0)
-
-exec 2>> /var/log/${my_name}.log
-exec >> /var/log/${my_name}.log
 
 log(){
   echo "${timestamp}: ${name}: $1"
@@ -36,12 +37,12 @@ fi
 
 # lighttpd
 name="lighttpd"
-out=$(curl -sv ${helm_repo_base} 2>&1)
+out=$(curl -sv ${helm_url} 2>&1)
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
   rc-service lighttpd restart; sleep 5
-  out=$(curl -sv ${helm_repo_base} 2>&1)
+  out=$(curl -sv ${helm_url} 2>&1)
   ret=$?
   if [ ${ret} -ne 0 ]; then
     log "problem NOT fixed"
@@ -56,12 +57,12 @@ fi
 
 # registry
 name="registry"
-out=$(curl -s -X GET https://${registry}/v2/_catalog 2>&1)
+out=$(curl -sv -X GET https://${registry}/v2/_catalog 2>&1)
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
   rc-service registry restart; sleep 60
-  out=$(curl -s -X GET https://${registry}/v2/_catalog 2>&1)
+  out=$(curl -sv -X GET https://${registry}/v2/_catalog 2>&1)
   ret=$?
   if [ ${ret} -ne 0 ]; then
     log "problem NOT fixed"

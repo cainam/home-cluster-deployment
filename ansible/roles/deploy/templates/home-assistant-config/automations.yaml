@@ -57,12 +57,12 @@
   - repeat:
       while:
       - condition: state
-        entity_id: switch.teich
+        entity_id: switch.lyra
         state: 'off'
       sequence:
       - type: turn_on
-        device_id: 52070036c70f4c68e6f18cf6809afbd5
-        entity_id: 8c48a2c7e50d15363de4343686855e1c
+        device_id: fc605fb5e61935d7cb03c713a225affc
+        entity_id: 57a3dae81792fbdde1eb989e6e7ea238
         domain: switch
       - service: notify.persistent_notification
         metadata: {}
@@ -91,8 +91,8 @@
     entity_id: sensor.power_meter_wirkleistung
     below: 0
   - type: turn_off
-    device_id: 52070036c70f4c68e6f18cf6809afbd5
-    entity_id: 8c48a2c7e50d15363de4343686855e1c
+    device_id: fc605fb5e61935d7cb03c713a225affc
+    entity_id: 57a3dae81792fbdde1eb989e6e7ea238
     domain: switch
   mode: single
 - id: '1716202078969'

@@ -18,7 +18,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 1.39.0
+    version: 1.39.1
     latest:
       type: github
       params:
@@ -31,7 +31,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.7"
+    version: "2024.8"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -69,7 +69,7 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 16.3-alpine
+    version: 16.4-alpine
     installed:
       type: k8s
       pattern: "postgres:"

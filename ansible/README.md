@@ -80,7 +80,7 @@ home-assistant:
     - Modbus could be also taken via efin converter on Smart Meter or on RS485 ports on Inverter, but SDongleA-05 required no additional hardware and is wireless
     - Home-Assistant: https://github.com/wlcrs/huawei_solar to custom_components/
   - Settings -> Energy Dashboard
-  - update config in git: goto /shared/home-assistant-config and find . ! -path "./custo*" ! -path "./deps*" ! -type d ! -name "*.log*" ! -size 0 ! -name ".HA_VERSION" - update yaml and all .storage/* files
+  - update config in git: (cd /shared/home-assistant-config; find . ! -path "./custo*" ! -path "./deps*" ! -type d ! -name "*.log*" ! -size 0 ! -name ".HA_VERSION" | while read f; do if [ -f /data/mine/git/ansible/roles/deploy/*/home-assistant-config/$f ]; then diff -q  $f /data/mine/git/ansible/roles/deploy/*/home-assistant-config/$f;ret=$?;[ $ret -eq 1 ] && cat $f > /data/mine/git/ansible/roles/deploy/*/home-assistant-config/$f ; fi; done)
 
 VPN wireguard (Fritzbox + Android):
   - tunnel created
