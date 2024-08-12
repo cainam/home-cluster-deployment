@@ -105,7 +105,7 @@ fi
 
 # gluster mounts
 name="/shared mounts"
-out=$(ls -l /shared/* 2>&1)
+out=$(ls -l /shared/ 2>&1)
 ret=$?
 fs=$(echo "$out" | head -n 1 | cut -d "'" -f 2)
 
