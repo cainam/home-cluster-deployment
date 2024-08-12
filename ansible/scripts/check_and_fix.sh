@@ -38,6 +38,7 @@ fi
 # lighttpd
 name="lighttpd"
 out=$(curl -sv ${helm_url} 2>&1)
+log "helm url: i${helm_url}"
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
