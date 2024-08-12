@@ -2,7 +2,8 @@
 exec 2>> /var/log/${my_name}.log
 exec >> /var/log/${my_name}.log
 
-set -x
+#set -x
+export PATH=/usr/local/bin/:$PATH
 
 # script addresses crashing services issues: detect them, log them, fix them
 . set_env.sh
