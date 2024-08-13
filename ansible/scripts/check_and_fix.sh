@@ -1,14 +1,14 @@
 #!/bin/bash
-exec 2>> /var/log/${my_name}.log
-exec >> /var/log/${my_name}.log
+my_name=$(basename $0)
+exec 2>&1
+exec 1>> /var/log/${my_name}.log
+#exec 2>> /var/log/${my_name}.log
 
-#set -x
 export PATH=/usr/local/bin/:$PATH
 
 # script addresses crashing services issues: detect them, log them, fix them
 . set_env.sh
 timestamp=$(date +'%Y-%m-%d %H:%M:%S')
-my_name=$(basename $0)
 
 log(){
   echo "${timestamp}: ${name}: $1"
@@ -39,7 +39,7 @@ fi
 # lighttpd
 name="lighttpd"
 out=$(curl -sv ${helm_url} 2>&1)
-log "helm url: i${helm_url}"
+#log "helm url: ${helm_url}"
 ret=$?
 if [ ${ret} -eq 35 ]; then
   log "known error: restarting service"
