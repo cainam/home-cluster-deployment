@@ -254,7 +254,7 @@
   when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
   
 - name: emerge build
-  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
 
 - name: link deploy cron
@@ -271,7 +271,7 @@
     state: link
  
 - name: emerge deploy
-  shell: emerge --verbose --update --deep --newuse --with-bdeps=y @world
+  shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
 
 - name: unlink deploy cron
