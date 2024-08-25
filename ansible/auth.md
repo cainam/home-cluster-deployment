@@ -47,7 +47,8 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
 # subdomains: cookie_domain? whilelist-domain?
 
 # oauth2 with curl
-1. curl -v -L --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy, notes:
+1. curl -v -L --cookie /tmp/cookie1 --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy 2>&1 | tail -n 1 | sed -e 's/</\n</g' | grep input
+
 - last redirect: > GET /authentication/login?login_challenge=cc2ef20d32164703aa2a4c5dfb87fbbd HTTP/2
 <form class="form-signin" method="post" action="/authentication/login">
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
@@ -62,7 +63,7 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
         </label>
     </div>
     <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-2. submit login form like this: curl  --data-urlencode -H "Content-Type: application/x-www-form-urlencoded"  -X POST -v -L https://open.my-lb.adm13/authentication/login -d "login_challenge=9564b82da1184091a6f2d29befccb9ba&email=user2@example.com&password=password" 
+2. submit login form like this: curl --cookie /tmp/cookie1 --cookie-jar /tmp/cookie1  --data-urlencode -H "Content-Type: application/x-www-form-urlencoded"  -X POST -v -L https://my-lb.adm13/idp/login -d "login_challenge=9564b82da1184091a6f2d29befccb9ba&email=user2@example.com&password=password" 
 
 
 auth update:

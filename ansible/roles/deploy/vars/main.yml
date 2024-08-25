@@ -238,4 +238,10 @@ applications:
       branch: "{{ software.descheduler.version }}"
       git_to_local_params: --fix_source=.image.tag={{ software.descheduler.version }}
       helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
-
+  storage:
+    longhorn:
+      git: https://github.com/longhorn/longhorn.git
+      subdir: chart
+      branch: v1.7.0
+      network:
+        svcName: longhorn-frontend

@@ -47,3 +47,6 @@ www-servers/lighttpd
 sys-kernel/linux-firmware
 net-fs/autofs
 net-fs/nfs-utils
+
+# only for longhorn
+sys-block/open-iscsi

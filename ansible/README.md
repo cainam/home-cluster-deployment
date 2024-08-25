@@ -131,7 +131,6 @@ TODO:
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - /etc/localtime + /etc/timezone
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
-- /var/db/repos - local on build, gluster vol for others
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - custom filter: depenencies (db + gateway)
@@ -144,8 +143,9 @@ TODO:
 - configure tempo in kiali
 - install grafana
 - ensure that kubelet and crio are always running
-- replace gluster by ??? openebs is not yet compatible with Raspberry
+- replace gluster by ??? openebs is not yet compatible with Raspberry, try longhorn, then Piraeus
 - remove auth policy from helm and deploy via Ansible (or merge with hydra chart)
+- import script: update Chart.yaml to contain the version of the software
 
 Manual steps to be automated:
 - client-in in oauth2-proxy is to be taken from hydra created by:
