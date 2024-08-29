@@ -1,28 +1,41 @@
-- name: app:{{ app }} set brick and disk path
-  set_fact:
-    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
-    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
+- block:
+  - name: app:{{ app }} set brick and disk path
+    set_fact:
+      brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
+      disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
 
-- name: app:{{ app }} ensure bricks for gluster
-  shell: |
-    set -e;
-    # exit if gluster volume exists already, better: do it upfront and outside
-    #gluster vol list | grep "^{{ storage.name }}$" && exit
-    echo "brick: {{ brick }}\ndisk: {{ disk }}"
-    if [ ! -f "{{ disk }}" ]; then
-      mkdir -p "{{ gluster_directory }}/disks"
-      truncate -s "{{ storage.size }}B" "{{ disk }}";
-      mkfs.ext4 "{{ disk }}";
-    fi
-    [ ! -d "{{ brick }}" ] && mkdir -p "{{ brick }}";
-    mountpoint -q "{{ brick }}" || mount "{{ disk }}" "{{ brick }}"
-#  vars:
-#    brick: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
-#    disk: "{{ gluster_directory }}/disks/app:{{ app }}-vol:{{ storage.name }}"
-  loop_control:
-    loop_var: storage
-  register: brick_result
+  - name: app:{{ app }} ensure bricks for gluster
+    shell: |
+      set -e;
+      # exit if gluster volume exists already, better: do it upfront and outside
+      #gluster vol list | grep "^{{ storage.name }}$" && exit
+      echo "brick: {{ brick }}\ndisk: {{ disk }}"
+      if [ ! -f "{{ disk }}" ]; then
+        mkdir -p "{{ gluster_directory }}/disks"
+        truncate -s "{{ storage.size }}B" "{{ disk }}";
+        mkfs.ext4 "{{ disk }}";
+      fi
+      [ ! -d "{{ brick }}" ] && mkdir -p "{{ brick }}";
+      mountpoint -q "{{ brick }}" || mount "{{ disk }}" "{{ brick }}"
+    loop_control:
+      loop_var: storage
+    register: brick_result
+  
+  - name: show brick and disk
+    debug:
+      msg: "brick: {{ brick }} disk: {{disk}}"
+  
+  when: storage.type is defined and storage.type!='local'
 
-- name: show brick and disk
-  debug:
-    msg: "brick: {{ brick }} disk: {{disk}}"
+- block:
+  - name: app:{{ app }} create local storage
+    shell: |
+      set -e;
+      if [ ! -f "{{ local_disk_directory }}/{{ storage.name }}.disk" ]; then
+        mkdir -p "{{ gluster_directory }}/disks"
+        truncate -s "{{ storage.size }}B" "{{ local_disk_directory }}/{{ storage.name }}.disk"
+        mkfs.ext4 "{{ local_disk_directory }}/{{ storage.name }}.disk";
+      fi
+      [ ! -d "{{ storage.mountpoint }}" ] && mkdir -p "{{ storage.mountpoint }}";
+      mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
+  when: storage.type is defined and storage.type=='local'

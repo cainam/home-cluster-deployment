@@ -146,6 +146,7 @@ TODO:
 - replace gluster by ??? openebs is not yet compatible with Raspberry, try longhorn, then Piraeus
 - remove auth policy from helm and deploy via Ansible (or merge with hydra chart)
 - import script: update Chart.yaml to contain the version of the software
+- istio enabled per deployment or per pod ...??, not per namespace
 
 Manual steps to be automated:
 - client-in in oauth2-proxy is to be taken from hydra created by:

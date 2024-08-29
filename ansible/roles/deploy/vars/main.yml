@@ -245,3 +245,8 @@ applications:
       branch: v1.7.0
       network:
         svcName: longhorn-frontend
+      storage:
+      - name: longhorn-1
+        type: local
+        size: 30Gi
+        mountpoint: /data/longhorn-1

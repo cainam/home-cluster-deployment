@@ -167,8 +167,8 @@
       dest: /etc/autofs/
     - file: syslog-ng.conf
       dest: /etc/syslog-ng/
-    - file: haproxy.logrotate
-      dest: /etc/logrotate.d/haproxy
+    - file: logrotate.d/
+      dest: /etc/logrotate.d/
     - file: iwd.conf
       dest: /etc/iwd/main.conf
 

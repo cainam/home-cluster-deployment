@@ -1,4 +1,5 @@
 gluster_directory: /data/gluster
+local_disk_directory: /data
 
 helm_repo_base: https://helm.adm13:9443/
 registry: myregistry.adm13:443

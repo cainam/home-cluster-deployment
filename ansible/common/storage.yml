@@ -1,61 +1,63 @@
-- name: app:{{ app }} create gluster volume
-  gluster.gluster.gluster_volume:
-    state: present
-    name: "{{ storage.name }}"
-    bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
-    force: yes
-    replicas: "{{ replicas }}"
-    # directory: /data
-    options:
-      {
-        cluster.quorum-type: 'fixed',
-      }
-    cluster: "{{ gluster_hosts }}"
-    
-- name: app:{{ app }} add volume to be kept
-  set_fact:
-    keep_volumes: "{{ keep_volumes +[storage.name] }}"
-  run_once: true
-  when: outside_k8s is not defined
-
-- name: app:{{ app }} show keep_volumes
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ keep_volumes }}"
-  when: outside_k8s is not defined
-
-- name: app:{{ app }} PersistentVolume
-  shell: |
-      set -x
-      kubectl apply -f - <<EOF
-      apiVersion: v1
-      kind: PersistentVolume
-      metadata:
-        namespace: {{ ns }}
-        name: "{{ storage.name }}"
-      spec:
-        nodeAffinity:
-          required:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: NotIn
-                values:
-                - example-node
-        claimRef:
-          namespace: "{{ ns }}"
+- block:
+  - name: app:{{ app }} create gluster volume
+    gluster.gluster.gluster_volume:
+      state: present
+      name: "{{ storage.name }}"
+      bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
+      force: yes
+      replicas: "{{ replicas }}"
+      # directory: /data
+      options:
+        {
+          cluster.quorum-type: 'fixed',
+        }
+      cluster: "{{ gluster_hosts }}"
+      
+  - name: app:{{ app }} add volume to be kept
+    set_fact:
+      keep_volumes: "{{ keep_volumes +[storage.name] }}"
+    run_once: true
+    when: outside_k8s is not defined
+  
+  - name: app:{{ app }} show keep_volumes
+    debug:
+      msg: "{{ item }}"
+    loop: "{{ keep_volumes }}"
+    when: outside_k8s is not defined
+  
+  - name: app:{{ app }} PersistentVolume
+    shell: |
+        set -x
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          namespace: {{ ns }}
           name: "{{ storage.name }}"
-        accessModes:
-          - ReadWriteOnce
-          - ReadOnlyMany
-          - ReadWriteMany
-        capacity:
-          storage: "{{ storage.size }}"
-        storageClassName: ""
-        #persistentVolumeReclaimPolicy: Delete
-        persistentVolumeReclaimPolicy: Retain
-        volumeMode: Filesystem
-        local:
-          path: "{{ shared_mounts }}/{{ storage.name }}/"
-      EOF
-  when: outside_k8s is not defined
+        spec:
+          nodeAffinity:
+            required:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: NotIn
+                  values:
+                  - example-node
+          claimRef:
+            namespace: "{{ ns }}"
+            name: "{{ storage.name }}"
+          accessModes:
+            - ReadWriteOnce
+            - ReadOnlyMany
+            - ReadWriteMany
+          capacity:
+            storage: "{{ storage.size }}"
+          storageClassName: ""
+          #persistentVolumeReclaimPolicy: Delete
+          persistentVolumeReclaimPolicy: Retain
+          volumeMode: Filesystem
+          local:
+            path: "{{ shared_mounts }}/{{ storage.name }}/"
+        EOF
+    when: outside_k8s is not defined
+  when: storage.type is not defined or storage.type!='local'
