@@ -115,6 +115,7 @@ Networking:
 - Load-balancer <=> Gateway: one to one relationship
 - Gateway <=> VirtualService: one to one relationship
 - VirtualService <=> Application: one to many relationship
+- inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
 Database:
 - PostgreSQL update:
@@ -161,6 +162,5 @@ curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: appl
     "token_endpoint_auth_method": "client_secret_post"
 }
 
-
-
+longhorn: check disk: findmnt -o TARGET,PROPAGATION /var/lib/longhorn/
 

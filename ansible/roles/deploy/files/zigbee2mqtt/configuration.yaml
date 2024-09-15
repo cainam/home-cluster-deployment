@@ -18,7 +18,7 @@ advanced:
   last_seen: ISO_8601
   legacy_availability_payload: false
   legacy_api: false
-  timestamp_format: 'YYYY-MM-DD HH:mm:ss'
+  timestamp_format: YYYY-MM-DD HH:mm:ss
   log_directory: /app/%TIMESTAMP%
   log_level: info
   log_rotation: true
@@ -59,6 +59,10 @@ devices:
   '0xa4c138d122942108':
     friendly_name: Telefon
   '0xf0d1b8be24084e34':
-    friendly_name: Lyra
+    friendly_name: Teich
   '0xa4c138e2bc190354':
     friendly_name: Carport
+  '0x70b3d52b60024287':
+    friendly_name: Büro-Ausgang
+  '0x70b3d52b60025cfa':
+    friendly_name: Bürotür

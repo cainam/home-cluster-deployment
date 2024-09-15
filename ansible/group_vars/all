@@ -1,3 +1,5 @@
+auto_silent: true
+
 gluster_directory: /data/gluster
 local_disk_directory: /data
 

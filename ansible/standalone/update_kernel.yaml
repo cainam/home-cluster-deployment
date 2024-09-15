@@ -1,0 +1,54 @@
+---
+- name: update firmware
+  gather_facts: false
+  hosts: all
+  tasks:
+  - name: set version
+    set_fact:
+      v: 1.20240902
+      d: /tmp/fw
+
+  - name: prepare directory
+    shell: |
+      dir="{{ d }}"
+      [ -e "$dir" ] && rm -rf "$dir"
+      mkdir "$dir"
+      #git clone -b "{{ v }}" --single-branch https://github.com/raspberrypi/firmware.git --depth 1 "{{ d }}" 
+      cd "{{ d }}"
+      curl -L https://github.com/raspberrypi/firmware/archive/refs/tags/"{{ v }}".tar.gz  --output "{{ v }}".tar.gz
+      tar xfz "{{ v }}".tar.gz
+      # git fetch --unshallow 
+      #git pull --all
+      #[ ! -d "$dir" ] && exit -1
+
+#  - name: download firmware
+#    get_url:
+#      url: "https://github.com/raspberrypi/firmware/releases/download/{{ v }}/raspi-firmware_{{ v }}.orig.tar.xz"
+#      dest: "{{ d }}/raspi-firmware_{{ v }}.orig.tar.xz"
+#     
+#  - name: extract firmware
+#    shell: |
+#      cd "{{ d }}"
+#      tar -xJf raspi-firmware_{{ v }}.orig.tar.xz
+#
+#  - name: fetch repo
+#    git: 
+#      repo: https://github.com/raspberrypi/firmware.git
+#      dest: "{{ d }}"
+#      version: "{{ v }}"
+#      single_branch: true
+
+  - name: backup old boot and  update from git local repo
+    shell: |
+      mount /boot
+      cp -r /boot/ "/boot-pre-{{ v }}"
+      dir="{{ d }}/firmware-{{ v }}"
+      [ ! -d "${dir}" ] && exit -1
+      cp -dp "/boot-pre-{{ v }}"/cmdline.txt  "/boot-pre-{{ v }}"/config.txt /boot
+      rm -rf /boot/*
+      cp -r "${dir}/boot"/* "${dir}/extra"/* /boot/
+      cp -rdp "${dir}/modules"/* /lib/modules/
+      cp -dp "/boot-pre-{{ v }}"/cmdline.txt  "/boot-pre-{{ v }}"/config.txt /boot
+      #cp -r "{{ d }}/boot"/* "{{ d }}/extra"/* /boot/
+      #cp -rdp "{{ d }}/modules"/* /lib/modules/
+

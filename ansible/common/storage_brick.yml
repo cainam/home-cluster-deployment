@@ -38,4 +38,5 @@
       fi
       [ ! -d "{{ storage.mountpoint }}" ] && mkdir -p "{{ storage.mountpoint }}";
       mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
+      mount --make-shared "{{ storage.mountpoint }}"
   when: storage.type is defined and storage.type=='local'
