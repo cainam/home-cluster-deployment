@@ -124,23 +124,6 @@
         "version": "2023.5.3"
       },
       {
-        "id": "8bf42319418545ca8d2f052485f9dd40",
-        "user_id": "1e3d128e31a34f458f33b473c37725fd",
-        "client_id": "https://ha.my-lb.adm13/",
-        "client_name": null,
-        "client_icon": null,
-        "token_type": "normal",
-        "created_at": "2024-06-10T20:19:44.043444+00:00",
-        "access_token_expiration": 1800.0,
-        "token": "59bee5894e024ed90eb6fbdba954d3b56493ed59e6735a92cd65360f935a7552fb0dd875c3c4cd61924b415cd1adf7e6b5a8f1c1b3a936a8e5616812cbef3722",
-        "jwt_key": "22d00eb556b34e3e3e36715dd2d92c5c11ec75742326d9f50891147fbf761973fac5f28582308709bf422b12f27d8efa1b57226aa6715965eacb86ce0dacd47b",
-        "last_used_at": "2024-06-11T18:03:49.368664+00:00",
-        "last_used_ip": "10.244.0.0",
-        "expire_at": 1725905029.368664,
-        "credential_id": "44185af1c0074ab683ff4185e81fb37f",
-        "version": "2024.6.1"
-      },
-      {
         "id": "0a682c9a02a24ed1a3f66926bad31ac8",
         "user_id": "1e3d128e31a34f458f33b473c37725fd",
         "client_id": "https://ha.my-lb.adm13/",
@@ -168,9 +151,9 @@
         "access_token_expiration": 1800.0,
         "token": "6950f05206d39ee51103469c76fe8d9a27e373c3e39d6c0cd48f7d9abc187e703f3d1bf918474cdf150fb1d5ebedf9aec63024322b57a1e7afab227712434df6",
         "jwt_key": "e116e699eba78c7d5f6336576eb8c1b6ec8d9a1ea6c9e42dd3825090fe34853d82039bd4982fba7852712383788de67f91d6b6cf9eae2fd4b112b3f56436443a",
-        "last_used_at": "2024-08-11T06:53:05.812072+00:00",
-        "last_used_ip": "10.244.2.0",
-        "expire_at": 1731135185.812072,
+        "last_used_at": "2024-09-14T18:11:43.173660+00:00",
+        "last_used_ip": "10.244.2.1",
+        "expire_at": 1734113503.17366,
         "credential_id": "44185af1c0074ab683ff4185e81fb37f",
         "version": "2024.7.3"
       },

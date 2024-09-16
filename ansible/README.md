@@ -162,5 +162,14 @@ curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: appl
     "token_endpoint_auth_method": "client_secret_post"
 }
 
-longhorn: check disk: findmnt -o TARGET,PROPAGATION /var/lib/longhorn/
-
+longhorn: 
+- check disk: findmnt -o TARGET,PROPAGATION /var/lib/longhorn/
+- check and delete longhorn crds: kubectl get crd -o jsonpath={.items[*].metadata.name} | tr ' ' '\n' | grep longhorn.io | xargs kubectl delete crd
+- list api-resources in namespace: kubectl api-resources --verbs=list --namespaced -o name | grep -v ^events  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n storage
+- delete: 
+# cat longhorn-confirm-deletion.yaml
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+  name: deleting-confirmation-flag
+# kubectl apply -f longhorn-confirm-deletion.yaml

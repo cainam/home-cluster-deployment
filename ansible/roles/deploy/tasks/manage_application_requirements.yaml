@@ -25,12 +25,14 @@
 
   - name: "{{ title_app_reqs }}map postgresql port to localhost" # hardcoded port to be replaced ! stdbuf to avoid buffering
     shell: kubectl port-forward service/"{{ requires.name }}" -n db :5432 | stdbuf -o0 sed -e 's/^.*://g' -e 's/\s\+.*$//g' > "{{ pf_tmp.path }}"
-    async: 60
+    async: 120
     poll: 0
     register: port_forwarder
     
   - name: "{{ title_app_reqs }}read local port from file"
-    shell: sleep 5;cat "{{ pf_tmp.path }}"
+    shell: |
+      # (while sleep 2; do c=$(ls -ld /proc/*/fd/* 2> /dev/null | grep "{{ pf_tmp.path }}" | wc -l); [ -e "{{ pf_tmp.path }}" -a $c -eq 0 ] && cat "{{ pf_tmp.path }}" && exit;  done)
+      (while sleep 2; do [ -s "{{ pf_tmp.path }}" ] && cat "{{ pf_tmp.path }}" && exit; done)
     register: read_port
 
   - name: "{{ title_app_reqs }}debug port_forwarder"
@@ -72,7 +74,7 @@
       password: "{{ requires.config.password }}"
       login_db: "{{ requires.config.database }}"
       
-  - name: "{{ title_app_reqs }}create database"
+  - name: "{{ title_app_reqs }}assign database owner"
     postgresql_db:
       login_host: localhost
       port: "{{ read_port.stdout }}"

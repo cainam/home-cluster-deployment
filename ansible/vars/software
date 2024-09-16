@@ -31,7 +31,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.8"
+    version: "2024.9"
     installed:
       pattern: "home-assistant:"
     latest:

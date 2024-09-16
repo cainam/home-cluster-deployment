@@ -57,19 +57,19 @@
   - repeat:
       while:
       - condition: state
-        entity_id: switch.lyra
+        entity_id: switch.teich
         state: 'off'
       sequence:
       - type: turn_on
         device_id: fc605fb5e61935d7cb03c713a225affc
         entity_id: 57a3dae81792fbdde1eb989e6e7ea238
         domain: switch
-      - service: notify.persistent_notification
-        metadata: {}
+      - metadata: {}
         data:
           message: Stromertrag
           title: Stromertrag
         enabled: false
+        action: notify.persistent_notification
       - delay: 00:00:15
   mode: single
 - id: '1710074233128'

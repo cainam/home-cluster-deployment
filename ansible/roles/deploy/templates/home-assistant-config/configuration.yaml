@@ -19,12 +19,13 @@ tts:
 
 recorder:
     auto_purge: true
-    purge_keep_days: 20
+    purge_keep_days: 5
     db_url: postgresql://ha:same@postgresql.db.svc.cluster.local/ha
     #db_url: !secret psql_string
     db_retry_wait: 15
     commit_interval: 20
-    include: # get a list of all entities via HA Developer Tools=>Templates and execute the template "{% for state in states %}- {{ state.entity_id -}}{% endfor %}
+    include: # get a list of all entities via HA Developer Tools=>Templates and execute the template {# "{% for state in states %}- {{ state.entity_id -}}{% endfor %}   #}
+
       entities:
         - sensor.power_meter_wirkleistung
         - switch.teich

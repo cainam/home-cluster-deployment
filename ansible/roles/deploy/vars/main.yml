@@ -242,7 +242,7 @@ applications:
     longhorn:
       git: https://github.com/longhorn/longhorn.git
       subdir: chart
-      branch: v1.7.0
+      branch: v1.7.1
       ranch: v1.6.2
       ihelm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
       helm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1

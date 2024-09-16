@@ -1,4 +1,6 @@
->sys-devel/gcc-13.2.1_p20230826
-<sys-devel/gcc-13.2.1_p20230826
+#>sys-devel/gcc-13.2.1_p20230826
+#<sys-devel/gcc-13.2.1_p20230826
+>sys-devel/gcc-14.2.1_p20240817
+<sys-devel/gcc-14.2.1_p20240817
 >dev-python/psycopg-2.9.9
 <dev-python/psycopg-2.9.9
