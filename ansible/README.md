@@ -23,7 +23,6 @@ Notes:
     backupdir=/
     mkdir -p "$backupdir";for a in auth.session ;do cp -rdp $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
 
-
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
 - fix corruption/0-byte files: find /var/lib/registry/docker/registry/v2 -size 0 -path "*_manifests/revisions/sha256*" -exec rm -v {} \;
@@ -145,7 +144,9 @@ TODO:
 - install grafana
 - ensure that kubelet and crio are always running
 - replace gluster by ??? openebs is not yet compatible with Raspberry, try longhorn, then Piraeus
-- remove auth policy from helm and deploy via Ansible (or merge with hydra chart)
+- remove auth policy from helm and deploy via Ansible (or merge with hydra chart) and consider adm13.dnshome.de + my-lb.adm13 as hosts
+- adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
+- my-lb.adm13 as hosts: gateways + virtualservices
 - import script: update Chart.yaml to contain the version of the software
 - istio enabled per deployment or per pod ...??, not per namespace
 

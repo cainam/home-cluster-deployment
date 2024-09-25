@@ -238,14 +238,15 @@ applications:
       branch: "{{ software.descheduler.version }}"
       git_to_local_params: --fix_source=.image.tag={{ software.descheduler.version }}
       helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
-  storage:
+  longhorn-system:
     longhorn:
       git: https://github.com/longhorn/longhorn.git
       subdir: chart
       branch: v1.7.1
-      ranch: v1.6.2
-      ihelm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
-      helm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1
+      elm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
+      xxhelm_options: --set defaultSettings.logLevel=Trace --set namespaceOverride=storage
+      helm_options: --set defaultSettings.logLevel=Trace 
+      elm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1
       network:
         svcName: longhorn-frontend
         proxy_sidecar: 
@@ -254,4 +255,4 @@ applications:
       - name: longhorn-1
         type: local
         size: 30Gi
-        mountpoint: /data/longhorn-1
+        mountpoint: /var/lib/longhorn

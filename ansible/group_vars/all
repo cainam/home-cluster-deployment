@@ -42,6 +42,7 @@ gateways:
     domain: "{{ base_domain }}"
     hosts:
     - "{{ base_domain }}"
+    - adm13.dnshome.de
     external_ip: 192.168.4.100
     additional_ports:
     - name: keycloak

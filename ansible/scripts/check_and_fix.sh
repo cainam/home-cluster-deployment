@@ -81,8 +81,21 @@ fi
 
 ### external services
 # wlan up
+name="wlan"
+if [ "$(cat /sys/class/net/wlan0/operstate)" == "down" ]; then
+  log "wlan is down"
+  if [ "$(rc-service iwd status --nocolor 2>&1 | grep status | cut -d ":" -f 2 | cut -c 2-)" != "started" ]; then
+    log "iwd is not started: restarting service"
+    rc-service iwd restart
+  fi
+  if [ "$(cat /sys/class/net/wlan0/operstate)" == "down" ]; then
+    log "wlan is still down"
+  fi
+else
+  log "ok"
+fi
 
-### local services
+# ### local services
 # gluster vol list
 name="gluster vol list"
 out=$(gluster vol list 2>&1)
