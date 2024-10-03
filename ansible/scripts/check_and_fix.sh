@@ -14,9 +14,6 @@ log(){
   echo "${timestamp}: ${name}: $1"
 }
 
-### internal central services
-if ( ip a 2>/dev/null | grep -q "10.10.10.10"; ); then
-
 # haproxy
 name="haproxy"
 out=$(ps -ef | grep hap | grep -v root | wc -l)
@@ -35,6 +32,9 @@ if [ ${out} -gt 20 ]; then
 else
   log "ok"
 fi
+
+### internal central services
+if ( ip a 2>/dev/null | grep -q "10.10.10.10"; ); then
 
 # lighttpd
 name="lighttpd"
