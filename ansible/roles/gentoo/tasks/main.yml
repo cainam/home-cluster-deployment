@@ -124,9 +124,6 @@
       dest: /etc/crio/crio.conf.d/
     - file: scripts/
       dest: /usr/local/bin/
-#    - file: cmdline.txt
-#      dest: /boot/
-#      backup: no
     - file: world
       dest: /var/lib/portage/
     - file: gentoo.conf

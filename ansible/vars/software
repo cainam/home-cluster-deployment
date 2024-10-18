@@ -1,7 +1,7 @@
 software:
   istio:
-    ersion: 1.21.2
-    version: 1.23.2
+    version: 1.21.2
+    ersion: 1.23.2
     attention: version 1.22.x leads to error tcmalloc 
     installed:
       pattern: "istio"
@@ -10,7 +10,7 @@ software:
       params:
         repo: istio/istio
   oauth2_proxy:
-    version: v7.6.0
+    version: v7.7.1
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -18,20 +18,20 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 1.40.1
+    version: 1.40.2
     latest:
       type: github
       params:
         repo: koenkk/zigbee2mqtt
   mosquitto:
-    version: 2.0.18
+    version: 2.0.20
     latest:
       type: dockerhub
       params:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.9"
+    version: "2024.10.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -55,7 +55,7 @@ software:
         repo: library/python
         arch: arm64
   helm:
-    version: 3.15.4
+    version: 3.16.2
     latest:
       type: dockerhub
       params:
@@ -79,7 +79,7 @@ software:
         repo: library/postgres
         arch: arm64
   descheduler:
-    version: "v0.30.1"
+    version: "v0.31.0"
     latest:
       type: github
       params: 
