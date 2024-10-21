@@ -22,7 +22,7 @@ function pull_local(){
   
       input=values.yaml
       # manage images
-      yq -r 'path(..|(.repository,.image)? // empty) | [.[]|tostring]|join(".")' "${input}"  | while read match; do
+      yq -r 'path(..|(.repository,.image,.image_name)? // empty) | [.[]|tostring]|join(".")' "${input}"  | while read match; do
         echo
         section_type=$(yq -r '.'"${match}"' | type' "${input}" )
         echo "match: ${match} section_type: ${section_type}"
@@ -35,7 +35,7 @@ function pull_local(){
         image=
         image_attr=
         unset image_registry # used as criteria to set image_registry
-        for att in image repository repo registry; do
+        for att in image image_name repository repo registry; do
           result=$(yq -r '.'"${match}"'.'"${att}"' // empty' "${input}")
           echo "match: ${match}, lookup for ${att}, result:${result}"
           if [ "${result}" != "" ]; then # something found
