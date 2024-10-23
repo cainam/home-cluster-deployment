@@ -40,3 +40,5 @@ ADD envoy /usr/local/bin/envoy
 " > Dockerfile
 
 podman build -f Dockerfile -t "${registry}/${original_image}-${new_image_suffix}"
+
+podman push "${registry}/${original_image}-${new_image_suffix}"
