@@ -16,7 +16,7 @@ applications:
       git: https://github.com/istio/istio.git
       branch: "{{ software.istio.version }}"
       subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi 
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi --set global.proxy.image=istio/proxyv2:"{{ software.istio.version }}-gentoo" --set global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}-gentoo"
       git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
       files:
         values:
