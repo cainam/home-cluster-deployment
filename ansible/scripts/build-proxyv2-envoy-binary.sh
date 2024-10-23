@@ -1,0 +1,32 @@
+#!/bin/bash
+
+build_directory="/data/build-envoy"
+
+[ ! -d "${build_directory}" ] && mkdir "${build_directory}"
+cd "${build_directory}"
+
+echo "FROM docker.io/debian:bookworm
+
+RUN apt update
+RUN apt install -y git bash  clang lld gcc g++ curl  libc++-14-dev libc++abi-14-dev make
+RUN curl -sL https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-arm64 --output /usr/local/bin/bazel
+RUN chmod a+x /usr/local/bin/bazel
+" > Dockerfile
+
+podman build -f Dockerfile -t debian:bazel
+
+rm Dockerfile
+
+git clone https://github.com/istio/proxy.git
+cd proxy
+git checkout release-1.23
+
+echo "build --define tcmalloc=gperftools # in .bazelrc" >> .bazelrc
+
+build_cache="${build_directory}/cache"
+[ ! -d "${build_cache}" ] && mkdir "${build_cache}"
+
+#podman run -it --rm -e CC=/usr/bin/clang -e CXX=/usr/bin/clang++ -v "${build_cache}":/root/.cache -v $PWD:$PWD --workdir $PWD debian:bazel bazel build --verbose_failures -s --config=sizeopt --noenable_bzlmod -- //...
+podman run -it --rm -e CC=/usr/bin/clang -e CXX=/usr/bin/clang++ -v "${build_cache}":/root/.cache -v $PWD:$PWD --workdir $PWD debian:bazel bazel build --verbose_failures --config=sizeopt --noenable_bzlmod -- //:envoy
+#CC=/usr/bin/clang CXX=/usr/bin/clang++ bazel build --verbose_failures -s  --noenable_bzlmod -- //...
+
