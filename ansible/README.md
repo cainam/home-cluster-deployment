@@ -52,6 +52,9 @@ prometheus web.external_url got configured, kiali failed to connect to prometheu
         insecure_skip_verify: true
       url: http://prometheus-server.tools/prometheus/
 
+test websocket: 
+ curl -i -N      -H "Connection: Upgrade"     -H "Upgrade: websocket"     -H "Host: echo.websocket.org"     -H "Origin:http://www.websocket.org" http://klskld.org
+
 tor:
   - test socks5 cluster internally: curl -L  socks5://tor.anon:9050 http://tagesschau.de
   - disable istio sidecar by:         sidecar.istio.io/inject: "false" 

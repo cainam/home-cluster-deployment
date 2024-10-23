@@ -249,6 +249,7 @@ applications:
       elm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1
       network:
         svcName: longhorn-frontend
+        prefix: /longhorn/
         proxy_sidecar: 
         - longhorn-ui
       storage:

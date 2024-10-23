@@ -49,11 +49,10 @@ function pull_local(){
           fi
         done
         [ "${image}" = "" ] && echo "no image, nothing to do" && continue
-        #image_path=$(echo "${image}" | grep -q / && echo "${image%/*}")
         image_path= && [[ ${image} == */* ]] && image_path="${image%/*}"
         echo "match: ${match} section_type: ${section_type} image: ${image} image_attr: ${image_attr} image_path: ${image_path}"
         # tag: check attribute, check image => if both contain tag, error, if one contains: keep, if none contains: error
-        tag_attr=$(yq -r '.'"${match}"'.tag // empty' "${input}")
+        tag_attr=$(yq -r '.'"${match}"'| (.image_version, .tag) // empty' "${input}")
         tagBy=attr
         tag_image=
         [[ ${image} == *:* ]] && tag_image=${image#*:} && tagBy=image
@@ -72,7 +71,7 @@ function pull_local(){
         done
         echo "update image informations in chart: ${image_attr}=\"${category}/${real_image_only}\""
         yq -yi "${image_attr}=\"${category}/${real_image_only}\"" "${input}"
-        [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' "${input}"
+        # [ "${tagBy}" == "attr" ] && yq -yi '.'"${match}"'.tag="'"${tag}"'"' "${input}"
         [[ ! -v ${image_registry} ]] && echo "replacing by default at ${match}.registry=${registry}" && yq -yi '.'"${match}"'.registry="'${registry}'"' "${input}" # replaces the following to ensure the value is empty instead of deleted: yq -yi 'del(.'"${match}"'.registry)' values.yaml
         echo "next image, please!"
       done 
