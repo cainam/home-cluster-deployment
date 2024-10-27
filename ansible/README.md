@@ -166,6 +166,15 @@ TODO:
 - istio enabled per deployment or per pod ...??, not per namespace
 - longhorn: mount-shared not implemented
 - add storageclass local to k8s deployment
+- define local storage class and set it as default, all others as not-default using kubectl patch storageclass local -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+ apiVersion: storage.k8s.io/v1
+ kind: StorageClass
+ metadata:
+   name: local
+ provisioner: kubernetes.io/no-provisioner # indicates that this StorageClass does not support automatic provisioning
+ volumeBindingMode: WaitForFirstConsumer
+ reclaimPolicy: Retain
+
 
 Manual steps to be automated:
 - client-in in oauth2-proxy is to be taken from hydra created by:
