@@ -25,7 +25,7 @@
     debug:
       msg: "brick: {{ brick }} disk: {{disk}}"
   
-  when: storage.type is defined and storage.type!='local'
+  when: storage.type is undefined or (storage.type is defined and storage.type!='local')
 
 - block:
   - name: app:{{ app }} create local storage

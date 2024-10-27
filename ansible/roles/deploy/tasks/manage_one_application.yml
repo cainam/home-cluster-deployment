@@ -94,17 +94,13 @@
   - name: "{{ name_prefix }} create patch from mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
     template:
       src: "mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
-      dest: "/tmp/hook-{{ object }}.yaml"
-    loop: "{{ application.value.network.proxy_sidecar }}"
-    loop_control:
-      loop_var: object
+      dest: "/tmp/hook-{{ item.key }}.yaml"
+    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
 
   - name: 
     shell: |
-      kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ object }}.yaml"
-    loop: "{{ application.value.network.proxy_sidecar }}"
-    loop_control:
-      loop_var: object
+      kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ item.key }}.yaml"
+    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
   when: application.value.network.proxy_sidecar is defined
 
 

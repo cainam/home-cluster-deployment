@@ -50,3 +50,5 @@ net-fs/nfs-utils
 
 # only for longhorn
 sys-block/open-iscsi
+
+net-misc/chrony

@@ -1,0 +1,4 @@
+/dev/mmcblk0p1          /boot           auto            noauto,noatime  1 2
+/dev/mmcblk0p2          /               ext4            noatime,shared  0 1
+/dev/sda1               /data           ext4 noatime 0 0
+/data/longhorn-1.disk   /var/lib/longhorn/ auto         shared          0 0

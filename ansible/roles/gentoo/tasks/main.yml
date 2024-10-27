@@ -134,20 +134,24 @@
       dest: /etc/modules-load.d/
     - file: hosts
       dest: /etc/
+    - file: fstab
+      dest: /etc/
     - file: patches
       dest: /etc/portage/
-    - file: portage/package.accept_keywords
-      dest: /etc/portage/package.accept_keywords
-    - file: portage/package.use
-      dest: /etc/portage/package.use
-    - file: portage/package.mask
-      dest: /etc/portage/package.mask
-    - file: portage/package.license
-      dest: /etc/portage
-    - file: env
+    - file: portage/
       dest: /etc/portage/
-    - file: portage/package.env
-      dest: /etc/portage
+#    - file: portage/package.accept_keywords
+#      dest: /etc/portage/package.accept_keywords
+#    - file: portage/package.use
+#      dest: /etc/portage/package.use
+#    - file: portage/package.mask
+#      dest: /etc/portage/package.mask
+#    - file: portage/package.license
+#      dest: /etc/portage
+#    - file: env
+#      dest: /etc/portage/
+#    - file: portage/package.env
+#      dest: /etc/portage
     - file: init.d/
       dest: /etc/init.d/
     - file: haproxy.cfg
@@ -245,6 +249,9 @@
     - src: net.lo
       dest: /etc/init.d/net.wlan0
 
+- name: portage profile
+  shell: eselect profile set default/linux/arm64/23.0/split-usr
+  
 - name: emerge sync
   shell: emerge --sync
   ignore_errors: true
@@ -284,8 +291,8 @@
 - name: eclean packages
   shell: eclean packages
 
-- name: install additional modules from Ansible Galaxy
-  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
+#- name: install additional modules from Ansible Galaxy
+#  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
 
 
 #- name: disable services
@@ -304,7 +311,8 @@
   loop:
     - net.wlan0
     - net.end0
-    - ntp-client
+#    - ntp-client
+    - chronyd
     - brickmount
     - keepalived
     - haproxy
@@ -315,7 +323,7 @@
     - lighttpd
     - syslog-ng
     - cronie
-    - wait_for_internet
+#    - wait_for_internet
     - cpupower
     - sshd
 #    - registry

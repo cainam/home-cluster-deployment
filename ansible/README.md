@@ -127,6 +127,18 @@ Database:
   4. copy new data in place (e.g. cp -rdp /tmp/pg_new/ /shared/data-postgresql-0/pgdata/)
   5. deploy update postgreSQL
 - tuning auf gluster: gluster vol set data-postgresql-0 group db-workload
+- meassure pg performance with storage:
+  pgbench -i -s 50 --foreign-keys -h dbperf-postgresql -U pg  postgres
+  pgbench  -h dbperf-postgresql -U pg  postgres -t 10000
+  gluster: 
+    latency average = 174.666 ms
+    initial connection time = 53.350 ms
+    tps = 5.725199 (without initial connection time)
+  longhorn:
+    latency average = 12.016 ms
+    initial connection time = 42.499 ms
+    tps = 83.224261 (without initial connection time)
+
 
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
@@ -152,6 +164,8 @@ TODO:
 - my-lb.adm13 as hosts: gateways + virtualservices
 - import script: update Chart.yaml to contain the version of the software
 - istio enabled per deployment or per pod ...??, not per namespace
+- longhorn: mount-shared not implemented
+- add storageclass local to k8s deployment
 
 Manual steps to be automated:
 - client-in in oauth2-proxy is to be taken from hydra created by:
