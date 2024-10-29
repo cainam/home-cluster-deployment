@@ -126,18 +126,16 @@
       dest: /usr/local/bin/
     - file: world
       dest: /var/lib/portage/
-    - file: gentoo.conf
-      dest: /etc/portage/repos.conf/
+#    - file: gentoo.conf
+#      dest: /etc/portage/repos.conf/
     - file: ipv6.conf
       dest: /etc/modprobe.d/
     - file: k8s.conf
       dest: /etc/modules-load.d/
     - file: hosts
       dest: /etc/
-    - file: fstab
-      dest: /etc/
-    - file: patches
-      dest: /etc/portage/
+#    - file: patches
+#      dest: /etc/portage/
     - file: portage/
       dest: /etc/portage/
 #    - file: portage/package.accept_keywords
@@ -202,26 +200,31 @@
       {% endfor %}
     dest: /etc/ssh/ssh_known_hosts
 
-- name: get root device
-  shell: |
-    l=$(blkid --output export --match-token LABEL=root | grep ^PARTUUID=)
-    n_l=$(echo "${l}" | wc -l )
-    if [ "${l}" = "" ];then
-      echo "/dev/mmcblk0p2"
-    elif [ $n_l -eq 1 ];then
-      echo "${l}"
-    else
-      exit -1
-    fi
-  changed_when: false
-  register: root_dev
+#- name: get root device
+#  shell: |
+#    l=$(blkid --output export --match-token LABEL=root | grep ^PARTUUID=)
+#    n_l=$(echo "${l}" | wc -l )
+#    if [ "${l}" = "" ];then
+#      echo "/dev/mmcblk0p2"
+#    elif [ $n_l -eq 1 ];then
+#      echo "${l}"
+#    else
+#      exit -1
+#    fi
+#  changed_when: false
+#  register: root_dev
 
 - name: deploy templates
+  vars: 
+    data_uuid: '{{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
+#    boot_device: '{{ ansible_mounts | selectattr("mount","==","/boot") | map(attribute="uuid") | default(default_boot_device, true) }}' # replaced by static host variables boot_uuid in inventory file, reason: tricky to handle device names and prefixes such as UUID= and UUID is not available when /boot is not mounted
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
     backup: "{{ item.backup | default('yes') }}"
   loop:
+    - file: fstab
+      dest: /etc/
     - file: make.conf
       dest: "/etc/portage/make.conf"
     - file: wpa_supplicant.conf
@@ -294,14 +297,12 @@
 #- name: install additional modules from Ansible Galaxy
 #  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
 
-
 #- name: disable services
 #  service:
 #    name: "{{ item }}"
 #    enabled: no
 #    state: stopped
 #  loop:
-   
 
 - name: enable services
   service:

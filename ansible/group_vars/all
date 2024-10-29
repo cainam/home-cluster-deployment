@@ -2,6 +2,7 @@ auto_silent: true
 
 gluster_directory: /data/gluster
 local_disk_directory: /data
+default_boot_device: /dev/mmcblk0p1
 
 helm_repo_base: https://helm.adm13:9443/
 registry: myregistry.adm13:443

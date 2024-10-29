@@ -110,3 +110,11 @@ software:
       type: github
       params:
         repo: kubernetes/dashboard
+  longhorn:
+    version: v1.7.2
+    installed:
+      pattern: "longhorn-ui:"
+    latest:
+      type: github
+      params:
+        repo: longhorn/longhorn
