@@ -7,6 +7,7 @@ exec 1>> /var/log/${my_name}.log
 export PATH=/usr/local/bin/:$PATH
 
 # script addresses crashing services issues: detect them, log them, fix them
+
 . set_env.sh
 timestamp=$(date +'%Y-%m-%d %H:%M:%S')
 
@@ -96,6 +97,24 @@ else
 fi
 
 # ### local services
+# DNS 
+name="dns"
+out=$(> /dev/tcp/$(grep ^nameserver /etc/resolv.conf | awk '{print $2}')/53)
+ret=$?
+if [ ${ret} -ne 0 ]; then
+  log "cannot reach nameserver, restarting iwd"
+  rc-service iwd restart
+  out=$(> /dev/tcp/$(grep ^nameserver /etc/resolv.conf | awk '{print $2}')/53)
+    ret=$?
+  if [ ${ret} -ne 0 ]; then
+    log "problem NOT fixed"
+  else
+    log "problem fixed"
+  fi
+else
+  log "ok"
+fi
+
 # gluster vol list
 name="gluster vol list"
 out=$(gluster vol list 2>&1)
