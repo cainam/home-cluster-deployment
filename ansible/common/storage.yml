@@ -1,3 +1,7 @@
+- name: apply default_storage_type if type is not defined to all gateways missing it
+  set_fact:
+    storage_type: "{{ storage.type | default(default_storage_type) }}"
+
 - block:
   - name: app:{{ app }} create gluster volume
     gluster.gluster.gluster_volume:
@@ -60,4 +64,4 @@
             path: "{{ shared_mounts }}/{{ storage.name }}/"
         EOF
     when: outside_k8s is not defined
-  when: storage.type is not defined or storage.type!='local'
+  when: storage_type == "gluster"

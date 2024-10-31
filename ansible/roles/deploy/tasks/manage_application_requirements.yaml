@@ -3,12 +3,8 @@
     title_app_reqs: "{{ name_prefix }} - requirements - "
     app: "{{ application.key }}"
         
-#- name: "{{ title_app_reqs }}include secrets"
-#  include_vars: "{{ local_only }}/secrets"
-
 - name: "{{ title_app_reqs }}debug requires"
   debug:
-#    msg: "requires: {{ requires.key }} value:{{ requires.value | to_yaml }}"
     msg: "requires: {{ requires }}"
 
 #- name: "{{ title_app_reqs }}service secrets"

@@ -145,6 +145,7 @@ TODO:
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - /etc/localtime + /etc/timezone
+- home-assistant: log file location should not be in /config, but seems not possible with configuration.yaml only using --log_file command line option but command line is hard-coded in docker image (/etc/services.d/home-assistant/run)
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
@@ -174,6 +175,9 @@ TODO:
  provisioner: kubernetes.io/no-provisioner # indicates that this StorageClass does not support automatic provisioning
  volumeBindingMode: WaitForFirstConsumer
  reclaimPolicy: Retain
+- migrate prometheus-server volume to longhorn
+- split zigbee2mqtt to have config on gluster and db on longhorn
+- the longhorn disk should be handled by system (gentoo role), the individual disks are then inside longhorn volume
 
 
 Manual steps to be automated:

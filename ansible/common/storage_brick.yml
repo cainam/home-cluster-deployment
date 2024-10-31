@@ -27,6 +27,7 @@
   
   when: storage.type is undefined or (storage.type is defined and storage.type!='local')
 
+# following block is disabled (falsed) because the longhorn disk should be handled by system (gentoo role), the individual disks are then inside longhorn volume
 - block:
   - name: app:{{ app }} create local storage
     shell: |
@@ -39,4 +40,4 @@
       [ ! -d "{{ storage.mountpoint }}" ] && mkdir -p "{{ storage.mountpoint }}";
       mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
       mount --make-shared "{{ storage.mountpoint }}"
-  when: storage.type is defined and storage.type=='local'
+  when: storage.type is defined and storage.type=='local' and false

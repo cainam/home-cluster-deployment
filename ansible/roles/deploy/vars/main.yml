@@ -108,7 +108,7 @@ applications:
         prefix: /
         gateway: open
         svcPort: 8080
-        proxy_sidecar: 
+        old_proxy_sidecar: 
           app.kubernetes.io/instance: zigbee2mqtt
       storage:
       - name: zigbee2mqtt
@@ -136,7 +136,7 @@ applications:
         prefix: /
         svcPort: 8123
         gateway: ha-gw
-        proxy_sidecar: 
+        old_proxy_sidecar: 
           app.kubernetes.io/instance: home-assistant
       requires:
       - type: postgresql
@@ -220,21 +220,21 @@ applications:
       remove_dependencies: alertmanager
       git_to_local_params: --fix_source=.server.image.tag=v2.50.1
       storage: 
-      - name: storage-prometheus-alertmanager-0
-        size: 2Gi
       - name: prometheus-server
-        size: 8Gi
+        type: longhorn
+        size: 2Gi
       network:
         svcName: prometheus-server
         rewrite: /prometheus
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-      git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres
+      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}" --set persistence.storageClass=longhorn --set persistence.size=2Gi
+      git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres 
       storage: 
       - name: data-postgresql-0
-        size: 11Gi
+        type: longhorn
+        size: 2Gi
     dbperf:
       git: https://github.com/cetic/helm-postgresql.git
       chart: postgresql
@@ -262,7 +262,7 @@ applications:
       network:
         svcName: longhorn-frontend
         prefix: /longhorn/
-        proxy_sidecar: 
+        old_proxy_sidecar: 
          app: longhorn-ui
       storage:
       - name: longhorn-1

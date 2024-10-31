@@ -25,6 +25,9 @@ volumes_to_exempt:
 default_gateway: gateway
 default_gateway_namespace: istio-ingress
 
+# supported storage types are longhorn, gluster and local
+default_storage_type: gluster
+
 external_coredns_ip: 192.168.4.111
 
 gateway_install:

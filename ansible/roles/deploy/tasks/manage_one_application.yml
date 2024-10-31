@@ -97,7 +97,7 @@
       dest: "/tmp/hook-{{ item.key }}.yaml"
     loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
 
-  - name: 
+  - name: "{{ name_prefix }} apply patch "
     shell: |
       kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ item.key }}.yaml"
     loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
