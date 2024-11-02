@@ -60,4 +60,4 @@
             path: "{{ shared_mounts }}/{{ storage.name }}/"
         EOF
     when: outside_k8s is not defined
-  when: storage_type == "gluster"
+  when: storage.type == "gluster"
