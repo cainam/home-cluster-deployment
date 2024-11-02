@@ -310,7 +310,7 @@
     enabled: yes
     state: restarted
   loop:
-    - net.wlan0
+#    - net.wlan0
     - net.end0
 #    - ntp-client
     - chronyd

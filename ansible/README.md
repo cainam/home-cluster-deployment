@@ -177,8 +177,6 @@ TODO:
  reclaimPolicy: Retain
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
-- the longhorn disk should be handled by system (gentoo role), the individual disks are then inside longhorn volume
-
 
 Manual steps to be automated:
 - client-in in oauth2-proxy is to be taken from hydra created by:
