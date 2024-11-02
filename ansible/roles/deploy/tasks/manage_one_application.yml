@@ -5,7 +5,16 @@
         
 - name: "{{ name_prefix }} status"
   debug:
-    msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: {{ application.value }}"
+    msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: \n{{ application.value | to_nice_yaml}}"
+
+- block:
+  - name: app:{{ app }} storage
+    include_tasks: common/storage_brick.yml
+    when: application.value.storage is defined #|| storage is defined
+    with_items: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+  when: application.value.storage is defined
 
 - block:
   - name: "{{ name_prefix }} storage"

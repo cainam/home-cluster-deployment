@@ -213,22 +213,11 @@
     when: "'deps' in ansible_run_tags" 
 
 # remove all that is no longer required
-  #- name: build list of what can be removed
-    #vars:
-      #current_ns:
-        #ns: "{{ item.ns }}"
-        #apps2remove: "{{ item.app | dict2items | map(attribute='key') | difference(only_apps) }}"
-    #set_fact:
-      #removal_list: "{{ removal_list | default([]) + current_ns.apps2remove }}"
-    #loop: "{{ apps | dict2items(key_name='ns', value_name='app') }}"
 
-  #- debug:
-      #msg: "removal_list=> {{ removal_list }}"
-
-    
-#  - name: remove items which are not required
-#    set_fact:
-#      apps: "{{ apps | ansible.utils.remove_keys(removal_list) }}"
+  - name: set only_apps to include all_apps if only_apps is not defined
+    set_fact:
+      only_apps: "{{ app_list | map(attribute='name') | list }}"
+    when: only_apps is not defined
 
   - set_fact:
 #      applications: "{{ apps }}"

@@ -1,7 +1,3 @@
-- name: apply default_storage_type if type is not defined to all gateways missing it
-  set_fact:
-    storage_type: "{{ storage.type | default(default_storage_type) }}"
-
 - block:
   - name: app:{{ app }} create gluster volume
     gluster.gluster.gluster_volume:
