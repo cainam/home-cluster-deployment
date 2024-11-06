@@ -33,7 +33,6 @@
     shell: |
       set -e;
       if [ ! -f "{{ local_disk_directory }}/{{ storage.name }}.disk" ]; then
-        mkdir -p "{{ gluster_directory }}/disks"
         truncate -s "{{ storage.size }}B" "{{ local_disk_directory }}/{{ storage.name }}.disk"
         mkfs.ext4 "{{ local_disk_directory }}/{{ storage.name }}.disk";
       fi

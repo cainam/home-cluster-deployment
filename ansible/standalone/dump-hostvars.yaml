@@ -7,4 +7,4 @@
   tasks:
   - name: dump
     debug:
-      msg: "hostvars: {{ hostvars|to_yaml }}"
+      msg: "hostvars:\n{{ hostvars|to_nice_yaml }}\nhosts: {{ hostvars.keys() }}\nfirst host: {{ [hostvars.keys() | first] }}"
