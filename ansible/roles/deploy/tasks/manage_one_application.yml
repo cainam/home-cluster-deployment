@@ -7,22 +7,22 @@
   debug:
     msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: \n{{ application.value | to_nice_yaml}}"
 
-- block:
-  - name: app:{{ app }} storage
-    include_tasks: common/storage_brick.yml
-    when: application.value.storage is defined #|| storage is defined
-    with_items: "{{ application.value.storage }}"
-    loop_control:
-      loop_var: storage
-  when: application.value.storage is defined
+#- block: # this is a run_once playbook, but local storage configuration has to be done on all nodes
+#  - name: app:{{ app }} storage
+#    include_tasks: common/storage_brick.yml
+#    when: application.value.storage is defined #|| storage is defined
+#    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+#  when: application.value.storage is defined
 
-- block:
-  - name: "{{ name_prefix }} storage"
-    include_tasks: common/storage.yml
-    with_items: "{{ application.value.storage }}"
-    loop_control:
-      loop_var: storage
-  when: application.value.storage is defined
+#- block:
+#  - name: "{{ name_prefix }} storage"
+#    include_tasks: common/storage.yml
+#    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+#  when: application.value.storage is defined
     
 - block:
   - block:
@@ -83,14 +83,14 @@
       helm repo update
   when: "'build' in ansible_run_tags" 
 
-- block:
-  - name: "{{ name_prefix }} install storage content"
-    include_tasks: storage_content.yml
-    when: storage.config is defined and storage.config
-    with_items: "{{ application.value.storage }}"
-    loop_control:
-      loop_var: storage
-  when: application.value.storage is defined
+#- block:
+#  - name: "{{ name_prefix }} install storage content"
+#    include_tasks: storage_content.yml
+#    when: storage.config is defined and storage.config
+#    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+#  when: application.value.storage is defined
     
 - name: "{{ name_prefix }} files"
   include_tasks: files.yml

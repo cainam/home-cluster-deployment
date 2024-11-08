@@ -1,16 +1,8 @@
 - name: set app fact
   set_fact:
     app: "{{ application.key }}"
+    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
   run_once: true
-
-#- block:
-#  - name: app:{{ app }} storage
-#    include_tasks: common/storage_brick.yml
-#    when: application.value.storage is defined #|| storage is defined
-#    with_items: "{{ application.value.storage }}"
-#    loop_control:
-#      loop_var: storage
-#  when: application.value.storage is defined
 
 - block: # generate helm_options from applications for gateways 
   - name: print application.value {{ app }}
@@ -33,28 +25,50 @@
   run_once: true
 
 - block:
-  - name: initialize variable storage
-    set_fact:
-      storage: "{{ [] }} "
+#  - name: initialize variable storage
+#    set_fact:
+#      storage_new: "{{ [] }} "
   - name: set default_storage_type if not set explicitely
     vars:
           entry: "{{ item | combine ( {'type': item.type | default(default_storage_type) } ) }}"
 
     set_fact:
-      storage: "{{ (storage | default([]) ) + [entry] }}"
+      storage_new: "{{ (storage_new | default([]) ) + [entry] }}"
     loop: "{{ application.value.storage }}"
       
   - name: dump new storage array
     debug:
-      msg: "new storage array for application {{ application.key }}: \n{{ storage | to_nice_yaml }}"
+      msg: "new storage array for application {{ application.key }}: \n{{ storage_new | to_nice_yaml }}"
 
   - name: replace storage in applications
     set_fact: 
       applications: "{{ applications | combine(
          {namespace.key : 
            {application.key: 
-              {'storage': storage}
+              {'storage': storage_new}
           }}, recursive=true)}}"
 
   run_once: true
   when: application.value.storage is defined
+
+- block:
+  - name: app:{{ app }} storage
+    include_tasks: common/storage_brick.yml
+    when: application.value.storage is defined
+    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    loop_control:
+      loop_var: storage
+  - name: "{{ name_prefix }} storage"
+    include_tasks: common/storage.yml
+    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    run_once: true
+    loop_control:
+      loop_var: storage
+  - name: "{{ name_prefix }} install storage content"
+    include_tasks: storage_content.yml
+    when: storage.config is defined and storage.config
+    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    loop_control:
+      loop_var: storage
+  when: application.value.storage is defined
+

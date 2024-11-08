@@ -25,7 +25,6 @@
   when: "'debug' in ansible_run_tags"
   run_once: true
 
-
 - name: run per namespace
   include_tasks: manage_applications.yml
   when: (limit_namespace is not defined or namespace.key == limit_namespace)

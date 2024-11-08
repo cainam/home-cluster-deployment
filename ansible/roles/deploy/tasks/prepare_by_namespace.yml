@@ -2,11 +2,9 @@
   set_fact:
     ns: "{{ namespace.key }}"
 
-- name: prepare by application
+- name: ns:{{ ns }} prepare by application
   include_tasks: prepare_application.yml
   loop: "{{ namespace.value | dict2items }}"
   loop_control:
     loop_var: application
 
-- debug:
-    msg: "{{ applications | to_nice_yaml }}"

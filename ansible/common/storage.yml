@@ -24,7 +24,9 @@
       msg: "{{ item }}"
     loop: "{{ keep_volumes }}"
     when: outside_k8s is not defined
+  when: storage.type == "gluster"
   
+- block:
   - name: app:{{ app }} PersistentVolume
     shell: |
         set -x
@@ -57,7 +59,7 @@
           persistentVolumeReclaimPolicy: Retain
           volumeMode: Filesystem
           local:
-            path: "{{ shared_mounts }}/{{ storage.name }}/"
+            path: "{% if storage.type == 'gluster' %}{{ shared_mounts }}{% elif storage.type == 'local_folder' %}{{ local_disk_directory }}{% endif %}/{{ storage.name }}/"
         EOF
     when: outside_k8s is not defined
-  when: storage.type == "gluster"
+  when: storage.type == "gluster" or storage.type == "local_folder"

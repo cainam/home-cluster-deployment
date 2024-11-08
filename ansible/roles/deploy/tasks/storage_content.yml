@@ -1,7 +1,7 @@
 - set_fact:
     app_cfg_templates_path: "{{ role_path }}/templates/{{ storage.name }}"
     app_cfg_files_path: "{{ role_path }}/files/{{ storage.name}}"
-    dest_base_dir: "{{ shared_mounts }}/{{ storage.name }}"
+    dest_base_dir: "{% if storage.type == 'local_folder' %}{{ local_disk_directory }}{% else %}{{ shared_mounts }}{% endif %}/{{ storage.name }}"
 
 - name: set directories
   set_fact:
@@ -12,7 +12,18 @@
 #    list_templates: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
 #    list_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_files_path +'\" ] || find \"'+ app_cfg_files_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
 
+- name: determine destination hosts
+  set_fact:
+    dest: "{% if storage.type == 'local_folder' %}{{ hostvars.keys() }}{% else %}{{ [hostvars.keys() | first] }}{% endif %}"
+  run_once: true
+
+- name: list destination hosts
+  debug:
+    msg: "destination hosts:\n{{ dest }}"
+  run_once: true
+
 - block:
+  - debug: var=inventory_hostname
   - name: ensure destination directory exists for templates
     file:
       path: "{{ dest_base_dir }}{{ item | replace (app_cfg_templates_path,'') }}"
@@ -57,7 +68,8 @@
       dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }}"
     loop: "{{ files_files }}"
   
-  run_once: true
+  when: "inventory_hostname in dest"
+#  run_once: true
 
 - name: Example using fail and when together
   ansible.builtin.fail:

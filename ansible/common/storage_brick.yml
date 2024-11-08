@@ -27,9 +27,8 @@
   
   when: storage.type == 'gluster'
 
-# following block is disabled (falsed) because the longhorn disk should be handled by system (gentoo role), the individual disks are then inside longhorn volume
 - block:
-  - name: app:{{ app }} create local storage
+  - name: app:{{ app }} create local disk storage
     shell: |
       set -e;
       if [ ! -f "{{ local_disk_directory }}/{{ storage.name }}.disk" ]; then
@@ -40,3 +39,10 @@
       mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
       mount --make-shared "{{ storage.mountpoint }}"
   when: storage.type=='local'
+
+- name: app:{{ app }} create local folder
+  file:
+    path: "{{ local_disk_directory }}/{{ storage.name }}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rx"
+  when: storage.type=='local_folder'
