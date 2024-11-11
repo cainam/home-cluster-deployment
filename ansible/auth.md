@@ -1,9 +1,17 @@
+# Solution
+
+Authentication and Authorization of the system is based on oauth2_proxy => hydra => idp downstream configuration
+1. oauth2_proxy is configured on service mesh level to centrally manage access control outside individual applications
+2. hydra is the OAUTH2 and OIDC provider used by oauth2 proxy to enable support for these protocols
+3. idp is a smapp application performing identity provider functionalities as login and consent management
+
+Initially keycloak was used, but it turned out to be too resource intensive and too complex for the required solution, DEX would be an alternative too.
+
+## hydra deployment
+a dedicated hydra-config helm chart is deployed to provide the optional PVC if persistent database is used but mainly configures the client_id of the solution
+
+
 # links
-
-error:
-[2023/02/09 19:24:55] [oauthproxy.go:823] Error redeeming code during OAuth2 callback: could not verify id_token: audience claims [] do not exist in claims: map[acr:0 at_hash:lwpWV3nKMvtRyhcSZdFppQ aud:test auth_time:1.675970421e+09 azp:test email:test@abc.de email_verified:true exp:1.675970994e+09 family_name:last given_name:first iat:1.675970694e+09 iss:https://my-lb.adm13:2005/realms/test jti:a077fae1-b000-4e14-bef9-c7f5894cc403 name:first last nonce:oqVtYnjYky9ym_u1KwZXn3uPlt4N3km6rAlNSwhW_F4 preferred_username:test session_state:9ce3f240-8131-4410-930c-4bbd65f7aaec sid:9ce3f240-8131-4410-930c-4bbd65f7aaec sub:a52872d5-b846-42a9-ab29-15426e17870f typ:ID]
-
-
 all: 
 - https://www.blog.jetstack.io/blog/istio-oidc/
 - https://www.ventx.de/blog/post/istio_oauth2_proxy/index.html
@@ -13,17 +21,7 @@ oauth2:
 - https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/ 
 - https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-auth-provider
 
-keycloak:
-- create realm test
-- create user test, mail test@abc.de (verified) named first last
-- create group test with user test
-- create client_id test with client_authentication=on and valid redirect_url http://example.com/*
-test: 
-curl -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  http://localhost:8080/realms/test/protocol/openid-connect/token
-{"access_token":"eyJhbGci.....
-also outside the cluster it works:
-curl -k -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token
-
+# testing authentication
 #### full test with token
 tk=$(curl -s -H "Content-Type: application/x-www-form-urlencoded" -d "client_id=test" -d "username=test" -d "password=test" -d "grant_type=password" -d "scope=openid" -d "client_secret=oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0" -X POST https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token | jq -r .id_token); echo "token: $tk"
 curl -L -i -X GET -H "Authorization: Bearer $tk" https://my-lb.adm13/infopage # success
@@ -44,8 +42,6 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
     - reference: https://istio.io/latest/docs/reference/config/security/authorization-policy/
     - best!!! https://developer.okta.com/blog/2022/07/14/add-auth-to-any-app-with-oauth2-proxy
 
-# subdomains: cookie_domain? whilelist-domain?
-
 # oauth2 with curl
 1. curl -v -L --cookie /tmp/cookie1 --cookie-jar /tmp/cookie1 https://open.my-lb.adm13/dummy 2>&1 | tail -n 1 | sed -e 's/</\n</g' | grep input
 
@@ -65,12 +61,6 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
     <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
 2. submit login form like this: curl --cookie /tmp/cookie1 --cookie-jar /tmp/cookie1  --data-urlencode -H "Content-Type: application/x-www-form-urlencoded"  -X POST -v -L https://my-lb.adm13/idp/login -d "login_challenge=9564b82da1184091a6f2d29befccb9ba&email=user2@example.com&password=password" 
 
-
-auth update:
-- initially keycloak but: no full featured idp required, huge resource consumption, corrupted DB, time to change: options seen: DEX and hydra, hydra selected because simple and separation with idp
-- Authorization policy per gateway
-- oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
-- hydra debug: add log.level: debug to hydra cm
 # manually edited and to be moved to ansible
 - 2nd AuthorizationPolicy
 - pod exec parameters:         - --cookie-domain=.my-lb.adm13,my-lb.adm13 (and same for white-list-domain)
@@ -100,3 +90,18 @@ auth update:
     "scope": "offline openid users.write users.read users.edit users.delete",
     "token_endpoint_auth_method": "client_secret_post"
 }   
+
+
+# Old remarks when using keycloak:
+- error "Caused by: org.h2.mvstore.MVStoreException: The write format 2 is smaller than the supported format 3 [2.2.220/5]" => fix by migrating the DB to a newer version: java -jar H2MigrationTool-1.4-all.jar -d keycloakdb.mv.db -f 2.0.202 -t 2.2.220 --user sa --password password
+
+setup keycloak:
+- create realm test
+- create user test, mail test@abc.de (verified) named first last
+- create group test with user test
+- create client_id test with client_authentication=on and valid redirect_url http://example.com/*
+test: 
+curl -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  http://localhost:8080/realms/test/protocol/openid-connect/token
+{"access_token":"eyJhbGci.....
+also outside the cluster it works:
+curl -k -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token

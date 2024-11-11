@@ -16,6 +16,7 @@ Notes:
 - ANSIBLE_HOME to use /plugin/filters for custom filters and local_only: ANSIBLE_HOME=$PWD ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory standalone/k8s-status.yaml --extra-vars local_only=/data/mine/git 
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
+- some variables are not part of the git repo, secrets which one has to define additionally like wifi WEP
 - create token: kubectl create token -n tools kiali-service-account
 - gluster - change size: use "vol replace-brick" and replace brick by brick 
 - gluster repair - split-brain: 
@@ -40,9 +41,6 @@ failure: "snap: snapshot file doesn't exist", "failed to recover v3 backend from
 2. backup
 3. delete member/snap/*snap and member/*/*wal
 4. start kubelet
-
-keycloak:
-- error "Caused by: org.h2.mvstore.MVStoreException: The write format 2 is smaller than the supported format 3 [2.2.220/5]" => fix by migrating the DB to a newer version: java -jar H2MigrationTool-1.4-all.jar -d keycloakdb.mv.db -f 2.0.202 -t 2.2.220 --user sa --password password
 
 kiali:
 prometheus web.external_url got configured, kiali failed to connect to prometheus using no prefix, solved by:
@@ -159,46 +157,17 @@ TODO:
 - configure tempo in kiali
 - install grafana
 - ensure that kubelet and crio are always running
-- replace gluster by ??? openebs is not yet compatible with Raspberry, try longhorn, then Piraeus
 - remove auth policy from helm and deploy via Ansible (or merge with hydra chart) and consider adm13.dnshome.de + my-lb.adm13 as hosts
 - adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
 - my-lb.adm13 as hosts: gateways + virtualservices
 - import script: update Chart.yaml to contain the version of the software
 - istio enabled per deployment or per pod ...??, not per namespace
-- longhorn: mount-shared not implemented
-- add storageclass local to k8s deployment
-- define local storage class and set it as default, all others as not-default using kubectl patch storageclass local -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
- apiVersion: storage.k8s.io/v1
- kind: StorageClass
- metadata:
-   name: local
- provisioner: kubernetes.io/no-provisioner # indicates that this StorageClass does not support automatic provisioning
- volumeBindingMode: WaitForFirstConsumer
- reclaimPolicy: Retain
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
 
-Manual steps to be automated:
-- client-in in oauth2-proxy is to be taken from hydra created by:
-curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
-{
-    "client_name": "test",
-    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0",
-    "grant_types": ["authorization_code", "refresh_token"],
-    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
-    "response_types": ["code", "id_token"],
-    "scope": "offline openid users.write users.read users.edit users.delete",
-    "token_endpoint_auth_method": "client_secret_post"
-}
+auth update:
+- Authorization policy per gateway
+- oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
+- hydra debug: add log.level: debug to hydra cm
+- hydra-config: pvc is required before the service, but client_id configuration should take place after, so hydra-client_id requires hydra requires hydra-pvc => use same helm chart and switch using if endif
 
-longhorn: 
-- check disk: findmnt -o TARGET,PROPAGATION /var/lib/longhorn/
-- check and delete longhorn crds: kubectl get crd -o jsonpath={.items[*].metadata.name} | tr ' ' '\n' | grep longhorn.io | xargs kubectl delete crd
-- list api-resources in namespace: kubectl api-resources --verbs=list --namespaced -o name | grep -v ^events  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n storage
-- delete: 
-# cat longhorn-confirm-deletion.yaml
-apiVersion: longhorn.io/v1beta2
-kind: Setting
-metadata:
-  name: deleting-confirmation-flag
-# kubectl apply -f longhorn-confirm-deletion.yaml

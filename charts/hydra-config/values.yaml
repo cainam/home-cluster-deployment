@@ -40,6 +40,27 @@ service:
   port: 1111
   targetPort: 28381
 
+persistent:
+  enabled: false
+  capacity: 5Mi
+
+config:
+  client_id: undefined
+  client_id_request: |
+    {
+    'client_id': '57df89d9-b7ca-4edd-b2f0-010c8d98b6e9',
+    'client_name': 'test',
+    'client_secret': 'oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0',
+    'grant_types': ['authorization_code', 'refresh_token'],
+    'redirect_uris': ['https://my-lb.adm13/oauth2-hydra/callback'],
+    'response_types': ['code', 'id_token'],
+    'scope': 'offline openid users.write users.read users.edit users.delete email',
+    'token_endpoint_auth_method': 'client_secret_post'
+    }
+  image:
+    repository: undefined
+    tag: undefined
+
 ingress:
   enabled: false
   className: ""

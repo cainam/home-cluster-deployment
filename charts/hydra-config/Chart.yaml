@@ -1,5 +1,5 @@
 apiVersion: v2
-name: hydra-pvc
+name: hydra-config
 description: create missing PersistantVolumeClaim not forseen by hydra helm chart
 
 # A chart can be either an 'application' or a 'library' chart.

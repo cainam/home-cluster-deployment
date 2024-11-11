@@ -29,3 +29,4 @@
 
   - name: "include secrets"
     include_vars: "{{ local_only }}/secrets"
+    run_once: true

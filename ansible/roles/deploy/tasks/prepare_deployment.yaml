@@ -235,4 +235,6 @@
       
   - debug:
       msg: "applications:\n{{ applications | to_nice_yaml}}"
+    failed_when: "'prepare' in ansible_run_tags"
+      
   run_once: true

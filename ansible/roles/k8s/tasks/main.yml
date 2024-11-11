@@ -131,7 +131,6 @@
       # kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].key,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
       kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
       true
-
   - name: ca template
     template:
       src: ca
@@ -149,8 +148,22 @@
 
   - name: additional DNS entries and external CoreDNS IP
     shell: |
+    
       # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 my-lb.adm13\n\1    fallthrough\n\1}/g' | kubectl replace -f -
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
-  when: inventory_hostname == healthy_node
+
+  - name: create storageClass local as default
+    shell: |
+      kubectl apply -f -<<EOF
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: local
+      provisioner: kubernetes.io/no-provisioner
+      reclaimPolicy: Retain
+      volumeBindingMode: WaitForFirstConsumer
+      EOF
+      kubectl patch storageclass local -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  when: inventory_hostname == healthy_node # to ensure this is executed on a healthy node only
      

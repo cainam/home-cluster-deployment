@@ -15,15 +15,11 @@ alphaConfig:
   enabled: true
   configData:
     providers:
-    - clientID: "57df89d9-b7ca-4edd-b2f0-010c8d98b6e9" #"bf6043ef-ffea-4db7-bfaf-d1bb23139d85"       # IdP Client ID
-      clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
+    - clientID: "{{ auth.client_id }}"
+      clientSecret: "{{ auth.client_secret }}" # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider
-      #loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
-#      loginURL: https://hydra.my-lb.adm13/oauth2/auth
-#      redeemURL: http://hydra.auth:1121/oauth2/token
       profileURL: http://hydra-public.auth:4444/userinfo
-#      validateURL: http://hydra.auth:1121/userinfo
       scope: "email openid"
       # scope: "openid email profile groups"
       #allowedGroups:
@@ -31,15 +27,8 @@ alphaConfig:
       oidcConfig:
         userIDClaim: sub  # Name of the claim in JWT containing the User ID
         emailClaim: sub
-        #emailClaim: email.  # Name of the clain in JWT containing the E-Mail
-#        emailClaim: email  # Name of the clain in JWT containing the E-Mail
-#        groupsClaim: groups # Name of the claim in JWT containing the Groups
-#        extraAudiences: 
-#        - email
         audienceClaims:
         - aud
-#        skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
-#        issuerURL: https://hydra.my-lb.adm13/
         issuerURL: https://my-lb.adm13/hydra
         jwksURL: http://hydra.auth:1121/
     upstreamConfig:
