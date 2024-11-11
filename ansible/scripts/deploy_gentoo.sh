@@ -15,7 +15,8 @@ cd /data/mine/git/ansible/
 
 #[ -f "${run_file}" ] && exit 0
 #touch "${run_file}"
-procs=$(pgrep -c -f "${my_name}")
+#procs=$(pgrep -c -f "${my_name}")
+procs=$(pgrep -c -f "$0")
 if [ $procs -gt 1 ]; then
   message="already $procs processes running of ${my_name} => exit"
   logger "${message}"
