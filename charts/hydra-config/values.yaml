@@ -4,6 +4,7 @@
 
 replicaCount: 1
 postInstallJob: false
+redirect_url: n/a
 
 operator:
   name: auth-operator

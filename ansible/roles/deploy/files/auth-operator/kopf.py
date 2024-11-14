@@ -8,6 +8,7 @@ import yaml
 import requests
 
 # env vars: namespace oauth2-proxy, hydra, secret, client_name, redirect_url, etc.
+redirect_url = os.environ.get('REDIRECT_URL')
 
 
 # extend with decorator for hydra
@@ -50,7 +51,7 @@ async def fun2(namespace, spec, body, logger, **kwargs):
       'client_name': 'test',
       'client_secret': client_secret,
       'grant_types': ["authorization_code","refresh_token"],
-      'redirect_uris': ["https://my-lb.adm13/oauth2-hydra/callback"],
+      'redirect_uris': [redirect_url],
       'response_types': ["code", "id_token"],
       'scope': 'offline openid users.write users.read users.edit users.delete email',
       'token_endpoint_auth_method': 'client_secret_post'

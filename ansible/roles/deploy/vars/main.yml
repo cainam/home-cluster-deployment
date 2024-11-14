@@ -55,7 +55,7 @@ applications:
     hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-config
-      helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} 
+      helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback"
       image_build:
       - name: auth-operator
         source: local

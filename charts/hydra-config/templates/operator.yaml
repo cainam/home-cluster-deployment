@@ -29,6 +29,9 @@ spec:
         - -n
         - {{ .Release.Namespace }}
         - /app/kopf.py
+        env:
+        - name: REDIRECT_URL
+          value: {{ .Values.redirect_url }}
         volumeMounts:
         - mountPath: /app
           name: "{{ .Values.operator.name }}"

@@ -69,31 +69,7 @@ helm upgrade --install -n istio-system istiod istio-system/istiod --set global.p
 - pod exec parameters:         - --cookie-domain=.my-lb.adm13,my-lb.adm13 (and same for white-list-domain)
 - 2nd extensionProviders: in istio cm
 # test hydra: https://my-lb.adm13/hydra/.well-known/openid-configuration
-# create client: ~ $ hydra create oauth2-client -e http://localhost:4445 --name test --scope openid --secret oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0
-# or:  curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
-{
-    "client_name": "test",
-    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0",
-    "grant_types": ["authorization_code", "refresh_token"],
-    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
-    "response_types": ["code", "id_token"],
-    "scope": "offline openid users.write users.read users.edit users.delete",
-    "token_endpoint_auth_method": "client_secret_post"
-}
 - test /userinfo endpoint: curl -v http://hydra-public.auth:4444/userinfo -H "Authorization: Bearer ory_at_5CEmBYcSTKtbvUB6jCL3OpZrkOGdQ3H0yC1a6J3dees.l66_2V80ta5HRFHxHi1X6joSoTtI87pQR3isysJhjow"
-- hydra: sql lite: ~ $ hydra migrate sql -e -c /etc/config/hydra.yaml^C
-~ $ export DSN=sqlite:///dev/shm/some-db.sqlite?_fk=true^C
- curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json'  --data-raw "$(cat /app/hydra-client.json)" with file content:
-{
-    "client_name": "test",
-    "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0", 
-    "grant_types": ["authorization_code", "refresh_token"],
-    "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"],
-    "response_types": ["code", "id_token"],
-    "scope": "offline openid users.write users.read users.edit users.delete",
-    "token_endpoint_auth_method": "client_secret_post"
-}   
-
 
 # Old remarks when using keycloak:
 - error "Caused by: org.h2.mvstore.MVStoreException: The write format 2 is smaller than the supported format 3 [2.2.220/5]" => fix by migrating the DB to a newer version: java -jar H2MigrationTool-1.4-all.jar -d keycloakdb.mv.db -f 2.0.202 -t 2.2.220 --user sa --password password

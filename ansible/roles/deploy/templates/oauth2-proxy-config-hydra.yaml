@@ -6,7 +6,7 @@ config:
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
         cookie_secret = "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU="
         ssl_insecure_skip_verify = true
-        redirect_url = "https://my-lb.adm13/oauth2-hydra/callback"
+        redirect_url = "https://{{base_domain }}{{ oauth2_path }}/callback"
         cookie_domains = [".my-lb.adm13","*.my-lb.adm13","my-lb.adm13"]
         whitelist_domains = [".my-lb.adm13","*.my-lb.adm13","my-lb.adm13"]
         errors_to_info_log = true
