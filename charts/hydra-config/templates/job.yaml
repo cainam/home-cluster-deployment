@@ -1,3 +1,4 @@
+{{- if .Values.postInstallJob }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -47,3 +48,4 @@ spec:
         configMap:
           defaultMode: 0700
           name: "{{ .Release.Name }}"
+{{- end }}

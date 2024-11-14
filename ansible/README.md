@@ -156,7 +156,6 @@ TODO:
 - build all images from gentoo
 - configure tempo in kiali
 - install grafana
-- ensure that kubelet and crio are always running
 - remove auth policy from helm and deploy via Ansible (or merge with hydra chart) and consider adm13.dnshome.de + my-lb.adm13 as hosts
 - adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
 - my-lb.adm13 as hosts: gateways + virtualservices
@@ -164,6 +163,7 @@ TODO:
 - istio enabled per deployment or per pod ...??, not per namespace
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
+- hydra: creating client_id with helm post-install job doesn't survive pod restart, see how to integrate this in K8S during pod restart
 
 auth update:
 - Authorization policy per gateway

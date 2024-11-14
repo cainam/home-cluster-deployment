@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hydra-shared
+  name: {{ .Values.persistent.name | quote }}
   labels:
     app: hydra
 spec:

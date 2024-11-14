@@ -3,6 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
+postInstallJob: false
 
 image:
 #  repository: tools/fastapi
@@ -42,6 +43,7 @@ service:
 
 persistent:
   enabled: false
+  name: storage
   capacity: 5Mi
 
 config:

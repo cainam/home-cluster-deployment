@@ -35,7 +35,7 @@ applications:
       subdir: helm/charts/hydra
       git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
       helm_options_for_memory: --set hydra.config.dsn=memory
-      helm_options_for_presistent_storage: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra-shared --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra-shared --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra-shared --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true
+      helm_options_for_presistent_storage: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true 
       helm_options: --set hydra.config.dsn=memory
       remove_dependencies: hydra-maester
       requires:
@@ -46,7 +46,7 @@ applications:
         values:
           file: hydra-config.yaml
       storage:
-      - name: hydra-shared
+      - name: hydra
         size: 5Mi 
       network:
         svcPort: 4444
@@ -55,7 +55,11 @@ applications:
     hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-config
-      helm_options: --set config.image.repository=tools/mypy --set config.image.tag={{ software.python.version }} --set config.client_id={{ auth.client_id }} --set config.client_name={{ auth.client_name }} --set config.client_secret={{ auth.client_secret }} --set-json config.grant_types='{{ auth.grant_types }}' --set-json config.redirect_uris='{{ auth.redirect_uris }}' --set-json config.response_types='{{ auth.response_types }}' --set-literal config.scope="{{ auth.scope }}" --set config.token_endpoint_auth_method={{ auth.token_endpoint_auth_method }}
+      image_build:
+      - name: auth-operator
+        source: local
+        tag: "{{ software.python.version }}"
+        build_args: --from docker.io/python:{{ software.python.version }}
     midp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/mini-idp
