@@ -63,7 +63,7 @@ applications:
         build_args: --from docker.io/python:{{ software.python.version }}
       storage:
       - name: auth-operator
-        xsize: 2Mi
+        size: 2Mi
         type: local_folder
         config: true
       network: true
