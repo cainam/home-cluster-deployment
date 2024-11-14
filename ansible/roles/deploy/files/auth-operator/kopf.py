@@ -11,7 +11,7 @@ import requests
 
 
 # extend with decorator for hydra
-@kopf.on.create('pods', labels={'app': 'dashboard-gw'} )
+@kopf.on.create('pods', labels={'app.kubernetes.io/instance': 'hydra'} )
 async def fun2(namespace, spec, body, logger, **kwargs):
   d = dict(body)
   logger.debug(json.dumps(d, indent=4))
