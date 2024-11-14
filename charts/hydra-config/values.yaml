@@ -5,6 +5,14 @@
 replicaCount: 1
 postInstallJob: false
 
+operator:
+  name: auth-operator
+  image: n/a
+  tag: n/a
+  volumeSize: 2Mi
+  serviceAccount:
+    create: true
+
 image:
 #  repository: tools/fastapi
 #  tag: 3.10.5-slim

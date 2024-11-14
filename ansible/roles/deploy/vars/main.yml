@@ -55,11 +55,18 @@ applications:
     hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-config
+      helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} 
       image_build:
       - name: auth-operator
         source: local
         tag: "{{ software.python.version }}"
         build_args: --from docker.io/python:{{ software.python.version }}
+      storage:
+      - name: auth-operator
+        xsize: 2Mi
+        type: local_folder
+        config: true
+      network: true
     midp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/mini-idp
