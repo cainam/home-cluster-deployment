@@ -21,7 +21,7 @@ spec:
           claimName: "{{ .Values.operator.name }}"
       containers:
       - name: "{{ .Values.operator.name }}"
-        image: "{{ .Values.operator.image }}:{{ .Values.operator.image.tag }}"
+        image: "{{ .Values.operator.image }}:{{ .Values.operator.tag }}"
         volumeMounts:
         - mountPath: /app
           name: "{{ .Values.operator.name }}"
