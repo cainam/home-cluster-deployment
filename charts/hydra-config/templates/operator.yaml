@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.operator.name }}"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      application: auth
+  template:
+    metadata:
+      labels:
+        application: auth
+    spec:
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}
+      volumes:
+      - name: "{{ .Values.operator.name }}"
+        persistentVolumeClaim:
+          claimName: "{{ .Values.operator.name }}"
+      containers:
+      - name: "{{ .Values.operator.name }}"
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+        volumeMounts:
+        - mountPath: /app
+          name: "{{ .Values.operator.name }}"
+
