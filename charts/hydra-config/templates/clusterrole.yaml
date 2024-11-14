@@ -5,7 +5,10 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["watch","patch","list"]
+  verbs: ["watch","list"]
+- apiGroups: [""]
+  resources: ["pods/status"]
+  verbs: ["patch"]
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["create"]
