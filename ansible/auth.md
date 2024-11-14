@@ -8,7 +8,10 @@ Authentication and Authorization of the system is based on oauth2_proxy => hydra
 Initially keycloak was used, but it turned out to be too resource intensive and too complex for the required solution, DEX would be an alternative too.
 
 ## hydra deployment
-a dedicated hydra-config helm chart is deployed to provide the optional PVC if persistent database is used but mainly configures the client_id of the solution
+a dedicated hydra-config helm chart is deployed
+- to provide the optional PVC if persistent database is used
+- to configure client_id via post-install batch Job (not used) and
+- to deploy a Kubernetes Operator which configures the client_id upon hydra pod restart
 
 
 # links
