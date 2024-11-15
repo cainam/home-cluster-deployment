@@ -9,7 +9,12 @@ import requests
 
 # env vars: namespace oauth2-proxy, hydra, secret, client_name, redirect_url, etc.
 redirect_url = os.environ.get('REDIRECT_URL')
-
+oauth2_config_secret = os.environ.get('OAUTH2_CONFIG_SECRET')
+oauth2_secret_file = os.environ.get('OAUTH2_SECRET_FILE')
+hydra_service = os.environ.get('HYDRA_SERVICE')
+hydra_service_port = os.environ.get('HYDRA_SERVICE_PORT') # "4445"
+hydra_search_label_key = os.environ.get('HYDRA_SEARCH_LABEL_KEY')
+hydra_search_label_value = os.environ.get('HYDRA_SEARCH_LABEL_VALUE')
 
 # extend with decorator for hydra
 @kopf.on.create('pods', labels={'app.kubernetes.io/instance': 'hydra'} )
@@ -26,9 +31,9 @@ async def fun2(namespace, spec, body, logger, **kwargs):
 
   api = kubernetes.client.CoreV1Api()
   # oauth2-proxy client_id and secret are mandatory at startup, get client_id and client_secret from oauth2_config
-  oauth2_proxy_configmap = api.read_namespaced_secret("oauth2-proxy-alpha", "auth").data
+  oauth2_proxy_configmap = api.read_namespaced_secret(oauth2_config_secret, namespace).data
   logger.debug("secret: "+str(oauth2_proxy_configmap))
-  secret_decoded = base64.b64decode(oauth2_proxy_configmap['oauth2_proxy.yml']).decode()
+  secret_decoded = base64.b64decode(oauth2_proxy_configmap[oauth2_secret_file]).decode()
   logger.debug("secret decoded: "+str(secret_decoded))
   conf = yaml.safe_load(secret_decoded)["providers"][0] # assuming only one provider is configured
   client_id = conf['clientID']
@@ -36,7 +41,7 @@ async def fun2(namespace, spec, body, logger, **kwargs):
   logger.debug("clientID:"+client_id+" client_secret:"+client_secret)
 
   # is a client_id set on hydra with same - client_secret should be checked too implementation left as TODO
-  url = 'http://hydra-admin.auth:4445/clients'
+  url = 'http://'+hydra_service+'.'+namespace+':'+hydra_service_port+'/clients'
   response = requests.get(url)
   client_missing = True
   for x in response.json():

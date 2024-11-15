@@ -32,6 +32,20 @@ spec:
         env:
         - name: REDIRECT_URL
           value: {{ .Values.redirect_url }}
+        - name: NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: OAUTH2_CONFIG_SECRET
+          value: "oauth2-proxy-alpha"
+        - name: OAUTH2_SECRET_FILE
+          value: 'oauth2_proxy.yml'
+        - name: HYDRA_SERVICE
+          value: "hydra-admin"
+        - name: HYDRA_SERVICE_PORT
+          value: "4445"
+        - name: HYDRA_SEARCH_LABEL_KEY
+          value: 'app.kubernetes.io/instance'
+        - name: HYDRA_SEARCH_LABEL_VALUE
+          value: 'hydra'
         volumeMounts:
         - mountPath: /app
           name: "{{ .Values.operator.name }}"
