@@ -4,12 +4,12 @@
 
 replicaCount: 1
 postInstallJob: false
-redirect_url: n/a
+redirect_url: null
 
 operator:
   name: auth-operator
-  image: n/a
-  tag: n/a
+  image: null
+  tag: null
   volumeSize: 2Mi
   serviceAccount:
     create: true
