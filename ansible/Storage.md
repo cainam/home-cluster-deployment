@@ -27,3 +27,11 @@ metadata:
   name: deleting-confirmation-flag
 # kubectl apply -f longhorn-confirm-deletion.yaml
 "README.md" 196L, 13280B                                      
+
+gluster:
+- change size: use "vol replace-brick" and replace brick by brick
+- repair split-brain:
+    brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
+    backupdir=/
+    mkdir -p "$backupdir";for a in auth.session ;do cp -rdp $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
+

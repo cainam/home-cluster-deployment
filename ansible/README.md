@@ -1,3 +1,8 @@
+# what is included
+- custom ansible filter plugin
+- k8s operator written in python
+- simple status page using FastAPI which async calls to fetch information from the systems
+
 # notes on this ansible playbook
 
 Usage example: 
@@ -17,12 +22,6 @@ Notes:
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - some variables are not part of the git repo, secrets which one has to define additionally like wifi WEP
-- create token: kubectl create token -n tools kiali-service-account
-- gluster - change size: use "vol replace-brick" and replace brick by brick 
-- gluster repair - split-brain: 
-    brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
-    backupdir=/
-    mkdir -p "$backupdir";for a in auth.session ;do cp -rdp $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
 
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
@@ -163,11 +162,9 @@ TODO:
 - istio enabled per deployment or per pod ...??, not per namespace
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
-- hydra: creating client_id with helm post-install job doesn't survive pod restart, see how to integrate this in K8S during pod restart
 
 auth update:
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
 - hydra debug: add log.level: debug to hydra cm
-- hydra-config: pvc is required before the service, but client_id configuration should take place after, so hydra-client_id requires hydra requires hydra-pvc => use same helm chart and switch using if endif
 

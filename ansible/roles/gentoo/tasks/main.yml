@@ -249,8 +249,8 @@
   loop:
     - src: net.lo
       dest: /etc/init.d/net.end0
-    - src: net.lo
-      dest: /etc/init.d/net.wlan0
+#    - src: net.lo
+#      dest: /etc/init.d/net.wlan0
 
 - name: portage profile
   shell: eselect profile set default/linux/arm64/23.0/split-usr

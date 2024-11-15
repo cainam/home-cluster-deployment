@@ -13,6 +13,8 @@ a dedicated hydra-config helm chart is deployed
 - to configure client_id via post-install batch Job (not used) and
 - to deploy a Kubernetes Operator which configures the client_id upon hydra pod restart
 
+## hydra-config
+internal chart to implement k8s operator to handle client_id, but can also create a pvc for hydra if needed. A helm-job to run as post-install is included, but no longer used in favor of the k8s operator
 
 # links
 all: 
