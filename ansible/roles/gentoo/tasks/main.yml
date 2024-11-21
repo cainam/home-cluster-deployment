@@ -239,18 +239,18 @@
       dest: /boot/
       backup: no
 
-- name: symlinks for services
+- name: symlinks for net.lo and localtime
   file:
     src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    path: "{{ item.path }}"
     owner: root
     group: root
     state: link
   loop:
     - src: net.lo
-      dest: /etc/init.d/net.end0
-#    - src: net.lo
-#      dest: /etc/init.d/net.wlan0
+      path: /etc/init.d/net.end0
+    - src: /usr/share/zoneinfo/Europe/Amsterdam
+      path: /etc/localtime
 
 - name: portage profile
   shell: eselect profile set default/linux/arm64/23.0/split-usr

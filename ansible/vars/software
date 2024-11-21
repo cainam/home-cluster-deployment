@@ -1,6 +1,5 @@
 software:
   istio:
-    ersion: 1.21.2
     version: 1.23.2
     attention: version 1.22.x leads to error tcmalloc 
     installed:
@@ -31,7 +30,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.10.3"
+    version: "2024.11.2"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -69,7 +68,7 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 16.4-alpine
+    version: 17.1-alpine
     installed:
       type: k8s
       pattern: "postgres:"

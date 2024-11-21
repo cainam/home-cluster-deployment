@@ -162,9 +162,9 @@ TODO:
 - istio enabled per deployment or per pod ...??, not per namespace
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
+- postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 
 auth update:
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
-- hydra debug: add log.level: debug to hydra cm
 

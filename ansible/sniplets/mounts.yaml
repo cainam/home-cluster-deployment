@@ -1,0 +1,38 @@
+---
+- name: mounts
+  gather_facts: true
+  hosts: all
+
+  tasks:
+  - debug:
+      msg: 'ansible_mounts: {{ ansible_mounts | to_nice_yaml}}'
+
+  - debug:
+      msg: 'root: {{ ansible_mounts | selectattr("mount","==","/") | to_nice_yaml}}'
+
+  - debug:
+      msg: 'boot: {{ ansible_mounts | selectattr("mount","==","/boot") | to_nice_yaml}}'
+
+  - debug:
+      msg: 'dict: {{ ansible_mounts | items2dict(key_name="mount",value_name="uuid") | to_nice_yaml }}'
+
+  - debug:
+      msg: 'boot: {{ ansible_mounts | selectattr("mount","==","/boot") | map(attribute="uuid") | default([default_boot_device], true) | first }}'
+#  - debug:
+#      msg: 'boot uuid: {{ ansible_mounts | items2dict(key_name="mount",value_name="uuid") | mapattribute("uuid
+
+#  - debug:
+#      msg: '{{ ansible_facts["devices"] }}'
+
+  - debug:
+      msg: 'data: {{ ansible_mounts | selectattr("mount","==","/data") | to_nice_yaml}}'
+
+  - debug:
+      msg: 'data: {{ uuid }}'
+    vars:
+      uuid: '{{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
+      # failed_when: uuid is not defined
+
+
+  - debug:
+      msg: 'data: {{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | default(["xyz"], true) | first }}'
