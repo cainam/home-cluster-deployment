@@ -117,12 +117,12 @@ def software(request: Request, name: str | None = None):
     raw, content = infopage.software()
     return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
 
-@general_pages_router.get("/soft_ng")
+@general_pages_router.get("/software")
 #async def software(request: Request):
 def software(request: Request, software: str | None = None):
-    raw, content = infopage.soft_ng(software)
+    raw, content = infopage.software(software)
     if (software is None ):
-      return templates.TemplateResponse("general_pages/soft_ng.html",{"request":request, "content": content, "raw": raw, "name": "soft_ng"})
+      return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
     else:
       logger.info("software: "+software+" content:"+str(content))
       return templates.TemplateResponse("general_pages/software_versions.html",{"request":request, "content": content, "raw": raw})

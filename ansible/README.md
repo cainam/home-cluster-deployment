@@ -8,7 +8,6 @@
 Usage example: 
     `# ansible-playbook  -i $PWD/inventory $PWD/site.yml --skip-tags k8s_images`
 
-
 New install:
 - stage3+portage+git-clone-firmware
 - enable net.end0+sshd
@@ -17,7 +16,7 @@ New install:
 Notes:
 - trying to run on one host only using run_once/delegate_to did only work having a hostname set as fact not with a variable. It seems like vars are re-evaluated when accessed, but facts remain constant
 - uninstall of kubernetes is triggered using "--tags=all,force_reinstall", otherwise force_reinstall is skipped
-- calling Ansible example: eval $my_ansible site.yml --tags=deploy,build --extra-vars limit_application=deconz site.yml --tags=deploy,build --extra-vars 'limit_namespace="istio-ingress"
+- calling Ansible example: eval $my_ansible site.yml --tags=deploy,build --extra-vars limit_application=deconz or eval $my_ansible site.yml --tags=deps,deploy --extra-vars \''{"limit_application":["zigbee2mqtt"]}'\'
 - ANSIBLE_HOME to use /plugin/filters for custom filters and local_only: ANSIBLE_HOME=$PWD ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory standalone/k8s-status.yaml --extra-vars local_only=/data/mine/git 
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
@@ -56,7 +55,6 @@ tor:
   - test socks5 cluster internally: curl -L  socks5://tor.anon:9050 http://tagesschau.de
   - disable istio sidecar by:         sidecar.istio.io/inject: "false" 
 
-
 home-assistant:
   - DB, postgreSQL to start with, but for future use DBs guide: https://smarthomescene.com/guides/optimize-your-home-assistant-database/
   - not possible to change webroot, so subdomain used instead
@@ -89,7 +87,6 @@ Fritz.Box:
   - configure floating IP: stop floating IP in network, flush cache by changing the DHCP range, add portfreigabe an start floating IP again
   - DYNDNS: dyndns domain added to certificates as alt-names
 
-
 Deconz:
 flash:
 # # git clone https://github.com/dresden-elektronik/gcfflasher.git
@@ -116,39 +113,16 @@ Networking:
 - VirtualService <=> Application: one to many relationship
 - inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
-Database:
-- PostgreSQL update:
-  1. scale down: kubectl scale --replicas=0 -n db statefulset postgresql
-  2. run ./scripts/migrate_postgresql.sh
-  3. move old data (e.g. mv /shared/data-postgresql-0/pgdata/ /shared/data-postgresql-0/pgdata.15.6)
-  4. copy new data in place (e.g. cp -rdp /tmp/pg_new/ /shared/data-postgresql-0/pgdata/)
-  5. deploy update postgreSQL
-- tuning auf gluster: gluster vol set data-postgresql-0 group db-workload
-- meassure pg performance with storage:
-  pgbench -i -s 50 --foreign-keys -h dbperf-postgresql -U pg  postgres
-  pgbench  -h dbperf-postgresql -U pg  postgres -t 10000
-  gluster: 
-    latency average = 174.666 ms
-    initial connection time = 53.350 ms
-    tps = 5.725199 (without initial connection time)
-  longhorn:
-    latency average = 12.016 ms
-    initial connection time = 42.499 ms
-    tps = 83.224261 (without initial connection time)
-
-
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
-- /etc/localtime + /etc/timezone
 - home-assistant: log file location should not be in /config, but seems not possible with configuration.yaml only using --log_file command line option but command line is hard-coded in docker image (/etc/services.d/home-assistant/run)
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - custom filter: depenencies (db + gateway)
 - dependencies: generalize waitdb initcontainer 
-- create keycloak config via script, e.g. https://suedbroecker.net/2020/08/04/how-to-create-a-new-realm-with-the-keycloak-rest-api/ 
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - gatways have to be kicked by e.g. kubectl delete pod -n istio-ingress gateway-xxx-yyy to use the new image injected via webhook => include this in the playbook

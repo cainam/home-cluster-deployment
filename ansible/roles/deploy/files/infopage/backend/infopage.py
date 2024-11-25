@@ -35,7 +35,7 @@ def node_info():
     content.append([ info, cond  ] )
   return content
 
-def soft_ng(name):
+def software(name):
   import yaml
   import requests
   import re

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
       .then(response => response.text())
       .then(html => {ItemElems[i].innerHTML = html;})
       .catch(error => {console.log(error);})
-      .then(function(){if(ItemElems[i].getAttribute('value')=="/soft_ng"){load_sw_details(ItemElems[i]);} })
+      .then(function(){if(ItemElems[i].getAttribute('value')=="/software"){load_sw_details(ItemElems[i]);} })
       ;
     }
 });
@@ -21,7 +21,7 @@ function load_sw_details(element){
   for (let i = 0; i < inner_elems.length; i++) {
     console.log("load: "+inner_elems[i].getAttribute('value'));
     // eval(inner_elems[i].innerHTML);
-    fetch(currentUrl+"/soft_ng"+"?software="+inner_elems[i].getAttribute('value'))
+    fetch(currentUrl+"/software"+"?software="+inner_elems[i].getAttribute('value'))
     .then(response => response.text())
       .then(html => {inner_elems[i].innerHTML = html;})
       .catch(error => {console.log(error);})

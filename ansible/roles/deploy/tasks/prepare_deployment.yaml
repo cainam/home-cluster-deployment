@@ -43,7 +43,7 @@
   - name: gateway_default_namespace populated to all gateways (to avoid checking this over and over again)
     debug:
       msg: 'gateways: {{ gateways | to_yaml }}'
-    when: "'debug_only' in ansible_run_tags"
+    when: "'debug' in ansible_run_tags"
 
   - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
     set_fact:
@@ -57,7 +57,8 @@
   - name: application list with gateways added
     debug:
       msg: 'apps: {{ apps | to_yaml }}'
-    when: "'debug_only' in ansible_run_tags"
+    when: "'debug' in ansible_run_tags"
+    failed_when: false
 
 # flatten app list and make namespace an attribute
   - debug: 
@@ -102,7 +103,7 @@
     loop: "{{ app_list | selectattr('network', 'defined')  }}"
     loop_control:
       loop_var: app
-    when: "'debug_only' in ansible_run_tags"
+    when: "'debug' in ansible_run_tags"
 
   - name: add gateways as application requirements
     vars:

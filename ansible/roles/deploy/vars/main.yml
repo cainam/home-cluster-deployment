@@ -122,8 +122,6 @@ applications:
       helm_options: --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
       git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}"
       network:
-        prefix: /
-        gateway: open
         svcPort: 8080
         old_proxy_sidecar: 
           app.kubernetes.io/instance: zigbee2mqtt

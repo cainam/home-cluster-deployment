@@ -4,20 +4,10 @@
 </pre>
 
 <table class="iTable">
-<tr><th>software</th><th>current version</th><th>latest version(s)</th></tr>
+<tr><th>software</th><th>installed</th><th>configured</th><th>latest version(s)</th></tr>
         {% for sw in content %}
-	<tr>
-	  <td>{{ sw[0] }}</td>
-	  <td>{{ sw[1] }}</td>
-	  {% if sw[2] is string %}
-	  <td>{{ sw[2] }}</td>
-	  {% else %}
-	  <td>
-	  {% for i in sw[2] %}
-	  {{ i }}<br />
-	  {% endfor %}
-	  </td>
-	  {% endif %}
+	<tr itemprop="inner_load" value="{{ sw }}">
+	  <td>=> {{ sw }}</td><td></td><td></td><td></td>
 	</tr>
         {% endfor %}
 </table>

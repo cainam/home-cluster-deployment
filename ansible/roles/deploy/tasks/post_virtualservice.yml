@@ -13,7 +13,21 @@
       echo  "update gateway {{ gateway.key }} in namespace {{ gateway.value.namespace }} with application {{ vs.application }} in namespace {{ vs.namespace }}"
       kubectl get -o yaml vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" | \
       yq -y 'del(.spec.http[]? | select(.name=="'"{{ vs.application }}"'"))' | \
-      yq -y '.spec.http += [{"name":"{{ vs.application }}","rewrite":{"uri":"{{ vs.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ vs.network.svcName | default(vs.application) }}.{{ vs.namespace }}.svc.cluster.local"{% if vs.network.svcPort is defined %},"port":{"number":{{ vs.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application) }}"}}] {% if vs.network.addition is defined %},{{ vs.network.addition }} {% endif %} }]' | \
+      yq -y 'del(.spec.http[]? | select(.name=="'"{{ vs.application }}-redirect"'"))' | \
+      yq -y '.spec.http += [
+      {
+        "name":"{{ vs.application }}",
+        "rewrite":{"uri":"{{ vs.network.rewrite | default("/") }}" },
+        "route":[{"destination":{
+           "host":"{{ vs.network.svcName | default(vs.application) }}.{{ vs.namespace }}.svc.cluster.local"{% if vs.network.svcPort is defined %},
+           "port":{"number":{{ vs.network.svcPort }} }{% endif %}}}],
+        "match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application + "/")}}"}}] 
+        {% if vs.network.addition is defined %},{{ vs.network.addition }} {% endif %} 
+      },{
+        "name":"{{ vs.application }}-redirect",
+        "match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application) }}"}}],
+        "redirect":{"uri":"{{ vs.network.prefix | default("/" + vs.application + "/")}}"}
+      } ]' | \
       kubectl apply -f -
     register: vs_setup
     loop: "{{ gateway.value.VirtualService }}"

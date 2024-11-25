@@ -5,12 +5,12 @@
   run_once: true
 
 - block: # generate helm_options from applications for gateways 
-  - name: print application.value {{ app }}
+  - name: "{{ name_prefix }} print application.value"
     debug:
       msg: "{{ application.value }}"
     when: "'debug' in ansible_run_tags"
       
-  - name: generate helm_options from applications for gateways # from ports array
+  - name: "{{ name_prefix }} generate helm_options from applications for gateways" # from ports array
     set_fact: 
       applications: "{{ applications | combine(
          {namespace.key : 
@@ -25,22 +25,22 @@
   run_once: true
 
 - block:
-#  - name: initialize variable storage
-#    set_fact:
-#      storage_new: "{{ [] }} "
-  - name: set default_storage_type if not set explicitely
+  - name: "{{ name_prefix }} empty storage_new array" # don't remove this, the variable has to be purge for each iteration
+    set_fact:
+      storage_new: []
+      
+  - name: "{{ name_prefix }} set default_storage_type if not set explicitely"
     vars:
-          entry: "{{ item | combine ( {'type': item.type | default(default_storage_type) } ) }}"
-
+      entry: "{{ item | combine ( {'type': item.type | default(default_storage_type) } ) }}"
     set_fact:
       storage_new: "{{ (storage_new | default([]) ) + [entry] }}"
     loop: "{{ application.value.storage }}"
       
-  - name: dump new storage array
+  - name: "{{ name_prefix }} dump new storage array"
     debug:
       msg: "new storage array for application {{ application.key }}: \n{{ storage_new | to_nice_yaml }}"
 
-  - name: replace storage in applications
+  - name: "{{ name_prefix }} replace storage in applications"
     set_fact: 
       applications: "{{ applications | combine(
          {namespace.key : 
@@ -52,7 +52,7 @@
   when: application.value.storage is defined
 
 - block:
-  - name: app:{{ app }} storage
+  - name: "{{ name_prefix }} storage brick"
     include_tasks: common/storage_brick.yml
     when: application.value.storage is defined
     with_items: "{{ applications[namespace.key][application.key].storage }}"
@@ -71,4 +71,4 @@
     loop_control:
       loop_var: storage
   when: application.value.storage is defined
-
+  

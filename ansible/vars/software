@@ -1,7 +1,6 @@
 software:
   istio:
-    version: 1.23.2
-    attention: version 1.22.x leads to error tcmalloc 
+    version: 1.24.0
     installed:
       pattern: "istio"
     latest:
@@ -30,7 +29,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.11.2"
+    version: "2024.11.3"
     installed:
       pattern: "home-assistant:"
     latest:

@@ -1,36 +1,10 @@
 - name: set app fact
   set_fact:
-    post_inst: "post_installation {{ namespace.key}} - "
-
-#- name: "{{ post_inst }}determine namespaces of gateways"
-  #shell: kubectl get pods --selector=istio="{{ item.key }}" -A -o jsonpath='{.items[*].metadata.namespace}'
-  #register: ns_gw
-  ## failed_when: ns_gw.stdout == ""
-  #loop: "{{ gateways | dict2items }}"
-
-#- name: "{{ post_inst }}output: determine namespaces of gateways"
-  #debug: 
-    #msg: "result: {{ item.rc }} out: {{ item.stdout }} for: {{ item.item.key }}"
-  #loop: "{{ ns_gw.results  }}"
-  #when: "'debug' in ansible_run_tags"
-
-#- name: "{{ post_inst }}debug: determine namespaces of gateways"
-  #debug:
-    #msg: "item.item.key: {{ item.item.key | to_yaml }} item.stdout:{{ item.stdout| to_yaml }}"
-  #loop: "{{ ns_gw.results  }}"
-
-#- name: "{{ post_inst }}extend gateways by discovered namespaces - default gateway"
-  #set_fact:
-    #gateways: "{{ gateways | combine({item.gw_name: {'namespace': item.namespace }}, recursive=True) }}"
-##    gateways: "{{ gateways | combine({item.item.key: {'namespace': item.stdout }}, recursive=True) }}"
-##  loop: "{{ ns_gw.results  }}"
-  #loop:
-  #- gw_name: gateway
-    #namespace: istio-ingress
+    post_inst: "post_installation namespace: {{ namespace.key}} - "
 
 - name: "{{ post_inst }}debug gateways"
   debug: 
-    msg: "namespace.value | dict2items: {{ namespace.value | dict2items| to_yaml}}"
+    msg: "namespace.value | dict2items:\n{{ namespace.value | dict2items| to_yaml}}"
   when: "'debug' in ansible_run_tags"
 
 - name: "{{ post_inst }}implement gateways"
@@ -39,20 +13,13 @@
   when: gateway.value.type is defined and gateway.value.type == 'gateway'
   loop_control:
     loop_var: gateway
+  failed_when: true
 
 # now VirtualServices => migrate to main (escape namespace loop which is used as when: here
 
-- name: "{{ post_inst }}debug gateways"
+- name: "{{ post_inst }}dump gateways"
   debug:
     msg: "gateways: {{ gateways | to_yaml}}"
-  when: "'debug' in ansible_run_tags"
-
-- name: "{{ post_inst }}debug gateways"
-  debug:
-    msg: "gateway.value.namespace: {{ gateway.value.namespace| default('no') }}"
-  loop: "{{ gateways | dict2items}}"
-  loop_control:
-    loop_var: gateway
   when: "'debug' in ansible_run_tags"
 
 - name: "{{ post_inst }}debug gateways"
@@ -61,11 +28,6 @@
   loop: "{{ gateways | dict2items}}"
   loop_control:
     loop_var: gateway
-  when: "'debug' in ansible_run_tags"
-
-- name: "{{ post_inst }}debug gateways"
-  debug:
-    msg: "namespace.key: {{ namespace.key}}"
   when: "'debug' in ansible_run_tags"
 
 - name: "{{ post_inst }}apply VirtualService application configurations"

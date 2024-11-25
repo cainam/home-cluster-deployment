@@ -246,6 +246,7 @@
     owner: root
     group: root
     state: link
+    force: true
   loop:
     - src: net.lo
       path: /etc/init.d/net.end0

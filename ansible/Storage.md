@@ -13,6 +13,22 @@ Storage content can only be deployed to local folders and gluster shares, not to
 
 Other solutions: OpenEBS is not yet compatible with Raspberry, Piraeus with DRBD could be an option, too.
 
+Database:
+upgrade:
+1. AUTOMATE BEFORE NEXT UPGRADE: build image from
+2. run playbook standalone/pg_update.yaml
+- tuning auf gluster: gluster vol set data-postgresql-0 group db-workload
+- meassure pg performance with storage:
+  pgbench -i -s 50 --foreign-keys -h dbperf-postgresql -U pg  postgres
+  pgbench  -h dbperf-postgresql -U pg  postgres -t 10000
+  gluster:
+    latency average = 174.666 ms
+    initial connection time = 53.350 ms
+    tps = 5.725199 (without initial connection time)
+  longhorn:
+    latency average = 12.016 ms
+    initial connection time = 42.499 ms
+    tps = 83.224261 (without initial connection time)
 
 longhorn:
 - shared mounts are enabled via /etc/fstab
@@ -31,7 +47,9 @@ metadata:
 gluster:
 - change size: use "vol replace-brick" and replace brick by brick
 - repair split-brain:
+    files=$(gluster vol heal home-assistant-config info | grep ^/ | sort -u | grep -v split-brain)
     brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
-    backupdir=/
-    mkdir -p "$backupdir";for a in auth.session ;do cp -rdp $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f; cp -dp $backupdir/$a $brickdir/$a;  done
+    backupdir=/tmp/bck
+    mkdir -p ${backupdir}
+    for a in $files;do rsync --mkpath -a $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f;[ "$f" != "" ] &&  rsync --mkpath -a $backupdir/$a $brickdir/$a;  done
 
