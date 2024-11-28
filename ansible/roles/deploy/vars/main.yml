@@ -26,7 +26,7 @@ applications:
     istiod-config:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/istiod-config
-      helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ base_domain_ext }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}"
+      helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ base_domain_ext }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ base_domain_ext }}:{{ port_ext }}"
   auth:
     ory-commons:
       git: https://github.com/ory/k8s.git
@@ -279,7 +279,7 @@ applications:
       helm_options: --set defaultSettings.logLevel=Trace 
       network:
         svcName: longhorn-frontend
-        prefix: /longhorn/
+        prefix: /longhorn
         old_proxy_sidecar: 
          app: longhorn-ui
       storage:

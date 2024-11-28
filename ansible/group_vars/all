@@ -15,7 +15,7 @@ local_ca: "{{ lookup('file', local_ca_file) }}"
 net:
   open_access:
   - /oauth2-hydra/callback
-  - /hydra/oauth2/*
+  - /hydra/*
   - /idp/*
 
   int:
@@ -32,6 +32,7 @@ net:
 base_domain: my-lb.adm13
 oauth2_path: /oauth2-hydra
 base_domain_ext: adm13.dnshome.de
+port_ext: 44354
 oauth2_path_ext: /oauth2-ext
 
 volumes_to_exempt:

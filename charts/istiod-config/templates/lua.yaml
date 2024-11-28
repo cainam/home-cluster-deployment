@@ -1,0 +1,54 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: lua-filter
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: gateway
+  configPatches:
+  - applyTo: HTTP_FILTER
+#  - applyTo: HTTP_ROUTE
+    match:
+      context: GATEWAY
+#      routeConfiguration:
+#        vhost:
+#          name: adm13.dnshome.de:44354
+
+#      listener:
+#        filterChain:
+#          sni: adm13.dnshome.de
+#          filter:
+#            name: "envoy.filters.network.http_connection_manager"
+#            subFilter:
+#              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+       name: envoy.lua
+       typed_config:
+         #"@type": "type.googleapis.com/envoy.config.filter.http.lua.v2.Lua"
+         "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+         inlineCode: |
+            function envoy_on_request(request_handle)
+              -- preserve authority from request for the response
+              local authority = request_handle:headers():get(":authority")
+              request_handle:logCritical("request: " .. authority)
+              request_handle:streamInfo():dynamicMetadata():set("context", "host_requested", authority)
+            end
+            function envoy_on_response(response_handle)
+                local host = response_handle:streamInfo():dynamicMetadata():get("context")["host_requested"]
+                local loc = response_handle:headers():get("location")
+                if not loc and false then
+                  response_handle:logCritical("no location header")
+                end
+                if loc and host == "{{ external_address }}" then
+                  local pos_2slash = loc:find("//")
+                  local pos_domain_end = loc:find("/",pos_2slash+2)
+                  local new_url = loc:sub(1,pos_2slash+1) .. host .. loc:sub(pos_domain_end)
+
+                  response_handle:logCritical("response: host: " .. host .. " location: " .. loc .. " pos_2slash:" .. pos_2slash .. " pos_domain_end:" .. pos_domain_end .. " new_url: " .. new_url)
+                  response_handle:headers():replace("location", new_url)
+                end
+            end
