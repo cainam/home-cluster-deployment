@@ -12,7 +12,7 @@ Initially keycloak was used, but it turned out to be too resource intensive and 
 - two separate oauth2-proxys doesn't work, because istio allows only one CUSTOM AuthorizationPolicy per workload (gateway)
 - oauth2-proxy allows to configure two provider (allowing two different issuerURLs), but only the first is recognized (feature not implemented) https://github.com/oauth2-proxy/oauth2-proxy/issues/926
 - looked at WASM but future unclear (https://github.com/envoyproxy/envoy/issues/35420)
-- next to check: lua or envoy External Processing
+- but got it finally working with an EnvoyFilter containing a Lua script modifying the location header for redirection
 
 lua TODO: 
 - how to apply EnvoyProxy only for a certain domain or host requested?

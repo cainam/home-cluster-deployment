@@ -12,19 +12,7 @@ applications:
       git: https://github.com/istio/istio.git
       branch: "{{ software.istio.version }}"
       subdir: manifests/charts/base
-    istiod-ext:
-      git: https://github.com/istio/istio.git
-      branch: "{{ software.istio.version }}"
-      subdir: manifests/charts/istio-control/istio-discovery
-      chart: istiod
-      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi --set global.proxy.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo" --set global.proxy_init.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo"
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
-      vars:
-        oauth2_proxy: "oauth2-proxy"
-      files:
-        values:
-          file: istiod-mesh.yaml
-    istiod-int: 
+    istiod: 
       git: https://github.com/istio/istio.git
       branch: "{{ software.istio.version }}"
       subdir: manifests/charts/istio-control/istio-discovery
@@ -35,10 +23,10 @@ applications:
       files:
         values:
           file: istiod-mesh.yaml
-    auth-policy:
+    istiod-config:
       git: https://github.com/cainam/krysyntyz.git
-      subdir: charts/auth-policy
-      helm_options: --set PolicyName=ext-authz --set hosts[0]="my-lb.adm13"
+      subdir: charts/istiod-config
+      helm_options: --set PolicyName=ext-authz --set hosts[0]="{{ base_domain }}" --set hosts[1]="*.{{ base_domain }}" --set hosts[2]="{{ adm13.dnshome.de }}:*" --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}"
   auth:
     ory-commons:
       git: https://github.com/ory/k8s.git
@@ -123,20 +111,6 @@ applications:
         svcPort: 80
         prefix: /oauth2-hydra
         rewrite: /oauth2-hydra
-    oauth2-proxy-ext:
-      git: https://github.com/oauth2-proxy/manifests.git
-      subdir: helm/oauth2-proxy
-      helm_options: --set proxyVarsAsSecrets=false 
-      git_to_local_params: --fix_source=.image.tag="{{ software.oauth2_proxy.version }}"
-      remove_dependencies: redis
-      chart: oauth2-proxy
-      files:
-        values:
-          file: oauth2-proxy-config-ext.yaml
-      network:
-        svcPort: 80
-        prefix: /oauth2-ext
-        rewrite: /oauth2-ext
   home:
     common:
       git: https://github.com/cainam/krysyntyz.git

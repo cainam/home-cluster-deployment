@@ -13,6 +13,11 @@ local_ca_file: "{{ cert_path }}/myCA.pem"
 local_ca: "{{ lookup('file', local_ca_file) }}"
 
 net:
+  open_access:
+  - /oauth2-hydra/callback
+  - /hydra/oauth2/*
+  - /idp/*
+
   int:
     domain: my-lb.adm13
     oauth2_proxy: oauth2-proxy

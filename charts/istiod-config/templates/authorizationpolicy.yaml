@@ -11,6 +11,8 @@ spec:
     - operation:
         hosts: 
           {{ toYaml .Values.hosts | indent 10 }}
+        notPaths:
+          {{ toYaml .Values.open_access | indent 10 }}
   selector:
     matchLabels:
-      istio: gateway
+      istio: {{ .Values.gateway }}
