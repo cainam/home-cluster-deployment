@@ -43,7 +43,7 @@ spec:
                 if not loc and false then
                   response_handle:logCritical("no location header")
                 end
-                if loc and host == "{{ external_address }}" then
+                if loc and host == "{{ .Values.external_address }}" then
                   local pos_2slash = loc:find("//")
                   local pos_domain_end = loc:find("/",pos_2slash+2)
                   local new_url = loc:sub(1,pos_2slash+1) .. host .. loc:sub(pos_domain_end)

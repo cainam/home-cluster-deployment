@@ -2,6 +2,7 @@
 - custom ansible filter plugin
 - k8s operator written in python
 - simple status page using FastAPI which async calls to fetch information from the systems
+- EnvoyFilter with Lua script to modify authentication responses - really cool!
 
 # notes on this ansible playbook
 
