@@ -12,12 +12,26 @@ applications:
       git: https://github.com/istio/istio.git
       branch: "{{ software.istio.version }}"
       subdir: manifests/charts/base
-    istiod: 
+    istiod-ext:
       git: https://github.com/istio/istio.git
       branch: "{{ software.istio.version }}"
       subdir: manifests/charts/istio-control/istio-discovery
+      chart: istiod
       helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi --set global.proxy.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo" --set global.proxy_init.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo"
       git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
+      vars:
+        oauth2_proxy: "oauth2-proxy"
+      files:
+        values:
+          file: istiod-mesh.yaml
+    istiod-int: 
+      git: https://github.com/istio/istio.git
+      branch: "{{ software.istio.version }}"
+      subdir: manifests/charts/istio-control/istio-discovery
+      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi --set global.proxy.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo" --set global.proxy_init.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo" --set revision=int
+      git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
+      vars:
+        oauth2_proxy: "oauth2-proxy-int"
       files:
         values:
           file: istiod-mesh.yaml
@@ -55,7 +69,7 @@ applications:
     hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-config
-      helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback"
+      helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback https://{{ base_domain_ext }}:44354{{ oauth2_path }}/callback"
       image_build:
       - name: auth-operator
         source: local
@@ -109,6 +123,20 @@ applications:
         svcPort: 80
         prefix: /oauth2-hydra
         rewrite: /oauth2-hydra
+    oauth2-proxy-ext:
+      git: https://github.com/oauth2-proxy/manifests.git
+      subdir: helm/oauth2-proxy
+      helm_options: --set proxyVarsAsSecrets=false 
+      git_to_local_params: --fix_source=.image.tag="{{ software.oauth2_proxy.version }}"
+      remove_dependencies: redis
+      chart: oauth2-proxy
+      files:
+        values:
+          file: oauth2-proxy-config-ext.yaml
+      network:
+        svcPort: 80
+        prefix: /oauth2-ext
+        rewrite: /oauth2-ext
   home:
     common:
       git: https://github.com/cainam/krysyntyz.git
@@ -142,7 +170,7 @@ applications:
       subdir: charts/home-assistant
       git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }}
+      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }} 
       storage:
       - name: home-assistant-config
         size: 100Mi
@@ -245,7 +273,7 @@ applications:
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}" --set persistence.storageClass=longhorn --set persistence.size=2Gi
+      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}" --set persistence.storageClass=longhorn --set persistence.size=2Gi --set postgresql.config.listen_addresses="'*'"
       git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres 
       storage: 
       - name: data-postgresql-0

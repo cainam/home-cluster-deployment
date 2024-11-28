@@ -6,13 +6,11 @@ config:
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
         cookie_secret = "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU="
         ssl_insecure_skip_verify = true
-        redirect_url = "https://{{base_domain }}{{ oauth2_path }}/callback"
-        cookie_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}"]
-        whitelist_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}"]
+        redirect_url = "https://{{base_domain_ext }}{{ oauth2_path_ext }}/callback"
+        cookie_domains = [".{{base_domain_ext }}","*.{{base_domain_ext }}","{{base_domain_ext }}"]
+        whitelist_domains = [".{{base_domain_ext }}","*.{{base_domain_ext }}","{{base_domain_ext }}"]
         errors_to_info_log = true
         proxy_prefix = "/oauth2-hydra"
-        reverse_proxy = true
-        cookie_secure = true
 alphaConfig:
   enabled: true
   configData:
@@ -31,7 +29,7 @@ alphaConfig:
         emailClaim: sub
         audienceClaims:
         - aud
-        issuerURL: https://{{ base_domain }}/hydra
+        issuerURL: https://{{ base_domain_ext }}/hydra
         jwksURL: http://hydra.auth:1121/
     upstreamConfig:
       upstreams:
@@ -49,6 +47,7 @@ alphaConfig:
 #        values:
 #          - claim: email
 extraArgs:
+  cookie-secure: "false"
   cookie-samesite: lax
   cookie-expire: 12h               # How long our Cookie is valid
   auth-logging: true               # Enable / Disable auth logs

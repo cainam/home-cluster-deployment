@@ -31,7 +31,7 @@ spec:
         - /app/kopf.py
         env:
         - name: REDIRECT_URL
-          value: {{ .Values.redirect_url }}
+          value: "{{ .Values.redirect_url }}"
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
         - name: OAUTH2_CONFIG_SECRET

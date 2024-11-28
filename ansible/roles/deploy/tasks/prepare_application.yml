@@ -21,7 +21,8 @@
     loop_control:
       loop_var: port
       index_var: port_idx
-  when: application.value.type is defined and application.value.type=='gateway'
+#  when: application.value.type is defined and application.value.type=='gateway' (25.11.24)
+  when: application.key in gateways
   run_once: true
 
 - block:

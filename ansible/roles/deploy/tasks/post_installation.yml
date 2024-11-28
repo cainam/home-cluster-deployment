@@ -8,12 +8,19 @@
   when: "'debug' in ansible_run_tags"
 
 - name: "{{ post_inst }}implement gateways"
-  include_tasks: post_gateway.yml
+  debug:
+    msg: "I am a gateway:\n{{ gateway|to_yaml }}"
   loop: "{{ namespace.value | dict2items }}"
-  when: gateway.value.type is defined and gateway.value.type == 'gateway'
+  when: gateway.key in gateways
   loop_control:
     loop_var: gateway
-  failed_when: true
+
+- name: "{{ post_inst }}implement gateways"
+  include_tasks: post_gateway.yml
+  loop: "{{ namespace.value | dict2items }}"
+  when: gateway.key in gateways
+  loop_control:
+    loop_var: gateway
 
 # now VirtualServices => migrate to main (escape namespace loop which is used as when: here
 

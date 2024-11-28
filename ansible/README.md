@@ -130,15 +130,25 @@ TODO:
 - configure tempo in kiali
 - install grafana
 - remove auth policy from helm and deploy via Ansible (or merge with hydra chart) and consider adm13.dnshome.de + my-lb.adm13 as hosts
-- adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
-- my-lb.adm13 as hosts: gateways + virtualservices
 - import script: update Chart.yaml to contain the version of the software
 - istio enabled per deployment or per pod ...??, not per namespace
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
+- split group/all vars to remove redundancies, e.g. to load net first and reuse then for gateways
 
 auth update:
 - Authorization policy per gateway
 - oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
+- adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
+- my-lb.adm13 as hosts: gateways + virtualservices
+1. auth policy for ext
+2. oauth2-proxy for ext
+3. istio cm with authprovider
+4. two authentication policies (post_installation)
+see auth.md and lua TODO
+
+- clean-up oauth/domain stuff in groups/all and remove usage of e.g. base_domain from everywhere
+
+
 

@@ -7,11 +7,29 @@ Authentication and Authorization of the system is based on oauth2_proxy => hydra
 
 Initially keycloak was used, but it turned out to be too resource intensive and too complex for the required solution, DEX would be an alternative too.
 
+# challange: how to handle two different domains, one dyndns one, one local?
+- local has to be fully local, no use of dyndns domain
+- two separate oauth2-proxys doesn't work, because istio allows only one CUSTOM AuthorizationPolicy per workload (gateway)
+- oauth2-proxy allows to configure two provider (allowing two different issuerURLs), but only the first is recognized (feature not implemented) https://github.com/oauth2-proxy/oauth2-proxy/issues/926
+- looked at WASM but future unclear (https://github.com/envoyproxy/envoy/issues/35420)
+- next to check: lua or envoy External Processing
+
+lua TODO: 
+- how to apply EnvoyProxy only for a certain domain or host requested?
+only critical is logged:
+  istioctl proxy-config log . --level lua:info
+  Options for --level are lua:debug, lua:info, lua:warning. Hope this helps
+
+
 ## hydra deployment
 a dedicated hydra-config helm chart is deployed
 - to provide the optional PVC if persistent database is used
 - to configure client_id via post-install batch Job (not used) and
 - to deploy a Kubernetes Operator which configures the client_id upon hydra pod restart
+
+### hydra tips
+ - query client_ids: curl -s -L -X GET 'http://hydra-admin.auth:4445/clients' | jq
+ - manually set client_id: curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json' --data-raw "$(cat /app/hydra-client.json)" with file content: { "client_name": "test", "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0", "grant_types": ["authorization_code", "refresh_token"], "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"], "response_types": ["code", "id_token"], "scope": "offline openid users.write users.read users.edit users.delete", "token_endpoint_auth_method": "client_secret_post" }
 
 ## hydra-config
 internal chart to implement k8s operator to handle client_id, but can also create a pvc for hydra if needed. A helm-job to run as post-install is included, but no longer used in favor of the k8s operator

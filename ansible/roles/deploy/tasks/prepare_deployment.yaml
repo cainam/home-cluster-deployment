@@ -47,9 +47,7 @@
 
   - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
     set_fact:
-      apps: "{{ apps | combine(
-         {gateway.value.namespace: 
-           {gateway.key: gateway_install | combine({'ports': gateway.value.additional_ports | default({}) | list, 'type': 'gateway' }, list_merge='append', recursive=true)}}, recursive=true)}}"
+      apps: "{{ apps | combine( {gateway.value.namespace: {gateway.key: gateway_install}}, recursive=true)}}"
     loop: "{{gateways | dict2items}}"
     loop_control:
       loop_var: gateway

@@ -23,6 +23,12 @@
 #    loop_control:
 #      loop_var: storage
 #  when: application.value.storage is defined
+
+- name: set application vars as facts
+  set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ application.value.vars | dict2items }}"
+  when: application.value.vars is defined  
     
 - block:
   - block:
@@ -136,6 +142,12 @@
     loop_control:
       loop_var: requires
   when: application.value.requires is defined
+
+- name: undef application vars again
+  set_fact:
+    "{{ item.key }}": "{{ undef() }}"
+  loop: "{{ application.value.vars | dict2items }}"
+  when: application.value.vars is defined  
 
 - name: "{{ name_prefix }} debug before vs preparation"
   debug:

@@ -1,6 +1,6 @@
 meshConfig:
   defaultConfig:
-    discoveryAddress: istiod.istio-system.svc:15012
+    discoveryAddress: {{ application.key }}.{{ namespace.key }}.svc:15012
     tracing:
       zipkin:
         address: jaeger-collector.tools:9411
@@ -26,28 +26,7 @@ meshConfig:
       - cookie
       - x-auth-request-groups
       port: 80
-      service: oauth2-proxy.auth.svc.cluster.local
-    name: oauth2-proxy
-  - envoyExtAuthzHttp:
-      headersToDownstreamOnDeny:
-      - content-type
-      - set-cookie
-      headersToUpstreamOnAllow:
-      - x-forwarded-access-token
-      - authorization
-      - x-auth-request-user
-      - x-auth-request-access-token
-      - path
-      - x-auth-request-email
-      - x-auth-request-preferred-username
-      includeAdditionalHeadersInCheck:
-        X-Auth-Request-Redirect: https://%REQ(:authority)%%REQ(:path)%
-      includeRequestHeadersInCheck:
-      - authorization
-      - cookie
-      - x-auth-request-groups
-      port: 80
-      service: oauth2-proxy-hydra.auth.svc.cluster.local
-    name: oauth2-proxy-hydra
+      service: {{ oauth2_proxy }}.auth.svc.cluster.local
+    name: {{ oauth2_proxy }}
   rootNamespace: null
   trustDomain: cluster.local

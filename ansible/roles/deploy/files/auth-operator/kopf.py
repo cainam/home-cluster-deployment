@@ -56,7 +56,7 @@ async def fun2(namespace, spec, body, logger, **kwargs):
       'client_name': 'test',
       'client_secret': client_secret,
       'grant_types': ["authorization_code","refresh_token"],
-      'redirect_uris': [redirect_url],
+      'redirect_uris': redirect_url.split(),
       'response_types': ["code", "id_token"],
       'scope': 'offline openid users.write users.read users.edit users.delete email',
       'token_endpoint_auth_method': 'client_secret_post'
