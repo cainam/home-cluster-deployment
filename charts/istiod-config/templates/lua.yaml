@@ -32,7 +32,7 @@ spec:
          "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
          inlineCode: |
             function envoy_on_request(request_handle)
-              request.handle:logInfo("info log")
+              request_handle:logInfo("info log")
               -- preserve authority from request for the response
               local authority = request_handle:headers():get(":authority")
               request_handle:logCritical("request: " .. authority)
