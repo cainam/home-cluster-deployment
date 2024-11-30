@@ -1,6 +1,7 @@
 software:
   istio:
-    version: 1.24.1
+    new_version: 1.24.1
+    version: 1.23.2
     installed:
       pattern: "istio"
     latest:

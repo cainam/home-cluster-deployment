@@ -143,9 +143,9 @@
       loop_var: requires
   when: application.value.requires is defined
 
-- name: undef application vars again
+- name: "{{ name_prefix }} undef application vars again"
   set_fact:
-    "{{ item.key }}": "{{ undef() }}"
+    "{{ item.key }}": !!null # "{{ undef() }}" doesn't work for facts, so nulling it instead
   loop: "{{ application.value.vars | dict2items }}"
   when: application.value.vars is defined  
 

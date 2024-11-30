@@ -36,6 +36,7 @@ spec:
               local authority = request_handle:headers():get(":authority")
               request_handle:logCritical("request: " .. authority)
               request_handle:streamInfo():dynamicMetadata():set("context", "host_requested", authority)
+              request.handle:logInfo("info log")
             end
             function envoy_on_response(response_handle)
                 local host = response_handle:streamInfo():dynamicMetadata():get("context")["host_requested"]
