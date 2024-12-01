@@ -57,6 +57,7 @@ gateway_install:
   subdir: manifests/charts/gateway
   branch: "{{ software.istio.version }}"
   chart: gateway
+  helm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:warning,lua:info"}'
   ports:
   - name: https
     port: 443
