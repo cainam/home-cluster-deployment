@@ -13,7 +13,7 @@ kind: ClusterConfiguration
 imageRepository: "{{ registry }}/k8s"
 controlPlaneEndpoint: "{{ controlPlaneEndpoint }}"
 networking:
- podSubnet: "10.244.0.0/16"
+ podSubnet: "{{ podSubnet }}"
 kubernetesVersion: "{{ k8s_version }}"
 ---
 kind: JoinConfiguration

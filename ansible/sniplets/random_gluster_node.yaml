@@ -1,0 +1,43 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+
+  tasks:
+  # Get cert info
+  - name: set title
+    set_fact:
+      title: "this is title"
+
+  - name: "{{ title }}"
+    debug:
+      msg: 'title: {{ title }}'
+
+  - name: get gluster nodes
+    shell: |
+      gluster pool list | awk '{print $2}' | grep -v "^Hostname$"  | sed -e "s/^localhost$/$(hostname)/g" 
+    register: gluster_nodes
+
+  - debug:
+      # msg: "gluster_nodes: \n{{ gluster_nodes | to_nice_yaml }}"
+      msg: "ansible_host: {{ item }} gluster_nodes: \n{{ hostvars[item]['gluster_nodes'].stdout_lines | to_nice_yaml }}"
+    #loop: "{{ hostvars[ groups['all'] ].ansible_host }}"
+    register: res_dbg
+    when: hostvars[item]['gluster_nodes']['stderr'] == '' and res_dbg is not defined
+    run_once: true
+    loop: "{{ groups['all'] }}"
+
+  - name: get seed
+    shell: echo $RANDOM
+    run_once: true
+    register: seed 
+
+  - set_fact:
+      selected_gluster_host: "{{ hostvars[item]['gluster_nodes'].stdout_lines | random(seed=seed.stdout) }}"
+    register: res
+    when: hostvars[item]['gluster_nodes']['stderr'] == '' and res is not defined
+    run_once: true
+    loop: "{{ groups['all'] }}"
+
+  - debug:
+      msg: "selected_gluster_host: {{ selected_gluster_host }}"

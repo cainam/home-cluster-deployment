@@ -22,6 +22,17 @@
     msg: "destination hosts:\n{{ dest }}"
   run_once: true
 
+- name: pg details
+  debug:
+    msg: "pg namespace:{{ application.value.requires | selectattr('type', 'match', 'postgresql')| map(attribute='namespace')}}
+    service: {{ application.value.requires | selectattr('type', 'match', 'postgresql')| map(attribute='name') }}
+    database: {{ application.value.requires | selectattr('type', 'match', 'postgresql')| map(attribute='config') | map(attribute='database') }}
+    username: {{ application.value.requires | selectattr('type', 'match', 'postgresql')| map(attribute='config') | map(attribute='username') }}
+    password: {{ application.value.requires | selectattr('type', 'match', 'postgresql')| map(attribute='config') | map(attribute='password') }}
+    "
+  when: application.value.requires is defined
+  run_once: true
+
 - block:
   - debug: var=inventory_hostname
   - name: ensure destination directory exists for templates
