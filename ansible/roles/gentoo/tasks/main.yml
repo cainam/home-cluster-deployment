@@ -78,11 +78,6 @@
   shell: /usr/sbin/update-ca-certificates
   when: ca.changed
 
-- name: get ip
-  shell: getent hosts $(hostname) | awk '{print $1}'
-  changed_when: false
-  register: myip
-
 - name: rc.conf
   lineinfile:
     path: /etc/rc.conf
@@ -313,9 +308,7 @@
     enabled: yes
     state: restarted
   loop:
-#    - net.wlan0
     - net.end0
-#    - ntp-client
     - chronyd
     - brickmount
     - keepalived
@@ -324,15 +317,11 @@
     - crio
     - glusterd 
     - kubelet
-    - lighttpd
     - syslog-ng
     - cronie
-#    - wait_for_internet
     - cpupower
     - sshd
     - iscsid
-#    - registry
-#    - lighttpd
   ignore_errors: yes
 
 - name: gluster

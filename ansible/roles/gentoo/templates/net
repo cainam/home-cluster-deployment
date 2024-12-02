@@ -1,4 +1,4 @@
-config_end0="{{ myip.stdout }} netmask 255.255.255.0"
+config_end0="{{ my_cluster_ip }} netmask 255.255.255.0"
 routes_end0="10.10.10.0/24  via end0"
 dns_servers_end0="192.168.178.1"
 ifplugd_end0=""

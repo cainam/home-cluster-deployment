@@ -119,7 +119,6 @@ TODO:
 - add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
 - error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - home-assistant: log file location should not be in /config, but seems not possible with configuration.yaml only using --log_file command line option but command line is hard-coded in docker image (/etc/services.d/home-assistant/run)
-- gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
