@@ -27,8 +27,8 @@ spec:
   - to:
     - operation:
         hosts:
-          - "*.my-lb.adm13"
-          - "my-lb.adm13"
-          - "adm13.dnshome.de"
+          - "*.{{ base_domain }}"
+          - "{{ base_domain }}"
+          - "{{ base_domain_ext }}"
         notPaths: ["/oauth2*","/hydra/*","/idp/*"]
 

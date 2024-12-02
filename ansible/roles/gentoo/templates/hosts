@@ -36,11 +36,8 @@
 10.10.10.23 k8s-3-int.adm13 k8s-3-int gentoo-binhost
 
 10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13
-192.168.4.100 my-lb.adm13
-192.168.4.101 ha.my-lb.adm13
-192.168.4.102 deconz.my-lb.adm13
-192.168.4.103 keycloak.my-lb.adm13
-192.168.4.104  open.my-lb.adm13
-192.168.4.105  dashboard.my-lb.adm13
-192.168.4.106 hydra.my-lb.adm13
+192.168.4.100 {{ base_domain }}
+192.168.4.101 ha.{{ base_domain }}
+192.168.4.104 open.{{ base_domain }}
+192.168.4.105 dashboard.{{ base_domain }}
 

@@ -12,14 +12,10 @@ Initially keycloak was used, but it turned out to be too resource intensive and 
 - two separate oauth2-proxys doesn't work, because istio allows only one CUSTOM AuthorizationPolicy per workload (gateway)
 - oauth2-proxy allows to configure two provider (allowing two different issuerURLs), but only the first is recognized (feature not implemented) https://github.com/oauth2-proxy/oauth2-proxy/issues/926
 - looked at WASM but future unclear (https://github.com/envoyproxy/envoy/issues/35420)
-- but got it finally working with an EnvoyFilter containing a Lua script modifying the location header for redirection
+- but got it finally working with an EnvoyFilter containing a Lua script modifying the location header for redirection and lua:info loglevel set via podAnnotation to gateway deployment 
 
 lua TODO: 
 - how to apply EnvoyProxy only for a certain domain or host requested?
-only critical is logged:
-  istioctl proxy-config log . --level lua:info
-  Options for --level are lua:debug, lua:info, lua:warning. Hope this helps
-
 
 ## hydra deployment
 a dedicated hydra-config helm chart is deployed

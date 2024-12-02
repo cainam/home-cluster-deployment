@@ -132,8 +132,8 @@
       dest: /etc/modprobe.d/
     - file: k8s.conf
       dest: /etc/modules-load.d/
-    - file: hosts
-      dest: /etc/
+#    - file: hosts
+#      dest: /etc/
 #    - file: patches
 #      dest: /etc/portage/
     - file: portage/
@@ -223,6 +223,8 @@
     dest: "{{ item.dest }}"
     backup: "{{ item.backup | default('yes') }}"
   loop:
+    - file: hosts
+      dest: /etc/
     - file: fstab
       dest: /etc/
     - file: make.conf

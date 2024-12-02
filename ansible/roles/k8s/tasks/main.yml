@@ -149,7 +149,7 @@
   - name: additional DNS entries and external CoreDNS IP
     shell: |
     
-      # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 my-lb.adm13\n\1    fallthrough\n\1}/g' | kubectl replace -f -
+      # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 {{ base_domain }}\n\1    fallthrough\n\1}/g' | kubectl replace -f -
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
 

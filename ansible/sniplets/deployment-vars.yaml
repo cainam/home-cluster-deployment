@@ -16,7 +16,7 @@ applications:
 #        prefix: /kiali
 #        rewrite: /kiali
 #      git_to_local_params: --fix_source=.image.repo=kiali/kiali-operator --fix_source=.image.tag=v1.68.0 --fix_source=.triggerPull.image=kiali/kiali:v1.68.0 
-      xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://my-lb.adm13/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
+      xhelm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL=https://{{ base_domain }}/prometheus/ --set alertmanager.enabled=false --set kube-state-metrics.autosharding.enabled=false
 
 #    deconz:
 #      git: https://github.com/cainam/k8s_at_home.git

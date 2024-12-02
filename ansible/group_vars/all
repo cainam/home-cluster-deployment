@@ -18,30 +18,13 @@ net:
   - /hydra/*
   - /idp/*
 
-  int:
-    domain: my-lb.adm13
-    oauth2_proxy: oauth2-proxy
-    oauth2_path: /oauth2-hydra
-    #istiod: istiod
-  ext:
-    domain: adm13.dnshome.de
-    oauth2_proxy: oauth2-proxy-ext
-    oauth2_path: /oauth2-ext
-    #istiod: istiod-ext
-
 base_domain: my-lb.adm13
 oauth2_path: /oauth2-hydra
 base_domain_ext: adm13.dnshome.de
 port_ext: 44354
-oauth2_path_ext: /oauth2-ext
 
 volumes_to_exempt:
-  - deconz
   - helm
-  - home_assistant
-  - k8s_at_home
-  - keycloak_data
-  - meinKram
   - registry
 
 default_gateway: gateway
@@ -57,7 +40,7 @@ gateway_install:
   subdir: manifests/charts/gateway
   branch: "{{ software.istio.version }}"
   chart: gateway
-  helm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:warning,lua:info"}'
+  helm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:error,lua:info"}'
   ports:
   - name: https
     port: 443
@@ -66,24 +49,11 @@ gateway_install:
 
 gateways:
   gateway:
-    domain: "{{ base_domain_ext }}"
+    domain: "{{ base_domain }}"
     hosts:
     - "{{ base_domain }}"
     - adm13.dnshome.de
     external_ip: 192.168.4.100
-    virtualservice_inject:
-      http:
-      - name: dummy
-        directResponse:
-          status: 598
-        match:
-        - uri:
-            prefix: /dummy
-  int:
-    domain: "{{ base_domain }}"
-    hosts:
-    - "{{ base_domain }}"
-    external_ip: 192.168.4.110
     virtualservice_inject:
       http:
       - name: dummy

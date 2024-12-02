@@ -122,7 +122,6 @@ TODO:
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - gluster peering - playbook runs no random node, but has to run only on a node part of the existing gluster
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
-- custom filter: depenencies (db + gateway)
 - dependencies: generalize waitdb initcontainer 
 - replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
@@ -136,20 +135,5 @@ TODO:
 - migrate prometheus-server volume to longhorn
 - split zigbee2mqtt to have config on gluster and db on longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-- split group/all vars to remove redundancies, e.g. to load net first and reuse then for gateways
-
-auth update:
-- Authorization policy per gateway
-- oauth2-proxy per ID provider, names to match in Authorization and extensionProviders: in isiod config
-- adm13.dnshome.de: have dedicated oauth2-proxy, hydra, idp for internet and local access
-- my-lb.adm13 as hosts: gateways + virtualservices
-1. auth policy for ext
-2. oauth2-proxy for ext
-3. istio cm with authprovider
-4. two authentication policies (post_installation)
-see auth.md and lua TODO
 
 - clean-up oauth/domain stuff in groups/all and remove usage of e.g. base_domain from everywhere
-
-
-

@@ -1,63 +1,54 @@
 config:
-  cookieSecret: "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU=" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
+  cookieSecret: "7Yb4qhHeNE74dMDIloVtx2EaWbUr-dM6H6APRbrQOR4=" # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview
   # cookieName: "_oauth2_proxy"    # Name of the cookie that oauth2-proxy creates, if not set defaults to "_oauth2_proxy"
   ssl_insecure_skip_verify: true
   configFile: |-
         email_domains = [ "*" ]        # Restrict to these E-Mail Domains, a wildcard "*" allows any email
         cookie_secret = "2I7BWFfNiFuBQdh4tEaFyuT8KnaPtNMMGLzP-uoG3YU="
         ssl_insecure_skip_verify = true
-        redirect_url = "https://my-lb.adm13/oauth2/callback"
-
+        redirect_url = "https://{{base_domain }}{{ oauth2_path }}/callback"
+        cookie_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}"]
+        whitelist_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}"]
+        errors_to_info_log = true
+        proxy_prefix = "/oauth2-hydra"
+        reverse_proxy = true
+        cookie_secure = true
 alphaConfig:
   enabled: true
   configData:
     providers:
-    - clientID: "test"       # IdP Client ID
-      clientSecret: "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0"   # IdP Client Secret
+    - clientID: "{{ auth.client_id }}"
+      clientSecret: "{{ auth.client_secret }}" # IdP Client Secret
       id: oidc-istio
       provider: oidc   # We use the generic 'oidc' provider
-      #loginURL: https://my-lb.adm13:2005/realms/test/protocol/openid-connect/auth
-      loginURL: https://keycloak.my-lb.adm13/realms/test/protocol/openid-connect/auth
-      redeemURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/token
-      profileURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
-      validateURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/userinfo
-      scope: "openid email"
+      profileURL: http://hydra-public.auth:4444/userinfo
+      scope: "email openid"
       # scope: "openid email profile groups"
-#      allowedGroups:
-#      - admins # List all groups managed at our your IdP which should be allowed access
-#      - test
-    # - infrateam
-    # - anothergroup
+      #allowedGroups:
+      #- admins # List all groups managed at our your IdP which should be allowed access
       oidcConfig:
-        userIDClaim: email  # Name of the claim in JWT containing the User ID
-        #emailClaim: email.  # Name of the clain in JWT containing the E-Mail
-        emailClaim: email  # Name of the clain in JWT containing the E-Mail
-        groupsClaim: groups # Name of the claim in JWT containing the Groups
-        extraAudiences: 
-        - test
+        userIDClaim: sub  # Name of the claim in JWT containing the User ID
+        emailClaim: sub
         audienceClaims:
         - aud
-        skipDiscovery: true # You can try using the well-knwon endpoint directly for auto discovery, here we won't use it
-        # issuerURL: https://my-lb.adm13:2005/realms/test
-        issuerURL: https://keycloak.my-lb.adm13/realms/test
-        jwksURL: http://keycloak.auth:1121/realms/test/protocol/openid-connect/certs
+        issuerURL: https://{{ base_domain }}/hydra
+        jwksURL: http://hydra.auth:1121/
     upstreamConfig:
       upstreams:
         - id: static_200
           path: /
           static: true
           staticCode: 200
+#          uri: https://open.my-lb.adm13/dummy
     # Headers that should be added to responses from the proxy
-    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
-      - name: X-Auth-Request-Preferred-Username
-        values:
-          - claim: preferred_username
-      - name: X-Auth-Request-Email
-        values:
-          - claim: email
+#    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
+#      - name: X-Auth-Request-Preferred-Username
+#        values:
+#          - claim: preferred_username
+#      - name: X-Auth-Request-Email
+#        values:
+#          - claim: email
 extraArgs:
-  cookie-secure: "false"
-  cookie-domain: "my-lb.adm13"   # Replace with your base domain
   cookie-samesite: lax
   cookie-expire: 12h               # How long our Cookie is valid
   auth-logging: true               # Enable / Disable auth logs
@@ -65,6 +56,5 @@ extraArgs:
   standard-logging: true           # Enable / Disable the standart logs
   show-debug-on-error: true        # Disable in production setups
   skip-provider-button: true       # We only have one provider configured (Keycloak)
-  silence-ping-logging: true       # Keeps our logs clean
-  whitelist-domain: "my-lb.adm13" # Replace with your base domain
+  silence-ping-logging: true       # do not log health checks
 

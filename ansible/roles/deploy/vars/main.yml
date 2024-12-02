@@ -106,7 +106,7 @@ applications:
       chart: oauth2-proxy
       files:
         values:
-          file: oauth2-proxy-config-hydra.yaml
+          file: oauth2-proxy-config.yaml
       network:
         svcPort: 80
         prefix: /oauth2-hydra
