@@ -8,7 +8,7 @@
 
 - name: "{{ gw_title }} - tls certificates for ingress gateway"
   shell: |
-    kubectl get secret --ignore-not-found=false -n "{{ namespace.key }}" "{{ gateway.key }}" 2>/dev/null >> /dev/null || kubectl create -n "{{ namespace.key }}" secret tls "{{ gateway.key }}"  --key="{{ cert_path }}/my-lb.adm13.key" --cert="{{ cert_path }}/my-lb.adm13.crt"
+    kubectl get secret --ignore-not-found=false -n "{{ namespace.key }}" "{{ gateway.key }}" 2>/dev/null >> /dev/null || kubectl create -n "{{ namespace.key }}" secret tls "{{ gateway.key }}"  --key="{{ cert_path }}/{{ base_domain }}.key" --cert="{{ cert_path }}/{{ base_domain }}.crt"
 
 - name: "{{ gw_title }} - configure gateway"
   shell: |

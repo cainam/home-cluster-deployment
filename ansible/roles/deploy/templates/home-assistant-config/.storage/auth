@@ -126,7 +126,7 @@
       {
         "id": "0a682c9a02a24ed1a3f66926bad31ac8",
         "user_id": "1e3d128e31a34f458f33b473c37725fd",
-        "client_id": "https://ha.my-lb.adm13/",
+        "client_id": "https://ha.{{ base_domain }}/",
         "client_name": null,
         "client_icon": null,
         "token_type": "normal",
@@ -143,7 +143,7 @@
       {
         "id": "2f38128fe4994ba8a36aaf472b794699",
         "user_id": "1e3d128e31a34f458f33b473c37725fd",
-        "client_id": "https://ha.my-lb.adm13/",
+        "client_id": "https://ha.{{ base_domain }}/",
         "client_name": null,
         "client_icon": null,
         "token_type": "normal",

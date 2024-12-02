@@ -3,7 +3,7 @@ permit_join: true
 frontend:
   port: 8080
   host: 0.0.0.0
-  url: https://open.my-lb.adm13/
+  url: https://open.{{ base_domain }}/
 mqtt:
   base_topic: zigbee2mqtt
   server: mqtt://mosquitto.home:1883

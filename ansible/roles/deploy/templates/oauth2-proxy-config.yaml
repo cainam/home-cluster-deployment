@@ -39,7 +39,7 @@ alphaConfig:
           path: /
           static: true
           staticCode: 200
-#          uri: https://open.my-lb.adm13/dummy
+#          uri: https://open.{{ base_domain }}/dummy
     # Headers that should be added to responses from the proxy
 #    injectResponseHeaders: # Send this headers in responses from oauth2-proxy
 #      - name: X-Auth-Request-Preferred-Username
