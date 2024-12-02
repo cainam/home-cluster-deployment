@@ -1,0 +1,19 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+
+  tasks:
+  - name: include software
+    include_vars: ../vars/software
+
+  - debug:
+      msg: |
+        {% for hname in hostvars %}
+            {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+        {%- endfor %}
+    run_once: true
+
+  - template:
+      src: jinja-template-linebreak.template
+      dest: /tmp/out

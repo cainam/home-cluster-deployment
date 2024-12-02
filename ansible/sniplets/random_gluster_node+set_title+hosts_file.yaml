@@ -1,0 +1,74 @@
+---
+- name: test
+  gather_facts: false
+  hosts: all
+
+  tasks:
+  - name: include software
+    include_vars: ../vars/software
+
+  - name: set title
+    set_fact:
+      title: "this is title"
+
+  - name: "{{ title }}"
+    debug:
+      msg: 'title: {{ title }}'
+
+  - name: get gluster nodes
+    shell: |
+      gluster pool list | awk '{print $2}' | grep -v "^Hostname$"  | sed -e "s/^localhost$/$(hostname)/g" 
+    register: gluster_nodes
+
+  - name: gentoo_build host
+    debug:
+      msg: "build_host: {{ hostvars | dict2items | map(attribute='value') | selectattr('gentoo_build','defined') | map(attribute='inventory_hostname') | first }}"
+      #msg: "build_host: {{ hostvars | map(attribute='gentoo_build') }}"
+    run_once: true
+
+  - name: get my cluster ip
+    shell: getent hosts $(hostname) | awk '{print $1}'
+    register: getemt_hosts
+
+  - name: set my_cluster_ip as fact
+    set_fact:
+      my_cluster_ip: "{{ getemt_hosts.stdout }}"
+
+  - name: print my_cluster_ip
+    debug:
+      msg: "my_cluster_ip:{{ my_cluster_ip }}"
+
+  - name: hosts
+    debug:
+      msg: "my_cluster_ip:{{ item.my_cluster_ip }} inventory_hostname: {{ item.inventory_hostname }} short name: {{ (item.inventory_hostname | split('.')) [0]}} "
+    loop: "{{ hostvars | dict2items  | map(attribute='value') | list }}"
+    run_once: true
+
+  - debug:
+      msg: |
+        {% for hname in hostvars %}
+            {{ hostvars[hname].my_cluster_ip }} {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+        {%- endfor %}
+    run_once: true
+
+  - debug:
+      msg: "ansible_host: {{ item }} gluster_nodes: \n{{ hostvars[item]['gluster_nodes'].stdout_lines | to_nice_yaml }}"
+    register: res_dbg
+    when: hostvars[item]['gluster_nodes']['stderr'] == '' and res_dbg is not defined
+    run_once: true
+    loop: "{{ groups['all'] }}"
+
+  - name: get seed
+    shell: echo $RANDOM
+    run_once: true
+    register: seed 
+
+  - set_fact:
+      selected_gluster_host: "{{ hostvars[item]['gluster_nodes'].stdout_lines | random(seed=seed.stdout) }}"
+    register: res
+    when: hostvars[item]['gluster_nodes']['stderr'] == '' and res is not defined
+    run_once: true
+    loop: "{{ groups['all'] }}"
+
+  - debug:
+      msg: "selected_gluster_host: {{ selected_gluster_host }}"

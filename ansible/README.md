@@ -122,7 +122,6 @@ TODO:
 - gentoo_build in inventory and gentoo-binhost in hosts - replace by configuration in global vars and create hosts from template
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
-- replace hard-coded by application vars: roles/deploy/templates/home-assistant-config/configuration.yaml
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - build all images from gentoo
 - configure tempo in kiali
@@ -132,3 +131,9 @@ TODO:
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 
+name: get ip
+  shell: getent hosts $(hostname) | awk '{print $1}'
+  changed_when: false
+  register: myip
++
+my_cluster_ip => is it the same??

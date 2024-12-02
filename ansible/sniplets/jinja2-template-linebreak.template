@@ -1,0 +1,27 @@
+{% for hname in hostvars +%}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor %}
+
+and the others
+
+{% for hname in hostvars %}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor %}
+
+{%+ for hname in hostvars %}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor %}
+
+{% for hname in hostvars %}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{%+ endfor %}
+
+{% for hname in hostvars %}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor +%}
+
+{%- for hname in hostvars %}
+here the ip  {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor %}
+
+10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13

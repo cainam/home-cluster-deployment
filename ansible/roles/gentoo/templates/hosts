@@ -31,9 +31,13 @@
 # APNIC, LACNIC, RIPE NCC, or AfriNIC.)
 #
 
-10.10.10.21 k8s-1-int.adm13 k8s-1-int
-10.10.10.22 k8s-2-int.adm13 k8s-2-int
-10.10.10.23 k8s-3-int.adm13 k8s-3-int gentoo-binhost
+#10.10.10.21 k8s-1-int.adm13 k8s-1-int
+#10.10.10.22 k8s-2-int.adm13 k8s-2-int
+#10.10.10.23 k8s-3-int.adm13 k8s-3-int gentoo-binhost
+
+{% for hname in hostvars +%}
+{{ hostvars[hname].my_cluster_ip }} {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo_build' in hostvars[hname] %}gentoo-binhost{% endif %}
+{% endfor %}
 
 10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13
 192.168.4.100 {{ base_domain }}
