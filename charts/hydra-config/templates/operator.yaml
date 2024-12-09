@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        application: auth
+        {{- include "infopage.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}
       volumes:
