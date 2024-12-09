@@ -3,7 +3,7 @@
 . set_env.sh
 
 build_directory="/data/build-envoy"
-original_image="istio-system/proxyv2:1.23.2"	
+original_image="istio-system/proxyv2:1.24.1"	
 new_image_suffix="gentoo"
 
 [ ! -d "${build_directory}" ] && mkdir "${build_directory}"
@@ -23,7 +23,7 @@ rm Dockerfile
 
 git clone https://github.com/istio/proxy.git
 cd proxy
-git checkout release-1.23
+git checkout release-1.24
 
 echo "build --define tcmalloc=gperftools # in .bazelrc" >> .bazelrc
 
@@ -32,7 +32,7 @@ build_cache="${build_directory}/cache"
 
 podman run -it --rm -e CC=/usr/bin/clang -e CXX=/usr/bin/clang++ -v "${build_cache}":/root/.cache -v $PWD:$PWD --workdir $PWD debian:bazel bash -c "bazel build --verbose_failures --strip=always --config=sizeopt --noenable_bzlmod -- //:envoy && find bazel-out/ -type f -name envoy -exec cp -dp {} . \;"
 
-# strip ./envoy # change this in the build command to exclude during build already, check after next full rebuild
+strip ./envoy # change this in the build command to exclude during build already, check after next full rebuild
 
 echo "FROM ${original_image}
 
