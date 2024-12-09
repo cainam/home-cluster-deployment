@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "infopage.selectorLabels" . | nindent 8 }}
+        {{- include "operator.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}
       volumes:
