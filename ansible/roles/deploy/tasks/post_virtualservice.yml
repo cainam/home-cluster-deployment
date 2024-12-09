@@ -21,12 +21,12 @@
         "route":[{"destination":{
            "host":"{{ vs.network.svcName | default(vs.application) }}.{{ vs.namespace }}.svc.cluster.local"{% if vs.network.svcPort is defined %},
            "port":{"number":{{ vs.network.svcPort }} }{% endif %}}}],
-        "match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application + "/")}}"}}] 
+        "match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application )}}/"}}] 
         {% if vs.network.addition is defined %},{{ vs.network.addition }} {% endif %} 
       },{
         "name":"{{ vs.application }}-redirect",
         "match":[{"uri":{"prefix":"{{ vs.network.prefix | default("/" + vs.application) }}"}}],
-        "redirect":{"uri":"{{ vs.network.prefix | default("/" + vs.application + "/")}}"}
+        "redirect":{"uri":"{{ vs.network.prefix | default("/" + vs.application )}}/"}
       } ]' | \
       kubectl apply -f -
     register: vs_setup

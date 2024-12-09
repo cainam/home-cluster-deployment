@@ -116,8 +116,6 @@ Networking:
 
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
-- add simple echo server via helm: https://github.com/mendhak/docker-http-https-echo
-- error route_not_found in istiod access log (404) using a subdomain (root cause not found, switching to dedicated IP for subdomain for dyndns usage too). Same happened with multiple gateways, there solved by using individual certificates per domain
 - home-assistant: log file location should not be in /config, but seems not possible with configuration.yaml only using --log_file command line option but command line is hard-coded in docker image (/etc/services.d/home-assistant/run)
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
@@ -125,14 +123,6 @@ TODO:
 - build all images from gentoo
 - configure tempo in kiali
 - install grafana
-- remove auth policy from helm and deploy via Ansible (or merge with hydra chart) and consider adm13.dnshome.de + my-lb.adm13 as hosts
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-
-name: get ip
-  shell: getent hosts $(hostname) | awk '{print $1}'
-  changed_when: false
-  register: myip
-+
-my_cluster_ip => is it the same??

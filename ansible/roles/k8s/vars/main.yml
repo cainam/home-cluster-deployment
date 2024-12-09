@@ -1,6 +1,6 @@
 ---
 k8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
-k8s_version: v1.31.1
+k8s_version: v1.31.2
 controlPlaneEndpoint: "k8s.adm13:7443"
 
 images:

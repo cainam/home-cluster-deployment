@@ -44,19 +44,19 @@
     loop_var: gateway
   when: (gateway.value.namespace| default(default_gateway_namespace)) == namespace.key
 
-- name: "{{ post_inst }} - apply VirtualService application configuration"
-  shell: |
-    echo  "update gateway {{ gateway.key }} in namespace {{ namespace.key }} with application {{ gateway.value.VirtualService }} in namespace {{ app_ns.key }}"
-    kubectl get -o yaml vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" | \
-    yq -y 'del(.spec.http[]? | select(.name=="'"{{ app_vs.key }}"'"))' | \
-    yq -y '.spec.http += [{"name":"{{ vs.value.application }}","rewrite":{"uri":"{{ vs.value.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ vs.value.network.svcName | default(vs.value.application) }}.{{ vs.value.namespace }}.svc.cluster.local"{% if vs.value.network.svcPort is defined %},"port":{"number":{{ vs.value.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ vs.value.network.prefix | default("/" + vs.value.application) }}"}}] {% if vs.value.network.addition is defined %},{{ vs.value.network.addition }} {% endif %} }]' | \
-    kubectl apply -f -
-  register: vs_setup
-  loop: "{{ gateway.value.VirtualService | dict2items}}"
-  loop_control:
-    loop_var: vs
-##    loop_var: app_ns
-  when: gateway.value.VirtualServicXXe is defined
+#- name: "{{ post_inst }} - apply VirtualService application configuration"
+#  shell: |
+#    echo  "update VirtualService {{ gateway.key }} in namespace {{ namespace.key }} with application {{ gateway.value.VirtualService }} in namespace {{ app_ns.key }}"
+#    kubectl get -o yaml vs -n "{{ gateway.value.namespace }}" "{{ gateway.key }}" | \
+#    yq -y 'del(.spec.http[]? | select(.name=="'"{{ app_vs.key }}"'"))' | \
+#    yq -y '.spec.http += [{"name":"{{ vs.value.application }}","rewrite":{"uri":"{{ vs.value.network.rewrite | default("/") }}" },"route":[{"destination":{"host":"{{ vs.value.network.svcName | default(vs.value.application) }}.{{ vs.value.namespace }}.svc.cluster.local"{% if vs.value.network.svcPort is defined %},"port":{"number":{{ vs.value.network.svcPort }} }{% endif %}}}],"match":[{"uri":{"prefix":"{{ vs.value.network.prefix | default("/" + vs.value.application) }}"}}] {% if vs.value.network.addition is defined %},{{ vs.value.network.addition }} {% endif %} }]' | \
+#    kubectl apply -f -
+#  register: vs_setup
+#  loop: "{{ gateway.value.VirtualService | dict2items}}"
+#  loop_control:
+#    loop_var: vs
+###    loop_var: app_ns
+#  when: gateway.value.VirtualServicXXe is defined
 
 - name: "{{ post_inst }} - output of VirtualService application configuration"
   debug:
