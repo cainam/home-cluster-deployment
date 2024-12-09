@@ -23,7 +23,7 @@ Create chart name and version as used by the chart label.
 Selector labels
 */}}
 {{- define "operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "operator.name" . }}
+app.kubernetes.io/name: {{ .Values.operator.name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
