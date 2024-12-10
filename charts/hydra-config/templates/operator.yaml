@@ -8,11 +8,11 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      application: auth
+      {{- include "operator.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        application: auth
+        {{- include "operator.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}
       volumes:
@@ -22,7 +22,7 @@ spec:
       containers:
       - name: "{{ .Values.operator.name }}"
         image: "{{ .Values.operator.image }}:{{ .Values.operator.tag }}"
-        command:
+        command: 
         - kopf
         args:
         - run
@@ -49,3 +49,4 @@ spec:
         volumeMounts:
         - mountPath: /app
           name: "{{ .Values.operator.name }}"
+
