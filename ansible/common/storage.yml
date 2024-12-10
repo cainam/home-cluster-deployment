@@ -54,7 +54,7 @@
             - ReadWriteMany
           capacity:
             storage: "{{ storage.size }}"
-          storageClassName: ""
+          storageClassName: local
           #persistentVolumeReclaimPolicy: Delete
           persistentVolumeReclaimPolicy: Retain
           volumeMode: Filesystem
