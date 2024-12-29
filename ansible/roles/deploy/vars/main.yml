@@ -247,7 +247,9 @@ applications:
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}" --set persistence.storageClass=longhorn --set persistence.size=2Gi --set postgresql.config.listen_addresses="'*'"
+      helm_options: | 
+        --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}" --set persistence.storageClass=longhorn --set persistence.size=2Gi --set postgresql.config.listen_addresses="'*'" --set postgresql.pghba='host    all             all             {{ podSubnet }}           trust
+        host    all             all             127.0.0.1/32           trust'
       git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres 
       storage: 
       - name: data-postgresql-0
@@ -273,7 +275,7 @@ applications:
       git: https://github.com/longhorn/longhorn.git
       subdir: chart
       branch: v1.7.2
-      elm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
+      lm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
       xxhelm_options: --set defaultSettings.logLevel=Trace --set namespaceOverride=storage
       elm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1
       helm_options: --set defaultSettings.logLevel=Info

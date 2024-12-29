@@ -1,7 +1,8 @@
 - block:
     - name: determine gluster hosts fact
       set_fact:
-        gluster_hosts: "{{ hostvars.keys()|list }}"
+        gluster_hosts: "{{ groups['all']|list }}"
+        # gluster_hosts: "{{ hostvars.keys()|list }}"
 
     - debug: var=ansible_search_path
 
