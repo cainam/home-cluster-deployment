@@ -20,10 +20,7 @@
     source: "{{ item.source }}"
     tag: "{{ item.tag | default(omit) }}"
     section: "{{ item.section | default(omit) }}"
-#  shell: |
-#    set -x
-#    echo "{{ item.platform | default(default_platform) }} {{ item.source }}:{{ item.tag | default('latest') }} {{ item.section | default("") }}" | pull-tag-push.sh
-#  register: image2local
+    image_name: "{{ item.name | default(omit) }}"
   loop: "{{ images  }}"
 
 - name: pull, tag and push k8s images

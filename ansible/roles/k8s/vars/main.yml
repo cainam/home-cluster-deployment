@@ -10,3 +10,6 @@ images:
 - source: docker.io/library/registry
   tag: "{{ software.registry.version }}"
   section: /local
+- source: local
+  name: MyBase
+  

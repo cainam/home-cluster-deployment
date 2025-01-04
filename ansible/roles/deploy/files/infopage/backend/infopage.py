@@ -79,6 +79,17 @@ def software(name):
         raw += "\n error while fetching information: "+str(exc.response.status_code)
 
 
+    elif sw["software"][item]["latest"]["type"] == "github-branches":
+      try:
+        vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/releases/latest") # | jq .tag_name
+        vers.raise_for_status()
+        raw += "\n  github branch version: "+str(vers.json()[-1]['name'] )
+        content_item.append([vers.json()[-1]['name']])
+      except requests.exceptions.HTTPError as exc:
+        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        raw += "\n error while fetching information: "+str(exc.response.status_code)
+
+
     elif sw["software"][item]["latest"]["type"] == "dockerhub":
       dockerhub_base_url = "https://hub.docker.com/v2/repositories/"
       digest = requests.get(dockerhub_base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tags/latest")

@@ -132,3 +132,5 @@ TODO:
 - auth-operator: no action when started after hydra, but has to execute a first check at startup
 - integrate custom build (ha) in pipeline
 - log and inspect all incoming flows
+- security: add to build
+- security: log all incoming connections on gateway
