@@ -28,8 +28,6 @@
   import_tasks: prepare_images.yml
   delegate_to: "{{ selected_host }}"
   run_once: true
-#  tags:
-#  - k8s_images
 
 - name: install cluster if needed
   include_tasks: init.yml

@@ -116,7 +116,6 @@ Networking:
 
 TODO: 
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
-- home-assistant: log file location should not be in /config, but seems not possible with configuration.yaml only using --log_file command line option but command line is hard-coded in docker image (/etc/services.d/home-assistant/run)
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
@@ -126,7 +125,10 @@ TODO:
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-
+- Longhorn I/O error: high CPU?
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - infopage: click on href to delete image results in new-tab, but no tab should be opened
+- auth-operator: no action when started after hydra, but has to execute a first check at startup
+- integrate custom build (ha) in pipeline
+- log and inspect all incoming flows

@@ -54,7 +54,7 @@ software:
         repo: library/python
         arch: arm64
   helm:
-    version: 3.16.2
+    version: 3.16.4
     latest:
       type: dockerhub
       params:
