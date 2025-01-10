@@ -4,6 +4,11 @@
 - simple status page using FastAPI which async calls to fetch information from the systems
 - EnvoyFilter with Lua script to modify authentication responses - really cool!
 
+Challenges:
+### recursion with playbooks
+challenge: images are build using playbooks, but they have downstream dependencies and within the build another build has to be triggered first, but there is no task level scope of variables in Ansible
+solution: a combination of dynamic variables and a stack of them ensures that a build within a build can be performed 
+
 # notes on this ansible playbook
 
 Usage example: 
@@ -134,3 +139,4 @@ TODO:
 - log and inspect all incoming flows
 - security: add to build
 - security: log all incoming connections on gateway
+- image build: exclude images already processed

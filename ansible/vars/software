@@ -110,11 +110,15 @@ software:
       params:
         repo: kubernetes/dashboard
   alpine:
-    version: v3.20.3
+    version: v3.21.2
     latest:
-      type: github-branches
-      params:
+      typeg: github-branches
+      paramsg:
         repo: alpinelinux/docker-alpine
+      type: dockerhub
+      params:
+        repo: library/alpine
+        arch: arm64
   longhorn:
     version: v1.7.2
     installed:

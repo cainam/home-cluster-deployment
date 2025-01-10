@@ -1,18 +1,20 @@
 - block:
-    - name: determine gluster hosts fact
-      set_fact:
-        gluster_hosts: "{{ groups['all']|list }}"
-        # gluster_hosts: "{{ hostvars.keys()|list }}"
+  - name: determine gluster hosts fact
+    set_fact:
+      gluster_hosts: "{{ groups['all']|list }}"
+      # gluster_hosts: "{{ hostvars.keys()|list }}"
 
-    - debug: var=ansible_search_path
+  - debug: var=ansible_search_path
 
-    - name: set gluster ips and number of replicas
-      set_fact:
-        replicas: "{{ gluster_hosts | length }}"
+  - name: set gluster ips and number of replicas
+    set_fact:
+      replicas: "{{ gluster_hosts | length }}"
 
-    - name: debug
-      debug:
-        msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}"
+  - name: debug
+    debug:
+      msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}"
+  - name: "include secrets"
+    include_vars: "{{ local_only }}/secrets"
   run_once: true
 
 - block:
@@ -28,7 +30,9 @@
     debug:
       msg: "my_cluster_ip:{{ my_cluster_ip }}"
 
-  - name: "include secrets"
-    include_vars: "{{ local_only }}/secrets"
-    run_once: true
+  - name: "ensure that {{ remote_temp }}(remote_temp) exists"
+    file:
+      path: "{{ remote_temp }}"
+      recurse: true
+      state: directory
 

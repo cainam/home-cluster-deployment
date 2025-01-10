@@ -1,0 +1,20 @@
+- name: prepare image information (define name where missing)
+  vars: # keep .name if it exists, otherwise take the last part of the source image
+    image_new: "{{ image | combine({'name': image.name | default( (image.source | default('')).split('/')|last) }) }}"
+  set_fact:
+    images_new: "{{ images_new | default([]) + [image_new] }}"
+  loop: "{{ images }}"
+  loop_control:
+    loop_var: "image"    
+- set_fact:
+    images: "{{ images_new }}"
+- debug:
+    msg: "updated list of images\n{{ images | to_nice_yaml }}"
+
+- name: handle images
+  include_tasks: common/image.yaml
+  vars:
+    image: "image0"
+  loop: "{{ images }}"
+  loop_control:
+    loop_var: "image0"

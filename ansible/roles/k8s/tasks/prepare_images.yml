@@ -6,23 +6,10 @@
 - debug:
     msg: "images to download: {{ required_images.stdout_lines }}"
 
-- name: check if container registry is available
-  shell: curl -s -X GET https://{{ registry }}/v2/_catalog | jq 'has("repositories")'
-  register: check_registry
-  
-- name: restart registry
-  shell: /etc/init.d/registry restart
-  when: check_registry.stdout != "true"
-
 - name: handle additional images
-  include_tasks: common/image.yaml
-  vars:
-    source: "{{ item.source }}"
-    tag: "{{ item.tag | default(omit) }}"
-    section: "{{ item.section | default(omit) }}"
-    image_name: "{{ item.name | default(omit) }}"
-  loop: "{{ images  }}"
-
+  import_tasks: common/images.yaml
+  failed_when: true
+  
 - name: pull, tag and push k8s images
   shell: |
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh

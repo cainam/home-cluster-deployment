@@ -1,0 +1,24 @@
+- name: recursion 
+  gather_facts: false
+  hosts: all
+  vars:
+    d:
+    - name: a
+      info: a
+      requires:
+      - b
+    - name: b
+      info: b 
+
+  tasks:
+  - block:
+    - debug:
+        msg: "d:\n{{ d | to_nice_yaml(2) }}"   
+    - name: "include again"
+      vars:
+        item_var: "outer"
+      include_tasks: recursion.yaml
+      loop: "{{ d }}"
+      loop_control:
+        loop_var: "outer"
+    run_once: true 

@@ -1,0 +1,37 @@
+images:
+- type: fetch
+  source: docker.io/alpine/helm
+  tag: "{{ software.helm.version }}"
+  section: local
+- type: script
+  name: my_py
+  tag: 3
+  section: local
+  requires:
+  - my_base
+  command: |
+    cat > Dockerfile << EOF
+    FROM my_base:{{ software.alpine.version }}
+    RUN apk add --no-cache gnupg openssl tar xz binutils python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
+    EOF
+    podman image build . --tag "${image}" && podman image push "${image}"
+- type: fetch
+  source: docker.io/library/registry
+  tag: "{{ software.registry.version }}"
+  section: local
+- type: script
+  name: my_base
+  tag: "{{ software.alpine.version }}"
+  section: local
+  command: |
+    version="{{ software.alpine.version }}" 
+    version_short=$(echo "${version}" | sed -e 's/^v//g')
+    version_tag=${version%.*}
+    minirootfs="alpine-minirootfs-${version_short}-aarch64.tar.gz"
+    curl -L -O "https://github.com/alpinelinux/docker-alpine/raw/refs/heads/${version_tag}/aarch64/${minirootfs}"
+    cat > Dockerfile << EOF
+    FROM scratch
+    ADD ${minirootfs} /
+    CMD ["/bin/sh"]
+    EOF
+    podman image build . --tag "${image}" && podman image push "${image}"

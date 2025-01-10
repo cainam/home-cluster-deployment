@@ -13,12 +13,16 @@
     registry: "{{ registry }}"
   pre_tasks:
   - name: include software
-    include_vars: vars/software
+    include_vars: "{{ item }}"
     tags:
     - deploy
     - k8s
     - testing
     - gentoo
+    loop:
+    - vars/software
+    - vars/images
+    run_once: true
   - name: setup # to gather facts only when needed
     setup:
     tags:

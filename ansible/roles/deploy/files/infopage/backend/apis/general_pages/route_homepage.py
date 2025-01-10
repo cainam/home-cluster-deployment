@@ -111,11 +111,11 @@ def registry_images(request: Request):
 
   return templates.TemplateResponse("general_pages/images_list.html",{"request":request, "images_list": images_list, "name": "registry images" } )
 
-@general_pages_router.get("/software")
-#async def software(request: Request):
-def software(request: Request, name: str | None = None):
-    raw, content = infopage.software()
-    return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
+# @general_pages_router.get("/software")
+# #async def software(request: Request):
+# def software(request: Request, name: str | None = None):
+#     raw, content = infopage.software()
+#     return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
 
 @general_pages_router.get("/software")
 #async def software(request: Request):

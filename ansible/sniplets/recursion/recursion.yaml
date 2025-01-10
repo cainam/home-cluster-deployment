@@ -1,0 +1,30 @@
+- name: instantiate 
+  debug:
+    msg: "item_var:{{item_var}}, info: {{ lookup('vars', item_var).info }}"    
+
+- block:
+  - set_fact:
+      t: "{{ lookup('vars', item_var) }}"
+      ivar: "{{ ivar|default([]) + [item_var] }}"
+  - debug: var=ivar
+  - name: "include again"
+    vars:
+      item_var: "{{ 'loop_'~t.name }}"        
+    include_tasks: recursion.yaml
+    loop: "{{ d | selectattr('name', 'defined') | selectattr('name', 'in', t.requires|default([]) ) }}"
+    loop_control:
+      loop_var: "{{ 'loop_'~t.name }}"
+
+- set_fact:
+    p: "{{ ivar[-1] }}"
+#- set_fact:
+    ivar: "{{ ivar[0:-1] }}"
+  vars:
+    p: "{{ ivar[-1] }}"
+- name: terminate 
+  debug:
+    msg: "post include: {{ p }}, ivar: {{ ivar }}"
+- name: terminate 
+  debug:
+    msg: "item_var:{{p}}, info: {{ lookup('vars', p).info }}"
+  

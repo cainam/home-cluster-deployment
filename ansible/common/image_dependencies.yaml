@@ -1,0 +1,30 @@
+- block:
+  - debug: var=image_local
+  - name: "{{ title }} create dynamic variable to preserve the image information local to this instance of playbook execution"
+    set_fact:
+      preserve_image: "{{ 'image_'~image_local.name }}"        
+  - debug: var=preserve_image
+  - debug: var=my_loop_var
+  - set_fact:
+      "{{ preserve_image }}": "{{ image }}"
+  - debug: var={{ preserve_image }}
+  - set_fact:
+      image: "{{ images | selectattr('name', 'defined') | selectattr('name', 'match', lookup('vars', my_loop_var) ) }}"  
+      image2: "{{ images | selectattr('name', 'defined') | selectattr('name', 'match', lookup('vars', my_loop_var) ) }}"  
+  - debug:
+      msg: "{{ images | selectattr('name', 'defined')  }}"
+  - debug:
+      msg: "{{ images | selectattr('name', 'defined') | selectattr('name', 'match', lookup('vars', my_loop_var) ) }}"
+  - debug:
+      msg: "local_image: {{ preserve_image }}, image for recursion: {{ image }}\nimage2:{{ image2 | to_nice_yaml }}"
+
+  - name: "{{ title }} handle required base images"
+    vars:
+      image: "{{ image2 | first }}"
+    include_tasks: common/image.yaml
+
+  - set_fact:
+      image: "{{ preserve_image }}"
+  - debug:
+      msg: "image variable reset to\n{{ image | to_nice_yaml }}"
+    failed_when: false
