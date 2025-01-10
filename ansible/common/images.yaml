@@ -15,6 +15,7 @@
   include_tasks: common/image.yaml
   vars:
     image: "image0"
+  when: limit_images is not defined or image0.name is in limit_images
   loop: "{{ images }}"
   loop_control:
     loop_var: "image0"

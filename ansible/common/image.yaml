@@ -1,4 +1,3 @@
-# recursive dependencies
 # check if exists and add enforced build
 
 - block:
@@ -25,38 +24,17 @@
         - i.type != 'script' or ( i.type == 'script' and i.command is defined)
         - i.type != 'script' or ( i.type == 'script' and i.name is defined)
 
-  # create local dict, with name taken from source if missing
-  #- debug: var=bv
-  #- name: "{{ title }} define image_local"
-    #set_fact:
-      #"{{ 'local_'~ name.name}}": "{{ image }}"
-    #vars:
-      #name: {'name': "{{ image.name }}" }
-    #when: image.name is defined
-  #- set_fact:
-      #"{{ 'local_'~ name.name}}": "{{ image | combine(name) }}"
-    #vars:
-      #name: {'name': "{{ image.source.split('/') | last }}" }
-    #when: image.name is not defined
-  #- debug:
-      #msg: "image to be processed:\n{{ lookup('vars', 'local_'~ image_local.name) | to_nice_yaml}}"
-  #- set_fact:
-  #    title: "manage image {{ lookup('vars', image).name }} -"
+  - set_fact:
+      t: "{{ lookup('vars', image) }}"
+      var_stack: "{{ (var_stack | default([])) + [image] }}"
 
-  # start recursion for downstream images
-
-  - block:
-    - set_fact:
-        t: "{{ lookup('vars', image) }}"
-        var_stack: "{{ (var_stack | default([])) + [image] }}"
-
-    - name: "{{ title }} handle required base images"
-      include_tasks: common/image.yaml
-      vars:
-        image: "{{ 'loop_'~t.name }}"
-      loop: "{{ images | selectattr('name', 'defined') | selectattr('name', 'in', t.requires|default([]) ) }}"
-      loop_control:
-        loop_var: "{{ 'loop_'~t.name }}"
+  - name: "{{ title }} handle required base images"
+    include_tasks: common/image.yaml
+    vars:
+      image: "{{ 'loop_'~t.name }}"
+    loop: "{{ images | selectattr('name', 'defined') | selectattr('name', 'in', t.requires|default([]) ) }}"
+    loop_control:
+      loop_var: "{{ 'loop_'~t.name }}"
   
   - name: "{{ title }} set vars to complete the image"
     set_fact:

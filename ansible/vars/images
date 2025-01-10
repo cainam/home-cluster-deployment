@@ -1,7 +1,17 @@
 images:
-- type: fetch
-  source: docker.io/alpine/helm
+- type: script
+  name: helm
   tag: "{{ software.helm.version }}"
+  requires:
+  - my_base
+  command: |
+    cat > Dockerfile << EOF
+    FROM my_base:{{ software.alpine.version }}
+    RUN curl -s https://get.helm.sh/helm-v{{ software.helm.version }}-linux-{{ default_platform }}.tar.gz  | tar -xz && mv linux-{{ default_platform }}/helm /usr/bin/helm && chmod +x /usr/bin/helm && rm -rf linux-{{ default_platform }}
+    ENTRYPOINT ["helm"]
+    CMD ["--help"]
+    EOF
+    podman image build . --tag "${image}" && podman image push "${image}"
   section: local
 - type: script
   name: my_py
@@ -12,7 +22,7 @@ images:
   command: |
     cat > Dockerfile << EOF
     FROM my_base:{{ software.alpine.version }}
-    RUN apk add --no-cache gnupg openssl tar xz binutils python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
+    RUN apk add --no-cache gnupg openssl xz python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
 - type: fetch
@@ -32,6 +42,7 @@ images:
     cat > Dockerfile << EOF
     FROM scratch
     ADD ${minirootfs} /
+    RUN apk add --no-cache tar binutils curl
     CMD ["/bin/sh"]
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"

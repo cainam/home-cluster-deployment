@@ -7,6 +7,10 @@
     msg: "images to download: {{ required_images.stdout_lines }}"
 
 - name: handle additional images
+  vars:
+    limit_images:
+    - helm
+    - registry
   import_tasks: common/images.yaml
   failed_when: true
   

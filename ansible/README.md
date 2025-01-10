@@ -130,7 +130,7 @@ TODO:
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-- Longhorn I/O error: high CPU?
+- Longhorn I/O error: high CPU? - reboot solves, but also restart of engine-image
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - infopage: click on href to delete image results in new-tab, but no tab should be opened
@@ -140,3 +140,4 @@ TODO:
 - security: add to build
 - security: log all incoming connections on gateway
 - image build: exclude images already processed
+- image build: limit applications to what is needed (k8s + deploy)

@@ -67,11 +67,7 @@
   # Use the info
   - name: debug
     debug:
-      msg: 'sha256:{{ __k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}'
-
-  - name: dbg
-    debug:
-      msg: "cert_key:{{cert_key}} token:{{token}}"
+      msg: 'sha256:{{ __k8s_pki_ca["public_key_fingerprints"]["sha256"] | replace(":","") }}\ncert_key:{{cert_key}} token:{{token}}'
 
   - name: populate join vars to all hosts
     set_fact: 
