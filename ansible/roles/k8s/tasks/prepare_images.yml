@@ -11,6 +11,7 @@
     limit_images:
     - helm
     - registry
+    - my_ha
   import_tasks: common/images.yaml
   failed_when: true
   

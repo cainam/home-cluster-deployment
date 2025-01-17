@@ -46,3 +46,51 @@ images:
     CMD ["/bin/sh"]
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
+- type: script
+  name: my_ha
+  tag: "{{ software.home_assistant.version }}"
+  section: local
+  requires:
+  - my_py
+  command: |
+    git clone  --depth=1 -b "{{ software.home_assistant.version }}" https://github.com/home-assistant/core.git
+    cd core
+    git clone -b master https://github.com/home-assistant/docker-base.git
+    
+    # ENV (merging from docker-base and turing ARGS into ENV) + removing uv version as strict dependency
+    sed -i -e '/QEMU/d' Dockerfile    
+    docker_base_env=$(awk -v RS= -v ORS='\n\n' '/ENV/'  docker-base/alpine/Dockerfile | grep -v -e "^#" -e ^ENV | tr '\n' ' ')
+    docker_base_args=$(awk -v RS= -v ORS='\n\n' '/ARG/' docker-base/alpine/Dockerfile | grep -v -e "^$" -e "^#" -e 'WORKDIR' -e "^ARG" | sed -e 's/^\s\+//g' | awk '{print $1}' | while read v; do grep "$v" docker-base/alpine/build.yaml; done | sed -e 's/^\s\+//g' -e 's/: /=/g' | tr '\n' ' ')    
+    sed -e 's/uv==\([0-9]\|\.\)\+/uv/g' -e 's/UV_SYSTEM_PYTHON=true/UV_SYSTEM_PYTHON=false/g' -e 's#^ENV#ENV UV_HTTP_TIMEOUT=120 VIRTUAL_ENV=/py_env PATH="/py_env/bin:$PATH" \\\n'"${docker_base_env} ${docker_base_args}"'\\\n  #' Dockerfile > Dockerfile.ha
+    env_full=$(awk -v RS= -v ORS='\n\n' '/ENV /' Dockerfile.ha | grep -v "^#" | tr '\n' ' ')
+    
+    mv Dockerfile Dockerfile.org
+    from=$(grep ^FROM Dockerfile.ha) # multi-stage dockerfile
+    sed -i -e '/^FROM /s#$# AS build\nRUN python -m venv --system-site-packages /py_env \&\& . /py_env/bin/activate\n#' Dockerfile.ha # build image and virtual env for python
+    sed -i -e "s%^COPY rootfs%RUN find /py_env -name '*.so*' -exec strip {} \\\; \&\& source /py_env/bin/activate \&\& pip uninstall --yes uv\n\n${from}\n${env_full}\nCOPY rootfs%" Dockerfile.ha # strip libraries and remove uv
+    echo "COPY --from=build /py_env /py_env" >> Dockerfile.ha
+    echo "COPY --from=build /usr/src /usr/src" >> Dockerfile.ha
+
+    awk -v RS= -v ORS='\n\n' '/RUN|ENTRYPOINT|WORKDIR/' docker-base/alpine/Dockerfile | sed -e 's#rm -rf /usr/src/\*#for d in /usr/src/*; do echo "${d}" | grep -q -v "homeassistant" \&\& rm -rf ${d}; done#' >> Dockerfile.ha
+    awk -v RS= -v ORS='\n\n' '!/requirements_all/' Dockerfile.ha > Dockerfile
+    
+    for package in home-assistant-frontend pyotp PyQRCode paho-mqtt pyudev; do
+      grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
+    done
+    grep -q "huawei-solar==2.3.0" requirements.txt || echo "huawei-solar==2.3.0" >> requirements.txt
+    
+    for f in requirements.txt homeassistant/package_constraints.txt pyproject.toml homeassistant/helpers/network.py; do
+      sed -i -e "/hass-nabucasa/d" -e "/hass_nabucasa/d" "${f}"
+    done
+    sed -i -e "/hass_nabucasa/d" -e 's#remote.is_cloud_request.get()#False#' homeassistant/components/http/forwarded.py
+    
+    # remove from default configuration
+    cp -dp homeassistant/components/default_config/manifest.json homeassistant/components/default_config/manifest.json.org
+    jq  -a 'del(.dependencies[] | select(. == ("assist_pipeline","stream","go2rtc","cloud","conversation","zeroconf","usb","ssdp","dhcp","mobile_app") ) )' homeassistant/components/default_config/manifest.json.org > homeassistant/components/default_config/manifest.json
+    
+    grep -q "source /py_env/bin/activate" rootfs/etc/services.d/home-assistant/run || sed -i -e 's#^exec#source /py_env/bin/activate\nexec#g' rootfs/etc/services.d/home-assistant/run
+    grep -q "log-file" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --log-file /tmp/log#' rootfs/etc/services.d/home-assistant/run
+    grep -q "skip-pip" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --skip-pip#' rootfs/etc/services.d/home-assistant/run
+    
+    podman build -f Dockerfile -t "${image}" --build-arg BUILD_ARCH=aarch64 --build-arg BUILD_FROM=my_py:3
+    podman push "${image}"

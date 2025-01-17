@@ -75,7 +75,7 @@
       loop: "{{ templates_files }}"
     - name: "{{ title }} build image"
       shell: |
-        set -x
+        set -xe
         image="{{ registry }}/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}:{{ lookup('vars', image_var).tag | default('latest') }}"
         {{ lookup('vars', image_var).command }}
       args:

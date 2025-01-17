@@ -96,7 +96,7 @@ Fritz.Box:
 Deconz:
 flash:
 # # git clone https://github.com/dresden-elektronik/gcfflasher.git
-# git checkout v4.3.0-beta
+# git checkout v4.5.2
 # ./build_cmake.sh
 # kubectl scale --replicas=0 -n home deploy deconz
 # build/GCFFlasher -d /dev/ttyAMA0 -f /root/deCONZ_RaspBeeII_0x26780700.bin.GCF
@@ -141,3 +141,6 @@ TODO:
 - security: log all incoming connections on gateway
 - image build: exclude images already processed
 - image build: limit applications to what is needed (k8s + deploy)
+- deploy: generate image.section from namespace
+- deploy: replace image builds by images.yaml
+- gentoo: change services section to reload, enabled and started

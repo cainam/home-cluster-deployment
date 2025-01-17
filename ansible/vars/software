@@ -9,7 +9,7 @@ software:
       params:
         repo: istio/istio
   oauth2_proxy:
-    version: v7.7.1
+    version: v7.8.1
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -30,7 +30,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.12.1"
+    version: "2024.12.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -78,7 +78,7 @@ software:
         repo: library/postgres
         arch: arm64
   descheduler:
-    version: "v0.31.0"
+    version: "v0.32.1"
     latest:
       type: github
       params: 

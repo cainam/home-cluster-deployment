@@ -53,12 +53,19 @@ sed -i -e "/hass-nabucasa/d" pyproject.toml
 sed -i -e "/hass_nabucasa/d" homeassistant/helpers/network.py
 sed -i -e "/hass_nabucasa/d" -e 's#remote.is_cloud_request.get()#False#' homeassistant/components/http/forwarded.py
 
-mkdir ../components
-mv homeassistant/components/* ../components
-for component in mqtt update panel_custom hassio sun homeassistant system_health switch number input_number notify media_player fan event cover button climate lock vacuum water_heater alarm_control_panel binary_sensor script api auth config default_config device_automation diagnostics file_upload group history http image_upload logbook lovelace onboarding recorder repairs search sensor system_log webhook network websocket_api http persistent_notification person device_tracker zone frontend automation blueprint scene light logger trace ; do 
-  mv ../components/$component homeassistant/components/
-done
+#mkdir ../components
+#mv homeassistant/components/* ../components
+#for component in __init__.py switch_as_x select usb mqtt update panel_custom hassio sun homeassistant system_health switch number input_number notify media_player fan event cover button climate lock vacuum water_heater alarm_control_panel binary_sensor script api auth config default_config device_automation diagnostics file_upload group history http image_upload logbook lovelace onboarding recorder repairs search sensor system_log webhook network websocket_api persistent_notification person device_tracker zone frontend automation blueprint scene light logger trace ; do 
+#  mv ../components/$component homeassistant/components/
+#done
+######for component in components/[abcdefghijklmnopqrstuvwxyz]*; do 
+#for component in components/[abcdefghijkmnopqrstuz]*; do 
+#  mv ../$component homeassistant/components/
+#done
 
 grep -q "source /py_env/bin/activate" rootfs/etc/services.d/home-assistant/run || sed -i -e 's#^exec#source /py_env/bin/activate\nexec#g' rootfs/etc/services.d/home-assistant/run
+grep -q "log-file" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --log-file /tmp/log#' rootfs/etc/services.d/home-assistant/run
+grep -q "skip-pip" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --skip-pip#' rootfs/etc/services.d/home-assistant/run
+
 podman build -f Dockerfile.${HA_VERSION} -t "${registry}"/my-ha-min:"${HA_VERSION}" --build-arg BUILD_ARCH=aarch64 --build-arg QEMU_CPU= --build-arg BUILD_FROM=my-ha-base-python:"${HA_VERSION}"
 podman push "${registry}"/my-ha-min:"${HA_VERSION}"
