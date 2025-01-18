@@ -64,7 +64,15 @@
   
     - debug: var=build_out
       failed_when: false
-    when: application.value.image_build is defined
+    when: application.value.DELETE_ME_image_build is defined
+
+
+  - block:
+    - name: handle additional images
+      vars:
+        limit_images: application.value.images
+      import_tasks: common/images.yaml
+    when: application.value.images is defined
     
   - name: "{{ name_prefix }} build helm"
     shell: |
