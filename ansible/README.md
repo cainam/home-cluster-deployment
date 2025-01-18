@@ -144,3 +144,6 @@ TODO:
 - deploy: generate image.section from namespace
 - deploy: replace image builds by images.yaml
 - gentoo: change services section to reload, enabled and started
+- remote access broken, oauth2-proxy csrf cookie gets lost
+- image build: add check if image exists already, skip is enforce is enabled
+- generate playbook doc with tags described

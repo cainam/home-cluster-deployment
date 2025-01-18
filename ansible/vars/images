@@ -20,9 +20,12 @@ images:
   requires:
   - my_base
   command: |
-    cat > Dockerfile << EOF
+    cat > Dockerfile << 'EOF'
     FROM my_base:{{ software.alpine.version }}
-    RUN apk add --no-cache gnupg openssl xz python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
+    ENV VIRTUAL_ENV=/py_env 
+    ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+    RUN apk add --no-cache jq py3-packaging py3-jinja2 py3-kubernetes gnupg openssl xz python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
+    RUN python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
 - type: fetch

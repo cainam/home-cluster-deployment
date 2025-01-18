@@ -9,7 +9,7 @@
 - set_fact:
     images: "{{ images_new }}"
 - debug:
-    msg: "updated list of images\n{{ images | to_nice_yaml }}"
+    msg: "updated list of images\n{{ images | to_nice_yaml }}\nlimit_images:\n{{ limit_images | to_nice_yaml }}\n"
 
 - name: handle images
   include_tasks: common/image.yaml

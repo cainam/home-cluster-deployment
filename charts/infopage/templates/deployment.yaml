@@ -34,7 +34,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-          - /usr/local/bin/uvicorn
+          - uvicorn
           - main:app
           - --host
           - 0.0.0.0

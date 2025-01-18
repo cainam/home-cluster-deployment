@@ -110,7 +110,7 @@ applications:
       network:
         svcPort: 80
         prefix: /oauth2-hydra
-        rewrite: /oauth2-hydra
+        rewrite: /oauth2-hydra/
   home:
     common:
       git: https://github.com/cainam/krysyntyz.git
@@ -172,8 +172,10 @@ applications:
     infopage:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/infopage
-      helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
-      image_build:
+      helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='section') | first }}/my_py" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='tag') | first }}
+      images:
+      - my_py
+      image_buildx:
       - name: mypy
         source: local
         tag: "{{ software.python.version }}"

@@ -85,6 +85,4 @@
     - debug: var=build_out
       failed_when: false
     when: lookup('vars', image_var).type == 'script'
-  vars:
-    bv: "kj"
   run_once: true

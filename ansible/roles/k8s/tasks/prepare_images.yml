@@ -13,7 +13,7 @@
     - registry
     - my_ha
   import_tasks: common/images.yaml
-  failed_when: true
+  # failed_when: true
   
 - name: pull, tag and push k8s images
   shell: |

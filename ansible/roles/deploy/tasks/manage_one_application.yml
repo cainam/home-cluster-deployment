@@ -66,11 +66,10 @@
       failed_when: false
     when: application.value.DELETE_ME_image_build is defined
 
-
   - block:
     - name: handle additional images
       vars:
-        limit_images: application.value.images
+        limit_images: "{{ application.value.images }}"
       import_tasks: common/images.yaml
     when: application.value.images is defined
     
