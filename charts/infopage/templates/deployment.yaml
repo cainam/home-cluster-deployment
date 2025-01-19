@@ -34,7 +34,6 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           args:
-          - uvicorn
           - main:app
           - --host
           - 0.0.0.0
@@ -42,7 +41,7 @@ spec:
           - "{{ .Values.service.targetPort }}"
           - --reload
           command:
-          - python
+          - uvicorn
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
