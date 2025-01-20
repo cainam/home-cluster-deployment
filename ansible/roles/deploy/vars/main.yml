@@ -58,11 +58,8 @@ applications:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/hydra-config
       helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback https://{{ base_domain_ext }}:44354{{ oauth2_path }}/callback"
-      image_build:
-      - name: auth-operator
-        source: local
-        tag: "{{ software.python.version }}"
-        build_args: --from docker.io/python:{{ software.python.version }}
+      images:
+      - my_py
       storage:
       - name: auth-operator
         size: 2Mi
@@ -142,9 +139,11 @@ applications:
     home-assistant:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.postgresql.image= 
+      git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.image.repository="home/my_ha" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }} 
+      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }}
+      images:
+      - my_ha
       storage:
       - name: home-assistant-config
         size: 100Mi
@@ -175,11 +174,6 @@ applications:
       helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='section') | first }}/my_py" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='tag') | first }}
       images:
       - my_py
-      image_buildx:
-      - name: mypy
-        source: local
-        tag: "{{ software.python.version }}"
-        build_args: --from docker.io/python:{{ software.python.version }}
       storage:
       - name: infopage
         size: 5Mi

@@ -11,7 +11,7 @@
     limit_images:
     - helm
     - registry
-    - my_ha
+    - my_base
   import_tasks: common/images.yaml
   # failed_when: true
   
@@ -27,5 +27,4 @@
     helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
     helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
 
-- debug:
-    msg: "{{ image2local }}"
+

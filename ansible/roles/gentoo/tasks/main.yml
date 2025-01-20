@@ -121,30 +121,12 @@
       dest: /usr/local/bin/
     - file: world
       dest: /var/lib/portage/
-#    - file: gentoo.conf
-#      dest: /etc/portage/repos.conf/
     - file: ipv6.conf
       dest: /etc/modprobe.d/
     - file: k8s.conf
       dest: /etc/modules-load.d/
-#    - file: hosts
-#      dest: /etc/
-#    - file: patches
-#      dest: /etc/portage/
     - file: portage/
       dest: /etc/portage/
-#    - file: portage/package.accept_keywords
-#      dest: /etc/portage/package.accept_keywords
-#    - file: portage/package.use
-#      dest: /etc/portage/package.use
-#    - file: portage/package.mask
-#      dest: /etc/portage/package.mask
-#    - file: portage/package.license
-#      dest: /etc/portage
-#    - file: env
-#      dest: /etc/portage/
-#    - file: portage/package.env
-#      dest: /etc/portage
     - file: init.d/
       dest: /etc/init.d/
     - file: haproxy.cfg
@@ -247,7 +229,7 @@
   loop:
     - src: net.lo
       path: /etc/init.d/net.end0
-    - src: /usr/share/zoneinfo/Europe/Amsterdam
+    - src: "/usr/share/zoneinfo/{{ timezone }}"
       path: /etc/localtime
 
 - name: portage profile
@@ -301,8 +283,20 @@
 #    enabled: no
 #    state: stopped
 #  loop:
+- name: only enable and reload services, but don't force a restart 
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: reloaded
+  loop:
+    - keepalived
+    - autofs
+    - sshd
+    - haproxy
+    - crio
+    - syslog-ng
 
-- name: enable services
+- name: enable and restart services
   service:
     name: "{{ item }}"
     enabled: yes
@@ -311,16 +305,10 @@
     - net.end0
     - chronyd
     - brickmount
-    - keepalived
-    - haproxy
-    - autofs
-    - crio
     - glusterd 
     - kubelet
-    - syslog-ng
     - cronie
     - cpupower
-    - sshd
     - iscsid
   ignore_errors: yes
 

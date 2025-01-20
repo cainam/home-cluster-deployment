@@ -32,44 +32,10 @@
     
 - block:
   - block:
-    - name: "{{ name_prefix }} tempdir for image build"
-      tempfile:
-        state: directory
-        suffix: "-build-image"
-      register: build_dir
-
-    - name: "{{ name_prefix }} copy dockerfile"
-      template:
-        src: "{{ item.dockerfile | default(item.name|default(application.key)~'.dockerfile') }}"
-        dest: "{{ build_dir.path }}"
-        mode: 0644
-      loop: "{{ application.value.image_build }}"
-
-    - name: "{{ name_prefix }} build image"
-      shell: |
-        set -x
-        if [ "{{ item.source }}" != "local" ]; then
-          git clone --branch "{{ item.branch | default('latest') }}" "{{ item.source }}"
-          bdir="${PWD}"
-          git_dir=$(basename "{{ item.source }}")
-          git_dir="${git_dir%%.git}/{{ item.subdir|default('') }}"
-          cd "${git_dir}"
-        fi
-        image="{{ registry }}{{ item.section | default('/'~namespace.key~'/')}}{{ item.name | default(application.key) }}:{{ item.tag | default('latest') }}"
-        podman build . {{ item.build_args|default("--tls-verify") }} --file "${bdir}/{{ item.dockerfile|default(item.name|default(application.key)~'.dockerfile') }}" --tag "${image}" && podman push "${image}"
-      args:
-        chdir: "{{ build_dir.path }}"
-      register: build_out
-      loop: "{{ application.value.image_build }}"
-  
-    - debug: var=build_out
-      failed_when: false
-    when: application.value.DELETE_ME_image_build is defined
-
-  - block:
-    - name: handle additional images
+    - name: "{{ name_prefix }} handle additional images"
       vars:
         limit_images: "{{ application.value.images }}"
+        default_section: "{{ namespace.key }}"
       import_tasks: common/images.yaml
     when: application.value.images is defined
     

@@ -25,7 +25,7 @@ images:
     ENV VIRTUAL_ENV=/py_env 
     ENV PATH="$VIRTUAL_ENV/bin:$PATH"
     RUN apk add --no-cache jq py3-packaging py3-jinja2 py3-kubernetes gnupg openssl xz python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
-    RUN python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn
+    RUN python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn kopf
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
 - type: fetch
@@ -52,7 +52,6 @@ images:
 - type: script
   name: my_ha
   tag: "{{ software.home_assistant.version }}"
-  section: local
   requires:
   - my_py
   command: |
