@@ -1,4 +1,25 @@
 images:
+- name: idp
+  tag: 2025.1
+  type: script
+  requires:
+  - my_base
+  command: |
+    git clone --branch master --depth 1 --filter=blob:none --sparse https://github.com/cainam/krysyntyz.git
+    cd krysyntyz
+    git sparse-checkout set hydra-login-consent-node
+    mv  hydra-login-consent-node/* ..
+    rm -rf krysyntyz
+    cat > Dockerfile << EOF
+    FROM my_base:{{ software.alpine.version }}
+    RUN apk add --no-cache npm
+    RUN adduser -S ory -D -u 10000 -s /bin/nologin
+    COPY . /app
+    WORKDIR /app
+    RUN npm ci --silent && npm run build
+    USER 10000
+    ENTRYPOINT npm run serve
+
 - type: script
   name: helm
   tag: "{{ software.helm.version }}"
@@ -13,6 +34,7 @@ images:
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
   section: local
+  
 - type: script
   name: my_py
   tag: 3
@@ -32,6 +54,7 @@ images:
   source: docker.io/library/registry
   tag: "{{ software.registry.version }}"
   section: local
+  
 - type: script
   name: my_base
   tag: "{{ software.alpine.version }}"
@@ -49,6 +72,7 @@ images:
     CMD ["/bin/sh"]
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
+    
 - type: script
   name: my_ha
   tag: "{{ software.home_assistant.version }}"

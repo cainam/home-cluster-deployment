@@ -141,3 +141,4 @@ TODO:
 - security: log all incoming connections on gateway
 - deploy: replace image builds by images.yaml
 - generate playbook doc with tags described
+- replace my own git by var in all

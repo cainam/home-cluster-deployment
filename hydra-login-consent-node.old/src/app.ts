@@ -13,6 +13,7 @@ import logout from "./routes/logout"
 import consent from "./routes/consent"
 
 const app = express()
+const morgan = require("morgan");
 
 // view engine setup
 app.set("views", path.join(__dirname, "..", "views"))
@@ -21,6 +22,29 @@ app.set("view engine", "pug")
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger("dev"))
+//
+/*
+ * morgan.token('id', function getId (req: Request) {
+  return req.id
+})
+
+//app.use(morgan(':id :method :url :response-time'))
+
+app.use(
+morgan(function (tokens, req: Request, res: Response<MyResponseBody, MyResponseLocals>) {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ].join(' ')
+})
+)
+*/
+//app.use(morgan('combined'))
+
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
@@ -69,5 +93,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 const listenOn = Number(process.env.PORT || 3000)
 app.listen(listenOn, () => {
-  console.log(`Listening on http://0.0.0.0:${listenOn}`)
+  console.log(`Aha!!! Listening on http://0.0.0.0:${listenOn}`)
 })

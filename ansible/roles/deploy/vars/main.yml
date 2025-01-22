@@ -85,13 +85,10 @@ applications:
     idp:
       git: https://github.com/cainam/krysyntyz.git
       subdir: charts/idp
-      git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag=1.0.0
+      git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'idp' ) | map(attribute='tag') }}"
       helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}" --set mount_path=/x
-      image_build:
-      - source: https://github.com/cainam/krysyntyz.git
-        branch: master
-        subdir: hydra-login-consent-node
-        tag: 1.0.0
+      images:
+      - idp
       network:
         prefix: /idp/
     oauth2-proxy:
