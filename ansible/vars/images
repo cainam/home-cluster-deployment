@@ -9,6 +9,7 @@ images:
     cd krysyntyz
     git sparse-checkout set hydra-login-consent-node
     mv  hydra-login-consent-node/* ..
+    cd ..
     rm -rf krysyntyz
     cat > Dockerfile << EOF
     FROM my_base:{{ software.alpine.version }}
@@ -19,7 +20,8 @@ images:
     RUN npm ci --silent && npm run build
     USER 10000
     ENTRYPOINT npm run serve
-
+    EOF
+    podman image build . --tag "${image}" && podman image push "${image}"
 - type: script
   name: helm
   tag: "{{ software.helm.version }}"
