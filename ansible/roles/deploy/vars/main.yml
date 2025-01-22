@@ -149,7 +149,7 @@ applications:
         size: 100Mi
         config: true
       network:
-        prefix: /
+        prefix: 
         svcPort: 8123
         gateway: ha-gw
         old_proxy_sidecar: 

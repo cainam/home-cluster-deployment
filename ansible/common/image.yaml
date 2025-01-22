@@ -1,37 +1,11 @@
-- set_fact:
-    title: "manage image {{ lookup('vars', image).name }} -"
-    image_build_sources: "{{ role_path }}/templates/image-build/"
-
-- name: "{{ title }} check if image exists already"
-  uri:
-    url: "https://{{ registry }}/v2/{{ lookup('vars', image).section }}/{{ lookup('vars', image).name }}/manifests/{{ lookup('vars', image).tag | default('latest') }}"
-    headers:
-      Accept: application/vnd.oci.image.manifest.v1+json
-    method: "GET"
-  register: check_image
-  failed_when: false
-
-- name: "{{ title }} record image as processed"
-  set_fact:
-    images_processed: "{{ images_processed + [lookup('vars', image).name] }}"
-  when: check_image.status == 200
-        
-- debug:
-    msg: "type: {{ check_image.status | type_debug }}\n{{ check_image | to_nice_yaml }}\nimages_processed:\n{{ images_processed | to_nice_yaml }}"
-  when: "'debug' in ansible_run_tags"
-
-- debug:
-    msg: "type: {{ check_image.status | type_debug }}\n{{ check_image | to_nice_yaml }}"
-  failed_when: false
-
 - block:
   - set_fact:
-      templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ image_build_sources +'\" ] || find \"'+ image_build_sources +'\"   -type d').split('\n')|reject('match', '^$')  }}"
-      templates_files: "{{ lookup('pipe', '[ ! -d \"'+ image_build_sources +'\" ] || find \"'+ image_build_sources +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+      title: "manage image {{ lookup('vars', image).name }} -"
 
   - name: "{{ title }} process image"
     debug:
       msg: "image:\n{{ lookup('vars', image) | to_nice_yaml}}"
+    when: "'debug' in ansible_run_tags"
       
   - name: "{{ title }} assert variables"
     vars:
@@ -49,23 +23,44 @@
       t: "{{ lookup('vars', image) }}"
       var_stack: "{{ (var_stack | default([])) + [image] }}"
 
-  - name: "{{ title }} handle required base images"
-    include_tasks: common/image.yaml
-    vars:
-      image: "{{ 'loop_'~t.name }}"
-    loop: "{{ images | selectattr('name', 'defined') | selectattr('name', 'in', t.requires|default([]) ) }}"
-    loop_control:
-      loop_var: "{{ 'loop_'~t.name }}"
+  - debug:
+      msg: "t:{{ t }}\nvar_stack:\n{{ var_stack | to_nice_yaml}}\nimage:\n{{image | to_nice_yaml }}\n"
+    when: "'debug' in ansible_run_tags"
+
+  - block:
+    - name: "{{ title }} handle required base images"
+      include_tasks: common/image.yaml
+      vars:
+        image: "{{ 'loop_'~t.name }}"
+      loop: "{{ images | selectattr('name', 'defined') | selectattr('name', 'in', t.requires|default([]) ) }}"
+      loop_control:
+        loop_var: "{{ 'loop_'~t.name }}"
   
-  - name: "{{ title }} set vars to complete the image"
+  - name: "recursion end - set vars to complete the upstream image"
     set_fact:
       image_var: "{{ var_stack[-1] }}"
       title: "manage image {{ lookup('vars', var_stack[-1]).name }} -"
       var_stack: "{{ var_stack[0:-1] }}"
+      
   - name: "{{ title }} process image"
     debug:
       msg: "image {{image_var}}:\n{{ lookup('vars', image_var) | to_nice_yaml}}"
+    when: "'debug' in ansible_run_tags"
 
+- name: "{{ title }} check if image exists already"
+  uri:
+    url: "https://{{ registry }}/v2/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}/manifests/{{ lookup('vars', image_var).tag | default('latest') }}"
+    headers:
+      Accept: application/vnd.oci.image.manifest.v1+json
+    method: "GET"
+  register: check_image
+  failed_when: false
+       
+- debug:
+    msg: "check_image type: {{ check_image.status | type_debug }}\n{{ check_image | to_nice_yaml }}\nimages_processed:\n{{ images_processed | to_nice_yaml }}"
+  when: "'debug' in ansible_run_tags"
+
+- block:
   - block:
     - name: "{{ title }} fetch image from registry and push to local registry"
       shell: |
@@ -83,6 +78,9 @@
         state: directory
         suffix: "-build-image"
       register: build_dir
+    - set_fact:
+        templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ image_build_sources +'\" ] || find \"'+ image_build_sources +'\"   -type d').split('\n')|reject('match', '^$')  }}"
+        templates_files: "{{ lookup('pipe', '[ ! -d \"'+ image_build_sources +'\" ] || find \"'+ image_build_sources +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
     - name: "{{ title }} ensure destination directory exists for templates"
       file:
         path: "{{ build_dir }}{{ item | replace (image_build_sources,'') }}"
@@ -106,9 +104,8 @@
     - debug: var=build_out
       failed_when: false
     when: lookup('vars', image_var).type == 'script'
-    
-  - name: "{{ title }} record image as processed"
-    set_fact:
-      images_processed: "{{ images_processed + [lookup('vars', image_var).name] }}"  
-  run_once: true
-  when: check_image.status != 200 or 'force' in ansible_run_tags
+  when: (check_image.status != 200) or ('force' in ansible_run_tags)
+  
+- name: "{{ title }} record image as processed"
+  set_fact:
+    images_processed: "{{ images_processed + [lookup('vars', image_var).name] }}"  

@@ -130,7 +130,7 @@ TODO:
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-- Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system
+- Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - infopage: click on href to delete image results in new-tab, but no tab should be opened
@@ -140,5 +140,4 @@ TODO:
 - security: add to build
 - security: log all incoming connections on gateway
 - deploy: replace image builds by images.yaml
-- gentoo: change services section to reload, enabled and started
 - generate playbook doc with tags described
