@@ -34,6 +34,20 @@ general_pages_router = APIRouter()
 registry = "https://10.10.10.10:443"
 	
 loglev = logging.getLogger("uvicorn.access").level
+
+block_endpoints = ["/check"]
+class LogFilter(logging.Filter):
+    def filter(self, record):
+        if record.args and len(record.args) >= 3:
+            #if (record.args[2] in block_endpoints
+            #    and record.args[4] == "200"):
+            if record.args[2] in block_endpoints:
+                return False
+        return True
+
+uvicorn_logger = logging.getLogger("uvicorn.access")
+uvicorn_logger.addFilter(LogFilter())
+
 #logging.getLogger("uvicorn.access").setLevel(logging.CRITICAL)
 @general_pages_router.get("/")
 async def home(request: Request):

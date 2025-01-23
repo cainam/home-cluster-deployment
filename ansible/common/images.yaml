@@ -1,7 +1,7 @@
 - block:
   - name: prepare image information (set name and section where missing)
     vars: # keep .name if it exists, otherwise take the last part of the source image
-      image_new: "{{ image | combine({'name': image.name | default( (image.source | default('')).split('/')|last), 'section': image.section | default( default_section )}) }}"
+      image_new: "{{ image | combine({'name': image.name | default( (image.source | default('')).split('/')|last), 'section': image.section | default( default_section|default('') )}) }}"
     set_fact:
       images_new: "{{ images_new | default([]) + [image_new] }}"
     loop: "{{ images }}"

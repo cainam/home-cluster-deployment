@@ -84,7 +84,7 @@ software:
       params: 
         repo: kubernetes-sigs/descheduler
   hydra:
-    version: "v2.2.0"
+    version: "v2.3.0"
     latest:
       type: github
       params:
