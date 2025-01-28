@@ -24,7 +24,7 @@ applications:
         values:
           file: istiod-mesh.yaml
     istiod-config:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/istiod-config
       helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ base_domain_ext }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ base_domain_ext }}:{{ port_ext }}"
   auth:
@@ -55,7 +55,7 @@ applications:
         svcName: hydra-public
         prefix: /hydra
     hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/hydra-config
       helm_options: --set operator.image=auth/auth-operator --set operator.tag={{ software.python.version }} --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback https://{{ base_domain_ext }}:44354{{ oauth2_path }}/callback"
       images:
@@ -67,7 +67,7 @@ applications:
         config: true
       network: true
     midp:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/mini-idp
       helm_options: --set image.repository=tools/mypy --set image.tag={{ software.python.version }}
       chart: mini-idp
@@ -83,7 +83,7 @@ applications:
       network: 
         prefix: /mini-idp
     idp:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/idp
       git_to_local_params: --fix_source=.image.repository=auth/idp --fix_source=.image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'idp' ) | map(attribute='tag')|first}}"
       helm_options: --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}" --set mount_path=/x
@@ -106,12 +106,12 @@ applications:
         rewrite: /oauth2-hydra/
   home:
     common:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/common
       #branch: common-4.5.2
       install: false
     zigbee2mqtt:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
       helm_options: --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
@@ -125,7 +125,7 @@ applications:
         size: 100Mi
         config: true
     mosquitto:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/mosquitto
       git_to_local_params: --fix_source=.image.tag="{{ software.mosquitto.version }}" --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
       storage:
@@ -133,7 +133,7 @@ applications:
         size: 1Gi
       network: x
     home-assistant:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/home-assistant
       git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.image.repository="home/my_ha" --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
@@ -165,7 +165,7 @@ applications:
       branch:  tempo-1.7.2
       git_to_local_params: --fix_source=.tempo.tag="{{ software.tempo.version }}" --fix_source=.tempoQuery.tag="{{ software.tempo_query.version }}"
     infopage:
-      git: https://github.com/cainam/krysyntyz.git
+      git: "{{ own_git_url }}"
       subdir: charts/infopage
       helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='section') | first }}/my_py" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'my_py' ) | map(attribute='tag') | first }}
       images:

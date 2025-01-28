@@ -12,14 +12,13 @@
     - helm
     - registry
   import_tasks: common/images.yaml
-  # failed_when: true
   
 - name: pull, tag and push k8s images
   shell: |
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
   with_items: "{{ required_images.stdout_lines }}"
 
-- name: prepare flannel
+- name: build flannel
   shell: |
     . set_env.sh kube-flannel
     helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git

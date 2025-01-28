@@ -5,12 +5,13 @@ images:
   requires:
   - my_base
   command: |
-    git clone --branch master --depth 1 --filter=blob:none --sparse https://github.com/cainam/krysyntyz.git
-    cd krysyntyz
+    git clone --branch master --depth 1 --filter=blob:none --sparse "{{ own_git_url }}"
+    git="{{ own_git_url.split('/')[-1].split('.') | first}}"
+    cd "${git}"
     git sparse-checkout set hydra-login-consent-node
     mv  hydra-login-consent-node/* ..
     cd ..
-    rm -rf krysyntyz
+    rm -rf "${git}"
     cat > Dockerfile << EOF
     FROM my_base:{{ software.alpine.version }}
     RUN apk add --no-cache npm

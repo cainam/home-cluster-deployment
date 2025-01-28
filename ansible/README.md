@@ -133,11 +133,10 @@ TODO:
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
-- infopage: click on href to delete image results in new-tab, but no tab should be opened
 - auth-operator: no action when started after hydra, but has to execute a first check at startup
-- integrate custom build (ha) in pipeline
 - log and inspect all incoming flows
 - security: add to build
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
-- replace my own git by var in all
+- replace PORTAGE_BINHOST by /binrepos.conf
+
