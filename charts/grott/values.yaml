@@ -9,7 +9,7 @@ image:
   # -- image repository
   repository: local/grott
     # -- image tag
-  tag: 1
+  tag: "1.0.0"
   # -- image pull policy
   pullPolicy: Always
 
