@@ -53,6 +53,7 @@ images:
     RUN python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn kopf
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
+
 - type: fetch
   source: docker.io/library/registry
   tag: "{{ software.registry.version }}"

@@ -68,6 +68,9 @@ def software(name):
             installed.append(x["image"]);
     content_item=[item,installed,sw["software"][item]["version"]]
 
+    if not 'latest' in sw["software"][item]:
+      return "no latest configured",""
+
     if sw["software"][item]["latest"]["type"] == "github":
       try:
         vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/releases/latest") # | jq .tag_name

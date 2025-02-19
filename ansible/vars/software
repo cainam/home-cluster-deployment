@@ -17,7 +17,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.0.0
+    version: 2.1.1
     latest:
       type: github
       params:
@@ -68,7 +68,7 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 17.2-alpine
+    version: 17.3-alpine
     installed:
       type: k8s
       pattern: "postgres:"
@@ -78,7 +78,7 @@ software:
         repo: library/postgres
         arch: arm64
   descheduler:
-    version: "v0.32.1"
+    version: "v0.32.2"
     latest:
       type: github
       params: 
