@@ -62,6 +62,22 @@
 
 - block:
   - block:
+    - name: "{{ title }} kubler - directories"
+      file:
+        path: "{{ kubler.base }}/{{ item }}"
+        recurse: true
+        state: directory
+      loop:
+      - namespace
+      - work
+     
+    - name: "{{ title }} kubler - kubler"
+      shell: |
+        if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
+      chdir: "{{ kubler.base }}"
+    when: lookup('vars', image_var).type == 'kubler'
+  
+  - block:
     - name: "{{ title }} fetch image from registry and push to local registry"
       shell: |
         set -x

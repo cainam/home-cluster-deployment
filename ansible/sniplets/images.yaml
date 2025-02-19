@@ -1,0 +1,25 @@
+---
+
+- name: test 
+  gather_facts: false
+  hosts: all
+  vars:
+    auto_legacy_silent: true
+    auto_silent: true
+    ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
+  tasks:
+  - block:
+    - set_fact:
+        role_path: ""
+    - include_vars: "../{{ item }}"
+      loop:
+      - vars/software
+      - vars/images
+      run_once: true
+    - name: handle additional images
+      vars:
+        limit_images:
+        - helm
+        - registry
+      import_tasks: common/images.yaml
+    

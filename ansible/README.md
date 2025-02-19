@@ -130,7 +130,7 @@ TODO:
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
-- Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => seems instance-manager restart is it + pgsql restart!
+- Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - auth-operator: no action when started after hydra, but has to execute a first check at startup
