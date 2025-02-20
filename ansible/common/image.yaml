@@ -62,7 +62,6 @@
 
 - block:
   - block:
-
     - name: "{{ title }} kubler - variables"
       set_fact:
         kubler_namespace: "common/kubler"
@@ -94,11 +93,17 @@
         src: "{{ item }}"
         dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace( kubler_namespace , '') }}"
       loop: "{{ templates_files }}"
+    - name: "{{ title }} kubler - kubler"
+      shell: |
+        kubler --help
+      register: kubler
+    - debug:
+        msg: "kubler output:\m{{ kubler }}"
     environment:
       KUBLER_VERBOSE: 'true'
       PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ ansible_env.PATH }}"
-      KUBLER_DATA_DIR="{{ kubler.base }}//data"
-      KUBLER_WORKING_DIR="{{ kubler.base }}"
+      KUBLER_DATA_DIR: "{{ kubler.base }}//data"
+      KUBLER_WORKING_DIR: "{{ kubler.base }}"
     when: lookup('vars', image_var).type == 'kubler'
   
   - block:
