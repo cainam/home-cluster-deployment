@@ -62,19 +62,43 @@
 
 - block:
   - block:
+
+    - name: "{{ title }} kubler - variables"
+      set_fact:
+        kubler_namespace: "common/kubler"
     - name: "{{ title }} kubler - directories"
       file:
         path: "{{ kubler.base }}/{{ item }}"
         recurse: true
         state: directory
       loop:
-      - namespace
-      - work
-     
+      - "{{ kubler.namespace_dir }}"
+      - "work"   
     - name: "{{ title }} kubler - kubler"
       shell: |
         if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
-      chdir: "{{ kubler.base }}"
+      args:
+        chdir: "{{ kubler.base }}"
+    - name: "{{ title }} kubler - get namespace directories and files"
+      set_fact:
+        templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\"   -type d').split('\n')|reject('match', '^$')  }}"
+        templates_files: "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+    - name: "{{ title }} kubler- ensure destination directory exists for templates"
+      file:
+        path: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
+        recurse: true
+        state: directory
+      loop: "{{ templates_dirs }}"
+    - name: "{{ title }} kubler - create config from templates"
+      template:
+        src: "{{ item }}"
+        dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace( kubler_namespace , '') }}"
+      loop: "{{ templates_files }}"
+    environment:
+      KUBLER_VERBOSE: 'true'
+      PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ ansible_env.PATH }}"
+      KUBLER_DATA_DIR="{{ kubler.base }}//data"
+      KUBLER_WORKING_DIR="{{ kubler.base }}"
     when: lookup('vars', image_var).type == 'kubler'
   
   - block:

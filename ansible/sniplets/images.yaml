@@ -19,7 +19,6 @@
     - name: handle additional images
       vars:
         limit_images:
-        - helm
-        - registry
+        - base
       import_tasks: common/images.yaml
     

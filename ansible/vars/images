@@ -58,6 +58,10 @@ images:
   source: docker.io/library/registry
   tag: "{{ software.registry.version }}"
   section: local
+
+- name: base
+  tag: 1
+  type: kubler
   
 - type: script
   name: my_base
