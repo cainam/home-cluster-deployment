@@ -53,6 +53,7 @@ configure_rootfs_build()
 finish_rootfs_build()
 {
   ln -s usr/lib "${_EMERGE_ROOT}/lib"
+  "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
   env-update
     # Useful helpers
 

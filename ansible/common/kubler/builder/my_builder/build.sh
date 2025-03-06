@@ -10,14 +10,14 @@ configure_builder() {
     fix_portage_profile_symlink
     # install basics used by helper functions
     eselect news read new 1> /dev/null
-    emerge app-portage/flaggie app-portage/eix app-portage/gentoolkit
+    emerge app-portage/flaggie app-portage/eix app-portage/gentoolkit # sys-apps/locale-gen
     eix-update
     mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use}
     touch /etc/portage/package.accept_keywords/flaggie
     # set locale of build container
-    echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
-    locale-gen
-    echo 'LANG="en_US.utf8"' > /etc/env.d/02locale
+    # incompatible with musl: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+    # incompatible with musl: locale-gen
+    # incompatible with musl: echo 'LANG="en_US.utf8"' > /etc/env.d/02locale
     env-update
     source /etc/profile
     # install default packages
@@ -27,9 +27,13 @@ configure_builder() {
     update_use 'app-crypt/pinentry' '+ncurses'
     update_keywords 'dev-python/ssl-fetch' '+~amd64'
     update_keywords 'app-admin/su-exec' '+~amd64'
+    update_use 'sys-devel/binutils' '+gold'
     emerge dev-vcs/git app-eselect/eselect-repository app-misc/jq app-shells/bash-completion
     #install_git_postsync_hooks
     [[ "${BOB_UPDATE_WORLD}" == true ]] && emerge -vuND world
-    add_overlay kubler https://github.com/edannenberg/kubler-overlay.git
-    emerge dev-lang/go
+    true
+    #add_overlay kubler https://github.com/edannenberg/kubler-overlay.git
+    ##export GOARCH=arm64
+    ##emerge dev-lang/go
+    ##emerge sys-devel/gcc
 }

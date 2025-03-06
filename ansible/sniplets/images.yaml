@@ -1,7 +1,7 @@
 ---
 
 - name: test 
-  gather_facts: false
+  gather_facts: true
   hosts: all
   vars:
     auto_legacy_silent: true
@@ -19,6 +19,6 @@
     - name: handle additional images
       vars:
         limit_images:
-        - base
+        - infopage
+#        - python-3.12
       import_tasks: common/images.yaml
-    

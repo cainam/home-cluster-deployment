@@ -60,7 +60,31 @@ images:
   section: local
 
 - name: base
+  tag: 2025.02-1
+  section: local
+  type: kubler
+  
+- name: python
   tag: 1
+  requires:
+  - base
+  type: kubler
+  
+- name: python-3.12
+  tag: 2025.02-1
+  section: local
+  requires:
+  - base
+  type: kubler
+  
+- name: infopage
+  tag: 2025.02-1
+  section: local
+  type: kubler
+- name: infopage-13
+  tag: 1
+  requires:
+  - python
   type: kubler
   
 - type: script

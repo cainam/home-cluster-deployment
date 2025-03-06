@@ -72,38 +72,53 @@
         state: directory
       loop:
       - "{{ kubler.namespace_dir }}"
-      - "work"   
     - name: "{{ title }} kubler - kubler"
       shell: |
         if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
       args:
         chdir: "{{ kubler.base }}"
-    - name: "{{ title }} kubler - get namespace directories and files"
-      set_fact:
-        templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\"   -type d').split('\n')|reject('match', '^$')  }}"
-        templates_files: "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
-    - name: "{{ title }} kubler- ensure destination directory exists for templates"
-      file:
-        path: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
-        recurse: true
-        state: directory
-      loop: "{{ templates_dirs }}"
-    - name: "{{ title }} kubler - create config from templates"
-      template:
-        src: "{{ item }}"
-        dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace( kubler_namespace , '') }}"
-      loop: "{{ templates_files }}"
+
+    - block: # deploy namespace files to system for kubler build
+      - name: "{{ title }} kubler - get namespace directories and files"
+        set_fact:
+          templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\"   -type d').split('\n')|reject('match', '^$')  }}"
+          templates_files: "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+      - name: "{{ title }} kubler- ensure destination directory exists for templates"
+        file:
+          path: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
+          recurse: true
+          state: directory
+        loop: "{{ templates_dirs }}"
+      - name: "{{ title }} kubler - create config from templates"
+        template:
+          src: "{{ item }}"
+          dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace( kubler_namespace , '') }}"
+        loop: "{{ templates_files }}"
+      - name: "{{ title }} kubler - make scripts executable"
+        shell: |
+          find "{{ kubler.base }}/{{ kubler.namespace_dir }}" -type f -name "*.sh" -exec chmod a+x {} \; 2>&1
+      - name: "{{ title }} kubler - define deploy_kubler_files to ensure files are only deployed once"
+        set_fact:
+          deploy_kubler_files: "deploy_kubler_files"
+      when: deploy_kubler_files is not defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler --help
-      register: kubler
+        kubler build namespace/{{ lookup('vars', image_var).name }} 2>&1
+      register: kubler_out
     - debug:
-        msg: "kubler output:\m{{ kubler }}"
+        msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"
+    - name: "{{ title }} kubler - push to registry"
+      shell: |
+        image2upload="{{ registry }}/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}:{{ lookup('vars', image_var).tag }}"
+        podman tag namespace/{{ lookup('vars', image_var).name }} "${image2upload}"
+        podman push "${image2upload}"
     environment:
+      TERM: dumb # because kubler uses tput command
       KUBLER_VERBOSE: 'true'
       PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ ansible_env.PATH }}"
-      KUBLER_DATA_DIR: "{{ kubler.base }}//data"
-      KUBLER_WORKING_DIR: "{{ kubler.base }}"
+      KUBLER_DATA_DIR: "{{ kubler.base }}/data"
+      KUBLER_WORKING_DIR: "{{ kubler.base }}/{{ kubler.namespace_dir }}"
+      KUBLER_DISABLE_KUBLER_NS: "true" #only use my own images
     when: lookup('vars', image_var).type == 'kubler'
   
   - block:

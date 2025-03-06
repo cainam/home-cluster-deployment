@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/busybox sh
 set -eo pipefail
 #set -x
 
