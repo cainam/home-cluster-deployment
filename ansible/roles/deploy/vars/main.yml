@@ -170,7 +170,7 @@ applications:
     infopage:
       git: "{{ own_git_url }}"
       subdir: charts/infopage
-      helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='section') | first }}/infopage" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='tag') | first }} --set-json "env=[{'name':PYTHONPATH,'value':'/app/backend/::/py_env/lib/python3.12/site-packages/'}]"
+      helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='section') | first }}/infopage" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='tag') | first }} --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.12/site-packages/"}]'
       images:
       - my_py
       storage:
