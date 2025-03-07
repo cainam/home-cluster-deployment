@@ -71,7 +71,7 @@
         recurse: true
         state: directory
       loop:
-      - "{{ kubler.namespace_dir }}"
+      - "{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
     - name: "{{ title }} kubler - kubler"
       shell: |
         if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
@@ -101,9 +101,35 @@
         set_fact:
           deploy_kubler_files: "deploy_kubler_files"
       when: deploy_kubler_files is not defined
+    - name: "{{ title }} kubler - create build.conf and Dockerfile.template"
+      vars:
+        image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
+      shell: |
+        i='{{ lookup('vars', image_var).requires | default(['scratch'])| first }}'
+        [ "${i}" == "scratch" ] || i="namespace/${i}"
+        echo "IMAGE_PARENT='${i}'" > "{{ image_dir }}/build.conf"
+        cat > "{{ image_dir }}/Dockerfile.template" <<"EOF"
+        FROM ${IMAGE_PARENT}
+        LABEL maintainer="${MAINTAINER}"
+        ADD rootfs.tar /
+        EOF
+    - name: "{{ title }} kubler - create build.sh"
+      vars:
+        build: "{{ lookup('vars', image_var).build }}"
+        build_sh: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}/build.sh"
+      shell: |
+        echo '_packages="{{ build.packages | default('') }}"' > "{{ build_sh }}"
+        echo 'configure_rootfs_build(){ 
+          {{ build.configure_rootfs_build | default('true') }}
+        }' >> "{{ build_sh }}"
+        echo 'finish_rootfs_build(){ 
+          {{ build.finish_rootfs_build | default('true') }}
+        }' >> "{{ build_sh }}"
+
+      when: lookup('vars', image_var).build is defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler build namespace/{{ lookup('vars', image_var).name }} 2>&1
+        kubler build -f namespace/{{ lookup('vars', image_var).name }} 2>&1
       register: kubler_out
     - debug:
         msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"

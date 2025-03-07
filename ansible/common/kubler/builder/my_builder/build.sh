@@ -37,3 +37,7 @@ configure_builder() {
     ##emerge dev-lang/go
     ##emerge sys-devel/gcc
 }
+
+finish_rootfs_build() {
+    eix-update
+}

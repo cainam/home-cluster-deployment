@@ -1,0 +1,19 @@
+---
+
+- name: test 
+  gather_facts: false
+  hosts: all
+
+  tasks:
+  - block:
+    - shell: |
+        echo -e "a\nb\nc\n\nd" > /tmp/out
+    - name: Supports common file attributes
+      ansible.builtin.replace:
+        path: /tmp/out
+        after: '(?m)^'
+        before: '$'
+        regexp: '.*'
+        replace: '1'
+    run_once: true
+
