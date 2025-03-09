@@ -138,4 +138,4 @@ TODO:
 - security: add to build
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
-
+- emerge depclean added: check if dev-db/postgresql and sys-devel/gcc-13.2.1 got removed

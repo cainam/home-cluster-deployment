@@ -98,7 +98,6 @@ images:
     packages: "app-misc/jq app-crypt/gnupg dev-libs/openssl dev-python/jinja2 dev-python/psycopg"
     ignore: "media-video/ffmpeg "
     run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
-
     configure_rootfs_build: |
       echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
       echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf

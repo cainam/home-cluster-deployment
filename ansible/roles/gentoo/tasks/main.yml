@@ -277,6 +277,14 @@
 - name: emerge depclean
   shell: emerge --depclean
 
+- name: emerge build
+  shell: emerge @preserved-rebuild
+  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+
+- name: emerge build
+  shell: emerge @preserved-rebuild
+  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+
 #- name: install additional modules from Ansible Galaxy
 #  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
 
