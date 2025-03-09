@@ -106,8 +106,10 @@
         image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
       shell: |
         i='{{ lookup('vars', image_var).requires | default(['scratch'])| first }}'
+        builder='{{ lookup('vars', image_var).builder | default('') }}'
         [ "${i}" == "scratch" ] || i="namespace/${i}"
         echo "IMAGE_PARENT='${i}'" > "{{ image_dir }}/build.conf"
+        [ "${builder}" == "" ] || echo "BUILDER='${builder}'" >> "{{ image_dir }}/build.conf"
         cat > "{{ image_dir }}/Dockerfile.template" <<"EOF"
         FROM ${IMAGE_PARENT}
         LABEL maintainer="${MAINTAINER}"

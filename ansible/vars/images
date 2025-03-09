@@ -64,6 +64,19 @@ images:
   section: local
   type: kubler
   
+- name: base-13
+  tag: 2025.02-1
+  section: local
+  type: kubler
+  builder: namespace/my_builder-13
+  build:
+    packages: busybox
+    finish_rootfs_build: |
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
+      "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
+      env-update
+
+  
 - name: python-3.12
   tag: 2025.02-1
   section: local
@@ -78,14 +91,35 @@ images:
   - python-3.12
   type: kubler
 
+- name: ha
+  tag: 2025.02-1
+  section: home
+  build:
+    packages: "app-misc/jq app-crypt/gnupg dev-libs/openssl dev-python/jinja2 dev-python/psycopg"
+    ignore: "media-video/ffmpeg "
+    run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
+
+    configure_rootfs_build: |
+      echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
+      echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf
+      emerge --newuse @world
+      emerge --changed-use @world
+      emerge --newuse @world
+    finish_rootfs_build: |  
+      mkdir -p ${_EMERGE_ROOT}/ha
+      ( cd ${_EMERGE_ROOT}/ha; git clone  --depth=1 -b "2024.12.3" https://github.com/home-assistant/core.git)
+  requires:
+  - python-3.12
+  type: kubler
+
 - name: auth-operator
-  tag: 2025.02-4
-  section: local
+  tag: 2025.02-7
+  section: auth
   build:
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
       export PYTHONPATH=/py_env/lib/python3.12/site-packages/    
-      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install kopf
+      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install --ignore-installed kopf idna kubernetes
       mv  "${VIRTUAL_ENV}" "${_EMERGE_ROOT}/${VIRTUAL_ENV}"
   requires:
   - python-3.12
