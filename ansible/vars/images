@@ -63,6 +63,12 @@ images:
   tag: 2025.02-1
   section: local
   type: kubler
+  build:
+    packages: busybox
+    finish_rootfs_build: |
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
+      "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
+      env-update
   
 - name: base-13
   tag: 2025.02-1
@@ -76,7 +82,6 @@ images:
       "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
       env-update
 
-  
 - name: python-3.12
   tag: 2025.02-1
   section: local
@@ -84,14 +89,42 @@ images:
   - base
   type: kubler
   
-- name: infopage
+- name: python-3.13
+  tag: 2025.02-2
+  section: local
+  requires:
+  - base-13
+  type: kubler
+  build:
+    packages: "dev-python/packaging dev-python/gpep517"
+    configure_rootfs_build: |
+        echo "configure_rootfs_build => start"
+        update_use '+sqlite'
+        provide_package sys-devel/gcc
+
+        # add user/group for unprivileged container usage
+        groupadd -g 404 python
+        useradd -u 4004 -g python -d /home/python python
+        mkdir -p "${_EMERGE_ROOT}"/home/python
+        echo -e "*/* PYTHON_TARGETS: -* python3_13\n*/* PYTHON_SINGLE_TARGET: -* python3_13\n*/* -su" >> /etc/portage/package.use/98py.conf
+        #emerge --depclean
+
+        ln -s usr/lib "${_EMERGE_ROOT}/lib"
+        echo "configure_rootfs_build => done"
+    finish_rootfs_build: |
+        echo "finish_rootfs_build => start"
+        copy_gcc_libs
+        echo "finish_rootfs_build => done"
+   
+  
+- name: infopage-xx
   tag: 2025.02-3
   section: local
   requires:
   - python-3.12
   type: kubler
 
-- name: ha
+- name: ha-base
   tag: 2025.02-1
   section: home
   build:
@@ -104,12 +137,29 @@ images:
       emerge --newuse @world
       emerge --changed-use @world
       emerge --newuse @world
-    finish_rootfs_build: |  
+    xxxxxxxxxfinish_rootfs_build: |  
       mkdir -p ${_EMERGE_ROOT}/ha
       ( cd ${_EMERGE_ROOT}/ha; git clone  --depth=1 -b "2024.12.3" https://github.com/home-assistant/core.git)
   requires:
   - python-3.12
   type: kubler
+
+- name: ha
+  tag: 2025.02-1
+  section: home
+  requires:
+  - ha-base
+  type: kubler
+  build:
+    configure_rootfs_build: |
+      HA_DIR=/ha
+      mkdir -p ${_EMERGE_ROOT}/${HA_DIR}
+      ( cd ${_EMERGE_ROOT}/${HA_DIR}; git clone  --depth=1 -b "2024.12.3" https://github.com/home-assistant/core.git)
+      ln -s ${_EMERGE_ROOT}/${HA_DIR} ${HA_DIR}
+      VIRTUAL_ENV=/py_env
+      export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/:${HA_DIR}/core
+      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
+      pip install  -r /ha/core/requirements.txt
 
 - name: auth-operator
   tag: 2025.02-7
@@ -117,18 +167,26 @@ images:
   build:
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
-      export PYTHONPATH=/py_env/lib/python3.12/site-packages/    
-      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install --ignore-installed kopf idna kubernetes
-      mv  "${VIRTUAL_ENV}" "${_EMERGE_ROOT}/${VIRTUAL_ENV}"
+      export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/   
+      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install  -r /ha/core/requirements.txt
   requires:
   - python-3.12
   type: kubler
 
-- name: infopage-13
-  tag: 1
+- name: infopage
+  tag: 2025.03-1
+  section tools
   requires:
-  - python
+  - python-3.13
   type: kubler
+  build:
+    packages: dev-python/uvicorn net-misc/curl dev-python/jinja2 dev-python/requests dev-python/typing-extensions dev-python/pyyaml 
+    finish_rootfs_build: |
+      VIRTUAL_ENV=/py_env
+      export PYTHONPATH=${VIRTUAL_ENV}/lib/python3.13/site-packages/
+      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi
+      mv  "${VIRTUAL_ENV}" "${_EMERGE_ROOT}/${VIRTUAL_ENV}"
+
   
 - type: script
   name: my_base
