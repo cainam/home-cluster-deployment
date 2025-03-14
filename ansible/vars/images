@@ -23,20 +23,24 @@ images:
     ENTRYPOINT npm run serve
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
-- type: script
-  name: helm
+
+- name: helm
+  type: kubler
   tag: "{{ software.helm.version }}"
   requires:
-  - my_base
-  command: |
-    cat > Dockerfile << EOF
-    FROM my_base:{{ software.alpine.version }}
-    RUN curl -s https://get.helm.sh/helm-v{{ software.helm.version }}-linux-{{ default_platform }}.tar.gz  | tar -xz && mv linux-{{ default_platform }}/helm /usr/bin/helm && chmod +x /usr/bin/helm && rm -rf linux-{{ default_platform }}
-    ENTRYPOINT ["helm"]
-    CMD ["--help"]
-    EOF
-    podman image build . --tag "${image}" && podman image push "${image}"
+  - base
   section: local
+  build:
+    packages: =app-admin/helm-{{ software.helm.version }}
+    configure_builder: |
+      set -x
+      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
+      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
+    configure_rootfs_build: |
+      set -x
+      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
+      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
+      sleep 9
   
 - type: script
   name: my_py
@@ -88,6 +92,31 @@ images:
   requires:
   - base
   type: kubler
+  build:
+    packages: dev-python/packaging
+    configure_rootfs_build: |
+      echo "configure_rootfs_build => start"
+      update_use '+sqlite'
+      provide_package sys-devel/gcc
+
+      # add user/group for unprivileged container usage
+      groupadd -g 404 python
+      useradd -u 4004 -g python -d /home/python python
+      mkdir -p "${_EMERGE_ROOT}"/home/python
+      echo -e "*/* PYTHON_TARGETS: -* python3_12\n*/* PYTHON_SINGLE_TARGET: -* python3_12\n*/* -su" >> /etc/portage/package.use/98py.conf
+      #echo "*/* -su" >> /etc/portage/package.use/98su.conf
+      #echo "*/* -seccomp" >> /etc/portage/package.use/98seccomp.conf
+      #echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
+      #echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf
+
+      emerge --depclean
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
+      echo "configure_rootfs_build => end"
+    finish_rootfs_build: | 
+      echo "finish_rootfs_build => start"
+      # required for internal modules
+      copy_gcc_libs
+      echo "finish_rootfs_build => done"
   
 - name: python-3.13
   tag: 2025.02-2
@@ -125,41 +154,56 @@ images:
   type: kubler
 
 - name: ha-base
-  tag: 2025.02-1
+  tag: 2025.02-4
   section: home
-  build:
-    packages: "app-misc/jq app-crypt/gnupg dev-libs/openssl dev-python/jinja2 dev-python/psycopg"
-    ignore: "media-video/ffmpeg "
-    run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
-    configure_rootfs_build: |
-      echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
-      echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf
-      emerge --newuse @world
-      emerge --changed-use @world
-      emerge --newuse @world
-    xxxxxxxxxfinish_rootfs_build: |  
-      mkdir -p ${_EMERGE_ROOT}/ha
-      ( cd ${_EMERGE_ROOT}/ha; git clone  --depth=1 -b "2024.12.3" https://github.com/home-assistant/core.git)
   requires:
   - python-3.12
   type: kubler
+  build:
+    packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2 dev-python/idna dev-python/certifi dev-python/requests"
+    run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
 
 - name: ha
-  tag: 2025.02-1
+  tag: 2025.02-4
   section: home
   requires:
   - ha-base
   type: kubler
   build:
+    packages: dev-db/postgresql
     configure_rootfs_build: |
       HA_DIR=/ha
       mkdir -p ${_EMERGE_ROOT}/${HA_DIR}
-      ( cd ${_EMERGE_ROOT}/${HA_DIR}; git clone  --depth=1 -b "2024.12.3" https://github.com/home-assistant/core.git)
+      ( cd ${_EMERGE_ROOT}/${HA_DIR}; 
+          git clone --depth=1 -b "{{ software.home_assistant.version }}" https://github.com/home-assistant/core.git
+          cd core
+          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt pyudev; do
+            grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
+          done
+            
+          for f in requirements.txt homeassistant/package_constraints.txt pyproject.toml homeassistant/helpers/network.py; do
+            sed -i -e "/hass-nabucasa/d" -e "/hass_nabucasa/d" "${f}"
+          done
+          sed -i -e "/hass_nabucasa/d" -e "s#remote.is_cloud_request.get()#False#" homeassistant/components/http/forwarded.py
+            
+          # remove from default configuration
+          cp -dp homeassistant/components/default_config/manifest.json homeassistant/components/default_config/manifest.json.org
+          jq  -a 'del(.dependencies[] | select(. == ("assist_pipeline","stream","go2rtc","cloud","conversation","zeroconf","usb","ssdp","dhcp","mobile_app","bluetooth") ) )' homeassistant/components/default_config/manifest.json.org > homeassistant/components/default_config/manifest.json     
+      )
       ln -s ${_EMERGE_ROOT}/${HA_DIR} ${HA_DIR}
+      
       VIRTUAL_ENV=/py_env
       export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/:${HA_DIR}/core
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
-      pip install  -r /ha/core/requirements.txt
+      pip install  -r ${HA_DIR}/core/requirements.txt | tee ${_EMERGE_ROOT}/py_env.log
+    finish_rootfs_build: |
+      VIRTUAL_ENV=/py_env
+      . "$VIRTUAL_ENV"/bin/activate
+      ln -s ${_EMERGE_ROOT}/usr/bin/pg_config17 /usr/bin/pg_config
+      pip install psycopg2
+      find /py_env -name '*.so*' -exec strip {} \;
+      pip uninstall --yes uv
+      mv "$VIRTUAL_ENV" ${_EMERGE_ROOT}/"$VIRTUAL_ENV"
 
 - name: auth-operator
   tag: 2025.02-7
@@ -175,7 +219,7 @@ images:
 
 - name: infopage
   tag: 2025.03-1
-  section tools
+  section: tools
   requires:
   - python-3.13
   type: kubler
@@ -206,50 +250,3 @@ images:
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
     
-- type: script
-  name: my_ha
-  tag: "{{ software.home_assistant.version }}"
-  requires:
-  - my_py
-  command: |
-    git clone  --depth=1 -b "{{ software.home_assistant.version }}" https://github.com/home-assistant/core.git
-    cd core
-    git clone -b master https://github.com/home-assistant/docker-base.git
-    
-    # ENV (merging from docker-base and turing ARGS into ENV) + removing uv version as strict dependency
-    sed -i -e '/QEMU/d' Dockerfile    
-    docker_base_env=$(awk -v RS= -v ORS='\n\n' '/ENV/'  docker-base/alpine/Dockerfile | grep -v -e "^#" -e ^ENV | tr '\n' ' ')
-    docker_base_args=$(awk -v RS= -v ORS='\n\n' '/ARG/' docker-base/alpine/Dockerfile | grep -v -e "^$" -e "^#" -e 'WORKDIR' -e "^ARG" | sed -e 's/^\s\+//g' | awk '{print $1}' | while read v; do grep "$v" docker-base/alpine/build.yaml; done | sed -e 's/^\s\+//g' -e 's/: /=/g' | tr '\n' ' ')    
-    sed -e 's/uv==\([0-9]\|\.\)\+/uv/g' -e 's/UV_SYSTEM_PYTHON=true/UV_SYSTEM_PYTHON=false/g' -e 's#^ENV#ENV UV_HTTP_TIMEOUT=120 VIRTUAL_ENV=/py_env PATH="/py_env/bin:$PATH" \\\n'"${docker_base_env} ${docker_base_args}"'\\\n  #' Dockerfile > Dockerfile.ha
-    env_full=$(awk -v RS= -v ORS='\n\n' '/ENV /' Dockerfile.ha | grep -v "^#" | tr '\n' ' ')
-    
-    mv Dockerfile Dockerfile.org
-    from=$(grep ^FROM Dockerfile.ha) # multi-stage dockerfile
-    sed -i -e '/^FROM /s#$# AS build\nRUN python -m venv --system-site-packages /py_env \&\& . /py_env/bin/activate\n#' Dockerfile.ha # build image and virtual env for python
-    sed -i -e "s%^COPY rootfs%RUN find /py_env -name '*.so*' -exec strip {} \\\; \&\& source /py_env/bin/activate \&\& pip uninstall --yes uv\n\n${from}\n${env_full}\nCOPY rootfs%" Dockerfile.ha # strip libraries and remove uv
-    echo "COPY --from=build /py_env /py_env" >> Dockerfile.ha
-    echo "COPY --from=build /usr/src /usr/src" >> Dockerfile.ha
-
-    awk -v RS= -v ORS='\n\n' '/RUN|ENTRYPOINT|WORKDIR/' docker-base/alpine/Dockerfile | sed -e 's#rm -rf /usr/src/\*#for d in /usr/src/*; do echo "${d}" | grep -q -v "homeassistant" \&\& rm -rf ${d}; done#' >> Dockerfile.ha
-    awk -v RS= -v ORS='\n\n' '!/requirements_all/' Dockerfile.ha > Dockerfile
-    
-    for package in home-assistant-frontend pyotp PyQRCode paho-mqtt pyudev; do
-      grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
-    done
-    grep -q "huawei-solar==2.3.0" requirements.txt || echo "huawei-solar==2.3.0" >> requirements.txt
-    
-    for f in requirements.txt homeassistant/package_constraints.txt pyproject.toml homeassistant/helpers/network.py; do
-      sed -i -e "/hass-nabucasa/d" -e "/hass_nabucasa/d" "${f}"
-    done
-    sed -i -e "/hass_nabucasa/d" -e 's#remote.is_cloud_request.get()#False#' homeassistant/components/http/forwarded.py
-    
-    # remove from default configuration
-    cp -dp homeassistant/components/default_config/manifest.json homeassistant/components/default_config/manifest.json.org
-    jq  -a 'del(.dependencies[] | select(. == ("assist_pipeline","stream","go2rtc","cloud","conversation","zeroconf","usb","ssdp","dhcp","mobile_app") ) )' homeassistant/components/default_config/manifest.json.org > homeassistant/components/default_config/manifest.json
-    
-    grep -q "source /py_env/bin/activate" rootfs/etc/services.d/home-assistant/run || sed -i -e 's#^exec#source /py_env/bin/activate\nexec#g' rootfs/etc/services.d/home-assistant/run
-    grep -q "log-file" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --log-file /tmp/log#' rootfs/etc/services.d/home-assistant/run
-    grep -q "skip-pip" rootfs/etc/services.d/home-assistant/run || sed -i -e '/^exec / s#$# --skip-pip#' rootfs/etc/services.d/home-assistant/run
-    
-    podman build -f Dockerfile -t "${image}" --build-arg BUILD_ARCH=aarch64 --build-arg BUILD_FROM=my_py:3
-    podman push "${image}"

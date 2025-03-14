@@ -30,7 +30,7 @@ software:
         repo: library/eclipse-mosquitto
         arch: arm64
   home_assistant:
-    version: "2024.12.3"
+    version: "2025.1.4"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -54,7 +54,7 @@ software:
         repo: library/python
         arch: arm64
   helm:
-    version: 3.16.4
+    version: 3.15.4
     latest:
       type: dockerhub
       params:

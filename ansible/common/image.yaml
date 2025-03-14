@@ -108,8 +108,10 @@
         i='{{ lookup('vars', image_var).requires | default(['scratch'])| first }}'
         builder='{{ lookup('vars', image_var).builder | default('') }}'
         [ "${i}" == "scratch" ] || i="namespace/${i}"
+        
         echo "IMAGE_PARENT='${i}'" > "{{ image_dir }}/build.conf"
         [ "${builder}" == "" ] || echo "BUILDER='${builder}'" >> "{{ image_dir }}/build.conf"
+        
         cat > "{{ image_dir }}/Dockerfile.template" <<"EOF"
         FROM ${IMAGE_PARENT}
         LABEL maintainer="${MAINTAINER}"
@@ -121,9 +123,19 @@
         build_sh: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}/build.sh"
       shell: |
         echo '_packages="{{ build.packages | default('') }}"' > "{{ build_sh }}"
-        echo 'configure_rootfs_build(){ 
+        
+        cat >> "{{ build_sh }}" <<"EOF"
+        configure_builder(){
+          {{ build.configure_builder | default('true') }}
+        }
+        EOF
+        
+        cat >> "{{ build_sh }}" <<"EOF"
+        configure_rootfs_build(){
           {{ build.configure_rootfs_build | default('true') }}
-        }' >> "{{ build_sh }}"
+        }
+        EOF
+        
         echo 'finish_rootfs_build(){ 
           {{ build.finish_rootfs_build | default('true') }}
         }' >> "{{ build_sh }}"
@@ -131,7 +143,7 @@
       when: lookup('vars', image_var).build is defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler build -f namespace/{{ lookup('vars', image_var).name }} 2>&1
+        kubler build namespace/{{ lookup('vars', image_var).name }} 2>&1
       register: kubler_out
     - debug:
         msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"

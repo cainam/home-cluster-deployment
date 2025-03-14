@@ -10,6 +10,7 @@ configure_builder() {
     fix_portage_profile_symlink
     # install basics used by helper functions
     eselect news read new 1> /dev/null
+    . /etc/profile.d/portage-defaults.sh
     emerge app-portage/flaggie app-portage/eix app-portage/gentoolkit # sys-apps/locale-gen
     eix-update
     mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use}
@@ -25,9 +26,15 @@ configure_builder() {
     [[ -f /usr/"${_LIB}"/misc/ssh-keysign ]] && rm /usr/"${_LIB}"/misc/ssh-keysign
     update_use 'dev-vcs/git' '-perl'
     update_use 'app-crypt/pinentry' '+ncurses'
-    update_keywords 'dev-python/ssl-fetch' '+~amd64'
-    update_keywords 'app-admin/su-exec' '+~amd64'
+    # update_keywords 'dev-python/ssl-fetch' '+~amd64'
+    # update_keywords 'app-admin/su-exec' '+~amd64'
+    echo "*/* -su" >> /etc/portage/package.use/98su.conf
+    echo "*/* -seccomp" >> /etc/portage/package.use/98seccomp.conf
+    echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
+    echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf
     update_use 'sys-devel/binutils' '+gold'
+    emerge --newuse @world
+
     emerge dev-vcs/git app-eselect/eselect-repository app-misc/jq app-shells/bash-completion
     #install_git_postsync_hooks
     [[ "${BOB_UPDATE_WORLD}" == true ]] && emerge -vuND world
