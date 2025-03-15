@@ -138,9 +138,18 @@ applications:
     home-assistant:
       git: "{{ own_git_url }}"
       subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag="{{ software.home_assistant.version }}" --fix_source=.image.repository="home/my_ha" --fix_source=.postgresql.image= 
+      git_to_local_params: --fix_source=.image.tag= --fix_source=.image.repository= --fix_source=.postgresql.image= 
       remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }}
+      helm_options: >-
+        --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }} 
+        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'ha' ) | map(attribute='section') | first }}/ha" 
+        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'ha' ) | map(attribute='tag') | first }} 
+        --set command=python --set-json 'args=["-m","homeassistant","--config","/config"]'  
+        --set-json 'env=[
+          {"name":"PYTHONPATH","value":"/ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages"},
+          {"name":"PATH","value":"/py_env/bin:/bin:/usr/bin"},
+          {"name":"TZ","value":"UTC"},
+          {"name":"LD_LIBRARY_PATH","value":"/usr/lib/postgresql-17/lib/"}]'
       images:
       - my_ha
       storage:

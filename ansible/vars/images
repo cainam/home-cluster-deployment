@@ -36,27 +36,6 @@ images:
       set -x
       echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
       echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
-    configure_rootfs_build: |
-      set -x
-      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
-      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
-      sleep 9
-  
-- type: script
-  name: my_py
-  tag: 3
-  section: local
-  requires:
-  - my_base
-  command: |
-    cat > Dockerfile << 'EOF'
-    FROM my_base:{{ software.alpine.version }}
-    ENV VIRTUAL_ENV=/py_env 
-    ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-    RUN apk add --no-cache jq py3-packaging py3-jinja2 py3-kubernetes gnupg openssl xz python3 py3-pip py3-psycopg2 libturbojpeg ffmpeg
-    RUN python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn kopf
-    EOF
-    podman image build . --tag "${image}" && podman image push "${image}"
 
 - type: fetch
   source: docker.io/library/registry
@@ -72,7 +51,7 @@ images:
     finish_rootfs_build: |
       ln -s usr/lib "${_EMERGE_ROOT}/lib"
       "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
-      env-update
+      #env-update
   
 - name: base-13
   tag: 2025.02-1
@@ -208,14 +187,14 @@ images:
 - name: auth-operator
   tag: 2025.02-7
   section: auth
+  requires:
+  - python-3.12
+  type: kubler
   build:
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
       export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/   
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install  -r /ha/core/requirements.txt
-  requires:
-  - python-3.12
-  type: kubler
 
 - name: infopage
   tag: 2025.03-1
@@ -230,23 +209,3 @@ images:
       export PYTHONPATH=${VIRTUAL_ENV}/lib/python3.13/site-packages/
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi
       mv  "${VIRTUAL_ENV}" "${_EMERGE_ROOT}/${VIRTUAL_ENV}"
-
-  
-- type: script
-  name: my_base
-  tag: "{{ software.alpine.version }}"
-  section: local
-  command: |
-    version="{{ software.alpine.version }}" 
-    version_short=$(echo "${version}" | sed -e 's/^v//g')
-    version_tag=${version%.*}
-    minirootfs="alpine-minirootfs-${version_short}-aarch64.tar.gz"
-    curl -L -O "https://github.com/alpinelinux/docker-alpine/raw/refs/heads/${version_tag}/aarch64/${minirootfs}"
-    cat > Dockerfile << EOF
-    FROM scratch
-    ADD ${minirootfs} /
-    RUN apk add --no-cache tar binutils curl
-    CMD ["/bin/sh"]
-    EOF
-    podman image build . --tag "${image}" && podman image push "${image}"
-    

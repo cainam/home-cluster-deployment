@@ -32,16 +32,20 @@ configure_builder() {
     echo "*/* -seccomp" >> /etc/portage/package.use/98seccomp.conf
     echo "*/* -udev" >> /etc/portage/package.use/98udev.conf
     echo "*/* -systemd" >> /etc/portage/package.use/98systemd.conf
+    echo -e "*/* PYTHON_TARGETS: -* python3_12\n*/* PYTHON_SINGLE_TARGET: -* python3_12" >> /etc/portage/package.use/98py.conf
     update_use 'sys-devel/binutils' '+gold'
-    emerge --newuse @world
+    emerge --unmerge $(qlist -Iv | grep dev-lang/python-3.13) virtual/service-manager
+    emerge --depclean
+    emerge --update --newuse --deep @world --quiet --tree
+    emerge --depclean
 
     emerge dev-vcs/git app-eselect/eselect-repository app-misc/jq app-shells/bash-completion
     #install_git_postsync_hooks
     [[ "${BOB_UPDATE_WORLD}" == true ]] && emerge -vuND world
     true
     #add_overlay kubler https://github.com/edannenberg/kubler-overlay.git
-    ##export GOARCH=arm64
-    ##emerge dev-lang/go
+    export GOARCH=arm64
+    emerge dev-lang/go
     ##emerge sys-devel/gcc
 }
 
