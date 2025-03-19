@@ -38,15 +38,11 @@ sys-cluster/keepalived
 sys-cluster/kubeadm
 sys-cluster/kubectl
 sys-cluster/kubelet
-sys-devel/bc
-dev-debug/gdb
 sys-kernel/linux-headers
 sys-power/cpupower
 sys-process/iotop
 www-servers/lighttpd
 sys-kernel/linux-firmware
-net-fs/autofs
-net-fs/nfs-utils
 
 # only for longhorn
 sys-block/open-iscsi

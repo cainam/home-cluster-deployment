@@ -1,5 +1,5 @@
 images:
-- name: idp
+- name: idpxx
   tag: 2025.1
   type: script
   requires:
@@ -24,6 +24,15 @@ images:
     EOF
     podman image build . --tag "${image}" && podman image push "${image}"
 
+images:
+- name: idp
+  tag: 2025.1-1
+  type: kubler
+  requires:
+  - base
+  build:
+    packages: net-libs/nodejs
+
 - name: helm
   type: kubler
   tag: "{{ software.helm.version }}"
@@ -32,11 +41,12 @@ images:
   section: local
   build:
     packages: =app-admin/helm-{{ software.helm.version }}
-    configure_builder: |
+    configure_rootfs_build: |
       set -x
       echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
       echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
-
+    finish_rootfs_build: |
+      strip "${_EMERGE_ROOT}/usr/bin/helm"
 - type: fetch
   source: docker.io/library/registry
   tag: "{{ software.registry.version }}"
@@ -98,7 +108,7 @@ images:
       echo "finish_rootfs_build => done"
   
 - name: python-3.13
-  tag: 2025.02-2
+  tag: 2025.03-1
   section: local
   requires:
   - base-13
