@@ -142,3 +142,4 @@ TODO:
 - base builder: remove pyhthon version stuff from my-builder-13 and perform it all in base-13
 - images requires: include section?
 - kubler: remove use seccomp - test in python, but move up to my_builder
+- kubler: add entrypoint for application images

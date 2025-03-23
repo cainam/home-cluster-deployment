@@ -116,6 +116,9 @@
         FROM ${IMAGE_PARENT}
         LABEL maintainer="${MAINTAINER}"
         ADD rootfs.tar /
+        {% if entrypoint is defined -%}
+        ENTRYPOINT ["{{ entrypoint | join('","') }}"]
+        {% endif %}
         EOF
     - name: "{{ title }} kubler - create build.sh"
       vars:

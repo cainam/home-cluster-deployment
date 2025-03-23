@@ -2,4 +2,4 @@
 >=dev-embedded/rpi-eeprom-12.5_p1-r1 rpi-eeprom
 sys-kernel/linux-firmware linux-fw-redistributable no-source-code
 sys-boot/raspberrypi-firmware raspberrypi-videocore-bin
-
+sys-kernel/raspberrypi-image raspberrypi-videocore-bin

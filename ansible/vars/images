@@ -1,4 +1,4 @@
-images:
+imaxges:
 - name: idpxx
   tag: 2025.1
   type: script
@@ -25,33 +25,6 @@ images:
     podman image build . --tag "${image}" && podman image push "${image}"
 
 images:
-- name: idp
-  tag: 2025.1-1
-  type: kubler
-  requires:
-  - base
-  build:
-    packages: net-libs/nodejs
-
-- name: helm
-  type: kubler
-  tag: "{{ software.helm.version }}"
-  requires:
-  - base
-  section: local
-  build:
-    packages: =app-admin/helm-{{ software.helm.version }}
-    configure_rootfs_build: |
-      set -x
-      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
-      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
-    finish_rootfs_build: |
-      strip "${_EMERGE_ROOT}/usr/bin/helm"
-- type: fetch
-  source: docker.io/library/registry
-  tag: "{{ software.registry.version }}"
-  section: local
-
 - name: base
   tag: 2025.02-1
   section: local
@@ -74,6 +47,71 @@ images:
       ln -s usr/lib "${_EMERGE_ROOT}/lib"
       "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
       env-update
+
+- name: nodejs
+  tag: 2025.2-4
+  section: local
+  type: kubler
+  requires:
+  - base-13
+  build:
+    packages: net-libs/nodejs # dev-lang/typescript # hm ... it depends on bin/env, otherwise build fails dev-lang/typescript
+    configure_builder: |
+      echo "net-libs/nodejs npm" >> /etc/portage/package.use/97nodejs.conf
+      echo "dev-lang/typescript ~arm64" > /etc/portage/package.accept_keywords/ts.conf && cat /etc/portage/package.accept_keywords/ts.conf
+      emerge net-libs/nodejs dev-lang/typescript
+    configure_rootfs_build: |
+      provide_package sys-devel/gcc
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
+    finish_rootfs_build: |
+      copy_gcc_libs
+      #sed -i -e 's#/env\s\+#/#' ${_EMERGE_ROOT}/usr/lib/node_modules/npm/bin/npm-cli.js
+      ln -s ../../bin/env "${_EMERGE_ROOT}/usr/bin/env"
+
+- name: idp
+  tag: 2025.2-5
+  section: local
+  type: kubler
+  requires:
+  - nodejs
+  entrypoint:
+  - /bin/sh
+  - "-c"
+  - "npm run serve"
+  build:
+    # packages: dev-lang/typescript # DELME AGAIN, but see above what prevents it
+    configure_rootfs_build: |
+      git clone --branch master --depth 1 --filter=blob:none --sparse "https://github.com/cainam/krysyntyz.git"
+      git="krysyntyz"
+      cd "${git}"
+      git sparse-checkout set hydra-login-consent-node
+      mkdir "${_EMERGE_ROOT}/app"
+      mv  hydra-login-consent-node/* "${_EMERGE_ROOT}/app/"
+      cd ..
+      rm -rf "${git}"
+    finish_rootfs_build: |
+      cd "${_EMERGE_ROOT}/app/"
+      npm ci && node /usr/bin/npm run build
+
+
+- name: helm
+  type: kubler
+  tag: "{{ software.helm.version }}"
+  requires:
+  - base
+  section: local
+  build:
+    packages: =app-admin/helm-{{ software.helm.version }}
+    configure_rootfs_build: |
+      set -x
+      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
+      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
+    finish_rootfs_build: |
+      strip "${_EMERGE_ROOT}/usr/bin/helm"
+- type: fetch
+  source: docker.io/library/registry
+  tag: "{{ software.registry.version }}"
+  section: local
 
 - name: python-3.12
   tag: 2025.02-1
