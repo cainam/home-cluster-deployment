@@ -106,7 +106,7 @@
   shell: mountpoint -q /boot || mount /boot
   changed_when: false 
 
-- name: gentoo files
+- name: deploy from files
   copy:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
@@ -191,7 +191,7 @@
 #  changed_when: false
 #  register: root_dev
 
-- name: deploy templates
+- name: deploy from templates
   vars: 
     data_uuid: '{{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
 #    boot_device: '{{ ansible_mounts | selectattr("mount","==","/boot") | map(attribute="uuid") | default(default_boot_device, true) }}' # replaced by static host variables boot_uuid in inventory file, reason: tricky to handle device names and prefixes such as UUID= and UUID is not available when /boot is not mounted
@@ -232,6 +232,19 @@
     - src: "/usr/share/zoneinfo/{{ timezone }}"
       path: /etc/localtime
 
+- name: link deploy cron
+  file:
+    src: /usr/local/bin/deploy_gentoo.sh
+    dest: /etc/cron.daily/deploy_gentoo.sh
+    state: link
+  when: gentoo_build is defined
+
+- name: unlink deploy cron
+  file:
+    dest: /etc/cron.daily/deploy_gentoo.sh
+    state: absent
+  when: gentoo_build is not defined
+
 - name: portage profile
   shell: eselect profile set default/linux/arm64/23.0/split-usr
   
@@ -239,17 +252,16 @@
   shell: emerge --sync
   ignore_errors: true
   when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
+
+- name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
+  shell: mv "{{ item }}" "{{ item }}.deployed"
+  loop:
+  - /boot/cmdline.txt
+  - /boot/config.txt
   
 - name: emerge build
   shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
-
-- name: link deploy cron
-  file:
-    src: /usr/local/bin/deploy_gentoo.sh
-    dest: /etc/cron.daily/deploy_gentoo.sh
-    state: link
-  when: gentoo_build is defined
 
 - name: link check_and_fix.sh cron
   file:
@@ -261,12 +273,12 @@
   shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
 
-- name: unlink deploy cron
-  file:
-    dest: /etc/cron.daily/deploy_gentoo.sh
-    state: absent
-  when: gentoo_build is not defined
-
+- name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
+  shell: mv "{{ item }}.deployed" "{{ item }}"
+  loop:
+  - /boot/cmdline.txt
+  - /boot/config.txt
+  
 - name: eclean distfiles
   shell: eclean distfiles
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
