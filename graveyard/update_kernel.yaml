@@ -1,3 +1,4 @@
+# move to graveyard, because Gentoo package sys-kernel/raspberrypi-image is used instead
 ---
 - name: update firmware
   gather_facts: false

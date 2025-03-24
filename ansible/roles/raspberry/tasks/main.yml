@@ -18,40 +18,44 @@
   loop: "{{ eeprom_update  | dict2items }}"
   when: "'force_eeprom' in ansible_run_tags" 
 
-- name: create download directory for firmware
-  tempfile:
-    state: directory
-    suffix: build
-  register: fw_tmp
+# no longer used
+- block:
+  - name: create download directory for firmware
+    tempfile:
+      state: directory
+      suffix: build
+    register: fw_tmp
    
-- name: download firmwares
-  shell: |
-    cd {{ fw_tmp }};
-    pwd;
-    mkdir -p /linux-firmware/updates/brcm /linux-firmware/brcm /linux-firmware/cypress
-    for dir in brcm cypress; do 
-      curl -s -q https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/$dir | grep href | cut -d "'" -f 2  | grep 43455 | while read f; do  
-        curl -s -q --remote-name --output-dir /linux-firmware/$dir/  https://git.kernel.org/$f;
+  - name: download firmwares
+    shell: |
+      cd {{ fw_tmp }};
+      pwd;
+      mkdir -p /linux-firmware/updates/brcm /linux-firmware/brcm /linux-firmware/cypress
+      for dir in brcm cypress; do 
+        curl -s -q https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/$dir | grep href | cut -d "'" -f 2  | grep 43455 | while read f; do  
+          curl -s -q --remote-name --output-dir /linux-firmware/$dir/  https://git.kernel.org/$f;
+        done
       done
-    done
-  register: out
+    register: out
 
-- name: download updates output
-  debug:
-    msg: "output: item: {{ item }}"
-  loop: "{{ out  | dict2items }}"
+  - name: download updates output
+    debug:
+      msg: "output: item: {{ item }}"
+    loop: "{{ out  | dict2items }}"
   
-- name: perform update
-  shell: | 
-    mkdir -p /linux-firmware/updates/brcm
-    cp -dp /linux-firmware/cypress/*43455* /linux-firmware/updates/brcm
-    cp -dp /linux-firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.txt /linux-firmware/updates/brcm
-    (cd /linux-firmware/updates/brcm; ln -fs cyfmac43455-sdio.clm_blob brcmfmac43455-sdio.clm_blob; ln -fs cyfmac43455-sdio.bin brcmfmac43455-sdio.bin)
-  when: "'force_fw' in ansible_run_tags"
-  register: out
+  - name: perform update
+    shell: | 
+      mkdir -p /linux-firmware/updates/brcm
+      cp -dp /linux-firmware/cypress/*43455* /linux-firmware/updates/brcm
+      cp -dp /linux-firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.txt /linux-firmware/updates/brcm
+      (cd /linux-firmware/updates/brcm; ln -fs cyfmac43455-sdio.clm_blob brcmfmac43455-sdio.clm_blob; ln -fs cyfmac43455-sdio.bin brcmfmac43455-sdio.bin)
+    when: "'force_fw' in ansible_run_tags"
+    register: out
   
-- name: perform update output
-  debug:
-    msg: "output: item: {{ item }}"
-  when: "'force_fw' in ansible_run_tags"
-  loop: "{{ out  | dict2items }}"
+  - name: perform update output
+    debug:
+      msg: "output: item: {{ item }}"
+    when: "'force_fw' in ansible_run_tags"
+    loop: "{{ out  | dict2items }}"
+  when: false
+
