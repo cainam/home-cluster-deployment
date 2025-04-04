@@ -9,7 +9,7 @@
     ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-    PATH: "/usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin" 
+    PATH: "{{ path }}"
     registry: "{{ registry }}"
   pre_tasks:
   - name: include software

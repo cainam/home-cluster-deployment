@@ -56,6 +56,10 @@ def software(name):
       installed=[]
       installed_type = "k8s"
       installed_pattern = item+":"
+      if "max_entries" in sw["software"][item]:
+        max = sw["software"][item]["max_entries"]
+      else:
+        max = 5
       if "installed" in sw["software"][item]:
         if "type" in sw["software"][item]["installed"]:
           installed_type = sw["software"][item]["installed"]["type"]
@@ -80,7 +84,17 @@ def software(name):
       except requests.exceptions.HTTPError as exc:
         content_item.append(["error while fetching information: "+str(exc.response.status_code)])
         raw += "\n error while fetching information: "+str(exc.response.status_code)
-
+    elif sw["software"][item]["latest"]["type"] == "github-tags":
+      try:
+        vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/tags") # | jq .tag_name
+        vers.raise_for_status()
+        raw += "\n  github version: "+str([item["name"] for item in vers.json()])
+        content_item.append([item["name"] for item in vers.json()][:max])
+      except requests.exceptions.HTTPError as exc:
+        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        raw += "\n error while fetching information: "+str(exc.response.status_code)
+      except TypeError as e:
+        raise TypeError("vers: "+str(vers.json()))
 
     elif sw["software"][item]["latest"]["type"] == "github-branches":
       try:
@@ -122,7 +136,7 @@ def software(name):
         name = v["name"]
         if name[0:6] != "latest" and name.split("-")[0] in vspec:
           versions.append(name)
-      content_item.append(versions)
+      content_item.append(versions[:max])
 
     else:
       content_item.append("no clue")

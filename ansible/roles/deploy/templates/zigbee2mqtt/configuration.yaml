@@ -19,7 +19,7 @@ advanced:
   legacy_availability_payload: false
   legacy_api: false
   timestamp_format: YYYY-MM-DD HH:mm:ss
-  log_directory: /app/%TIMESTAMP%
+  log_directory: /log/%TIMESTAMP%
   log_level: info
   log_rotation: true
   log_syslog:

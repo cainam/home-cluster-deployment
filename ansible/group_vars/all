@@ -1,6 +1,7 @@
 auto_silent: true
 own_git_url: https://github.com/cainam/krysyntyz.git
 timezone: Europe/Amsterdam
+path: /usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin
 
 gluster_directory: /data/gluster
 local_disk_directory: /data/disks
@@ -17,7 +18,7 @@ kubler:
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
   stage3_date: 20250302T233336Z
-  portage: 20250309
+  portage: 20250329
 
 helm_repo_base: https://helm.adm13:9443/
 registry: myregistry.adm13:443

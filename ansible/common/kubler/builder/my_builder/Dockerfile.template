@@ -1,0 +1,5 @@
+FROM ${NAMESPACE}/my_builder
+LABEL maintainer="${MAINTAINER}"
+
+CMD ["/bin/bash"]
+

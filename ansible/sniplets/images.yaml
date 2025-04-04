@@ -17,8 +17,4 @@
       - vars/images
       run_once: true
     - name: handle additional images
-#      vars:
-#        limit_images:
-#        - infopage
-#        - python-3.12
       import_tasks: common/images.yaml

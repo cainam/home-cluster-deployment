@@ -3,7 +3,7 @@
 . set_env.sh
 
 build_directory="/data/build-envoy"
-original_image="istio-system/proxyv2:1.24.1"	
+original_image="istio-system/proxyv2:1.25.1"	
 new_image_suffix="gentoo"
 
 [ ! -d "${build_directory}" ] && mkdir "${build_directory}"
@@ -13,7 +13,7 @@ echo "FROM docker.io/debian:bookworm
 
 RUN apt update
 RUN apt install -y git bash  clang lld gcc g++ curl  libc++-14-dev libc++abi-14-dev make
-RUN curl -sL https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-linux-arm64 --output /usr/local/bin/bazel
+RUN curl -sL https://github.com/bazelbuild/bazel/releases/download/8.1.1/bazel-8.1.1-linux-arm64 --output /usr/local/bin/bazel
 RUN chmod a+x /usr/local/bin/bazel
 " > Dockerfile
 
@@ -23,7 +23,7 @@ rm Dockerfile
 
 git clone https://github.com/istio/proxy.git
 cd proxy
-git checkout release-1.24
+git checkout release-1.25
 
 echo "build --define tcmalloc=gperftools # in .bazelrc" >> .bazelrc
 

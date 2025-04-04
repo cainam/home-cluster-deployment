@@ -139,7 +139,10 @@ TODO:
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
 - emerge depclean added: check if dev-db/postgresql and sys-devel/gcc-13.2.1 got removed
-- base builder: remove pyhthon version stuff from my-builder-13 and perform it all in base-13
-- images requires: include section?
-- kubler: remove use seccomp - test in python, but move up to my_builder
-- kubler: add entrypoint for application images
+- images requires: include optional section and tag
+- security: don't run containers as root
+- deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
+- deploy/vars/main.yaml: replace images: by new software-to-image mapping
+- kubler: maintain USE flags centrally and exclude e.g. debug doc kerberos ldap pam perl systemd tcl test xml => done, rebuild builder!
+- kubler: implement build-tests to check if image is usable
+- ansible:  community.general.yaml has been deprecated. The plugin has been superseded by the the option `result_format=yaml` => probably alias  ANSIBLE_STDOUT_CALLBACK=yaml to fix

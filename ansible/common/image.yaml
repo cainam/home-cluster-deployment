@@ -101,9 +101,18 @@
         set_fact:
           deploy_kubler_files: "deploy_kubler_files"
       when: deploy_kubler_files is not defined
+
+#    - debug:
+#        msg: "kubler.base: {{ kubler.base }} kubler.kubler_dir: {{ kubler.kubler_dir }} ansible_env.PATH: {{ ansible_env.PATH }}"
+ #     vars:
+ #       image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
+ #     failed_when: true
     - name: "{{ title }} kubler - create build.conf and Dockerfile.template"
       vars:
         image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
+        entrypoint: "{{ lookup('vars', image_var).entrypoint }}"
+        workdir: "{{ lookup('vars', image_var).workdir }}"
+        env: "{{ lookup('vars', image_var).env }}"
       shell: |
         i='{{ lookup('vars', image_var).requires | default(['scratch'])| first }}'
         builder='{{ lookup('vars', image_var).builder | default('') }}'
@@ -116,6 +125,14 @@
         FROM ${IMAGE_PARENT}
         LABEL maintainer="${MAINTAINER}"
         ADD rootfs.tar /
+        {% if env is defined -%}
+        {% for e in env %}
+        ENV {{ e }}="{{ env[e] }}"
+        {% endfor %}
+        {% endif %}
+        {% if workdir is defined -%}
+        WORKDIR "{{ workdir }}"
+        {% endif %}
         {% if entrypoint is defined -%}
         ENTRYPOINT ["{{ entrypoint | join('","') }}"]
         {% endif %}
@@ -146,7 +163,7 @@
       when: lookup('vars', image_var).build is defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler build -f namespace/{{ lookup('vars', image_var).name }} 2>&1
+        kubler build -f --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
       register: kubler_out
     - debug:
         msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"
@@ -158,7 +175,7 @@
     environment:
       TERM: dumb # because kubler uses tput command
       KUBLER_VERBOSE: 'true'
-      PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ ansible_env.PATH }}"
+      PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ path }}"
       KUBLER_DATA_DIR: "{{ kubler.base }}/data"
       KUBLER_WORKING_DIR: "{{ kubler.base }}/{{ kubler.namespace_dir }}"
       KUBLER_DISABLE_KUBLER_NS: "true" #only use my own images
