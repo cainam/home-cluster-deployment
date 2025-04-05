@@ -10,6 +10,34 @@ images:
       "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
       #env-update
   
+- name: go
+  tag: 2025.03-1
+  section: local
+  type: kubler
+  requires:
+  - base
+  build:
+    configure_builder: 
+      emerge dev-lang/go
+    configure_rootfs_build: |
+      touch "${_EMERGE_ROOT}/ready2go"
+      
+- name: oauth2-proxy
+  tag: "{{ software.oauth2_proxy.version }}"
+  section: auth
+  type: kubler
+  entrypoint: ["/bin/oauth2-proxy"]
+  requires:
+  - go
+  build:
+    configure_rootfs_build: |
+      git clone -b "{{ software.oauth2_proxy.version }}" https://github.com/oauth2-proxy/oauth2-proxy.git
+      cd oauth2-proxy
+      go build
+      strip  oauth2-proxy
+      mkdir "${_EMERGE_ROOT}/bin"
+      mv oauth2-proxy "${_EMERGE_ROOT}/bin/"
+
 - name: nodejs
   tag: 2025.4
   section: local
@@ -17,7 +45,7 @@ images:
   requires:
   - base
   build:
-    packages: net-libs/nodejs # dev-lang/typescript # hm ... it depends on bin/env, otherwise build fails dev-lang/typescript
+    packages: net-libs/nodejs
     configure_builder: |
       echo "net-libs/nodejs npm" >> /etc/portage/package.use/97nodejs.conf
       echo "dev-lang/typescript ~arm64" > /etc/portage/package.accept_keywords/ts.conf && cat /etc/portage/package.accept_keywords/ts.conf
@@ -39,17 +67,14 @@ images:
   entrypoint: ["/bin/sh", "-c", "npm run serve"]
   build:
     configure_rootfs_build: |
-      git clone --branch master --depth 1 --filter=blob:none --sparse "https://github.com/cainam/krysyntyz.git"
-      git="krysyntyz"
-      cd "${git}"
-      git sparse-checkout set hydra-login-consent-node
-      mkdir "${_EMERGE_ROOT}/app"
-      mv  hydra-login-consent-node/* "${_EMERGE_ROOT}/app/"
-      cd ..
-      rm -rf "${git}"
+      git=$(basename "{{ own_git_url }}" | sed -e 's/\.git$//g')
+      git clone --branch master --depth 1 --filter=blob:none --sparse "{{ own_git_url }}"
+      ( cd "${git}" && git sparse-checkout set hydra-login-consent-node
+        mkdir "${_EMERGE_ROOT}/app" && mv  hydra-login-consent-node/* "${_EMERGE_ROOT}/app/"
+      ) && rm -rf "${git}"
     finish_rootfs_build: |
       cd "${_EMERGE_ROOT}/app/"
-      npm ci && node /usr/bin/npm run build
+      npm ci && npm run build
       npm prune --omit=dev
 
 - name: zigbee2mqtt
@@ -106,14 +131,10 @@ images:
         echo "configure_rootfs_build => start"
         update_use '+sqlite'
         provide_package sys-devel/gcc
-
         # add user/group for unprivileged container usage
         groupadd -g 404 python
         useradd -u 4004 -g python -d /home/python python
         mkdir -p "${_EMERGE_ROOT}"/home/python
-        #echo -e "*/* PYTHON_TARGETS: -* python3_13\n*/* PYTHON_SINGLE_TARGET: -* python3_13\n*/* -su" >> /etc/portage/package.use/98py.conf
-        #emerge --depclean
-
         ln -s usr/lib "${_EMERGE_ROOT}/lib"
         echo "configure_rootfs_build => done"
     finish_rootfs_build: |
@@ -128,8 +149,8 @@ images:
   - python-3.13
   type: kubler
   build:
-    packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2" # dev-python/idna dev-python/certifi dev-python/requests"
-    ##### check if idna, requests and certifi can be removed again!!!!  All were missing for auth-operator and 
+    packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2 dev-python/idna" # dev-python/certifi dev-python/requests"
+    ##### check if requests and certifi can be removed again!!!!  All were missing for auth-operator and 
     run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
 
 - name: ha
@@ -145,8 +166,7 @@ images:
       emerge app-misc/jq 
     configure_rootfs_build: |
       set -x
-      HA_DIR=/ha
-      mkdir -p ${_EMERGE_ROOT}/${HA_DIR}
+      HA_DIR=/ha && mkdir -p ${_EMERGE_ROOT}/${HA_DIR}
       ( cd ${_EMERGE_ROOT}/${HA_DIR}; 
           git clone --depth=1 -b "{{ software.home_assistant.version }}" https://github.com/home-assistant/core.git
           cd core
@@ -185,10 +205,7 @@ images:
   requires:
   - base
   type: kubler
-  entrypoint:
-  - "/mosquitto/sbin/mosquitto"
-  - "-c"
-  - "/mosquitto/config/mosquitto.conf"
+  entrypoint: ["/mosquitto/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf" ]
   ################# next time: distinguish build and run dependencies, not to include build in run (e.g. cmake in packages.provided)
   build:
     packages: dev-libs/cJSON dev-libs/openssl net-libs/libwebsockets net-libs/libwebsockets
@@ -218,7 +235,7 @@ images:
       env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh.
  
 - name: auth-operator
-  tag: 2025.02-7
+  tag: 2025.04
   section: auth
   requires:
   - python-3.13
@@ -227,7 +244,7 @@ images:
     packages: dev-python/idna dev-python/urllib3 dev-python/certifi dev-python/requests
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
-      export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/   
+      #export PYTHONPATH=${PYTHON_ENV}/lib/python3.12/site-packages/   
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn kopf kubernetes
       mv "$VIRTUAL_ENV" ${_EMERGE_ROOT}/"$VIRTUAL_ENV"
 

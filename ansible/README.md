@@ -138,11 +138,11 @@ TODO:
 - security: add to build
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
-- emerge depclean added: check if dev-db/postgresql and sys-devel/gcc-13.2.1 got removed
-- images requires: include optional section and tag
+- images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
 - security: don't run containers as root
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
 - kubler: maintain USE flags centrally and exclude e.g. debug doc kerberos ldap pam perl systemd tcl test xml => done, rebuild builder!
 - kubler: implement build-tests to check if image is usable
-- ansible:  community.general.yaml has been deprecated. The plugin has been superseded by the the option `result_format=yaml` => probably alias  ANSIBLE_STDOUT_CALLBACK=yaml to fix
+- kubler: go builder for oauth2-proxy and hydra
+- kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)

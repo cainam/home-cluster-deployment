@@ -8,7 +8,7 @@ software:
       params:
         repo: istio/istio
   oauth2_proxy:
-    version: v7.8.1
+    version: v7.8.2
     installed:
       pattern: "oauth2-proxy:"
     latest:

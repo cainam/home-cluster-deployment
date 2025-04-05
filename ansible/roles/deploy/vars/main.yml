@@ -79,8 +79,10 @@ applications:
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
-      helm_options: --set proxyVarsAsSecrets=false 
-      git_to_local_params: --fix_source=.image.tag="{{ software.oauth2_proxy.version }}"
+      git_to_local_params:  --fix_source=.image.repository= --fix_source=.image.tag=""
+      helm_options: >-
+        --set proxyVarsAsSecrets=false --set image.tag="{{ software.oauth2_proxy.version }}"
+        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'oauth2-proxy' ) | map(attribute='section') | first }}/oauth2-proxy"
       remove_dependencies: redis
       chart: oauth2-proxy
       files:
