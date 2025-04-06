@@ -9,15 +9,15 @@ new_image_suffix="gentoo"
 [ ! -d "${build_directory}" ] && mkdir "${build_directory}"
 cd "${build_directory}"
 
-echo "FROM docker.io/debian:bookworm
-
-RUN apt update
-RUN apt install -y git bash  clang lld gcc g++ curl  libc++-14-dev libc++abi-14-dev make
-RUN curl -sL https://github.com/bazelbuild/bazel/releases/download/8.1.1/bazel-8.1.1-linux-arm64 --output /usr/local/bin/bazel
-RUN chmod a+x /usr/local/bin/bazel
-" > Dockerfile
-
-podman build -f Dockerfile -t debian:bazel
+#echo "FROM docker.io/debian:bookworm
+#
+#RUN apt update
+#RUN apt install -y git bash  clang lld gcc g++ curl  libc++-14-dev libc++abi-14-dev make
+#RUN curl -sL https://github.com/bazelbuild/bazel/releases/download/7.5.0/bazel-7.5.0-linux-arm64 --output /usr/local/bin/bazel
+#RUN chmod a+x /usr/local/bin/bazel
+#" > Dockerfile
+#
+#podman build -f Dockerfile -t debian:bazel
 
 rm Dockerfile
 

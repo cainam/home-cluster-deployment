@@ -22,6 +22,21 @@ images:
     configure_rootfs_build: |
       touch "${_EMERGE_ROOT}/ready2go"
       
+- name: hydra
+  tag: "{{ software.hydra.version }}"
+  section: auth
+  type: kubler
+  requires:
+  - go
+  build:
+    configure_rootfs_build: |
+      git clone --branch "{{ software.hydra.version }}" --depth 1 --filter=blob:none  https://github.com/ory/hydra.git
+      cd hydra
+      go build
+      strip hydra
+      mkdir "${_EMERGE_ROOT}/bin"
+      mv hydra "${_EMERGE_ROOT}/bin/"
+
 - name: oauth2-proxy
   tag: "{{ software.oauth2_proxy.version }}"
   section: auth

@@ -35,15 +35,19 @@ applications:
     hydra:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/hydra
-      git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag="{{ software.hydra.version }}"
+      git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag= --fix_source=.image.repository=
       helm_options_for_memory: --set hydra.config.dsn=memory
       helm_options_for_presistent_storage: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true 
-      helm_options: --set hydra.config.dsn=memory
+      helm_options: >-
+        --set hydra.config.dsn=memory 
+        --set image.repository=auth/hydra --set image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'hydra' ) | map(attribute='tag')|first}}"
       remove_dependencies: hydra-maester
       requires:
       - type: default
         name: hydra-config
         namespace: auth
+      images:
+      - hydra
       files:
         values:
           file: hydra-config.yaml
@@ -76,6 +80,7 @@ applications:
       images:
       - idp
       network: true
+
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy
@@ -83,6 +88,8 @@ applications:
       helm_options: >-
         --set proxyVarsAsSecrets=false --set image.tag="{{ software.oauth2_proxy.version }}"
         --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'oauth2-proxy' ) | map(attribute='section') | first }}/oauth2-proxy"
+      images:
+      - oauth2-proxy
       remove_dependencies: redis
       chart: oauth2-proxy
       files:
