@@ -277,7 +277,7 @@
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
 
 - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: [ -f "{{ item }}.deployed" ] && mv "{{ item }}.deployed" "{{ item }}"
+  shell: test -f "{{ item }}.deployed" && mv "{{ item }}.deployed" "{{ item }}"
   loop:
   - /boot/cmdline.txt
   - /boot/config.txt
