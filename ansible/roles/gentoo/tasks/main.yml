@@ -257,7 +257,7 @@
   when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
 
 - name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: [ -f "{{ item }}" ] && mv "{{ item }}" "{{ item }}.deployed"
+  shell: test -f "{{ item }}" && mv "{{ item }}" "{{ item }}.deployed"
   loop:
   - /boot/cmdline.txt
   - /boot/config.txt
