@@ -54,6 +54,10 @@
       Accept: application/vnd.oci.image.manifest.v1+json
     method: "GET"
   register: check_image
+  when: "'no_exists_check' not in ansible_run_tags"
+#  tags:
+#  - always
+#  - exists_check
   failed_when: false
        
 - debug:
@@ -224,7 +228,7 @@
     - debug: var=build_out
       failed_when: false
     when: lookup('vars', image_var).type == 'script'
-  when: (check_image.status != 200) or ('force' in ansible_run_tags)
+  when: "'status' not in check_image.keys() or (check_image is defined and 'status' in check_image.keys() and check_image.status != 200)"
   
 - name: "{{ title }} record image as processed"
   set_fact:

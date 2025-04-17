@@ -217,6 +217,9 @@
     - file: cmdline.txt
       dest: /boot/
       backup: no
+    - file: config.txt
+      dest: /boot/
+      backup: no
 
 - name: symlinks for net.lo and localtime
   file:
@@ -254,7 +257,7 @@
   when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
 
 - name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: mv "{{ item }}" "{{ item }}.deployed"
+  shell: [ -f "{{ item }}" ] && mv "{{ item }}" "{{ item }}.deployed"
   loop:
   - /boot/cmdline.txt
   - /boot/config.txt
@@ -274,7 +277,7 @@
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
 
 - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: mv "{{ item }}.deployed" "{{ item }}"
+  shell: [ -f "{{ item }}.deployed" ] && mv "{{ item }}.deployed" "{{ item }}"
   loop:
   - /boot/cmdline.txt
   - /boot/config.txt

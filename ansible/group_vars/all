@@ -8,7 +8,7 @@ local_disk_directory: /data/disks
 remote_temp: /data/tmp
 default_boot_device: /dev/mmcblk0p1
 
-kubler:
+Xkubler:
   base: "/data/build/kubler"
   git: https://github.com/edannenberg/kubler.git
   namespace_dir: namespace

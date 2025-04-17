@@ -13,8 +13,11 @@
         role_path: ""
     - include_vars: "../{{ item }}"
       loop:
+      - vars/kubler
       - vars/software
       - vars/images
       run_once: true
     - name: handle additional images
       import_tasks: common/images.yaml
+    tags:
+    - always

@@ -1,0 +1,24 @@
+gpu_mem=16
+#hdmi_force_hotplug=1
+#hdmi_ignore_cec_init=1
+#dtoverlay=vc4-kms-v3d-pi4
+kernel=kernel8.img
+
+#force_turbo=1
+#dtoverlay=disable-bt
+#dtoverlay=miniuart-bt
+#dtoverlay=i2c-rtc,pcf85063,addr=0x51
+#dtoverlay=i2c-rtc-gpio
+
+#hdmi_blanking=2 should be enabled
+#disable_splash=1
+
+# https://r.obin.ch/blog/2022/08/02/integrate-raspbee-2-into-home-assistant/ 
+enable_uart=1
+#dtparam=i2c_arm=on
+#dtparam=i2c_vc=on
+#dtoverlay=miniuart-bt
+dtoverlay=disable-bt
+dtoverlay=i2c-rtc,pcf85063
+
+disable_splash=1

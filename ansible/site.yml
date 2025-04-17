@@ -20,6 +20,7 @@
     - testing
     - gentoo
     loop:
+    - vars/kubler
     - vars/software
     - vars/images
     run_once: true
