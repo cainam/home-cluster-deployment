@@ -283,7 +283,7 @@
   - /boot/config.txt
   
 - name: eclean distfiles
-  shell: eclean distfiles
+  shell: eclean --deep distfiles
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
  
 - name: eclean packages

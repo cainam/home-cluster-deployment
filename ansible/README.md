@@ -146,3 +146,4 @@ TODO:
 - kubler: implement build-tests to check if image is usable
 - kubler: go builder for oauth2-proxy and hydra
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
+- images: mosquitto: next time: distinguish build and run dependencies, not to include build in run (e.g. cmake in packages.provided)

@@ -114,7 +114,8 @@
     - name: "{{ title }} kubler - create build.conf and Dockerfile.template"
       vars:
         image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
-        entrypoint: "{{ lookup('vars', image_var).entrypoint }}"
+        entrypoint: "{{ lookup('vars', image_var).build.entrypoint }}"
+        user: "{{ lookup('vars', image_var).build.user }}"
         workdir: "{{ lookup('vars', image_var).workdir }}"
         env: "{{ lookup('vars', image_var).env }}"
       shell: |
@@ -136,6 +137,9 @@
         {% endif %}
         {% if workdir is defined -%}
         WORKDIR "{{ workdir }}"
+        {% endif %}
+        {% if user is defined -%}
+        USER "{{ user }}"
         {% endif %}
         {% if entrypoint is defined -%}
         ENTRYPOINT ["{{ entrypoint | join('","') }}"]

@@ -37,7 +37,6 @@ def node_info():
 
 def software(name):
   import yaml
-  import requests
   import re
   from packaging.specifiers import SpecifierSet
 
@@ -141,8 +140,10 @@ def software(name):
         results = requests.get(base_url+sw["software"][item]["latest"]["params"]["repo"])
         results.raise_for_status()
         for f in results.json():
-          if f != "files" and f != "Manifest" and f != "metadata.xml" and not "9999" in f:
-            versions.append(f)
+          if f['name'] != "files" and f['name'] != "Manifest" and f['name'] != "metadata.xml" and not "9999" in f['name']:
+            n=re.sub(item+'-','',f['name'])
+            n=re.sub('.ebuild','',n)
+            versions.append(n)
         versions.reverse()
       except requests.exceptions.HTTPError as exc:
         versions = ["error while fetching information: "+str(exc.response.status_code)]
