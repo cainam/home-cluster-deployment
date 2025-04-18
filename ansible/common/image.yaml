@@ -167,7 +167,7 @@
       when: lookup('vars', image_var).build is defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler build -f --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
+        kubler build --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
       register: kubler_out
     - debug:
         msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"

@@ -59,15 +59,14 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 17.3-alpine
+    version: 17.4
     installed:
       type: k8s
       pattern: "postgres:"
     latest:
-      type: dockerhub
+      type: gentoo
       params:
-        repo: library/postgres
-        arch: arm64
+        repo: dev-db/postgresql
   descheduler:
     version: "v0.32.2"
     latest:
@@ -100,16 +99,6 @@ software:
       type: github
       params:
         repo: kubernetes/dashboard
-  alpine:
-    version: v3.21.2
-    latest:
-      typeg: github-branches
-      paramsg:
-        repo: alpinelinux/docker-alpine
-      type: dockerhub
-      params:
-        repo: library/alpine
-        arch: arm64
   longhorn:
     version: v1.7.2
     installed:

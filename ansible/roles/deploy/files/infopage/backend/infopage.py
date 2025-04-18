@@ -49,7 +49,7 @@ def software(name):
   else:
     raw = "" #str(sw)
     item = name
-    raw+="\n"+item+"\n  current version: "+sw["software"][item]["version"]
+    raw+="\n"+item+"\n  current version: "+str(sw["software"][item]["version"])
 
     installed=["unknn"]
     if True:
@@ -74,24 +74,25 @@ def software(name):
 
     if not 'latest' in sw["software"][item]:
       return "no latest configured",""
-
+    
+    versions = []
     if sw["software"][item]["latest"]["type"] == "github":
       try:
         vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/releases/latest") # | jq .tag_name
         vers.raise_for_status()
         raw += "\n  github version: "+str(vers.json()["tag_name"] )
-        content_item.append([vers.json()["tag_name"]])
+        versions = [vers.json()["tag_name"]]
       except requests.exceptions.HTTPError as exc:
-        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        versions = ["error while fetching information: "+str(exc.response.status_code)]
         raw += "\n error while fetching information: "+str(exc.response.status_code)
     elif sw["software"][item]["latest"]["type"] == "github-tags":
       try:
         vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/tags") # | jq .tag_name
         vers.raise_for_status()
         raw += "\n  github version: "+str([item["name"] for item in vers.json()])
-        content_item.append([item["name"] for item in vers.json()][:max])
+        versions = [item["name"] for item in vers.json()][:max]
       except requests.exceptions.HTTPError as exc:
-        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        versions = ["error while fetching information: "+str(exc.response.status_code)]
         raw += "\n error while fetching information: "+str(exc.response.status_code)
       except TypeError as e:
         raise TypeError("vers: "+str(vers.json()))
@@ -101,11 +102,10 @@ def software(name):
         vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/branches") # | jq .tag_name
         vers.raise_for_status()
         raw += "\n  github branch version: "+str(vers.json()[-1]['name'] )
-        content_item.append([vers.json()[-1]['name']])
+        versions = [vers.json()[-1]['name']]
       except requests.exceptions.HTTPError as exc:
-        content_item.append(["error while fetching information: "+str(exc.response.status_code)])
+        versions = ["error while fetching information: "+str(exc.response.status_code)]
         raw += "\n error while fetching information: "+str(exc.response.status_code)
-
 
     elif sw["software"][item]["latest"]["type"] == "dockerhub":
       dockerhub_base_url = "https://hub.docker.com/v2/repositories/"
@@ -116,7 +116,6 @@ def software(name):
           break
       raw += "\n  latest digest: "+digest
       all_tags = requests.get(dockerhub_base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tags/?page_size=500")
-      versions = []
       for tag in all_tags.json()["results"]:
         if tag["name"] == "latest": continue
         for image in tag["images"]:
@@ -125,20 +124,33 @@ def software(name):
             continue
           if image["digest"] == digest:
             versions.append(tag["name"])
-      content_item.append(versions)
 
     elif sw["software"][item]["latest"]["type"] == "quay":
       base_url = "https://quay.io/api/v1/repository/"
       results = requests.get(base_url+sw["software"][item]["latest"]["params"]["repo"]+"/tag/?onlyActiveTags=true")
       vspec = SpecifierSet(">="+sw["software"][item]["version"])
-      versions = []
       for v in results.json()["tags"]:
         name = v["name"]
         if name[0:6] != "latest" and name.split("-")[0] in vspec:
           versions.append(name)
-      content_item.append(versions[:max])
+      versions = versions[:max]
+
+    elif sw["software"][item]["latest"]["type"] == "gentoo":
+      try:
+        base_url = "https://api.github.com/repos/gentoo/gentoo/contents/"
+        results = requests.get(base_url+sw["software"][item]["latest"]["params"]["repo"])
+        results.raise_for_status()
+        for f in results.json():
+          if f != "files" and f != "Manifest" and f != "metadata.xml" and not "9999" in f:
+            versions.append(f)
+        versions.reverse()
+      except requests.exceptions.HTTPError as exc:
+        versions = ["error while fetching information: "+str(exc.response.status_code)]
+        raw += "\n error while fetching information: "+str(exc.response.status_code)
 
     else:
-      content_item.append("no clue")
+      versions = ["unknown type"]
+
+    content_item.append(versions)
     return raw, content_item
 
