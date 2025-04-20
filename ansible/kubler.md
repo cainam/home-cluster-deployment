@@ -6,14 +6,23 @@
 - since I like to avoid using ":latest" which is hard-coded and since I want to tag images with the version of the software but IMAGE_TAG is used for the parent-builder as well I decided to implement parts of kubler in ansible keeping the init phase (portage, stage) and using kubler-build-root script
 
 ```mermaid
-flowchart LR; 
+flowchart TD; 
+ subgraph kubler init
   portage-->stage;
   stage-->builder-core;
   builder-core-->builder-image1;
   builder-image1-->builder-image2
   builder-image1-->image1;
+  end
   builder-image2-->builder-image3
+  subgraph kubler-build-root
   builder-image2-->image2
+  end
+  builder-image3-->builder-image4
+  subgraph kubler-build-root
+  builder-image3-->image3
+  end
+
 ```
 
 
