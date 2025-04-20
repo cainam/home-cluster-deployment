@@ -10,9 +10,10 @@ graph TD;
   portage-->stage;
   stage-->builder-core;
   builder-core-->builder-image1;
-  builder-core-->image1;
   builder-image1-->builder-image2
-  builder-image1-->image2;
+  builder-image1-->image1;
+  builder-image1-->builder-image3
+  builder-image1-->image2
 ```
 
 
