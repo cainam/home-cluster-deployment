@@ -12,8 +12,8 @@ graph TD;
   builder-core-->builder-image1;
   builder-image1-->builder-image2
   builder-image1-->image1;
-  builder-image1-->builder-image3
-  builder-image1-->image2
+  builder-image2-->builder-image3
+  builder-image2-->image2
 ```
 
 
