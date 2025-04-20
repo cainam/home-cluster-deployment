@@ -11,10 +11,10 @@ flowchart TD;
   portage-->stage;
   stage-->builder-core;
   builder-core-->builder-image1;
-  builder-image1-->builder-image2
   builder-image1-->image1;
   end
  subgraph ansible-driven using kubler-build-root
+  builder-image1-->builder-image2
   builder-image2-->builder-image3
   builder-image2-->image2
   builder-image3-->builder-image4
