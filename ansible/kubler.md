@@ -14,15 +14,12 @@ flowchart TD;
   builder-image1-->builder-image2
   builder-image1-->image1;
   end
+ subgraph ansible-driven using kubler-build-root
   builder-image2-->builder-image3
-  subgraph kubler-build-root-2
   builder-image2-->image2
-  end
   builder-image3-->builder-image4
-  subgraph kubler-build-root-3
   builder-image3-->image3
-  end
-
+ end
 ```
 
 
