@@ -7,10 +7,12 @@
 
 ```mermaid
 graph TD; 
-  A-->B;
-  B-->C;
-  C-->D1;
-  C-->D2;
+  portage-->stage;
+  stage-->builder-core;
+  builder-core-->image1;
+  builder-core-->builder-image1;
+  builder-image1-->image2;
+  builder-image1-->builder-image2
 ```
 
 
