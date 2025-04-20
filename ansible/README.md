@@ -134,7 +134,6 @@ TODO:
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - auth-operator: no action when started after hydra, but has to execute a first check at startup
-- log and inspect all incoming flows
 - security: add to build
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
@@ -142,8 +141,10 @@ TODO:
 - security: don't run containers as root
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
-- kubler: maintain USE flags centrally and exclude e.g. debug doc kerberos ldap pam perl systemd tcl test xml => done, rebuild builder!
 - kubler: implement build-tests to check if image is usable
-- kubler: go builder for oauth2-proxy and hydra
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
-- images: mosquitto: next time: distinguish build and run dependencies, not to include build in run (e.g. cmake in packages.provided)
+- images: image_parent defaults to namespace and :latest, replace by section and tag from lookup
+  - colon in path breaks podman run => add tag to template
+  - 
+
+- kubler: follow kubler md, import from keyserver, then verify

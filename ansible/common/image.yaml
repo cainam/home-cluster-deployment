@@ -69,13 +69,15 @@
     - name: "{{ title }} kubler - variables"
       set_fact:
         kubler_namespace: "common/kubler"
+        dest_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/{{ lookup('vars', image_var).section }}/images/{{ lookup('vars', image_var).name }}"
+        # base_dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
     - name: "{{ title }} kubler - directories"
       file:
-        path: "{{ kubler.base }}/{{ item }}"
+        path: "{{ item }}"
         recurse: true
         state: directory
       loop:
-      - "{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
+      - "{{ dest_dir }}"
     - name: "{{ title }} kubler - kubler"
       shell: |
         if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
@@ -89,14 +91,14 @@
           templates_files: "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
       - name: "{{ title }} kubler- ensure destination directory exists for templates"
         file:
-          path: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
+          path: "{{ dest_dir }}"
           recurse: true
           state: directory
         loop: "{{ templates_dirs }}"
       - name: "{{ title }} kubler - create config from templates"
         template:
           src: "{{ item }}"
-          dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace( kubler_namespace , '') }}"
+          dest: "{{ dest_dir }}"
         loop: "{{ templates_files }}"
       - name: "{{ title }} kubler - make scripts executable"
         shell: |
@@ -111,23 +113,30 @@
  #     vars:
  #       image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
  #     failed_when: true
+    - name: "{{ title }} kubler - kubler.conf symlink"
+      file:
+        state: link
+        src: "{{ kubler.base }}/{{ kubler.namespace_dir }}/kubler.conf"
+        dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}/{{ lookup('vars', image_var).section }}/kubler.conf"
+ 
     - name: "{{ title }} kubler - create build.conf and Dockerfile.template"
       vars:
         image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
+        section: "{{ lookup('vars', image_var).section }}"
         entrypoint: "{{ lookup('vars', image_var).build.entrypoint }}"
         user: "{{ lookup('vars', image_var).build.user }}"
         workdir: "{{ lookup('vars', image_var).workdir }}"
         env: "{{ lookup('vars', image_var).env }}"
+        requires: "{{ lookup('vars', image_var).requires | default(['scratch'])| first }}"
+        req_section: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='section')|first}}"
+        req_tag: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='tag')|first}}"
       shell: |
-        i='{{ lookup('vars', image_var).requires | default(['scratch'])| first }}'
-        builder='{{ lookup('vars', image_var).builder | default('') }}'
-        [ "${i}" == "scratch" ] || i="namespace/${i}"
+        image_dir="{{ dest_dir }}"
+        echo "IMAGE_PARENT='{{ req_section }}/{{ requires }}'" > "${image_dir}/build.conf"
+        [ "${builder}" == "" ] || echo "BUILDER='${builder}'" >> "${image_dir}/build.conf"
         
-        echo "IMAGE_PARENT='${i}'" > "{{ image_dir }}/build.conf"
-        [ "${builder}" == "" ] || echo "BUILDER='${builder}'" >> "{{ image_dir }}/build.conf"
-        
-        cat > "{{ image_dir }}/Dockerfile.template" <<"EOF"
-        FROM ${IMAGE_PARENT}
+        cat > "${image_dir}/Dockerfile.template" <<"EOF"
+        FROM ${IMAGE_PARENT}:{{ req_tag }}
         LABEL maintainer="${MAINTAINER}"
         ADD rootfs.tar /
         {% if env is defined -%}
@@ -171,7 +180,7 @@
       when: lookup('vars', image_var).build is defined
     - name: "{{ title }} kubler - kubler"
       shell: |
-        kubler build --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
+        kubler build --no-deps --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
       register: kubler_out
     - debug:
         msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"

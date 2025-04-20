@@ -5,10 +5,7 @@ images:
   type: kubler
   build:
     packages: busybox
-    finish_rootfs_build: |
-      ln -s usr/lib "${_EMERGE_ROOT}/lib"
-      "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
-      #env-update
+    finish_rootfs_build: ln -s usr/lib "${_EMERGE_ROOT}/lib" && "${_EMERGE_ROOT}"/bin/busybox --install "${_EMERGE_ROOT}/bin"
   
 - name: postgresql
   tag: "{{ software.postgresql.version }}"
@@ -119,7 +116,6 @@ images:
     entrypoint: ["/bin/sh", "-c", "node index.js"]
     configure_rootfs_build: |
       git clone --branch {{ software.zigbee2mqtt.version }} --depth 1 https://github.com/Koenkk/zigbee2mqtt.git "${_EMERGE_ROOT}/app"
-      #npm --prefix "${_EMERGE_ROOT}/app" install -g pnpm
     finish_rootfs_build: |
       cd "${_EMERGE_ROOT}/app/"
       mkdir log
@@ -137,7 +133,6 @@ images:
   build:
     packages: =app-admin/helm-{{ software.helm.version }}
     configure_rootfs_build: |
-      set -x
       echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
       echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
     finish_rootfs_build: strip "${_EMERGE_ROOT}/usr/bin/helm"
@@ -174,7 +169,6 @@ images:
   type: kubler
   build:
     packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2 dev-python/idna dev-python/certifi dev-python/requests"
-    ##### check if requests and certifi can be removed again!!!!  All were missing for auth-operator and 
     run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
 
 - name: ha
@@ -228,7 +222,6 @@ images:
   requires:
   - base
   type: kubler
-  ################# next time: distinguish build and run dependencies, not to include build in run (e.g. cmake in packages.provided)
   build:
     entrypoint: ["/mosquitto/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf" ]
     packages: dev-libs/cJSON dev-libs/openssl net-libs/libwebsockets net-libs/libwebsockets

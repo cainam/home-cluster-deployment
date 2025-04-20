@@ -103,7 +103,6 @@ applications:
     common:
       git: "{{ own_git_url }}"
       subdir: charts/common
-      #branch: common-4.5.2
       install: false
     grott:
       git: "{{ own_git_url }}"
