@@ -15,9 +15,9 @@
         - i.type is defined
         - i.section is defined
         - i.tag is defined
-        - i.type != 'fetch'  or ( i.type == 'fetch'  and i.source is defined)
-        - i.type != 'script' or ( i.type == 'script' and i.command is defined)
-        - i.type != 'script' or ( i.type == 'script' and i.name is defined)
+        - i.type != 'fetch'  or i.source is defined
+        - i.type != 'script' or i.command is defined
+        - i.type != 'script' or i.name is defined
 
   - set_fact:
       t: "{{ lookup('vars', image) }}"
@@ -41,102 +41,145 @@
       image_var: "{{ var_stack[-1] }}"
       title: "manage image {{ lookup('vars', var_stack[-1]).name }} -"
       var_stack: "{{ var_stack[0:-1] }}"
-      
-  - name: "{{ title }} process image"
-    debug:
-      msg: "image {{image_var}}:\n{{ lookup('vars', image_var) | to_nice_yaml}}"
-    when: "'debug' in ansible_run_tags"
+      image_info: "{{ lookup('vars', var_stack[-1]) }}"
+
+- name: "{{ title }} check for builder image availability"
+  shell: |
+    podman image inspect --format " " {{ image_info.section }}/{{ kubler.default_builder }}-{{ image_info.name }}:{{ image_info.tag }} 2>&1
+  failed_when: false
+  register: check_builder
 
 - name: "{{ title }} check if image exists already"
   uri:
-    url: "https://{{ registry }}/v2/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}/manifests/{{ lookup('vars', image_var).tag | default('latest') }}"
+    url: "https://{{ registry }}/v2/{{ image_info.section }}/{{ image_info.name }}/manifests/{{ image_info.tag | default('latest') }}"
     headers:
       Accept: application/vnd.oci.image.manifest.v1+json
     method: "GET"
   register: check_image
   when: "'no_exists_check' not in ansible_run_tags"
-#  tags:
-#  - always
-#  - exists_check
   failed_when: false
-       
+
 - debug:
     msg: "check_image type: {{ check_image.status | type_debug }}\n{{ check_image | to_nice_yaml }}\nimages_processed:\n{{ images_processed | to_nice_yaml }}"
   when: "'debug' in ansible_run_tags"
 
-- block:
-  - block:
-    - name: "{{ title }} kubler - variables"
+- block: # build something
+  - block: # kubler
+    - name: "{{ title }} variables - 1"
       set_fact:
-        kubler_namespace: "common/kubler"
-        dest_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/{{ lookup('vars', image_var).section }}/images/{{ lookup('vars', image_var).name }}"
-        # base_dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}{{ item | replace (kubler_namespace,'') }}"
-    - name: "{{ title }} kubler - directories"
+        requires: "{{ image_info.requires | default(['core'])| first }}" # as scratch should be the only image without requires attribute
+        dest_dir: "{{ kubler.base }}/{{ image_info.section }}/{{ image_info.name }}"
+        build_dir: "{{ kubler.base }}/build"
+        portage_image: "build/portage:{{ kubler.portage }}"
+        stage3_image: "build/{{ kubler.stage3_base }}:{{ kubler.stage3_date }}"
+        stage3_url: "https://distfiles.gentoo.org/releases/{{ default_platform }}/autobuilds/{{ kubler.stage3_date }}/"
+        stage3_file: "{{ kubler.stage3_base }}-{{ kubler.stage3_date }}.tar.xz"
+        core_builder: "build/{{ kubler.default_builder }}-core:{{ kubler.portage }}" 
+        scratch_builder: "build/{{ kubler.default_builder }}-scratch:{{ kubler.portage }}"
+
+    - name: "{{ title }} variables - 2"
+      set_fact:
+        build_container: "rootfs-builder-{{ image_info.section }}-{{ image_info.name }}"
+        build_image: "{{ registry }}/{{ image_info.section }}/{{ image_info.name }}:{{ image_info.tag }}"
+        req_section: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='section') | first| default('build')}}"
+        req_tag: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='tag') |first | default(kubler.portage)}}"
+    - name: "{{ title }} directories"
       file:
         path: "{{ item }}"
         recurse: true
         state: directory
       loop:
       - "{{ dest_dir }}"
-    - name: "{{ title }} kubler - kubler"
+      - "{{ build_dir }}"
+    - name: "{{ title }} git clone kubler"
       shell: |
         if [ ! -d "kubler" ]; then git clone -b master --depth 1 "{{ kubler.git }}" kubler; else (cd kubler; git pull); fi  
       args:
         chdir: "{{ kubler.base }}"
 
-    - block: # deploy namespace files to system for kubler build
-      - name: "{{ title }} kubler - get namespace directories and files"
-        set_fact:
-          templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\"   -type d').split('\n')|reject('match', '^$')  }}"
-          templates_files: "{{ lookup('pipe', '[ ! -d \"'+ kubler_namespace +'\" ] || find \"'+ kubler_namespace +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
-      - name: "{{ title }} kubler- ensure destination directory exists for templates"
-        file:
-          path: "{{ dest_dir }}"
-          recurse: true
-          state: directory
-        loop: "{{ templates_dirs }}"
-      - name: "{{ title }} kubler - create config from templates"
-        template:
-          src: "{{ item }}"
-          dest: "{{ dest_dir }}"
-        loop: "{{ templates_files }}"
-      - name: "{{ title }} kubler - make scripts executable"
+    - block: # check only when image_info.name == 'scratch'
+      # portage
+      - name: "{{ title }} check for portage image availability"
         shell: |
-          find "{{ kubler.base }}/{{ kubler.namespace_dir }}" -type f -name "*.sh" -exec chmod a+x {} \; 2>&1
-      - name: "{{ title }} kubler - define deploy_kubler_files to ensure files are only deployed once"
-        set_fact:
-          deploy_kubler_files: "deploy_kubler_files"
-      when: deploy_kubler_files is not defined
-
-#    - debug:
-#        msg: "kubler.base: {{ kubler.base }} kubler.kubler_dir: {{ kubler.kubler_dir }} ansible_env.PATH: {{ ansible_env.PATH }}"
- #     vars:
- #       image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
- #     failed_when: true
-    - name: "{{ title }} kubler - kubler.conf symlink"
-      file:
-        state: link
-        src: "{{ kubler.base }}/{{ kubler.namespace_dir }}/kubler.conf"
-        dest: "{{ kubler.base }}/{{ kubler.namespace_dir }}/{{ lookup('vars', image_var).section }}/kubler.conf"
- 
-    - name: "{{ title }} kubler - create build.conf and Dockerfile.template"
-      vars:
-        image_dir: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}"
-        section: "{{ lookup('vars', image_var).section }}"
-        entrypoint: "{{ lookup('vars', image_var).build.entrypoint }}"
-        user: "{{ lookup('vars', image_var).build.user }}"
-        workdir: "{{ lookup('vars', image_var).workdir }}"
-        env: "{{ lookup('vars', image_var).env }}"
-        requires: "{{ lookup('vars', image_var).requires | default(['scratch'])| first }}"
-        req_section: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='section')|first}}"
-        req_tag: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', requires ) | map(attribute='tag')|first}}"
-      shell: |
-        image_dir="{{ dest_dir }}"
-        echo "IMAGE_PARENT='{{ req_section }}/{{ requires }}'" > "${image_dir}/build.conf"
-        [ "${builder}" == "" ] || echo "BUILDER='${builder}'" >> "${image_dir}/build.conf"
+          podman image inspect --format " " {{ portage_image }} 2>&1
+        failed_when: false
+        register: check_portage
         
-        cat > "${image_dir}/Dockerfile.template" <<"EOF"
-        FROM ${IMAGE_PARENT}:{{ req_tag }}
+      - block:
+        - name: "{{ title }} get portage"
+          get_url:
+            url: https://distfiles.gentoo.org/snapshots/portage-{{ kubler.portage }}.tar.xz
+            dest: "{{ build_dir }}/"
+        - name: "{{ title }} build portage image"
+          shell: |
+            cd {{ build_dir }}
+            cat > "Dockerfile.portage" <<EOF
+            FROM local/base AS builder
+            RUN set -x && \
+                mkdir -p /var/db/repos/ && \
+                tar -xf /portage-{{ kubler.portage }}.tar.xz -C /var/db/repos && \
+                mv /var/db/repos/portage /var/db/repos/gentoo && \
+                mkdir -p /var/db/repos/gentoo/metadata
+            FROM local/base
+            COPY --from=builder /var/db/repos/gentoo /var/db/repos/gentoo
+            VOLUME /var/db/repos /var/cache/eix
+            EOF
+            podman build -v ./portage-{{ kubler.portage }}.tar.xz:/portage-{{ kubler.portage }}.tar.xz --file Dockerfile.portage --tag {{ portage_image }}
+            podman run --name {{ kubler.portage_container }} {{ portage_image }} true
+        when: "check_portage.rc != 0"
+        
+      # stage3 
+      - name: "{{ title }} check for stage3 image availability"
+        shell: |
+          podman image inspect --format " " {{ stage3_image }} 2>&1
+        failed_when: false
+        register: check_stage3
+        
+      - block:
+        - name: "{{ title }} get stage3"
+          get_url:
+            url: "{{ stage3_url }}/{{ stage3_file }}"
+            dest: "{{ build_dir }}/"
+        - name: "{{ title }} build stage3 image"
+          shell: |
+            podman import "{{ build_dir }}/{{ stage3_file }}" {{ stage3_image }}
+        when: "check_stage3.rc != 0 or check_portage.rc != 0"
+        
+      # core builder
+      - name: "{{ title }} check for core builder image availability"
+        shell: |
+          podman image inspect --format " " {{ core_builder }} 2>&1
+        failed_when: false
+        register: check_core
+        
+      - block:
+        - name: "{{ title }} build core builder image"
+          shell: |
+            cd {{ build_dir }}
+            cp -rdp "{{ kubler.base }}/kubler/engine/docker/bob-core"/* .
+            . {{ kubler.base }}/kubler/engine/docker.sh
+            BOB_CURRENT_STAGE3_ID="{{ stage3_image }}" BOB_CHOST='{{ kubler.chost }}' BOB_BUILDER_CHOST='{{ kubler.chost }}' generate_dockerfile {{ build_dir }}
+            mv Dockerfile Dockerfile.core
+            podman build --file Dockerfile.core --tag {{ core_builder }}
+        when: "check_core.rc != 0 or check_stage3.rc != 0 or check_portage.rc != 0"
+        
+      # scratch builder
+      - name: "{{ title }} check for scratch builder image availability"
+        shell: |
+          podman image inspect --format " " {{ scratch_builder }} 2>&1
+        failed_when: false
+        register: check_scratch
+      when: image_info.name == 'scratch'
+
+    - name: "{{ title }} create Dockerfile.template"
+      vars:
+        entrypoint: "{{ image_info.build.entrypoint }}"
+        user: "{{ image_info.build.user }}"
+        workdir: "{{ image_info.workdir }}"
+        env: "{{ image_info.env }}"
+      shell: |
+        cat > "{{ dest_dir }}/Dockerfile.template" <<"EOF"
+        FROM ${IMAGE_PARENT}
         LABEL maintainer="${MAINTAINER}"
         ADD rootfs.tar /
         {% if env is defined -%}
@@ -154,59 +197,68 @@
         ENTRYPOINT ["{{ entrypoint | join('","') }}"]
         {% endif %}
         EOF
-    - name: "{{ title }} kubler - create build.sh"
+    - name: "{{ title }} create build.sh"
       vars:
-        build: "{{ lookup('vars', image_var).build }}"
-        build_sh: "{{ kubler.base }}/{{ kubler.namespace_dir }}/images/{{ lookup('vars', image_var).name }}/build.sh"
+        build_sh: "{{ dest_dir }}/build.sh"
       shell: |
-        echo '_packages="{{ build.packages | default('') }}"' > "{{ build_sh }}"
+        echo '_packages="{{ image_info.build.packages | default('') }}"' > "{{ build_sh }}"
         
-        cat >> "{{ build_sh }}" <<"EOF"
+        cat >> "{{ build_sh }}" <<"INLINE"
         configure_builder(){
-          {{ build.configure_builder | default('true') }}
+          {{ image_info.build.configure_builder | default('true') }}
         }
-        EOF
+        INLINE
         
-        cat >> "{{ build_sh }}" <<"EOF"
+        cat >> "{{ build_sh }}" <<"INLINE"
         configure_rootfs_build(){
-          {{ build.configure_rootfs_build | default('true') }}
+          {{ image_info.build.configure_rootfs_build | default('true') }}
         }
-        EOF
+        INLINE
         
         echo 'finish_rootfs_build(){ 
-          {{ build.finish_rootfs_build | default('true') }}
+          {{ image_info.build.finish_rootfs_build | default('true') }}
         }' >> "{{ build_sh }}"
 
-      when: lookup('vars', image_var).build is defined
-    - name: "{{ title }} kubler - kubler"
-      shell: |
-        kubler build --no-deps --verbose-build namespace/{{ lookup('vars', image_var).name }} 2>&1
-      register: kubler_out
-    - debug:
-        msg: "kubler output:\n{{ kubler_out | to_nice_yaml }}"
-    - name: "{{ title }} kubler - push to registry"
-      shell: |
-        image2upload="{{ registry }}/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}:{{ lookup('vars', image_var).tag }}"
-        podman tag namespace/{{ lookup('vars', image_var).name }} "${image2upload}"
-        podman push "${image2upload}"
-    environment:
-      TERM: dumb # because kubler uses tput command
-      KUBLER_VERBOSE: 'true'
-      PATH: "{{ kubler.base }}/{{ kubler.kubler_dir }}/bin:{{ path }}"
-      KUBLER_DATA_DIR: "{{ kubler.base }}/data"
-      KUBLER_WORKING_DIR: "{{ kubler.base }}/{{ kubler.namespace_dir }}"
-      KUBLER_DISABLE_KUBLER_NS: "true" #only use my own images
-    when: lookup('vars', image_var).type == 'kubler'
+    - block:
+      - name: "{{ title }} - build content"
+        shell: >-
+          podman run --replace --name {{ build_container }} --volumes-from {{ kubler.portage_container }}
+          -v {{ dest_dir }}/:/config -v {{ kubler.base }}/data/distfiles:/distfiles -v {{ kubler.base }}/data/packages:/packages 
+          -e BOB_BUILDER_CHOST={{ kubler.chost }} -e BOB_CHOST={{ kubler.chost }} -e BOB_CURRENT_STAGE3_ID={{ stage3_image }}  
+          -e BOB_EMERGE_DEFAULT_OPTS="-b -k --binpkg-respect-use=y --quiet-build" -e BOB_EMERGE_OPT="-v --tree" 
+          -e BOB_FEATURES="-parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox" -e BOB_GENTOO_MIRRORS=http://distfiles.gentoo.org/ 
+          -e BOB_HOST_GID=0 -e BOB_HOST_UID=0 -e BOB_IS_DEBUG=false -e BOB_MAKEOPTS=-j4 -e BOB_TIMEZONE=UTC 
+          -e BOB_CURRENT_TARGET="{{ build_image }}"
+          {{ req_section }}/{{ kubler.default_builder }}-{{ requires }}:{{ req_tag }} kubler-build-root
+
+      - name: "{{ title }} - commit build container to image"
+        shell: >-
+          podman commit {{ build_container }} {{ image_info.section }}/{{ kubler.default_builder }}-{{ image_info.name }}:{{ image_info.tag }}
+
+      - block: 
+        - name: "{{ title }} - generate Dockerfile"
+          shell: |
+            . {{ kubler.base }}/kubler/engine/docker.sh
+            IMAGE_PARENT="{% if requires == 'scratch' %}scratch{% else %}{{ registry }}/{{ req_section }}/{{ requires }}:{{ req_tag }}{% endif %}" generate_dockerfile {{ dest_dir }}
+        - name: "{{ title }} - build image"
+          shell: >-
+            podman build -t {{ build_image }} {{ dest_dir }} 
+        - name: "{{ title }} - push to registry"
+          shell: |
+            podman push {{ build_image }}
+        when: "image_info.name != 'scratch'"
+      when: "image_info.name != 'scratch' or check_core.rc != 0 or check_stage3.rc != 0 or check_portage.rc != 0 or check_scratch.rc != 0"
+    when: image_info.type == 'kubler'
   
   - block:
     - name: "{{ title }} fetch image from registry and push to local registry"
       shell: |
         set -x
-        echo "{{ platform | default(default_platform) }} {{ lookup('vars', image_var).source }}:{{ lookup('vars', image_var).tag | default('latest') }} {{ lookup('vars', image_var).section }}" | pull-tag-push.sh
+        echo "{{ platform | default(default_platform) }} {{ image_info.source }}:{{ image_info.tag | default('latest') }} {{ image_info.section }}" | pull-tag-push.sh
       register: image2local
     - debug: var=image2local
       failed_when: false
-    when: lookup('vars', image_var).type == 'fetch'
+    when: image_info.type == 'fetch'
   
   - block:
     - name: "{{ title }} tempdir for build"
@@ -232,17 +284,17 @@
     - name: "{{ title }} build image"
       shell: |
         set -xe
-        image="{{ registry }}/{{ lookup('vars', image_var).section }}/{{ lookup('vars', image_var).name }}:{{ lookup('vars', image_var).tag | default('latest') }}"
-        {{ lookup('vars', image_var).command }}
+        image="{{ registry }}/{{ image_info.section }}/{{ image_info.name }}:{{ image_info.tag | default('latest') }}"
+        {{ image_info.command }}
       args:
         chdir: "{{ build_dir.path }}"
       register: build_out
     
     - debug: var=build_out
       failed_when: false
-    when: lookup('vars', image_var).type == 'script'
-  when: "'status' not in check_image.keys() or (check_image is defined and 'status' in check_image.keys() and check_image.status != 200)"
+    when: image_info.type == 'script'
+  when: "'status' not in check_image.keys() or (check_image is defined and 'status' in check_image.keys() and check_image.status != 200) or (image_info.type == 'kubler' and check_builder.rc != 0)"
   
 - name: "{{ title }} record image as processed"
   set_fact:
-    images_processed: "{{ images_processed + [lookup('vars', image_var).name] }}"  
+    images_processed: "{{ images_processed + [image_info.name] }}"  

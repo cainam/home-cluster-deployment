@@ -146,8 +146,8 @@ applications:
       remove_dependencies: postgresql,mariadb,influxdb
       helm_options: >-
         --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgres:{{ software.postgresql.version }} 
-        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'ha' ) | map(attribute='section') | first }}/ha" 
-        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'ha' ) | map(attribute='tag') | first }} 
+        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='section') | first }}/home-assistant" 
+        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='tag') | first }} 
         --set command=python --set-json 'args=["-m","homeassistant","--config","/config"]'  
         --set-json 'env=[
           {"name":"PYTHONPATH","value":"/ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages"},
@@ -155,7 +155,7 @@ applications:
           {"name":"TZ","value":"UTC"},
           {"name":"LD_LIBRARY_PATH","value":"/usr/lib/postgresql-17/lib/"}]'
       images:
-      - ha
+      - home-assistant
       storage:
       - name: home-assistant-config
         size: 100Mi
@@ -289,7 +289,7 @@ applications:
     longhorn:
       git: https://github.com/longhorn/longhorn.git
       subdir: chart
-      branch: v1.7.2
+      branch: "{{ software.longhorn.version }}"
       lm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
       xxhelm_options: --set defaultSettings.logLevel=Trace --set namespaceOverride=storage
       elm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1

@@ -1,6 +1,6 @@
 images:
 - name: base
-  tag: 2025.02-1
+  tag: "{{ kubler.portage }}"
   section: local
   type: kubler
   build:
@@ -151,7 +151,7 @@ images:
     packages: "dev-python/packaging dev-python/gpep517"
     configure_rootfs_build: |
         echo "configure_rootfs_build => start"
-        update_use '+sqlite'
+        echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
         provide_package sys-devel/gcc
         # add user/group for unprivileged container usage
         groupadd -g 404 python
@@ -171,8 +171,8 @@ images:
     packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2 dev-python/idna dev-python/certifi dev-python/requests"
     run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
 
-- name: ha
-  tag: "{{ software.home_assistant.version }}"
+- name: home-assistant
+  tag: "{{ software['home-assistant'].version }}"
   section: home
   requires:
   - ha-base
@@ -186,7 +186,7 @@ images:
       set -x
       HA_DIR=/ha && mkdir -p ${_EMERGE_ROOT}/${HA_DIR}
       ( cd ${_EMERGE_ROOT}/${HA_DIR}; 
-          git clone --depth=1 -b "{{ software.home_assistant.version }}" https://github.com/home-assistant/core.git
+          git clone --depth=1 -b "{{ software['home-assistant'].version }}" https://github.com/home-assistant/core.git
           cd core
           for package in home-assistant-frontend pyotp PyQRCode paho-mqtt; do # pyudev; do
             grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt

@@ -148,3 +148,5 @@ TODO:
   - 
 
 - kubler: follow kubler md, import from keyserver, then verify
+- kubler: try smaller builder with multi-stage builds 
+- kubler: replace "build" directory in yaml by variable in kubler

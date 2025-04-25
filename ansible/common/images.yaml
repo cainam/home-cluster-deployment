@@ -1,7 +1,11 @@
 - block:
   - name: prepare image information (set name and section where missing)
     vars: # keep .name if it exists, otherwise take the last part of the source image
-      image_new: "{{ image | combine({'name': image.name | default( (image.source | default('')).split('/')|last), 'section': image.section | default( default_section|default('') )}) }}"
+      image_new: "{{ image | combine({
+        'name':    image.name    | default( (image.source | default('')).split('/')|last),
+        'requires': image.requires | default( ['scratch'] ),
+        'section': image.section | default( default_section|default('') )
+        }) }}"
     set_fact:
       images_new: "{{ images_new | default([]) + [image_new] }}"
     loop: "{{ images }}"
@@ -9,7 +13,7 @@
       loop_var: "image"    
 
   - set_fact:
-      images: "{{ images_new }}"
+      images: "{{ images_new + [{'name': 'scratch', 'section': 'build', 'tag': kubler.portage, 'build': kubler.builder, 'type': 'kubler'}] }}"
       images_processed: "{{ [] }}"
       image_build_sources: "{{ role_path }}/templates/image-build/"
 

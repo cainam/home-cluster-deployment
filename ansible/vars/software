@@ -29,8 +29,8 @@ software:
       params:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
-  home_assistant:
-    version: "2025.4.0"
+  home-assistant:
+    version: "2025.4.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -45,7 +45,7 @@ software:
       params:
         repo: kiali/kiali
   helm:
-    version: 3.17.1
+    version: 3.17.2
     latest:
       type: gentoo
       params:
@@ -96,7 +96,7 @@ software:
       params:
         repo: kubernetes/dashboard
   longhorn:
-    version: v1.7.2
+    version: v1.8.1
     installed:
       pattern: "longhorn-ui:"
     latest:
