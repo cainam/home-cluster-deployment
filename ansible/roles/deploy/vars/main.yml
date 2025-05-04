@@ -149,6 +149,7 @@ applications:
         --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='section') | first }}/home-assistant" 
         --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='tag') | first }} 
         --set command=python --set-json 'args=["-m","homeassistant","--config","/config"]'  
+        --set-json 'securityContext={"runAsUser": {{ securityContexts["home-assistant"].runAsUser }} }'
         --set-json 'env=[
           {"name":"PYTHONPATH","value":"/ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages"},
           {"name":"PATH","value":"/py_env/bin:/bin:/usr/bin"},
@@ -183,9 +184,12 @@ applications:
     infopage:
       git: "{{ own_git_url }}"
       subdir: charts/infopage
-      helm_options: --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='section') | first }}/infopage" --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='tag') | first }} --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.12/site-packages/"}]'
+      helm_options: >-
+        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='section') | first }}/infopage"
+        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='tag') | first }}
+        --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.13/site-packages/"}]'
       images:
-      - my_py
+      - python-3.13
       storage:
       - name: infopage
         size: 5Mi

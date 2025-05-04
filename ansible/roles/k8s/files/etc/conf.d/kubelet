@@ -1,15 +1,5 @@
 supervisor="supervise-daemon"
 rc_need=crio
 
-# Kubernetes Kubelet (worker) config
-
-command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests"
-#command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --pod-manifest-path=/etc/kubernetes/manifests"
-
-command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --cluster-dns=10.244.0.2,10.244.0.5"
-command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf "
-
-command_args="--container-runtime=remote --container-runtime-endpoint='unix:///var/run/crio/crio.sock' -v 4 --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --cluster-dns=10.96.0.10"
-
 # April 2022
 command_args="--container-runtime-endpoint='unix:///var/run/crio/crio.sock' --kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"

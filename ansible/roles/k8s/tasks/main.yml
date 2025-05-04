@@ -111,6 +111,9 @@
   when: k8s_upgrade or ('update' in ansible_run_tags)
   
 - block:
+  - name: apply AdmissionConfiguration for Pod Security Standards
+    shell: kubectl apply -f /etc/kubernetes/AdmissionConfiguration.yaml
+
   - name: taint to allow master nodes to run pods
     shell: |
       # kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].key,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
@@ -133,8 +136,6 @@
 
   - name: additional DNS entries and external CoreDNS IP
     shell: |
-    
-      # kubectl get -o yaml cm coredns -n kube-system  | sed -e '/hosts/,/}/d'| sed -e 's/^\(\s*\)\(errors\)\s*$/\1\2\n\1hosts {\n\1  192.168.4.100 {{ base_domain }}\n\1    fallthrough\n\1}/g' | kubectl replace -f -
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
 

@@ -70,11 +70,11 @@
         requires: "{{ image_info.requires | default(['core'])| first }}" # as scratch should be the only image without requires attribute
         dest_dir: "{{ kubler.base }}/{{ image_info.section }}/{{ image_info.name }}"
         build_dir: "{{ kubler.base }}/build"
-        portage_image: "build/portage:{{ kubler.portage }}"
-        stage3_image: "build/{{ kubler.stage3_base }}:{{ kubler.stage3_date }}"
+        portage_image: "{{ kubler.build_dir }}/portage:{{ kubler.portage }}"
+        stage3_image: "{{ kubler.build_dir }}/{{ kubler.stage3_base }}:{{ kubler.stage3_date }}"
         stage3_url: "https://distfiles.gentoo.org/releases/{{ default_platform }}/autobuilds/{{ kubler.stage3_date }}/"
         stage3_file: "{{ kubler.stage3_base }}-{{ kubler.stage3_date }}.tar.xz"
-        core_builder: "build/{{ kubler.default_builder }}-core:{{ kubler.portage }}" 
+        core_builder: "{{ kubler.build_dir }}/{{ kubler.default_builder }}-core:{{ kubler.portage }}" 
         scratch_builder: "build/{{ kubler.default_builder }}-scratch:{{ kubler.portage }}"
 
     - name: "{{ title }} variables - 2"
@@ -220,7 +220,7 @@
         }' >> "{{ build_sh }}"
 
     - block:
-      - name: "{{ title }} - build content"
+      - name: "{{ title }} build content"
         shell: >-
           podman run --replace --name {{ build_container }} --volumes-from {{ kubler.portage_container }}
           -v {{ dest_dir }}/:/config -v {{ kubler.base }}/data/distfiles:/distfiles -v {{ kubler.base }}/data/packages:/packages 
@@ -231,19 +231,19 @@
           -e BOB_CURRENT_TARGET="{{ build_image }}"
           {{ req_section }}/{{ kubler.default_builder }}-{{ requires }}:{{ req_tag }} kubler-build-root
 
-      - name: "{{ title }} - commit build container to image"
+      - name: "{{ title }} commit build container to image"
         shell: >-
           podman commit {{ build_container }} {{ image_info.section }}/{{ kubler.default_builder }}-{{ image_info.name }}:{{ image_info.tag }}
 
       - block: 
-        - name: "{{ title }} - generate Dockerfile"
+        - name: "{{ title }} generate Dockerfile"
           shell: |
             . {{ kubler.base }}/kubler/engine/docker.sh
             IMAGE_PARENT="{% if requires == 'scratch' %}scratch{% else %}{{ registry }}/{{ req_section }}/{{ requires }}:{{ req_tag }}{% endif %}" generate_dockerfile {{ dest_dir }}
-        - name: "{{ title }} - build image"
+        - name: "{{ title }} build image"
           shell: >-
             podman build -t {{ build_image }} {{ dest_dir }} 
-        - name: "{{ title }} - push to registry"
+        - name: "{{ title }} push to registry"
           shell: |
             podman push {{ build_image }}
         when: "image_info.name != 'scratch'"

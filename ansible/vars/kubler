@@ -1,7 +1,7 @@
 kubler:
   base: "/data/build/kubler"
   git: https://github.com/edannenberg/kubler.git
-  namespace_dir: namespace
+  build_dir: build
   kubler_dir: kubler
   default_builder: my_builder
   makeopts: "-j4"

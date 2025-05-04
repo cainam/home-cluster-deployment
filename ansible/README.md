@@ -124,7 +124,6 @@ TODO:
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
 - consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
-- build all images from gentoo
 - configure tempo in kiali
 - install grafana
 - import script: update Chart.yaml to contain the version of the software
@@ -133,20 +132,13 @@ TODO:
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - start keepalived after glusterd is up
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
-- auth-operator: no action when started after hydra, but has to execute a first check at startup
 - security: add to build
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
 - images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
-- security: don't run containers as root
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
 - kubler: implement build-tests to check if image is usable
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
-- images: image_parent defaults to namespace and :latest, replace by section and tag from lookup
-  - colon in path breaks podman run => add tag to template
-  - 
-
-- kubler: follow kubler md, import from keyserver, then verify
 - kubler: try smaller builder with multi-stage builds 
-- kubler: replace "build" directory in yaml by variable in kubler
+- security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too

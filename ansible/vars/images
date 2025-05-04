@@ -131,10 +131,12 @@ images:
   - go
   section: local
   build:
-    packages: =app-admin/helm-{{ software.helm.version }}
+    packages: "=app-admin/helm-{{ software.helm.version }} app-misc/yq"
     configure_rootfs_build: |
       echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
       echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
+      provide_package sys-devel/gcc
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
     finish_rootfs_build: strip "${_EMERGE_ROOT}/usr/bin/helm"
 - type: fetch
   source: docker.io/library/registry
@@ -150,15 +152,15 @@ images:
   build:
     packages: "dev-python/packaging dev-python/gpep517"
     configure_rootfs_build: |
-        echo "configure_rootfs_build => start"
-        echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
-        provide_package sys-devel/gcc
-        # add user/group for unprivileged container usage
-        groupadd -g 404 python
-        useradd -u 4004 -g python -d /home/python python
-        mkdir -p "${_EMERGE_ROOT}"/home/python
-        ln -s usr/lib "${_EMERGE_ROOT}/lib"
-        echo "configure_rootfs_build => done"
+      echo "configure_rootfs_build => start"
+      echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
+      provide_package sys-devel/gcc
+      ln -s usr/lib "${_EMERGE_ROOT}/lib"
+      # add user/group for unprivileged container usage
+      groupadd -g 404 python
+      useradd -u 4004 -g python -d /home/python python
+      mkdir -p "${_EMERGE_ROOT}"/home/python
+      echo "configure_rootfs_build => done"
     finish_rootfs_build: copy_gcc_libs
 
 - name: ha-base
@@ -264,7 +266,7 @@ images:
       mv "$VIRTUAL_ENV" ${_EMERGE_ROOT}/"$VIRTUAL_ENV"
 
 - name: infopage
-  tag: 2025.03-1
+  tag: 2025.04-1
   section: tools
   requires:
   - python-3.13

@@ -41,6 +41,8 @@
     - etc/modules-load.d/k8s.conf
     - etc/conf.d/kubelet
     - etc/kubernetes/kubeadm.conf
+    - etc/kubernetes/audit-policy.yaml 
+    - etc/kubernetes/AdmissionConfiguration.yaml
 
 - name: enable kubelet service
   service:
