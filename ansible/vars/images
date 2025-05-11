@@ -23,7 +23,7 @@ images:
       mkdir -p -m 3777 ${_EMERGE_ROOT}/run/postgresql && chown postgres ${_EMERGE_ROOT}/run/postgresql
     
 - name: go
-  tag: 2025.03-1
+  tag: 2025.05-1
   section: local
   type: kubler
   requires:
@@ -46,6 +46,21 @@ images:
       strip hydra
       mkdir "${_EMERGE_ROOT}/bin"
       mv hydra "${_EMERGE_ROOT}/bin/"
+
+- name: descheduler
+  tag: "{{ software.descheduler.version }}"
+  section: kube-system
+  type: kubler
+  requires:
+  - go
+  build:
+    configure_rootfs_build: |
+      git clone --branch "{{ software.descheduler.version }}" --depth 1 --filter=blob:none https://github.com/kubernetes-sigs/descheduler.git
+      cd descheduler
+      make
+      strip ./_output/bin/descheduler
+      mkdir "${_EMERGE_ROOT}/bin"
+      mv  ./_output/bin/descheduler "${_EMERGE_ROOT}/bin/"
 
 - name: oauth2-proxy
   tag: "{{ software.oauth2_proxy.version }}"

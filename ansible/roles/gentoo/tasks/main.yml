@@ -56,6 +56,8 @@
       perm: u=rwx,g=rx,o=rx
     - path: /etc/iwd
       perm: u=rwx,g=rx,o=rx
+    - path: /etc/cron.hourly
+      perm: u=rwx,g=rx
 
 - name: auto.master
   lineinfile: 
@@ -155,6 +157,7 @@
   lineinfile:
     path: /var/lib/iwd/AdM13.psk
     insertbefore: BOF
+    create: true
     line: "[Security]"
 
 - name: passphrase for iwd
@@ -248,39 +251,45 @@
     state: absent
   when: gentoo_build is not defined
 
+- name: set date if year is 1970
+  shell: date +%Y | ( grep -q "^1970$" && date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" ) || echo "date ok"
+  
 - name: portage profile
-  shell: eselect profile set default/linux/arm64/23.0/split-usr
+  shell: export LC_ALL=C && eselect profile show && eselect profile set default/linux/arm64/23.0 #/split-usr
   
 - name: emerge sync
   shell: emerge --sync
   ignore_errors: true
   when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
 
-- name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: test -f "{{ item }}" && mv "{{ item }}" "{{ item }}.deployed"
-  loop:
-  - /boot/cmdline.txt
-  - /boot/config.txt
+- name: build and deploy
+  block:
+  - name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
+    shell: test -f "{{ item }}" && mv "{{ item }}" "{{ item }}.deployed"
+    loop:
+    - /boot/cmdline.txt
+    - /boot/config.txt
   
-- name: emerge build
-  shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+  - name: emerge build
+    shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
+    when: gentoo_build is defined and 'emerge' in ansible_run_tags
 
-- name: link check_and_fix.sh cron
-  file:
-    src: /usr/local/bin/check_and_fix.sh
-    dest: /etc/cron.hourly/check_and_fix.sh
-    state: link
+  - name: link check_and_fix.sh cron
+    file:
+      src: /usr/local/bin/check_and_fix.sh
+      dest: /etc/cron.hourly/check_and_fix.sh
+      state: link
  
-- name: emerge deploy
-  shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
-
-- name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-  shell: test -f "{{ item }}.deployed" && mv "{{ item }}.deployed" "{{ item }}"
-  loop:
-  - /boot/cmdline.txt
-  - /boot/config.txt
+  - name: emerge deploy
+    shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
+    when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+  
+  always:
+  - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
+    shell: test -f "{{ item }}.deployed" && mv "{{ item }}.deployed" "{{ item }}"
+    loop:
+    - /boot/cmdline.txt
+    - /boot/config.txt
   
 - name: eclean distfiles
   shell: eclean --deep distfiles
@@ -292,16 +301,16 @@
 - name: emerge depclean
   shell: emerge --depclean
 
-- name: emerge build
+- name: emerge preserved rebuild
   shell: emerge @preserved-rebuild
   when: gentoo_build is defined and 'emerge' in ansible_run_tags
 
-- name: emerge build
+- name: emerge preserved rebuild
   shell: emerge @preserved-rebuild
   when: gentoo_build is not defined and 'emerge' in ansible_run_tags
 
-#- name: install additional modules from Ansible Galaxy
-#  shell: ansible-galaxy collection install gluster.gluster --upgrade --collections-path /usr/lib/python3.12/site-packages/ansible_collections
+- name: install additional modules from Ansible Galaxy
+  shell: ansible-galaxy collection install gluster.gluster --upgrade #--collections-path /usr/lib/python3.12/site-packages/ansible_collections
 
 #- name: disable services
 #  service:
@@ -332,7 +341,6 @@
     - chronyd
     - brickmount
     - glusterd 
-    - kubelet
     - cronie
     - cpupower
     - iscsid

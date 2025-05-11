@@ -6,13 +6,6 @@
 - debug:
     msg: "images to download: {{ required_images.stdout_lines }}"
 
-- name: handle additional images
-  vars:
-    limit_images:
-    - helm
-    - registry
-  import_tasks: common/images.yaml
-  
 - name: pull, tag and push k8s images
   shell: |
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh

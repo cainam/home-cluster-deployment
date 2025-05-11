@@ -6,6 +6,8 @@
 
   tasks:
   - block:
+    - debug: 
+        msg: "now: {{ now(fmt='%Y-%m-%d %H:%M:%S') }}"
     - set_fact:
         var_omit: "{{ b | default(omit) }}"
         ivar_omit: "lkj"

@@ -96,7 +96,7 @@
   shell: |
     . set_env.sh "{{ namespace.key }}"
     set -x
-     helm upgrade --dry-run --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
+     helm upgrade --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
      {{ applications[namespace.key][application.key].helm_options | default('') }} --post-renderer /usr/local/bin/post-renderer.sh \
      {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
   register: out

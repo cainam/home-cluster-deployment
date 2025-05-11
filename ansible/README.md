@@ -9,8 +9,21 @@ Challenges:
 challenge: images are build using playbooks, but they have downstream dependencies and within the build another build has to be triggered first, but there is no task level scope of variables in Ansible
 solution: a combination of dynamic variables and a stack of them ensures that a build within a build can be performed 
 
-# notes on this ansible playbook
+### new node
+- populate /boot partition with copy and root from stage3
+- modify root password, authorized_keys, create net.end0 link net.lo and enable sshd and net.end0 in /etc/runlevel/default
+- add /data to fstab and /boot by UUID=xxxx-xxxx
+- sync: /lib/modules and /lib/firmware and /var/db/repos/gentoo: rsync -a /var/db/repos/gentoo 10.10.10.23:/var/db/repos/
+- set hostname
+- set correct host entry in etc/hosts: echo "10.10.10.23 k8s-3-int.adm13 k8s-3-int" >> /etc/hosts
+- gluster: remove former bricks if any:  (for v in $(gluster vol list); do gluster vol heal $v info | grep k8s-3 | sed -e "s/^Brick/$v/g"; done) | while read v b;do (echo "y" | gluster vol remove-brick $v replica 2 $b force); done
+- Ansible: update inventory file: uuids and if host to be installed is gentoo-build, remove this from the inventory
+- Emerge: missing binary packages can be created using e.g. quickpkg --include-config y lua
+- deploy gentoo / reboot / emerge manually etc. / from here to improve next time
+- next time: check why ca-certs are not updated
+- deploy k8s
 
+# notes on this ansible playbook
 Usage example: 
     `# ansible-playbook  -i $PWD/inventory $PWD/site.yml --skip-tags k8s_images`
 
@@ -27,6 +40,7 @@ Notes:
 - Ansible example, deploy Gentoo with build: ANSIBLE_STDOUT_CALLBACK=yaml ansible-playbook -i inventory site.yml --tags=gentoo,emerge
 - remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - some variables are not part of the git repo, secrets which one has to define additionally like wifi WEP
+- gentoo_build and gentoo_binhost are usually assigned to the same host, but in case of recovery having two variables allows to disable build while configuring another available host as binhost
 
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
@@ -142,3 +156,4 @@ TODO:
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
 - kubler: try smaller builder with multi-stage builds 
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
+- kubler: commit --squash => does it reduce the size

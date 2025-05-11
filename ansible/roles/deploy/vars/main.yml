@@ -76,7 +76,7 @@ applications:
       git_to_local_params: --fix_source=.image.repository= --fix_source=.image.tag=
       helm_options: >-
         --set image.repository=auth/idp --set image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'idp' ) | map(attribute='tag')|first}}"
-        --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ user }}" --set password="{{ pass }}" --set mount_path=/x
+        --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ auth.user }}" --set password="{{ auth.pass }}" --set mount_path=/x
       images:
       - idp
       network: true
@@ -259,6 +259,8 @@ applications:
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
+      images:
+      - postgresql
       helm_options: >- 
         --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
         --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
@@ -287,8 +289,23 @@ applications:
       git: https://github.com/kubernetes-sigs/descheduler.git
       subdir: charts/descheduler
       branch: "{{ software.descheduler.version }}"
-      git_to_local_params: --fix_source=.image.tag={{ software.descheduler.version }}
-      helm_options: --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
+      git_to_local_params: --fix_source=.image.tag= --fix_source=.image.repository= 
+      images:
+      - descheduler
+      helm_options: >-
+        --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false
+        --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false 
+        --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false 
+        --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false 
+        --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false 
+        --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false 
+        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 
+        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 
+        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  
+        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 
+        --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
+        --set image.tag={{ software.descheduler.version }}
+        --set image.repository=kube-system/descheduler
   longhorn-system:
     longhorn:
       git: https://github.com/longhorn/longhorn.git

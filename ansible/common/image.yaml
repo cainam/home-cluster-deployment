@@ -115,6 +115,7 @@
             cd {{ build_dir }}
             cat > "Dockerfile.portage" <<EOF
             FROM local/base AS builder
+            COPY ./portage-{{ kubler.portage }}.tar.xz /
             RUN set -x && \
                 mkdir -p /var/db/repos/ && \
                 tar -xf /portage-{{ kubler.portage }}.tar.xz -C /var/db/repos && \
@@ -124,7 +125,7 @@
             COPY --from=builder /var/db/repos/gentoo /var/db/repos/gentoo
             VOLUME /var/db/repos /var/cache/eix
             EOF
-            podman build -v ./portage-{{ kubler.portage }}.tar.xz:/portage-{{ kubler.portage }}.tar.xz --file Dockerfile.portage --tag {{ portage_image }}
+            podman build -v {{ build_dir }}/portage-{{ kubler.portage }}.tar.xz:/portage-{{ kubler.portage }}.tar.xz --file Dockerfile.portage --tag {{ portage_image }}
             podman run --name {{ kubler.portage_container }} {{ portage_image }} true
         when: "check_portage.rc != 0"
         
@@ -233,7 +234,7 @@
 
       - name: "{{ title }} commit build container to image"
         shell: >-
-          podman commit {{ build_container }} {{ image_info.section }}/{{ kubler.default_builder }}-{{ image_info.name }}:{{ image_info.tag }}
+          podman commit --squash {{ build_container }} {{ image_info.section }}/{{ kubler.default_builder }}-{{ image_info.name }}:{{ image_info.tag }}
 
       - block: 
         - name: "{{ title }} generate Dockerfile"

@@ -29,6 +29,14 @@
   delegate_to: "{{ selected_host }}"
   run_once: true
 
+- name: handle additional images
+  vars:
+    limit_images:
+    - helm
+    - registry
+  import_tasks: common/images.yaml
+  run_once: true
+
 - name: install cluster if needed
   include_tasks: init.yml
   when: not k8s_init_done and inventory_hostname == selected_host
@@ -99,7 +107,7 @@
       cert_key: cert_key.stdout
   - name: joining nodes
 #    shell: '{{ join_command.stdout }} --control-plane --certificate-key {{ cert_key.stdout }} --config "{{ kubeadm_tmp.path }}"'
-    shell: kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}"
+    shell: kubeadm reset && rm -rf /etc/kubernetes/ && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}"
     throttle: 1
   when: k8s_healthy and not k8s_installed
 
