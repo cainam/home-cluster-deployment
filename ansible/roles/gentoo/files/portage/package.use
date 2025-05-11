@@ -9,3 +9,4 @@ dev-embedded/rpi-eeprom pi4
 # required by @selected
 # required by @world (argument)
 >=net-firewall/iptables-1.8.10 nftables
+sys-cluster/glusterfs PYTHON_SINGLE_TARGET: -* python3_12
