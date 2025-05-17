@@ -1,0 +1,27 @@
+#- name: title
+#  set_fact:
+#    name: "{{my}}"
+
+- name: "debug lift_reqs - {{ my_idx }}" 
+  debug:
+    msg: "item: {{ item }}\nitem.0:{{ item.0 }}\nitem.1:{{ item.1 }}\nmy_idx:{{my_idx}}"
+
+- name: add requires one level up
+  vars:
+#    dep_idx: "{{ napps | ansible.utils.index_of('eq', item.1.name, 'name') }}"
+    old_entry: "{{ napps[my_idx|int] }}"
+    new_entry: "{{ old_entry | combine({'requires': (old_entry.requires|default([]))+(napps | selectattr('name', 'eq', item.1.name) )   }, list_merge='replace') }}"
+  set_fact:
+    napps: "{%- set _ = napps.pop(my_idx|int) %}{{napps+[new_entry]}}"
+
+- name: recursive move inside
+  vars:
+    my_idx: "{{ my_idx }}"
+  include_tasks: lift_reqs.yaml
+  loop: "{{ napps | selectattr('name', 'eq', item.1.name) | selectattr('requires', 'defined') | subelements('requires') }}"
+
+- name: debug lift_reqs end
+  debug:
+    msg: "item: {{ item }}\nitem.0:{{ item.0 }}\nitem.1:{{ item.1 }}\nmy_idx:{{my_idx}}"
+
+

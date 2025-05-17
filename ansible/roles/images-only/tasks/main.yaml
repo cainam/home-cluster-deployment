@@ -1,0 +1,4 @@
+- name: handle additional images
+  include_role: 
+    name: gentoo-image-builder
+

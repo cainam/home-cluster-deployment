@@ -78,6 +78,22 @@ images:
       mkdir "${_EMERGE_ROOT}/bin"
       mv oauth2-proxy "${_EMERGE_ROOT}/bin/"
 
+- name: registry
+  tag: "{{ software.registry.version }}"
+  section: local
+  type: kubler
+  requires:
+  - go
+  build:
+    entrypoint: ["/bin/registry"]
+    configure_rootfs_build: |
+      git clone -b "{{ software.registry.version }}" https://github.com/distribution/distribution.git
+      cd distribution
+      make bin/registry
+      strip bin/registry
+      mkdir "${_EMERGE_ROOT}/bin"
+      mv bin/registry "${_EMERGE_ROOT}/bin/"
+
 - name: nodejs
   tag: 2025.4
   section: local

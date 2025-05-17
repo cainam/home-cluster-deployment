@@ -8,7 +8,7 @@ software:
       params:
         repo: istio/istio
   oauth2_proxy:
-    version: v7.8.2
+    version: v7.9.0
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -30,7 +30,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2025.4.3"
+    version: "2025.5.2"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -51,14 +51,14 @@ software:
       params:
         repo: app-admin/helm
   registry:
-    version: 2.8.3
+    version: 3.0.0
     latest:
       type: dockerhub
       params:
         repo: library/registry
         arch: arm64
   postgresql:
-    version: 17.4
+    version: 17.5
     latest:
       type: gentoo
       params:

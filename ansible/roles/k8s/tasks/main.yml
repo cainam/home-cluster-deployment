@@ -34,7 +34,8 @@
     limit_images:
     - helm
     - registry
-  import_tasks: common/images.yaml
+  include_role:
+    name: gentoo-image-builder
   run_once: true
 
 - name: install cluster if needed

@@ -68,18 +68,39 @@
     create: true
 
 - name: symlinks for CA
-  file:
-    src: "{{ local_ca_file }}"
-    dest: "/usr/local/share/ca-certificates//myCA.crt"
+  copy:
+    src: "{{ cert_path }}/{{ item }}"
+    dest: "/usr/local/share/ca-certificates/{{ item }}"
     owner: root
     group: root
-    state: link
   register: ca
+  loop: "{{ local_ca_files }}"
 
 - name: update CA certificates
   shell: /usr/sbin/update-ca-certificates
   when: ca.changed
 
+- name: put certificates and keys in place
+  copy:
+    content: "{{ lookup('file', '{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem') }}\n{{ lookup('file', '{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt') }}"
+    dest: "{{ item.dest }}/{{ item.name }}.pem"
+  loop: "{{ certs }}"
+  throttle: 1
+  
+- name: put certificate keys in place
+  copy:
+    src: "{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem"
+    dest: "{{ item.dest }}/{{ item.name }}.key"
+  loop: "{{ certs }}"
+  throttle: 1
+
+- name: put certificates in place
+  copy:
+    src: "{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt"
+    dest: "{{ item.dest }}/{{ item.name }}.crt"
+  loop: "{{ certs }}"
+  throttle: 1
+  
 - name: rc.conf
   lineinfile:
     path: /etc/rc.conf

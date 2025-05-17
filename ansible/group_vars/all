@@ -13,8 +13,15 @@ registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
 cert_path: /data/mine/certs
-local_ca_file: "{{ cert_path }}/myCA.pem"
-local_ca: "{{ lookup('file', local_ca_file) }}"
+local_ca_files:
+- "root-ca.crt"
+- "intermediate-ca.crt"
+#local_ca: "{{ lookup('file', local_ca_file) }}"
+certs:
+- name: myregistry.adm13
+  dest: /shared/registry/certs
+- name: helm.adm13
+  dest: /shared/helm/certs
 
 net:
   open_access:

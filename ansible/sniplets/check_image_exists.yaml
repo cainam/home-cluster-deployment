@@ -1,0 +1,33 @@
+---
+
+- name: test 
+  gather_facts: false
+  hosts: all
+  vars:
+    auto_legacy_silent: true
+    auto_silent: true
+    ansible_python_interpreter: /usr/bin/python # to avoid interpreter warning
+
+  tasks:
+  - block:
+    - name: "{{ title }} check if image exists already"
+      uri:
+        url: "https://{{ registry }}/v2/local/my_py/manifests/3"
+        headers:
+          Accept: application/vnd.oci.image.manifest.v1+json
+        method: "GET"
+      register: check_image
+      failed_when: false
+    
+    - debug:
+        msg: "image doesn't exist"
+      when: check_image.status != 200
+    - debug:
+        msg: "image exists"
+      when: check_image.status == 200
+    - debug:
+        msg: "image doesn't exist or forced"
+      when: (check_image.status != 200) or ('force' in ansible_run_tags)
+    run_once: true
+    tags: 
+    - always

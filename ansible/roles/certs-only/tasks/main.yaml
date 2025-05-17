@@ -1,0 +1,30 @@
+- block:
+  # -name: check if root ca exists and is valid
+  - name: certificates
+    vars:
+      ca_openssl_path: /data/mine/certs
+      ca_common_name: FreeAsABird
+      ca_country_name: XX
+      ca_passphrase: "{{ cert_pass }}"
+      ca_organization_name: FreeAsABird
+      ca_organizational_unit_name: Anarchists
+      ca_state_or_province_name: Some-State
+      ca_email_address: a.b@c.de
+      #ca_init: false
+      ca_requests:
+      - name: myregistry.adm13
+        internal_name: myregistry.adm13
+        external_name: myregistry.adm13
+      - name: helm.adm13
+        internal_name: helm.adm13
+        external_name: helm.adm13
+      - name: my-lb.adm13
+        internal_name: '*.my-lb.adm13'
+        external_name: adm13.dnshome.de
+      - name: ha.my-lb.adm13
+        internal_name: ha.my-lb.adm13
+        external_name: xyz
+    include_role: 
+      name: certificates
+  run_once: true
+

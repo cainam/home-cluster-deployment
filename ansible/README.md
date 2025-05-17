@@ -157,3 +157,6 @@ TODO:
 - kubler: try smaller builder with multi-stage builds 
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
 - kubler: commit --squash => does it reduce the size
+- gentoo-image-builder: document usage (images definition + limit_images)
+- recreate CA and certs using openssl -extensions v3_ca (to include Key Identifier, see chatgpt) and remove validate_certs: no again from gentoo-image-builder
+- build registry

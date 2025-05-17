@@ -1,0 +1,7 @@
+- src: git+https://github.com/cainam/gentoo-image-builder.git
+  version: main
+  name: gentoo-image-builder
+
+#- src: git+https://github.com/robertdebock/ansible-role-ca.git
+#  version: master
+#  name: certificates

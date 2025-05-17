@@ -36,7 +36,8 @@
       vars:
         limit_images: "{{ application.value.images }}"
         default_section: "{{ namespace.key }}"
-      import_tasks: common/images.yaml
+      include_role:
+        name: gentoo-image-builder
     when: application.value.images is defined
     
   - name: "{{ name_prefix }} build helm"

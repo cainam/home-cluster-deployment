@@ -294,7 +294,7 @@
     - debug: var=build_out
       failed_when: false
     when: image_info.type == 'script'
-  when: "'status' not in check_image.keys() or (check_image is defined and 'status' in check_image.keys() and check_image.status != 200) or (image_info.type == 'kubler' and check_builder.rc != 0)"
+  when: "'status' not in check_image.keys() or (check_image is defined and 'status' in check_image.keys() and check_image.status != 200 and image_info.name != 'scratch') or (image_info.type == 'kubler' and check_builder.rc != 0)"
   
 - name: "{{ title }} record image as processed"
   set_fact:

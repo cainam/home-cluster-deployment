@@ -19,6 +19,7 @@
     - k8s
     - testing
     - gentoo
+    - images-only
     loop:
     - vars/kubler
     - vars/software
@@ -49,6 +50,14 @@
       tags:
         - never
         - raspberry
+    - role: images-only
+      tags:
+        - never
+        - images-only
+    - role: certs-only
+      tags:
+        - never
+        - certs-only
     - role: testing
       tags:
         - never
