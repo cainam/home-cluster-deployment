@@ -51,7 +51,7 @@ software:
       params:
         repo: app-admin/helm
   registry:
-    version: 3.0.0
+    version: v3.0.0
     latest:
       type: dockerhub
       params:

@@ -13,17 +13,20 @@
       #ca_init: false
       ca_requests:
       - name: myregistry.adm13
-        internal_name: myregistry.adm13
-        external_name: myregistry.adm13
+        alt_names: 
+        - myregistry.adm13
       - name: helm.adm13
-        internal_name: helm.adm13
-        external_name: helm.adm13
+        alt_names: 
+        - helm.adm13
       - name: my-lb.adm13
-        internal_name: '*.my-lb.adm13'
-        external_name: adm13.dnshome.de
+        alt_names:
+        - my-lb.adm13
+        - '*.my-lb.adm13'
+        - adm13.dnshome.de
       - name: ha.my-lb.adm13
-        internal_name: ha.my-lb.adm13
-        external_name: xyz
+        alt_names:
+        - ha.my-lb.adm13
+        - adm13.dnshome.de
     include_role: 
       name: certificates
   run_once: true
