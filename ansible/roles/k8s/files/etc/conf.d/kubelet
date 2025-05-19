@@ -1,4 +1,5 @@
 supervisor="supervise-daemon"
+supervise_daemon_args="--respawn-delay 10 --respawn-max 0"
 rc_need=crio
 
 # April 2022
