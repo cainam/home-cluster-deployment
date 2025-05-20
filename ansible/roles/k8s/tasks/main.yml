@@ -120,9 +120,33 @@
   when: k8s_upgrade or ('update' in ansible_run_tags)
   
 - block:
-  - name: apply AdmissionConfiguration for Pod Security Standards
-    shell: kubectl apply -f /etc/kubernetes/AdmissionConfiguration.yaml
-
+  - name: ensure kube-apiserver has audit-log with its volumes enabled
+    shell: |
+      yq -yi '
+      .spec.volumes = ((.spec.volumes // []) | map(select(.name != "AdmissionConfiguration" and .name != "audit" and .name != "audit-log"))+
+      [{name: "audit","hostPath": {type: "File",path: "/etc/kubernetes/audit-policy.yaml"}},
+       {name: "audit-log","hostPath": {type: "FileOrCreate",path: "/var/log/kubernetes/audit/audit.log"}},
+       {name: "AdmissionConfiguration","hostPath": {type: "FileOrCreate",path: "/etc/kubernetes/AdmissionConfiguration.yaml"}}
+       ]) |
+      .spec.containers[] |= (
+       if .name == "kube-apiserver" then
+         .command = ( (.command // []) # remove parameters if existing and add new ones
+              | map(select(startswith("--enable-admission-plugins=") | not))
+              + ["--enable-admission-plugins=NodeRestriction,PodSecurity"]
+              | map(select(startswith("--admission-control-config-file=") | not))
+              + ["--admission-control-config-file=/etc/kubernetes/AdmissionConfiguration.yaml"]
+              | map(select(startswith("--audit-log-path=") | not))
+              + ["--audit-log-path=/var/log/kubernetes/audit/audit.log"]
+              | map(select(startswith("--audit-policy-file=") | not))
+              + ["--audit-policy-file=/etc/kubernetes/audit-policy.yaml"]
+         )|
+         .volumeMounts = ( (.volumeMounts // []) | map(select(.name != "AdmissionConfiguration" and .name != "audit" and .name != "audit-log"))+
+           [{name: "audit",mountPath: "/etc/kubernetes/audit-policy.yaml", readOnly: true},
+            {name: "audit-log",mountPath: "/var/log/kubernetes/audit/audit.log", readOnly: false},
+            {name: "AdmissionConfiguration",mountPath: "/etc/kubernetes/AdmissionConfiguration.yaml", readOnly: true}
+           ])
+       else . end )' /etc/kubernetes/manifests/kube-apiserver.yaml
+      
   - name: taint to allow master nodes to run pods
     shell: |
       # kubectl get node -o custom-columns=NAME:.metadata.name,TAINT:.spec.taints[*].key,TAINT:.spec.taints[*].effect | grep -e master:NoSchedule >/dev/null && kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
