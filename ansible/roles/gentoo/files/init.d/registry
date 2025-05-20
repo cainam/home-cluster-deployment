@@ -41,7 +41,7 @@ start()
                 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
                 -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \
                 -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/myregistry.adm13.key \
-        "${service_image}"
+        "${service_image}" serve /var/lib/registry/config.yml
 
         rc=0
         eend "Done"
