@@ -48,17 +48,5 @@ SecurityContext (container) supports overrides PodSecurityContext if specified:
   seccompProfile
   windowsOptions
 
-Enable audit log:
-cat /etc/kubernetes/manifests/kube-apiserver.yaml  | yq -y '
-.spec.volumes = ((.spec.volumes // []) | map(select(.name != "audit" and .name != "audit-log"))+
-  [{name: "audit","hostPath": {type: "File",path: "/etc/kubernetes/audit-policy.yaml"}},{name: "audit-log","hostPath": {type: "FileOrCreate",path: "/var/log/kubernetes/audit/audit.log"}}])
-
-| .spec.containers[] |= (
- if .name == "kube-apiserver" then
-   .command = ( (.command // [])
-     + (if (.command // []) | index("--audit-log-path=/var/log/kubernetes/audit/audit.log")  | not then ["--audit-log-path=/var/log/kubernetes/audit/audit.log"]  else [] end)
-     + (if (.command // []) | index("--audit-policy-file=/etc/kubernetes/audit-policy.yaml") | not then ["--audit-policy-file=/etc/kubernetes/audit-policy.yaml"] else [] end)) |
-   .volumeMounts = ( (.volumeMounts // [])
-     + (if (.volumeMounts // []) | map(.name) | index("audit") | not then [{name: "audit",mountPath: "/etc/kubernetes/audit-policy.yaml", readOnly: true}] else [] end )
-     + (if (.volumeMounts // []) | map(.name) | index("audit-log") | not then [{name: "audit-log",mountPath: "/var/log/kubernetes/audit/audit.log", readOnly: true}] else [] end ))
- else . end )' > b
+longhorn-system and kube-system seem to be implicitly exempted from PodSecurity. As this is not visible outside the cluster, only by its effects, both are explicitly exempted in the AdmissionController
+- audit log Policy: first match wins, so granular exclusions have to be early in the policy

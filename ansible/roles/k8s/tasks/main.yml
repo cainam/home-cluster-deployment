@@ -7,9 +7,6 @@
 - set_fact:
     selected_host: "{{ ansible_play_hosts | random(seed=seed.stdout) }}"
 
-- debug: 
-    msg: "selected_host:{{ selected_host }}"
-
 - name: system configurations
   import_tasks: system.yml
 
@@ -26,30 +23,28 @@
 
 - name: prepare images
   import_tasks: prepare_images.yml
-  delegate_to: "{{ selected_host }}"
-  run_once: true
-
-- name: handle additional images
-  vars:
-    limit_images:
-    - helm
-    - registry
-  include_role:
-    name: gentoo-image-builder
   run_once: true
 
 - name: install cluster if needed
   include_tasks: init.yml
   when: not k8s_init_done and inventory_hostname == selected_host
 
-- name: install flannel pod network
-  shell: |
-    . set_env.sh kube-flannel
-    kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
-    kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
-    helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
-  register: flannel_install
-  when: inventory_hostname == healthy_node
+- block:
+  - name: build flannel
+    shell: |
+      . set_env.sh kube-flannel
+      helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git
+      helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
+      helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
+    
+  - name: install flannel pod network
+    shell: |
+      . set_env.sh kube-flannel
+      kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
+      kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
+      helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
+    register: flannel_install
+  when: inventory_hostname == healthy_node and (not k8s_init_done or k8s_upgrade)
   
 - name: output flannel install
   debug:
@@ -57,15 +52,12 @@
 
 - block:
   - name: get token
-    #shell: kubeadm token create --print-join-command
     shell: kubeadm token create
     register: token
-    #when: k8s_healthy and k8s_installed
 
   - name: get certificate key
     shell: kubeadm init phase upload-certs --upload-certs | grep -v upload-certs
     register: cert_key
-    #when: k8s_healthy and k8s_installed
 
   # Get cert info
   - name: Get CA certificate hash
@@ -107,7 +99,6 @@
       join_ip: "{{ my_cluster_ip }}"
       cert_key: cert_key.stdout
   - name: joining nodes
-#    shell: '{{ join_command.stdout }} --control-plane --certificate-key {{ cert_key.stdout }} --config "{{ kubeadm_tmp.path }}"'
     shell: kubeadm reset && rm -rf /etc/kubernetes/ && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}"
     throttle: 1
   when: k8s_healthy and not k8s_installed
@@ -123,10 +114,10 @@
   - name: ensure kube-apiserver has audit-log with its volumes enabled
     shell: |
       yq -yi '
-      .spec.volumes = ((.spec.volumes // []) | map(select(.name != "AdmissionConfiguration" and .name != "audit" and .name != "audit-log"))+
+      .spec.volumes = ((.spec.volumes // []) | map(select(.name != "admission-configuration" and .name != "audit" and .name != "audit-log"))+
       [{name: "audit","hostPath": {type: "File",path: "/etc/kubernetes/audit-policy.yaml"}},
-       {name: "audit-log","hostPath": {type: "FileOrCreate",path: "/var/log/kubernetes/audit/audit.log"}},
-       {name: "AdmissionConfiguration","hostPath": {type: "FileOrCreate",path: "/etc/kubernetes/AdmissionConfiguration.yaml"}}
+       {name: "audit-log","hostPath": {type: "FileOrCreate",path: "{{ k8s_log_directory }}/audit.log"}},
+       {name: "admission-configuration","hostPath": {type: "File",path: "/etc/kubernetes/AdmissionConfiguration.yaml"}}
        ]) |
       .spec.containers[] |= (
        if .name == "kube-apiserver" then
@@ -136,14 +127,14 @@
               | map(select(startswith("--admission-control-config-file=") | not))
               + ["--admission-control-config-file=/etc/kubernetes/AdmissionConfiguration.yaml"]
               | map(select(startswith("--audit-log-path=") | not))
-              + ["--audit-log-path=/var/log/kubernetes/audit/audit.log"]
+              + ["--audit-log-path={{ k8s_log_directory }}/audit.log"]
               | map(select(startswith("--audit-policy-file=") | not))
               + ["--audit-policy-file=/etc/kubernetes/audit-policy.yaml"]
          )|
-         .volumeMounts = ( (.volumeMounts // []) | map(select(.name != "AdmissionConfiguration" and .name != "audit" and .name != "audit-log"))+
+         .volumeMounts = ( (.volumeMounts // []) | map(select(.name != "admission-configuration" and .name != "audit" and .name != "audit-log"))+
            [{name: "audit",mountPath: "/etc/kubernetes/audit-policy.yaml", readOnly: true},
-            {name: "audit-log",mountPath: "/var/log/kubernetes/audit/audit.log", readOnly: false},
-            {name: "AdmissionConfiguration",mountPath: "/etc/kubernetes/AdmissionConfiguration.yaml", readOnly: true}
+            {name: "audit-log",mountPath: "{{ k8s_log_directory }}/audit.log", readOnly: false},
+            {name: "admission-configuration",mountPath: "/etc/kubernetes/AdmissionConfiguration.yaml", readOnly: true}
            ])
        else . end )' /etc/kubernetes/manifests/kube-apiserver.yaml
       

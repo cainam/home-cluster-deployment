@@ -10,9 +10,9 @@ plugins:
       enforce-version: "latest"
       audit: "restricted"
       audit-version: "latest"
-      warn: "restricted"
-      warn-version: "latest"
+#      warn: "restricted"
+#      warn-version: "latest"
     exemptions:
       usernames: []
       runtimeClasses: []
-      namespaces: [kube-system]
+      namespaces: [kube-system,longhorn-system]

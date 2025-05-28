@@ -70,7 +70,7 @@
 - name: symlinks for CA
   copy:
     src: "{{ cert_path }}/{{ item }}"
-    dest: "/usr/local/share/ca-certificates/{{ item }}"
+    dest: "{{ system_local_certs: }}/{{ item }}"
     owner: root
     group: root
   register: ca

@@ -13,6 +13,8 @@ registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
 cert_path: /data/mine/certs
+system_local_certs: /usr/local/share/ca-certificates
+
 local_ca_files:
 - "root-ca.crt"
 - "intermediate-ca.crt"

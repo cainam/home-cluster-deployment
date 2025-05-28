@@ -1,7 +1,8 @@
 ---
 k8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
-k8s_version: v1.32.3
+k8s_version: v1.33.1
 controlPlaneEndpoint: "k8s.adm13:7443"
+k8s_log_directory: /var/log/kubernetes
 
 
 

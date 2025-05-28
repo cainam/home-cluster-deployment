@@ -1,11 +1,9 @@
 apiVersion: v1
 data:
-  {% for f in local_ca_files %}
+{% for f in local_ca_files %}
   {{ f }}: |
-    {{ lookup('file', f) | indent( width=4, first=False) }}"
-  {% endfor %}
-  
-  
+      {{ lookup('file', system_local_certs+"/"+f) | indent( width=6, first=False) }}
+{% endfor %}
 kind: ConfigMap
 metadata:
   name: myca

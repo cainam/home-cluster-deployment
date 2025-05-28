@@ -1,5 +1,8 @@
 supervisor="supervise-daemon"
 supervise_daemon_args="--respawn-delay 10 --respawn-max 0"
+command_background="yes"
+output_log="/var/log/kubelet/kubelet.log"
+error_log="/var/log/kubelet/kubelet.log"
 rc_need=crio
 
 # April 2022

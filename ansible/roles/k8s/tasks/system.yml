@@ -55,14 +55,16 @@
     path: "/var/lib/etcd"
   register: etcd_data
 
-- name: ensure /data/etcd exists
+- name: ensure directories exists
   file:
     path: "{{ item.path }}"
     state: directory
     mode: "{{ item.perm }}"
   loop:
-    - path: /data/etcd
-      perm: u=rwx,g=rx,o=rx
+  - path: /data/etcd
+    perm: u=rwx,g=rx,o=rx
+  - path: "{{ k8s_log_directory }}"
+    perm: u=rwx,g=rx,o=rx
 
 - name: ensure /var/lib/etcd is absent
   file:

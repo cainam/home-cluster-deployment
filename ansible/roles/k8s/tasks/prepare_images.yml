@@ -11,11 +11,13 @@
     echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
   with_items: "{{ required_images.stdout_lines }}"
 
-- name: build flannel
-  shell: |
-    . set_env.sh kube-flannel
-    helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git
-    helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
-    helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
+- name: handle additional images
+  vars:
+    limit_images:
+    - helm
+    - registry
+  include_role:
+    name: gentoo-image-builder
+
 
 

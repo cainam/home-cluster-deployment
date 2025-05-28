@@ -2,5 +2,33 @@
 apiVersion: audit.k8s.io/v1
 kind: Policy
 rules:
-- level: Request
-- level: Metadata
+rules:
+  - level: None
+    users:
+    - system:serviceaccount:kube-system:job-controller
+    - system:node:k8s-1-int.adm13
+    - system:node:k8s-2-int.adm13
+    - system:node:k8s-3-int.adm13
+    namespaces: ["kube-system"]
+  - level: None
+    users: ["system:serviceaccount:kube-system:replicaset-controller"]
+  - level: None
+    users:
+    - system:kube-scheduler
+    - system:kube-controller-manager
+    - system:serviceaccount:kube-system:descheduler
+    - system:apiserver
+    verbs: ["get", "list", "watch"]
+  - level: Metadata
+    stages: ["ResponseComplete"]
+    omitStages:
+      - "RequestReceived"
+      - "ResponseStarted"
+      - "Panic"
+    resources:
+      - group: ""
+        resources: ["pods"]
+      - group: "apps"
+        resources: ["deployments", "replicasets"]
+  - level: None  # Drop everything else
+
