@@ -18,7 +18,7 @@ image:
 initContainers:
   waitdb:
 #    image: db/postgres:15.4
-    command: ['sh', '-c', 'until pg_isready -h postgresql.db -p 5432;do echo waiting for database; sleep 2; done;']
+    command: ['sh', '-c', 'until pg_isready -h postgres.db -p 5432;do echo waiting for database; sleep 2; done;']
 # -- environment variables.
 # @default -- See below
 env:

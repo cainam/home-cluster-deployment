@@ -1,6 +1,7 @@
-homeassistant: true
-permit_join: true
+homeassistant:
+  enabled: true
 frontend:
+  enabled: true
   port: 8080
   host: 0.0.0.0
   url: https://open.{{ base_domain }}/
@@ -16,8 +17,6 @@ serial:
 advanced:
   adapter_delay: 200
   last_seen: ISO_8601
-  legacy_availability_payload: false
-  legacy_api: false
   timestamp_format: YYYY-MM-DD HH:mm:ss
   log_directory: /log/%TIMESTAMP%
   log_level: info
@@ -34,12 +33,12 @@ advanced:
     type: '5424'
   channel: 15
 availability:
+  enabled: true
   active:
     timeout: 10
   passive:
     timeout: 30
 device_options:
-  legacy: false
   homeassistant:
     last_seen:
       enabled_by_default: true
@@ -66,3 +65,6 @@ devices:
     friendly_name: Büro-Ausgang
   '0x70b3d52b60025cfa':
     friendly_name: Bürotür
+  '0x70b3d52b60076b69':
+    friendly_name: '0x70b3d52b60076b69'
+version: 4

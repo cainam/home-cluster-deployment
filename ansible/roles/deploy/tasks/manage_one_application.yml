@@ -39,38 +39,31 @@
       include_role:
         name: gentoo-image-builder
     when: application.value.images is defined
-    
-  - name: "{{ name_prefix }} build helm"
-    shell: |
-      . set_env.sh "{{ namespace.key }}"
-      helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
-      --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
-      --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
-      --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
-      {{ application.value.git_to_local_params | default("") }} 
-    register: build_out
 
-  - name: "{{ name_prefix }} build output"
-    debug:
-      msg: "{{ item }}"
-    loop: "{{ build_out  | dict2items }}"
-
-  - name: "{{ name_prefix }} helm repo refresh"
-    shell: |
-      . set_env.sh "{{ namespace.key }}"
-      helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
-      helm repo index "${helm_repo_dir}" --url "${helm_url}"
-      helm repo update
+  - block:
+    - name: "{{ name_prefix }} build helm"
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
+        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
+        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
+        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
+        {{ application.value.git_to_local_params | default("") }} 
+      register: build_out
+  
+    - name: "{{ name_prefix }} build output"
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ build_out  | dict2items }}"
+  
+    - name: "{{ name_prefix }} helm repo refresh"
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+        helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
+        helm repo index "${helm_repo_dir}" --url "${helm_url}"
+        helm repo update
+    when: (application.value.deployment_type| default("helm")) == "helm"
   when: "'build' in ansible_run_tags" 
-
-#- block:
-#  - name: "{{ name_prefix }} install storage content"
-#    include_tasks: storage_content.yml
-#    when: storage.config is defined and storage.config
-#    with_items: "{{ application.value.storage }}"
-#    loop_control:
-#      loop_var: storage
-#  when: application.value.storage is defined
     
 - name: "{{ name_prefix }} files"
   include_tasks: files.yml
@@ -92,22 +85,32 @@
     loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
   when: application.value.network.proxy_sidecar is defined
 
+- block:
+  - name: "{{ name_prefix }} install or upgrade"
+    shell: |
+      . set_env.sh "{{ namespace.key }}"
+      set -x
+       helm upgrade --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
+       {{ applications[namespace.key][application.key].helm_options | default('') }} --post-renderer /usr/local/bin/post-renderer.sh \
+       {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
+    register: out
+    when: "application.value.install | default(true)"
+  when: (application.value.deployment_type| default("helm")) == "helm"
 
-- name: "{{ name_prefix }} install or upgrade"
-  shell: |
-    . set_env.sh "{{ namespace.key }}"
-    set -x
-     helm upgrade --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
-     {{ applications[namespace.key][application.key].helm_options | default('') }} --post-renderer /usr/local/bin/post-renderer.sh \
-     {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
-  register: out
-  when: "application.value.install | default(true)"
-  #failed_when: true
-  
-- name: "{{ name_prefix }} output"
-  debug:
-    msg: "{{ item | to_yaml }}"
-  loop: "{{ out  | dict2items }}"
+- block:
+  - name: "{{ title }} - run helper to process kustomize templates"
+    include_role:
+      name: shared_helper
+      tasks_from: template_directory.yaml
+    vars:
+      dir_var: build_dir
+      template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.key }}"
+      kustom: "{{ application.value.kustom | default({}) | combine({'namespace': namespace.key }) }}"
+  - name: "{{ name_prefix }} kustomize"
+    shell: |
+      kubectl apply -k {{ build_dir }}
+  when: (application.value.deployment_type| default("helm")) == "kustomize"
+  run_once: true
   
 - block:
   - name: "{{ name_prefix }} manage application requirements"

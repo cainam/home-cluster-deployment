@@ -8,3 +8,4 @@
   - name: dump
     debug:
       msg: "hostvars:\n{{ hostvars|to_nice_yaml }}\nhosts: {{ hostvars.keys() }}\nfirst host: {{ [hostvars.keys() | first] }}"
+    delegate_to: localhost

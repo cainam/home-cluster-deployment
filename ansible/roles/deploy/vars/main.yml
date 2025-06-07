@@ -169,7 +169,7 @@ applications:
           app.kubernetes.io/instance: home-assistant
       requires:
       - type: postgresql
-        name: postgresql
+        name: postgres
         namespace: db
         config:
           database: ha
@@ -259,6 +259,18 @@ applications:
   db:
     postgresql:
       git: https://github.com/cetic/helm-postgresql.git
+      deployment_type: kustomize
+      kustom:
+        image: "db/postgresql:{{ software.postgresql.version }}"
+        user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
+        pass: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
+        trustedSubnet: "{{ podSubnet }}"
+        runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
+        storage:
+          class: longhorn
+          size: 2Gi
+          dataPath: /var/lib/postgresql
+          confPath: /conf
       images:
       - postgresql
       helm_options: >- 
