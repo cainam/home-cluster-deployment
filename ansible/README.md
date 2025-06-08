@@ -158,3 +158,4 @@ TODO:
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
 - images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"
 - security: mute warnings for longhorn-system => added as exempted to AdmissionController.yaml => see if it works!
+- add Kyvero: policy exceptions (e.g. zigbee2mqtt) and runAsUser enforcements, PodSecurity=restricted for all!

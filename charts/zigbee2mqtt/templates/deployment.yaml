@@ -43,7 +43,7 @@ spec:
           {{- if .Values.zigbee2mqtt.deployment.debug }}
             - "sleep infinity"
           {{- else }}
-            - "/initconfig.sh"
+            - "/z/initconfig.sh"
           {{- end }}
           {{- if .Values.zigbee2mqtt.deployment.frontend.enabled }}
           ports:
@@ -60,9 +60,8 @@ spec:
             - mountPath: "/app/data"
               name: zigbee2mqtt-data
               readOnly: false
-            - mountPath: "/initconfig.sh"
+            - mountPath: "/z"
               name: zigbee2mqtt-config
-              subPath: initconfig.sh
           {{- if .Values.zigbee2mqtt.deployment.devicePath }}
             - mountPath: {{ .Values.zigbee2mqtt.deployment.devicePath | quote }}
               name: zigbeedongle
