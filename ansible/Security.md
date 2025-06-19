@@ -4,8 +4,15 @@ https://kubernetes.io/docs/concepts/security/pod-security-admission/
 https://kubernetes.io/docs/concepts/security/pod-security-standards/
 https://dev.to/thenjdevopsguy/implementing-kubernetes-pod-security-standards-4aco
 
+Kyvero: hm, nice, but too heavy, better to code directly for the need
+
 Implementation:
 1. AdmissionConfirmation with cluster-wide config is deployed
+2. own ValidationWebhook is configured to handle exemptions in isolated workspaces:
+- zigbee2mqtt
+- auth-operator
+- descheduler
+- valmut
 
 
 Pod and Container Security:

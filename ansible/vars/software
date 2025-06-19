@@ -30,7 +30,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2025.5.2"
+    version: "2025.6.1"
     installed:
       pattern: "home-assistant:"
     latest:

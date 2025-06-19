@@ -176,7 +176,7 @@ images:
 #  section: local
   
 - name: python-3.13
-  tag: 2025.04-1
+  tag: 2025.06-1
   section: local
   requires:
   - base
@@ -196,7 +196,7 @@ images:
     finish_rootfs_build: copy_gcc_libs
 
 - name: ha-base
-  tag: 2025.04
+  tag: 2025.06
   section: home
   requires:
   - python-3.13
@@ -296,10 +296,10 @@ images:
       VIRTUAL_ENV=/py_env
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi uvicorn kopf kubernetes
       mv "$VIRTUAL_ENV" ${_EMERGE_ROOT}/"$VIRTUAL_ENV"
-
-- name: infopage
+      
+- name: fastapi
   tag: 2025.04-1
-  section: tools
+  section: local
   requires:
   - python-3.13
   type: kubler

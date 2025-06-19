@@ -45,7 +45,7 @@ Notes:
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
 - fix corruption/0-byte files: find /var/lib/registry/docker/registry/v2 -size 0 -path "*_manifests/revisions/sha256*" -exec rm -v {} \;
-- delete physically: # podman exec -it registry bin/registry garbage-collect /etc/docker/registry/config.yml
+- delete physically: # podman exec -it registry bin/registry garbage-collect --delete-untagged /var/lib/registry/config.yml
 - additionally sometimes structures have to be removed in /var/lib/registry/docker/registry/v2/repositories when no image version is shown
 
 etcd:
@@ -154,8 +154,11 @@ TODO:
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
 - kubler: implement build-tests to check if image is usable
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
+- certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - kubler: try smaller builder with multi-stage builds 
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
 - images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"
 - security: mute warnings for longhorn-system => added as exempted to AdmissionController.yaml => see if it works!
 - add Kyvero: policy exceptions (e.g. zigbee2mqtt) and runAsUser enforcements, PodSecurity=restricted for all!
+- Webhook API Server:
+- merge the code from chatgpt and gemini

@@ -1,7 +1,10 @@
 - name: set namespace fact
   set_fact:
     ns: "{{ namespace.key }}"
-  
+
+- name: "ensure namespace {{ ns }} exists"
+  shell: kubectl get namespace {{ ns }} > /dev/null 2>&1 || kubectl create namespace {{ ns }}
+
 - name: "namespace: {{ ns }} - manage applications"
   include_tasks: manage_one_application.yml
   loop: "{{ namespace.value | dict2items }}"

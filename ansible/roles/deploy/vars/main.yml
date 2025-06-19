@@ -148,7 +148,7 @@ applications:
         --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgresql:{{ software.postgresql.version }} 
         --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='section') | first }}/home-assistant" 
         --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='tag') | first }} 
-        --set command=python --set-json 'args=["-m","homeassistant","--config","/config"]'  
+        --set command=python --set-json 'args=["-m","homeassistant","--config","/config","--log-file","/tmp/home-assistant.log"]'  
         --set-json 'securityContext={"runAsUser": {{ securityContexts["home-assistant"].runAsUser }} }'
         --set-json 'env=[
           {"name":"PYTHONPATH","value":"/ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages"},
@@ -185,11 +185,11 @@ applications:
       git: "{{ own_git_url }}"
       subdir: charts/infopage
       helm_options: >-
-        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='section') | first }}/infopage"
-        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'infopage' ) | map(attribute='tag') | first }}
+        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='section') | first }}/fastapi"
+        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='tag') | first }}
         --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.13/site-packages/"}]'
       images:
-      - python-3.13
+      - fastapi
       storage:
       - name: infopage
         size: 5Mi
@@ -296,7 +296,22 @@ applications:
       storage: 
       - name: data-dbperf-postgresql-0
         size: 11Gi
-  kube-system:
+  kubext:
+    valmut:
+      deployment_type: kustomize
+      flags: ['certs']
+      kustom:
+        image: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='section') | first }}/fastapi:{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='tag') | first }}"
+        podPort: 28382
+      images:
+      - fastapi
+      storage:
+      - name: valmut
+        size: 5Mi
+        type: local_folder
+        config: true
+      network: true
+      
     descheduler:
       git: https://github.com/kubernetes-sigs/descheduler.git
       subdir: charts/descheduler
@@ -318,6 +333,7 @@ applications:
         --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
         --set image.tag={{ software.descheduler.version }}
         --set image.repository=kube-system/descheduler
+    
   longhorn-system:
     longhorn:
       git: https://github.com/longhorn/longhorn.git

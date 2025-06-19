@@ -3,10 +3,6 @@
     name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
         
-- name: "{{ name_prefix }} status"
-  debug:
-    msg: "inner namespace: {{ namespace.key }}, application: {{ application.key }}, application git: {{ application.value.git }} helm_options: {{ application.value.helm_options | default('') }}  all values: \n{{ application.value | to_nice_yaml}}"
-
 #- block: # this is a run_once playbook, but local storage configuration has to be done on all nodes
 #  - name: app:{{ app }} storage
 #    include_tasks: common/storage_brick.yml
@@ -98,6 +94,28 @@
   when: (application.value.deployment_type| default("helm")) == "helm"
 
 - block:
+  - name: "{{ name_prefix }} certificates for internal service"
+    vars:
+      cert_var: "reg_cert"
+      key_var: "reg_key"
+      caBundle_var: "caBundle"
+      ca_init: false
+      ca_openssl_path: /data/mine/certs
+      ca_common_name: FreeAsABird
+      ca_country_name: XX
+      ca_passphrase: "{{ cert_pass }}"
+      ca_organization_name: FreeAsABird
+      ca_organizational_unit_name: Anarchists
+      ca_state_or_province_name: Some-State
+      ca_email_address: a.b@c.de
+      ca_requests:
+      - name: "{{ application.key }}.{{ namespace.key }}.svc"
+        alt_names: 
+        - "{{ application.key }}.{{ namespace.key }}.svc"
+    include_role: 
+      name: certificates
+    when: "'certs' in application.value.flags"
+
   - name: "{{ title }} - run helper to process kustomize templates"
     include_role:
       name: shared_helper
@@ -106,7 +124,11 @@
       dir_var: build_dir
       template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.key }}"
       kustom: "{{ application.value.kustom | default({}) | combine({'namespace': namespace.key }) }}"
+
+
   - name: "{{ name_prefix }} kustomize"
+    vars:
+      kustom: "{{ kustome | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
       kubectl apply -k {{ build_dir }}
   when: (application.value.deployment_type| default("helm")) == "kustomize"
