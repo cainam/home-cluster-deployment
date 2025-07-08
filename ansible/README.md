@@ -10,16 +10,15 @@ challenge: images are build using playbooks, but they have downstream dependenci
 solution: a combination of dynamic variables and a stack of them ensures that a build within a build can be performed 
 
 ### new node
-- populate /boot partition with copy and root from stage3
-- modify root password, authorized_keys, create net.end0 link net.lo and enable sshd and net.end0 in /etc/runlevel/default
-- add /data to fstab and /boot by UUID=xxxx-xxxx
-- sync: /lib/modules and /lib/firmware and /var/db/repos/gentoo: rsync -a /var/db/repos/gentoo 10.10.10.23:/var/db/repos/
-- set hostname
-- set correct host entry in etc/hosts: echo "10.10.10.23 k8s-3-int.adm13 k8s-3-int" >> /etc/hosts
+- populate /boot partition with copy and root from stage3-arm64-openrc
+- /boot/cmdline.txt => update root=PARTUUID from  lsblk -o NAME,UUID,PARTUUID /dev/sdf, set /etc/conf.d/hostname to FQDN and define FQDN in /etc/hosts
+- configure end0 in /etc/conf.d/net, authorized_keys, create net.end0 link net.lo and enable sshd and net.end0 in /etc/runlevel/default => boot!
+- update UUID and PARTUUID in inventory file and if host to be installed is gentoo-build, remove this from the inventory
+- manage ssh keys and authorized_keys
+- run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world)
 - gluster: remove former bricks if any:  (for v in $(gluster vol list); do gluster vol heal $v info | grep k8s-3 | sed -e "s/^Brick/$v/g"; done) | while read v b;do (echo "y" | gluster vol remove-brick $v replica 2 $b force); done
-- Ansible: update inventory file: uuids and if host to be installed is gentoo-build, remove this from the inventory
+- gluster: gluster peer detach k8s-3-int.adm13 and gluster peer probe k8s-3-int.adm13
 - Emerge: missing binary packages can be created using e.g. quickpkg --include-config y lua
-- deploy gentoo / reboot / emerge manually etc. / from here to improve next time
 - next time: check why ca-certs are not updated
 - deploy k8s
 
@@ -145,6 +144,8 @@ TODO:
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - start keepalived after glusterd is up
+- ssh keys and authorized_keys management in playbook
+- turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - haproxy: why doesn't it start at boot? shouldn't it be started via keepalived?
 - security: add to build
 - security: log all incoming connections on gateway

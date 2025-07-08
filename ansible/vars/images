@@ -298,7 +298,7 @@ images:
       mv "$VIRTUAL_ENV" ${_EMERGE_ROOT}/"$VIRTUAL_ENV"
       
 - name: fastapi
-  tag: 2025.04-1
+  tag: 2025.06-1
   section: local
   requires:
   - python-3.13
@@ -308,5 +308,5 @@ images:
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
       export PYTHONPATH=${VIRTUAL_ENV}/lib/python3.13/site-packages/
-      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi
+      python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi kubernetes
       mv  "${VIRTUAL_ENV}" "${_EMERGE_ROOT}/${VIRTUAL_ENV}"

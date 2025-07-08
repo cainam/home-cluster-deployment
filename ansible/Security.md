@@ -6,14 +6,20 @@ https://dev.to/thenjdevopsguy/implementing-kubernetes-pod-security-standards-4ac
 
 Kyvero: hm, nice, but too heavy, better to code directly for the need
 
+Order of admission validation and webhooks:
+1. mutate webhook
+2. PSA
+3. validation webhook
+
 Implementation:
 1. AdmissionConfirmation with cluster-wide config is deployed
-2. own ValidationWebhook is configured to handle exemptions in isolated workspaces:
+2. own ValidationWebhook is configured to handle exemptions from Pod Security Admission reimplementing the rules
 - zigbee2mqtt
 - auth-operator
 - descheduler
 - valmut
 
+- rules enforced: 
 
 Pod and Container Security:
 PodTemplateSpec v1 core

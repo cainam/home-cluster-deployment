@@ -99,7 +99,7 @@
       join_ip: "{{ my_cluster_ip }}"
       cert_key: cert_key.stdout
   - name: joining nodes
-    shell: kubeadm reset && rm -rf /etc/kubernetes/ && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}"
+    shell: kubeadm reset --force && rm -rf /etc/kubernetes/ && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}" --ignore-preflight-errors=DirAvailable--var-lib-etcd
     throttle: 1
   when: k8s_healthy and not k8s_installed
 
@@ -163,6 +163,11 @@
     shell: |
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
+
+  - name: ensure /var/lib/kubelet/config.yaml is refreshed
+    shell: |
+      [ -f /var/lib/kubelet/config.yaml ] && cp -dp /var/lib/kubelet/config.yaml /var/lib/kubelet/config.yaml.bck
+      kubectl get configmaps -n kube-system kubelet-config -o jsonpath='{.data.kubelet}' > /var/lib/kubelet/config.yaml
 
   - name: create storageClass local as default
     shell: |

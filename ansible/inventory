@@ -3,12 +3,13 @@ all:
     k8s-3-int.adm13:
       gentoo_build:
       gentoo_binhost:
-      boot_root: PARTUUID=d6133bfa-02
-      boot_uuid: 2136-5579
+      boot_root: PARTUUID=10014c66-02
+      boot_uuid: 4C9E-34AC
     k8s-1-int.adm13:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
     k8s-2-int.adm13:
       boot_root: PARTUUID=2e93d72b-02
       boot_uuid: 92BE-3FCF
+      xgentoo_binhost:
 

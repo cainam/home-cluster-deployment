@@ -70,7 +70,7 @@
 - name: symlinks for CA
   copy:
     src: "{{ cert_path }}/{{ item }}"
-    dest: "{{ system_local_certs: }}/{{ item }}"
+    dest: "{{ system_local_certs }}/{{ item }}"
     owner: root
     group: root
   register: ca
@@ -80,27 +80,6 @@
   shell: /usr/sbin/update-ca-certificates
   when: ca.changed
 
-- name: put certificates and keys in place
-  copy:
-    content: "{{ lookup('file', '{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem') }}\n{{ lookup('file', '{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt') }}"
-    dest: "{{ item.dest }}/{{ item.name }}.pem"
-  loop: "{{ certs }}"
-  throttle: 1
-  
-- name: put certificate keys in place
-  copy:
-    src: "{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem"
-    dest: "{{ item.dest }}/{{ item.name }}.key"
-  loop: "{{ certs }}"
-  throttle: 1
-
-- name: put certificates in place
-  copy:
-    src: "{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt"
-    dest: "{{ item.dest }}/{{ item.name }}.crt"
-  loop: "{{ certs }}"
-  throttle: 1
-  
 - name: rc.conf
   lineinfile:
     path: /etc/rc.conf
@@ -124,10 +103,6 @@
     - line: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
       setting: hostname
       file: hostname
-
-- name: mount boot
-  shell: mountpoint -q /boot || mount /boot
-  changed_when: false 
 
 - name: deploy from files
   copy:
@@ -238,12 +213,25 @@
       dest: /etc/conf.d/
     - file: conf.d/helm
       dest: /etc/conf.d/
+
+- name: mount boot
+  shell: mountpoint -q /boot || mount /boot
+  changed_when: false 
+
+- name: deploy from templates to /boot
+  vars:
+  template:
+    src: "{{ item.file }}"
+    dest: "{{ item.dest }}"
+    backup: "{{ item.backup | default('yes') }}"
+  loop:
     - file: cmdline.txt
       dest: /boot/
       backup: no
     - file: config.txt
       dest: /boot/
       backup: no
+
 
 - name: symlinks for net.lo and localtime
   file:
@@ -274,15 +262,48 @@
 
 - name: set date if year is 1970
   shell: date +%Y | ( grep -q "^1970$" && date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" ) || echo "date ok"
-  
-- name: portage profile
-  shell: export LC_ALL=C && eselect profile show && eselect profile set default/linux/arm64/23.0 #/split-usr
-  
+
+- name: get hostname of Ansible control node
+  connection: local
+  run_once: true
+  delegate_to: localhost
+  set_fact:
+    ansible_controller_hostname: "{{ lookup('pipe', 'hostname') }}"
+
+- name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
+  shell: |
+    if [ ! -d "/var/db/repos/gentoo/.git" ]; then
+      profile_dir=/var/db/repos/gentoo/profiles
+      rsync -a {{ ansible_controller_hostname }}:${profile_dir} /tmp
+      mv /etc/portage/make.profile /etc/portage/make.profile.bck || true
+      ln -s /tmp/profiles/default/linux/arm64/23.0 /etc/portage/make.profile
+      rsync -a {{ ansible_controller_hostname }}:/var/cache/binpkgs/Packages /var/cache/binpkgs/Packages
+ 
+      binpkgs="/var/cache/binpkgs"
+      atoms=$(USE="adns alt-svc ftp hsts http2 http3 httpsrr imap openssl pop3 psl quic smtp ssl tftp websockets" ACCEPT_LICENSE="*" emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e 's/-[0-9].*$//g')
+      atoms_iwd=$(ACCEPT_LICENSE="*" emerge -1 --usepkg --pretend net-wireless/iwd 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e "s/-[0-9].*$//g")
+      #atoms="$(ACCEPT_LICENSE='*' emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep 'binary  N' | cut -d ']' -f 2 | cut -d ' ' -f 2 | sed -e 's/-[0-9].*$//g'")
+      for atom in ${atoms} ${atoms_iwd}; do
+        pkg_dir=${binpkgs}/${atom}
+        mkdir -p ${pkg_dir}
+        rsync -a {{ ansible_controller_hostname }}:${pkg_dir}/* ${pkg_dir}/
+        ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
+      done
+      rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
+      rsync -a k8s-2-int.adm13:/lib/firmware /lib
+      /etc/init.d/dbus start
+      /etc/init.d/iwd start
+      rm /etc/portage/make.profile && mv /etc/portage/make.profile.bck /etc/portage/make.profile || true
+    fi
+
 - name: emerge sync
   shell: emerge --sync
   ignore_errors: true
-  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
+#  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
 
+- name: portage profile
+  shell: export LC_ALL=C && eselect profile show && eselect profile set default/linux/arm64/23.0 #/split-usr
+  
 - name: build and deploy
   block:
   - name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
@@ -370,3 +391,24 @@
 - name: gluster
   import_tasks: gluster.yml
   
+- name: put certificates and keys in place
+  copy:
+    content: "{{ lookup('file', '{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem') }}\n{{ lookup('file', '{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt') }}"
+    dest: "{{ item.dest }}/{{ item.name }}.pem"
+  loop: "{{ certs }}"
+  throttle: 1
+    
+- name: put certificate keys in place
+  copy:
+    src: "{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem"
+    dest: "{{ item.dest }}/{{ item.name }}.key"
+  loop: "{{ certs }}"
+  throttle: 1
+    
+- name: put certificates in place
+  copy:
+    src: "{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt"
+    dest: "{{ item.dest }}/{{ item.name }}.crt"
+  loop: "{{ certs }}"
+  throttle: 1
+

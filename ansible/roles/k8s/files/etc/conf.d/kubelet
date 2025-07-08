@@ -5,5 +5,5 @@ output_log="/var/log/kubelet/kubelet.log"
 error_log="/var/log/kubelet/kubelet.log"
 rc_need=crio
 
-# April 2022
 command_args="--container-runtime-endpoint='unix:///var/run/crio/crio.sock' --kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"
+command_args="--kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"
