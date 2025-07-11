@@ -156,10 +156,14 @@ TODO:
 - kubler: implement build-tests to check if image is usable
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
+- rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
 - kubler: try smaller builder with multi-stage builds 
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
 - images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"
 - security: mute warnings for longhorn-system => added as exempted to AdmissionController.yaml => see if it works!
 - add Kyvero: policy exceptions (e.g. zigbee2mqtt) and runAsUser enforcements, PodSecurity=restricted for all!
 - Webhook API Server:
-- merge the code from chatgpt and gemini
+- limit locales generated
+- PSA: turn to restricted
+- PSA: remove exemption for home and auth
+- istio-ingress: migrate from helm to kustomize

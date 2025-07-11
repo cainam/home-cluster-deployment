@@ -115,6 +115,8 @@
       dest: /etc/lighttpd/
     - file: 02-cgroup-manager.conf
       dest: /etc/crio/crio.conf.d/
+    - file: 03-allowed-devices.conf
+      dest: /etc/crio/crio.conf.d/
     - file: scripts/
       dest: /usr/local/bin/
     - file: world

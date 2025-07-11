@@ -113,6 +113,7 @@ applications:
       affinity: k8s-2-int.adm13
       helm_options: >-
         --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" 
+        --set-json zigbee2mqtt.deployment.annotations="[{'io.kubernetes.cri-o.Devices': '/dev/ttyUSB0'}]"
         --set zigbee2mqtt.deployment.image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'zigbee2mqtt' ) | map(attribute='section') | first }}/zigbee2mqtt"
         --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
       git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.repository=  --fix_source=.zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}"
