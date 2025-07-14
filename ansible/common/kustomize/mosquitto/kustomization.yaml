@@ -1,0 +1,7 @@
+resources:
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - persistentvolumeclaim.yaml
+
+namespace: {{ kustom.namespace }}
