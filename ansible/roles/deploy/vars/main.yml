@@ -128,12 +128,9 @@ applications:
         size: 100Mi
         config: true
     mosquitto:
-      git: "{{ own_git_url }}"
-      subdir: charts/mosquitto
-      git_to_local_params: --fix_source=.image.tag="" --fix_source=.image.repository="" --fix_source=.authentication.passwordFilePath=/mosquitto/data/mosquitto.passwd
-      helm_options: >-
-        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'mosquitto' ) | map(attribute='section') | first }}/mosquitto" 
-        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'mosquitto' ) | map(attribute='tag') | first }}
+      deployment_type: kustomize
+      kustom:
+        image: "home/mosquitto:{{ software.mosquitto.version }}"
       images:
       - mosquitto
       storage:
@@ -259,7 +256,6 @@ applications:
         rewrite: /prometheus
   db:
     postgresql:
-      git: https://github.com/cetic/helm-postgresql.git
       deployment_type: kustomize
       kustom:
         image: "db/postgresql:{{ software.postgresql.version }}"
@@ -274,17 +270,6 @@ applications:
           confPath: /conf
       images:
       - postgresql
-      helm_options: >- 
-        --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-        --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-        --set persistence.storageClass=longhorn --set persistence.size=2Gi --set postgresql.config.listen_addresses="'*'" 
-        --set-string postgresql.pghba='host    all             all             {{ podSubnet }}           trust
-        
-        host    all             all             127.0.0.1/32           trust'
-        --set securityContext.runAsUser=postgres --set securityContext.fsGroup=postgres
-        --set image.tag={{ software.postgresql.version }} --set volumePermissions.image.tag={{ software.postgresql.version }}
-        --set image.repository=db/postgresql --set volumePermissions.image.repository=db/postgresql
-      git_to_local_params: --fix_source=.image.tag= --fix_source=.volumePermissions.image.tag= --fix_source=.image.repository= --fix_source=.volumePermissions.image.repository= --fix_source=.image.registry= --fix_source=.volumePermissions.image.registry= 
       storage: 
       - name: data-postgresql-0
         type: longhorn

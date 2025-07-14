@@ -22,7 +22,7 @@ software:
       params:
         repo: koenkk/zigbee2mqtt
   mosquitto:
-    version: v2.0.21
+    version: v2.0.22
     max_entries: 2
     latest:
       type: github-tags

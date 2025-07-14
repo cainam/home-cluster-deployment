@@ -76,9 +76,47 @@ async def vs(request: Request):
 #@log
 #async def services_status(request: Request):
 def services_status(request: Request):
+    import re, requests
+    from datetime import datetime
+
     output={}
     output["registry"] = subprocess.run(["curl","-k","-s","-X","GET","-I",registry+"/v2/_catalog"], capture_output=True).stdout.decode('ascii')
     output["helm"] = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:9443"], capture_output=True).stdout.decode('ascii')
+
+    stage3_html = subprocess.run(["curl","-s","http://distfiles.gentoo.org/releases/arm64/autobuilds/current-stage3-arm64-musl-hardened/"], capture_output=True).stdout.decode('ascii')
+    stage3_pattern = re.compile(r'<a\s+href=["\'](.*?\.tar\.xz)["\'][^>]*>', re.IGNORECASE)
+    stage3_match = stage3_pattern.search(stage3_html)
+    output['stage3'] = stage3_match.group(1) if stage3_match else ''
+    logger.info("stage3:"+str(output['stage3']))
+
+    url = 'https://distfiles.gentoo.org/snapshots/'
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
+        portage_html = response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching URL: {e}")
+        portage_html = ''
+
+    portage_pattern = re.compile(r'<a[^>]*href=["\'](portage-(\d{8})\.tar\.xz)["\'][^>]*>', re.IGNORECASE)
+    latest_file_name = ''
+    latest_date = None
+
+    for match in portage_pattern.finditer(portage_html):
+        full_file_name = match.group(1) # e.g., "portage-20250713.tar.xz"
+        date_string = match.group(2)    # e.g., "20250713"
+        try:
+            current_date = datetime.strptime(date_string, '%Y%m%d')
+        except ValueError:
+            # Skip if the date string doesn't match the expected format
+            continue
+
+        if latest_date is None or current_date > latest_date:
+            latest_date = current_date
+            latest_file_name = full_file_name
+    output['stage3'] = output['stage3'] + '\n' + latest_file_name
+
+
 
     # logger.info("response: "+response)
     return templates.TemplateResponse("general_pages/service_status.html",{"request":request, "content": output, "name": "service status" } )

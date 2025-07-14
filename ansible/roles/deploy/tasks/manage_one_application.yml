@@ -114,7 +114,7 @@
         - "{{ application.key }}.{{ namespace.key }}.svc"
     include_role: 
       name: certificates
-    when: "'certs' in application.value.flags"
+    when: "'flags' in application.value and 'certs' in application.value.flags"
 
   - name: "{{ title }} - run helper to process kustomize templates"
     include_role:

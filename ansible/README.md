@@ -167,3 +167,4 @@ TODO:
 - PSA: turn to restricted
 - PSA: remove exemption for home and auth
 - istio-ingress: migrate from helm to kustomize
+- longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
