@@ -31,6 +31,9 @@ New install:
 - enable net.end0+sshd
 - sync /lib/firmware/bmrc and /cypress and /var/db/repos/gentoo
 
+Usage:
+- build a dedicated image: eval $my_ansible site.yml --tags=images-only --extra-vars \''{"limit_images":["fastapi"]}'\'
+
 Notes:
 - trying to run on one host only using run_once/delegate_to did only work having a hostname set as fact not with a variable. It seems like vars are re-evaluated when accessed, but facts remain constant
 - uninstall of kubernetes is triggered using "--tags=all,force_reinstall", otherwise force_reinstall is skipped

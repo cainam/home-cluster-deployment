@@ -176,7 +176,7 @@ images:
 #  section: local
   
 - name: python-3.13
-  tag: 2025.06-1
+  tag: 2025.07-1
   section: local
   requires:
   - base

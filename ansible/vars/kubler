@@ -7,8 +7,8 @@ kubler:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
-  stage3_date: 20250706T230915Z
-  portage: 20250706
+  stage3_date: 20250713T232224Z
+  portage: 20250713
   portage_container: "portage"
   builder:
     configure_builder: |
