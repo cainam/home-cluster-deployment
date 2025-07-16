@@ -57,6 +57,7 @@ if [ "$(rc-service kubelet status --nocolor 2>&1 | grep status | cut -d ":" -f 2
   rc-service kubelet restart
 else
   log "ok"
+fi
 
 
 # gluster vol list
