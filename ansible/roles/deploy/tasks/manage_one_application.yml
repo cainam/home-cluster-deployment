@@ -123,9 +123,12 @@
     vars:
       dir_var: build_dir
       template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.key }}"
-      kustom: "{{ application.value.kustom | default({}) | combine({'namespace': namespace.key }) }}"
-
-
+      kustom: "{{ application.value.kustom | default({}) | combine({
+         'namespace': namespace.key,
+         'name': application.key, 
+         'storage': application.value.storage | default([]), 
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+software[application.key].version )
+         }) }}"
   - name: "{{ name_prefix }} kustomize"
     vars:
       kustom: "{{ kustome | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"

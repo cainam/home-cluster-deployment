@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mosquitto
+  name: {{ kustom.name }}
 spec:
   selector:
-    app: mosquitto
+    app: {{ kustom.name }}
   ports:
   - name: mqtt
     port: 1883

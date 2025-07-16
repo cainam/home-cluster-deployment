@@ -50,6 +50,15 @@ else
   log "ok"
 fi
 
+# kubelet
+name="kubelet"
+if [ "$(rc-service kubelet status --nocolor 2>&1 | grep status | cut -d ":" -f 2 | cut -c 2-)" != "started" ]; then
+  log "kubelet is not started: restarting service"
+  rc-service kubelet restart
+else
+  log "ok"
+
+
 # gluster vol list
 name="gluster vol list"
 out=$(gluster vol list 2>&1)

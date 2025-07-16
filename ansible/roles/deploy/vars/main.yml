@@ -108,6 +108,19 @@ applications:
       git: "{{ own_git_url }}"
       subdir: charts/grott
     zigbee2mqtt:
+      deployment_type: kustomize
+      affinity: k8s-2-int.adm13
+      images:
+      - zigbee2mqtt
+      network:
+        svcPort: 8080
+        old_proxy_sidecar:
+          app.kubernetes.io/instance: zigbee2mqtt
+      storage:
+      - name: zigbee2mqtt
+        size: 100Mi
+        config: true
+    xzigbee2mqtt:
       git: "{{ own_git_url }}"
       subdir: charts/zigbee2mqtt
       affinity: k8s-2-int.adm13
