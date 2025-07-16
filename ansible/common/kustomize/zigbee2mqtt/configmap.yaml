@@ -1,0 +1,6 @@
+apiVersion: v1
+data:
+  initconfig.sh: "#!/bin/sh\n# export DEBUG=zigbee-herdsman* \ncd /app\nnode index.js\n"
+kind: ConfigMap
+metadata:
+  name: {{ kustom.name }}

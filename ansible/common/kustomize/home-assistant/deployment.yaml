@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ kustom.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ kustom.name }}
+      app.kubernetes.io/name: {{ kustom.name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ kustom.name }}
+        app.kubernetes.io/name: {{ kustom.name }}
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - args:
+        - -m
+        - homeassistant
+        - --config
+        - /config
+        - --log-file
+        - /tmp/home-assistant.log
+        command:
+        - python
+        env:
+        - name: PYTHONPATH
+          value: /ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages
+        - name: PATH
+          value: /py_env/bin:/bin:/usr/bin
+        - name: TZ
+          value: UTC
+        - name: LD_LIBRARY_PATH
+          value: /usr/lib/postgresql-17/lib/
+        image: {{ kustom.image }}
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8123
+          timeoutSeconds: 1
+        name: {{ kustom.name }}
+        ports:
+        - containerPort: 8123
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8123
+          timeoutSeconds: 1
+        resources: {}
+        securityContext:
+          runAsUser: 651234
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 8123
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h postgres.db -p 5432;do echo waiting for database; sleep
+          2; done;
+        image: db/postgresql:17.5
+        imagePullPolicy: IfNotPresent
+        name: waitdb
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: {{ kustom.name }}

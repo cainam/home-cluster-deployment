@@ -120,30 +120,8 @@ applications:
       - name: zigbee2mqtt
         size: 100Mi
         config: true
-    xzigbee2mqtt:
-      git: "{{ own_git_url }}"
-      subdir: charts/zigbee2mqtt
-      affinity: k8s-2-int.adm13
-      helm_options: >-
-        --set zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}" 
-        --set-json zigbee2mqtt.deployment.annotations="[{'io.kubernetes.cri-o.Devices': '/dev/ttyUSB0'}]"
-        --set zigbee2mqtt.deployment.image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'zigbee2mqtt' ) | map(attribute='section') | first }}/zigbee2mqtt"
-        --set zigbee2mqtt.deployment.nodeSelector.zigbee2mqtt=zigbee2mqtt --set persistent.enabled=true --set persistent.capacity=100Mi 
-      git_to_local_params: --fix_source=.zigbee2mqtt.deployment.image.repository=  --fix_source=.zigbee2mqtt.deployment.image.tag="{{ software.zigbee2mqtt.version }}"
-      images:
-      - zigbee2mqtt
-      network:
-        svcPort: 8080
-        old_proxy_sidecar: 
-          app.kubernetes.io/instance: zigbee2mqtt
-      storage:
-      - name: zigbee2mqtt
-        size: 100Mi
-        config: true
     mosquitto:
       deployment_type: kustomize
-      kustom:
-        image: "home/mosquitto:{{ software.mosquitto.version }}"
       images:
       - mosquitto
       storage:
@@ -151,21 +129,7 @@ applications:
         size: 1Gi
       network: true
     home-assistant:
-      git: "{{ own_git_url }}"
-      subdir: charts/home-assistant
-      git_to_local_params: --fix_source=.image.tag= --fix_source=.image.repository= --fix_source=.postgresql.image= 
-      remove_dependencies: postgresql,mariadb,influxdb
-      helm_options: >-
-        --set persistence.config.enabled=true --set persistence.config.size=100Mi --set initContainers.waitdb.image=db/postgresql:{{ software.postgresql.version }} 
-        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='section') | first }}/home-assistant" 
-        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'home-assistant' ) | map(attribute='tag') | first }} 
-        --set command=python --set-json 'args=["-m","homeassistant","--config","/config","--log-file","/tmp/home-assistant.log"]'  
-        --set-json 'securityContext={"runAsUser": {{ securityContexts["home-assistant"].runAsUser }} }'
-        --set-json 'env=[
-          {"name":"PYTHONPATH","value":"/ha/core:/py_env/lib/python3.12/site-packages:/usr/lib/python3.12/site-packages"},
-          {"name":"PATH","value":"/py_env/bin:/bin:/usr/bin"},
-          {"name":"TZ","value":"UTC"},
-          {"name":"LD_LIBRARY_PATH","value":"/usr/lib/postgresql-17/lib/"}]'
+      deployment_type: kustomize
       images:
       - home-assistant
       storage:
@@ -193,12 +157,9 @@ applications:
       branch:  tempo-1.7.2
       git_to_local_params: --fix_source=.tempo.tag="{{ software.tempo.version }}" --fix_source=.tempoQuery.tag="{{ software.tempo_query.version }}"
     infopage:
-      git: "{{ own_git_url }}"
-      subdir: charts/infopage
-      helm_options: >-
-        --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='section') | first }}/fastapi"
-        --set image.tag={{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='tag') | first }}
-        --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.13/site-packages/"}]'
+      deployment_type: kustomize
+      kustom:
+        image: "local/fastapi:{{ images | selectattr('name', 'equalto', 'fastapi') | map(attribute='tag') | first }}"
       images:
       - fastapi
       storage:
