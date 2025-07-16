@@ -9,7 +9,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 export helm_dir=/shared/helm
 export helm_options="--repository-config $helm_dir/config --repository-cache $helm_dir/cache "
 function helm(){
-  export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir -v /usr/local/bin/post-renderer.sh:/usr/local/bin/post-renderer.sh --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
+  export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"
   echo "podman_options:${podman_options}"
   [ "${category}" != "" ] && helm_options="${helm_options} -n ${category}"
   podman run ${podman_options} ${helm_image} helm $helm_options "$@"

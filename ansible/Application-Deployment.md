@@ -4,11 +4,6 @@ This I did when even there were so many posibilities of customization in the pos
 With kustomize he configuration for the playbooks is easier, no adaptions require to fetch and modify the helm chart, no limitations on the chart
 In the end helm templating with ansible templating is one templating too much!
 
-helm flow:
-- chart source taken from git repository (own or shared)
-- chart is build and uploaded to local helm repository
-- application is installed using helm with a post-render script to perform some normalization (e.g. set securityContext if missing)
-
 Notes:
 - runAsUser is configured explicitely or - if missing - a random (which each new deployment action) uid is assigned to the running containers and to files deployed (if any)
 
