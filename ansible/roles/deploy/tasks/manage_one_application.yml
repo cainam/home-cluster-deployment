@@ -127,7 +127,7 @@
          'namespace': namespace.key,
          'name': application.key, 
          'storage': application.value.storage | default([]), 
-         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+software[application.key].version )
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+(software[application.key].version|default('latest')) )
          }) }}"
   - name: "{{ name_prefix }} kustomize"
     vars:

@@ -130,10 +130,12 @@ applications:
       network: true
     home-assistant:
       deployment_type: kustomize
+      kustom:
+        runAsGroup: "{% raw %} {{ securityContexts[application.key].runAsGroup}}{% endraw %}"
       images:
       - home-assistant
       storage:
-      - name: home-assistant-config
+      - name: home-assistant
         size: 100Mi
         config: true
       network:

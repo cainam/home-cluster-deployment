@@ -41,7 +41,7 @@
       recurse: true
       state: directory
       owner: "{{ securityContexts[application.key].runAsUser | default('root') }}"
-      group: root
+      group: "{{ securityContexts[application.key].runAsGroup | default('root') }}"
       mode: u=rwx,g=rx,o=rx
     loop: "{{ templates_dirs }}"
 
@@ -51,7 +51,7 @@
       recurse: true
       state: directory
       owner: "{{ securityContexts[application.key].runAsUser | default('root') }}"
-      group: root
+      group: "{{ securityContexts[application.key].runAsGroup | default('root') }}"
       mode: u=rwx,g=rx,o=rx
     loop: "{{ files_dirs }}"
 
