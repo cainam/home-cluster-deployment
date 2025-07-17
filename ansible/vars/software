@@ -16,7 +16,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.4.0
+    version: 2.5.1
     latest:
       type: github
       params:

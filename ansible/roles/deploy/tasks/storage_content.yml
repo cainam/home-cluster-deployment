@@ -40,9 +40,9 @@
       path: "{{ dest_base_dir }}{{ item | replace (app_cfg_templates_path,'') }}"
       recurse: true
       state: directory
-      owner: "{{ securityContexts[application.key].runAsUser | default('root') }}"
-      group: "{{ securityContexts[application.key].runAsGroup | default('root') }}"
-      mode: u=rwx,g=rx,o=rx
+      owner: "{{ applicationSecurity[application.key].runAsUser | default('root') }}"
+      group: "{{ applicationSecurity[application.key].runAsGroup | default('root') }}"
+      mode: "{{ applicationSecurity[application.key].directoryMode | default('u=rwx,g=rx,o=-rwx') }}"
     loop: "{{ templates_dirs }}"
 
   - name: ensure destination directory exists for files
@@ -50,8 +50,8 @@
       path: "{{ dest_base_dir }}{{ item | replace (app_cfg_files_path,'') }}"
       recurse: true
       state: directory
-      owner: "{{ securityContexts[application.key].runAsUser | default('root') }}"
-      group: "{{ securityContexts[application.key].runAsGroup | default('root') }}"
+      owner: "{{ applicationSecurity[application.key].runAsUser | default('root') }}"
+      group: "{{ applicationSecurity[application.key].runAsGroup | default('root') }}"
       mode: u=rwx,g=rx,o=rx
     loop: "{{ files_dirs }}"
 

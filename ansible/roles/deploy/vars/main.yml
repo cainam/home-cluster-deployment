@@ -100,10 +100,6 @@ applications:
         prefix: /oauth2-hydra
         rewrite: /oauth2-hydra/
   home:
-    common:
-      git: "{{ own_git_url }}"
-      subdir: charts/common
-      install: false
     grott:
       git: "{{ own_git_url }}"
       subdir: charts/grott
@@ -131,7 +127,7 @@ applications:
     home-assistant:
       deployment_type: kustomize
       kustom:
-        runAsGroup: "{% raw %} {{ securityContexts[application.key].runAsGroup}}{% endraw %}"
+        runAsGroup: "{% raw %} {{ applicationSecurity[application.key].runAsGroup}}{% endraw %}"
       images:
       - home-assistant
       storage:

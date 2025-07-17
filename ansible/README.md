@@ -164,10 +164,7 @@ TODO:
 - security: don't run containers as root => initial solution: helm post-renderer - works for infopage, others to be migrated too
 - images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"
 - security: mute warnings for longhorn-system => added as exempted to AdmissionController.yaml => see if it works!
-- add Kyvero: policy exceptions (e.g. zigbee2mqtt) and runAsUser enforcements, PodSecurity=restricted for all!
-- Webhook API Server:
 - limit locales generated
 - PSA: turn to restricted
-- PSA: remove exemption for home and auth
-- istio-ingress: migrate from helm to kustomize
+- PSA: remove exemption for home
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/

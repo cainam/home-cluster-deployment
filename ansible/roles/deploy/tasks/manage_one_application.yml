@@ -122,7 +122,7 @@
       tasks_from: template_directory.yaml
     vars:
       dir_var: build_dir
-      template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.key }}"
+      template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': namespace.key,
          'name': application.key, 

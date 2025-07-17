@@ -4,5 +4,6 @@ resources:
 - deploy.yaml
 - pvc.yaml
 - service.yaml
+- serviceaccount.yaml
   
 namespace: {{ kustom.namespace }}

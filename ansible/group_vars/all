@@ -51,11 +51,14 @@ external_coredns_ip: 192.168.4.111
 podSubnet: 10.244.0.0/16
 
 gateway_install:
-  git: https://github.com/istio/istio.git
-  subdir: manifests/charts/gateway
-  branch: "{{ software.istio.version }}"
-  chart: gateway
-  helm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:error,lua:info"}'
+  xgit: https://github.com/istio/istio.git
+  xsubdir: manifests/charts/gateway
+  ybranch: "{{ software.istio.version }}"
+  ychart: gateway
+  yhelm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:error,lua:info"}'
+  deployment_type: kustomize
+  kustom:
+    application: gateway
   ports:
   - name: https
     port: 443

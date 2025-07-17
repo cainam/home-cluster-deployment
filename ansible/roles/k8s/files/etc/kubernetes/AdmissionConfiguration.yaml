@@ -15,4 +15,4 @@ plugins:
     exemptions:
       usernames: []
       runtimeClasses: []
-      namespaces: [home,auth,kube-system,longhorn-system]
+      namespaces: [home,kube-system,longhorn-system]
