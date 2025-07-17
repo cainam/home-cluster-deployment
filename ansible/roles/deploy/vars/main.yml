@@ -1,12 +1,5 @@
 ---
 applications:
-#  anon:
-#    tor:
-#      git: https://github.com/cainam/k8s_at_home.git
-#      subdir: charts/tor
-#      storage:
-#      - name: tor
-#        size: 10Mi
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
@@ -298,8 +291,6 @@ applications:
       subdir: chart
       branch: "{{ software.longhorn.version }}"
       lm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
-      xxhelm_options: --set defaultSettings.logLevel=Trace --set namespaceOverride=storage
-      elm_options: --set defaultSettings.disableRevisionCounter=null --set defaultSettings.priorityClass=null --set defaultSettings.createDefaultDiskLabeledNodes=true --set defaultSettings.defaultDataPath=/data/longhorn-1
       helm_options: --set defaultSettings.logLevel=Info
       network:
         svcName: longhorn-frontend

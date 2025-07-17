@@ -1,0 +1,22 @@
+ca_private_path: private
+ca_certs_path: certs
+ca_requests_path: requests
+ca_newcerts_path: newcerts
+ca_extfiles_path: extfiles
+ca_subject_keys_path: subject_keys
+ca_filename: ca
+ca_privatekey_path: "{{ ca_private_path }}/{{ ca_filename }}.key"
+ca_csr_path: "{{ ca_requests_path }}/{{ ca_filename }}.csr"
+ca_certificate_path: "{{ ca_certs_path }}/{{ ca_filename }}.crt"
+
+# root CA names
+ca_root_privatekey_path: "{{ ca_private_path }}/rootCA.key"
+ca_root_csr_path: "{{ ca_requests_path }}/rootCA.csr"
+ca_root_certificate_path: "{{ ca_certs_path }}/rootCA.crt"
+ca_root_common_name: "{{ ca_common_name }} root CA"
+
+#
+ca_crl_params: >
+  -config {{ ca_openssl_config_file }} -key {{ ca_passphrase }}
+  -gencrl -out {{ ca_certs_path }}/crl.pem
+

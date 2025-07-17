@@ -1,0 +1,65 @@
+---
+
+#- name: generate_ca_certs | Set root CA path
+#  ansible.builtin.set_fact:
+#    ca_root_path: "{{ ca_path }}/rootCA"
+
+- name: generate_ca_certs | Generate root ca certificate signing request
+  community.crypto.openssl_csr:
+    path: "{{ ca_root_path }}/{{ ca_root_csr_path }}"
+    privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
+    privatekey_passphrase: "{{ ca_passphrase }}"
+    common_name: "{{ ca_root_common_name }}"
+    country_name: "{{ ca_country_name | default(omit) }}"
+    email_address: "{{ ca_email_address | default(omit) }}"
+    organization_name: "{{ ca_organization_name | default(omit) }}"
+    organizational_unit_name: "{{ ca_organizational_unit_name | default(omit) }}"
+    state_or_province_name: "{{ ca_state_or_province_name | default(omit) }}"
+    use_common_name_for_san: false
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+
+- name: generate_ca_certs | Generate root ca certificate
+  community.crypto.x509_certificate:
+    provider: "selfsigned"
+    privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
+    privatekey_passphrase: "{{ ca_passphrase }}"
+    path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
+    csr_path: "{{ ca_root_path }}/{{ ca_root_csr_path }}"
+    selfsigned_not_after: "+3650d"
+  
+- name: generate_ca_certs | Generate ca certificate signing request
+  community.crypto.openssl_csr:
+    path: "{{ ca_root_path }}/{{ ca_csr_path }}"
+    privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
+    privatekey_passphrase: "{{ ca_passphrase }}"
+    common_name: "{{ ca_common_name }}"
+    country_name: "{{ ca_country_name | default(omit) }}"
+    email_address: "{{ ca_email_address | default(omit) }}"
+    organization_name: "{{ ca_organization_name | default(omit) }}"
+    organizational_unit_name: "{{ ca_organizational_unit_name | default(omit) }}"
+    state_or_province_name: "{{ ca_state_or_province_name | default(omit) }}"
+    use_common_name_for_san: false
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+    
+- name: generate_ca_certs | Generate ca certificate
+  community.crypto.x509_certificate:
+    provider: "ownca"
+    privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
+    privatekey_passphrase: "{{ ca_passphrase }}"
+    path: "{{ ca_root_path }}/{{ ca_certificate_path }}"
+    csr_path: "{{ ca_root_path }}/{{ ca_csr_path }}"
+    ownca_not_after: "+3650d"
+    ownca_path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
+    ownca_privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
+    ownca_privatekey_passphrase: "{{ ca_passphrase }}"
+    

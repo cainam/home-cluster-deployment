@@ -1,0 +1,34 @@
+# processes recursively a given folder and templates all files from source to destination    
+# variables:
+# - dir_var: return parameter with output directory
+# - template_source_dir
+# - destination_dir (if missing, empty) it will be set
+
+- name: "{{ title | default('') }} destination_dir for processed templates"
+  tempfile:
+    path: "{{ remote_temp }}"
+    state: directory
+    suffix: "-build-image"
+  register: temp_dir
+  when: destination_dir is not defined or destination_dir == ""
+  
+- set_fact:
+    templates_dirs:  "{{ lookup('pipe', '[ ! -d \"'+ template_source_dir +'\" ] || find \"'+ template_source_dir +'\"   -type d').split('\n')|reject('match', '^$')  }}"
+    templates_files: "{{ lookup('pipe', '[ ! -d \"'+ template_source_dir +'\" ] || find \"'+ template_source_dir +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+    "{{ dir_var }}": "{{ temp_dir.path | default('destination_dir') }}"
+    dest_dir: "{{ temp_dir.path | default('destination_dir') }}"
+    
+- name: "{{ title | default('') }} ensure destination directory exists for templates"
+  file:
+    path: "{{ dest_dir }}{{ item | replace (template_source_dir,'') }}"
+    recurse: true
+    state: directory
+  loop: "{{ templates_dirs }}"
+
+- name: "{{ title | default('') }} create files from templates"
+  template:
+    src: "{{ item }}"
+    dest: "{{ dest_dir }}/{{ item | replace( template_source_dir , '') }}"
+  loop: "{{ templates_files }}"
+
+  

@@ -1,0 +1,89 @@
+# handles certificate management
+# input parameter:
+# - cert_var
+# - key_var
+# - caBundle_var
+
+- name: Import assert.yml
+  ansible.builtin.import_tasks:
+    file: assert.yml
+  run_once: true
+  delegate_to: localhost
+
+- name: Create root ca
+  when:
+    - ca_init
+    - ca_own_root
+  block:
+    - name: Set path for root CA
+      ansible.builtin.set_fact:
+        ca_path: "{{ ca_openssl_path }}/{{ ca_common_name }}/rootCA"
+        # seems it is not used, maybe vars via lazy var replacement        ca_filename: rootCA
+
+    - name: Init root CA
+      ansible.builtin.include_tasks:
+        file: init_ca.yml
+
+- name: Set path for CA
+  ansible.builtin.set_fact:
+    ca_path:      "{{ ca_openssl_path }}/{{ ca_common_name }}"
+    ca_root_path: "{{ ca_openssl_path }}/{{ ca_common_name }}/rootCA"
+    # seems it is not used, maybe vars via lazy var replacement    ca_filename: ca
+
+- name: Create ca
+  when:
+    - ca_init
+  block:
+    - name: Init CA
+      ansible.builtin.include_tasks:
+        file: init_ca.yml
+
+    - name: Generate ca certificates
+      ansible.builtin.include_tasks:
+        file: generate_ca_certs.yml
+      when:
+        - ca_own_root
+      
+- name: main | Save root ca certificate
+  ansible.builtin.slurp:
+    src: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
+  register: _cacert_root
+
+- name: main | Save ca certificate
+  ansible.builtin.slurp:
+    src: "{{ ca_root_path }}/{{ ca_certificate_path }}"
+  register: _cacert
+
+- name: main | save caBundle var
+  set_fact:
+    "{{ caBundle_var }}": "{{ (_cacert.content | b64decode ~ _cacert_root.content | b64decode) | b64encode }}"
+  when: caBundle_var is defined
+
+- name: main | Create ca chain
+  ansible.builtin.copy:
+    content: "{{ _cacert.content| b64decode }}{{ _cacert_root.content| b64decode }}"
+    dest: "{{ ca_path }}/{{ ca_certificate_path }}"
+    mode: "0644"
+  when: ca_init and ca_own_root
+
+- name: Ensure publication location exists
+  ansible.builtin.file:
+    path: "{{ ca_publication_location }}"
+    state: directory
+    mode: "755"
+    owner: root
+    group: root
+  when:
+    - ca_publication_location is defined
+
+- name: Handle requests
+  vars: 
+    ca_root_path: "{{ ca_path }}/rootCA"
+  ansible.builtin.include_tasks:
+    file: requests.yml
+  loop: "{{ ca_requests }}"
+  loop_control:
+    loop_var: request
+    label: "{{ request.name | default(request) }}"
+  when:
+    - ca_requests is defined

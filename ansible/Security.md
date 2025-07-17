@@ -6,6 +6,9 @@ https://dev.to/thenjdevopsguy/implementing-kubernetes-pod-security-standards-4ac
 
 Kyvero: hm, nice, but too heavy, better to code directly for the need
 
+query audit violations of PSA from audit.log: cat /var/log/kubernetes/audit.log | jq 'select(.annotations."pod-security.kubernetes.io/audit-violations" != null)'
+
+
 Order of admission validation and webhooks:
 1. mutate webhook
 2. PSA

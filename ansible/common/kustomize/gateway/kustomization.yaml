@@ -1,0 +1,9 @@
+resources:
+- Deployment.yaml
+- HorizontalPodAutoscaler.yaml
+- RoleBinding.yaml
+- Role.yaml
+- ServiceAccount.yaml
+- Service.yaml
+  
+namespace: {{ kustom.namespace }}

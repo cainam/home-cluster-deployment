@@ -31,4 +31,3 @@ webhooks:
         values:
         - kube-system
         - kubext
-        - auth
