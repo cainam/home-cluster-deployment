@@ -11,7 +11,8 @@ exec 1>> /var/log/${my_name}.log
 
 
 . /usr/local/bin/set_env.sh 
-cd /data/mine/git/ansible/
+export ANSIBLE_HOME=/data/mine/git/ansible
+cd ${ANSIBLE_HOME}
 
 procs=$(pgrep -c -f "$0")
 if [ $procs -gt 1 ]; then
@@ -23,7 +24,10 @@ fi
 
 logger "starting $my_name"
 
-eval $my_ansible /data/mine/git/ansible/site.yml --tags=gentoo,emerge
-eval $my_ansible /data/mine/git/ansible/site.yml --tags=deploy --extra-vars limit_application=infopage
+ansible-galaxy role  install -r requirements.yaml
+
+eval $my_ansible ${ANSIBLE_HOME}/site.yml --tags=gentoo,emerge
+
+eval $my_ansible ${ANSIBLE_HOME}/site.yml --tags=deploy --extra-vars limit_application=infopage
 
 logger "finished $my_name"
