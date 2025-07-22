@@ -51,10 +51,8 @@ applications:
         svcPort: 4444
         svcName: hydra-public
         prefix: /hydra
-    hydra-config: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true
-      git: "{{ own_git_url }}"
-      subdir: charts/hydra-config
-      helm_options: --set operator.image="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'auth-operator' ) | map(attribute='section') | first }}/auth-operator" --set operator.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'auth-operator' ) | map(attribute='tag') | first }}" --set redirect_url="https://{{base_domain }}{{ oauth2_path }}/callback https://{{ base_domain_ext }}:44354{{ oauth2_path }}/callback" --set-json 'env=[{"name":"PYTHONPATH","value":"/app/backend/:/py_env/lib/python3.12/site-packages/"},{"name":"PATH","value":"/py_env/bin:/bin:/usr/bin"}]'
+    auth-operator: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true or =memory
+      deployment_type: kustomize
       images:
       - auth-operator
       storage:
@@ -120,7 +118,7 @@ applications:
     home-assistant:
       deployment_type: kustomize
       kustom:
-        runAsGroup: "{% raw %} {{ applicationSecurity[application.key].runAsGroup}}{% endraw %}"
+        runAsGroup: "{% raw %}{{ applicationSecurity[application.key].runAsGroup}}{% endraw %}"
       images:
       - home-assistant
       storage:

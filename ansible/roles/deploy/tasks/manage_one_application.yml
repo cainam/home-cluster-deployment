@@ -126,8 +126,8 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': namespace.key,
          'name': application.key, 
-         'storage': application.value.storage | default([]), 
-         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+(software[application.key].version|default('latest')) )
+         'storage': application.value.storage | default({}), 
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+(software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first|string | default('latest')) ))
          }) }}"
   - name: "{{ name_prefix }} kustomize"
     vars:

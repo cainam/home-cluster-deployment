@@ -139,14 +139,12 @@ TODO:
 - helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
-- consider helm_options for build (to have tags considered or: make new section in yaml to consider both)
 - configure tempo in kiali
 - install grafana
 - import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
-- start keepalived after glusterd is up
 - ssh keys and authorized_keys management in playbook
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on gateway
@@ -155,7 +153,14 @@ TODO:
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
 - kubler: implement build-tests to check if image is usable
-- kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?)
+- kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
+  - download zulu21.44.17-ca-jdk21.0.8-linux_musl_aarch64.tar.gz (important: musl or static libs!)
+  - download bazel*dist.zip and extract
+  - emerge app-arch/zip
+  - patch bazel source with https://github.com/bazelbuild/bazel/releases/download/8.3.1/bazel-8.3.1-dist.zip
+  - env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
+
+
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
 - images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"

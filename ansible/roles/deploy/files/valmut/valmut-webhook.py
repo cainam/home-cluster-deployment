@@ -318,8 +318,8 @@ def process_requested_object(req_object, mutate, exemptions=None):
             else:
                 messages.append(f"- Container '{c_name}' adds capabilities => violated, creation exempted")
         elif len(set_caps) != 0:
-            if mutate:
-                    patch_ops.append({"op": "replace", "path": caps_path+"/add", "value": set_caps })
+        # elif mutate: # enforce add: [] to hmake 
+            patch_ops.append({"op": "replace", "path": caps_path+"/add", "value": set_caps })
 
         # readOnlyRootFilesystem
         readOnlyRootFilesystem = sc.get('readOnlyRootFilesystem')
