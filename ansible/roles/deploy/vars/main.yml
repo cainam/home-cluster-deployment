@@ -61,22 +61,11 @@ applications:
         type: local_folder
         config: true
       network: true
-    idpx:
-      git: "{{ own_git_url }}"
-      subdir: charts/idp
-      git_to_local_params: --fix_source=.image.repository= --fix_source=.image.tag=
-      helm_options: >-
-        --set image.repository=auth/idp --set image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'idp' ) | map(attribute='tag')|first}}"
-        --set hydraAdminUrl=http://hydra-admin.auth:4445 --set hydraPublicUrl=http://hydra-public.auth:4444 --set baseUrl=/idp/ --set mockTlsTermination=noX --set username="{{ auth.user }}" --set password="{{ auth.pass }}" --set mount_path=/x
-      images:
-      - idp
-      network: true
     idp:
       deployment_type: kustomize
       images:
       - idp
       network: true
-
     oauth2-proxy:
       git: https://github.com/oauth2-proxy/manifests.git
       subdir: helm/oauth2-proxy

@@ -167,3 +167,6 @@ TODO:
 - PSA: turn to restricted
 - PSA: remove exemption for home
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
+- github pages: helm vs. kustomize
+- github pages: bazel build
+- lifeness and readiness probes: generate from application config
