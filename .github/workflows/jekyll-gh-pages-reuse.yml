@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - master
+    paths:
+    - 'docs/**'
+    - '_data/**'
+    - .github/workflows/**'
   workflow_dispatch:
 jobs:
   call_reusable_build:
