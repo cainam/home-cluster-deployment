@@ -30,6 +30,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Download Site Inventory
+        run: |
+          mkdir -p _data
+          curl -o _data/site_inventory.yml https://raw.githubusercontent.com/cainam/cainam.github.io/main/_data/site_inventory.yml
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
