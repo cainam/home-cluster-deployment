@@ -34,6 +34,7 @@ jobs:
         run: |
           mkdir -p _data
           curl -o _data/site_inventory.yml https://raw.githubusercontent.com/cainam/cainam.github.io/main/_data/site_inventory.yml
+          cat _data/site_inventory.yml
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
