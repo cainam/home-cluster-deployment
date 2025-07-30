@@ -20,5 +20,5 @@ jobs:
       inherit # This passes all secrets from repo1 that exist in repo2's workflow_call definition
 
   # You can have other jobs that depend on the output of the called workflow
-  deploy_job:
-    needs: call_reusable_build # This job runs after the reusable workflow completes
+  #deploy_job:
+  #  needs: call_reusable_build # This job runs after the reusable workflow completes
