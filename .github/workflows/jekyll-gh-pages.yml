@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Download Site Inventory
         run: |
-          mkdir -p _data
+          mkdir -p _data/site_inventory.yml_data
           curl -o docs/_data/site_inventory.yml https://raw.githubusercontent.com/cainam/cainam.github.io/main/_data/site_inventory.yml
           cat docs/_data/site_inventory.yml
       - name: Setup Pages
