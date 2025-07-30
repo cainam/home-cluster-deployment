@@ -9,6 +9,7 @@ on:
     - 'docs/**'
     - '_data/**'
     - '.github/workflows/**'
+    
   workflow_dispatch:
 jobs:
   call_reusable_build:
