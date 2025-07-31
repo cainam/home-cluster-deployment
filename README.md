@@ -4,6 +4,9 @@
 - simple status page using FastAPI which async calls to fetch information from the systems
 - EnvoyFilter with Lua script to modify authentication responses - really cool!
 
+# usage
+some additional files are required for handling sensitive information (like passwords), these are to be stored at $local_conf (files: secret)
+
 Challenges:
 ### recursion with playbooks
 challenge: images are build using playbooks, but they have downstream dependencies and within the build another build has to be triggered first, but there is no task level scope of variables in Ansible
