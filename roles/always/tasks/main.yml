@@ -15,6 +15,11 @@
       msg: "gluster_hosts: {{ gluster_hosts }}\nreplicas: {{ replicas }}"
   - name: "include secrets"
     include_vars: "{{ local_only }}/secrets"
+    
+  - name: install additional roles required
+    ansible.builtin.command: ansible-galaxy install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
+    delegate_to: localhost
+
   run_once: true
 
 - block:
