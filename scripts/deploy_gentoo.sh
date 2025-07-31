@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# random delay
-#sleep $(($RANDOM/100))
-
 my_name=$(basename $0)
 run_file="/var/run/${my_name}"
 
@@ -11,8 +8,9 @@ exec 1>> /var/log/${my_name}.log
 
 
 . /usr/local/bin/set_env.sh 
-export ANSIBLE_DIR=/data/mine/git/ansible
+export ANSIBLE_DIR=/data/mine/home-cluster-deployment
 cd ${ANSIBLE_DIR}
+git pull
 
 procs=$(pgrep -c -f "$0")
 if [ $procs -gt 1 ]; then
