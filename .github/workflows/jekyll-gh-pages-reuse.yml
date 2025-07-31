@@ -1,0 +1,29 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+    - 'docs/**'
+    - '_data/**'
+    - '.github/workflows/**'
+    
+  workflow_dispatch:
+jobs:
+  call_reusable_build:
+    # Reference the reusable workflow in repo2
+    uses:  cainam/cainam.github.io/.github/workflows/jekyll-gh-pages.yml@main
+#    with:
+#      source_directory: my-app-code # Pass an input
+#      build_command: npm install && npm run build # Pass another input
+    secrets:
+      # If your reusable workflow needs secrets, you can pass them from the caller
+      # They can be inherited (secrets: inherit) or explicitly named
+      # my_custom_secret: ${{ secrets.MY_REPO1_SECRET }}
+      inherit # This passes all secrets from repo1 that exist in repo2's workflow_call definition
+
+  # You can have other jobs that depend on the output of the called workflow
+  #deploy_job:
+  #  needs: call_reusable_build # This job runs after the reusable workflow completes
