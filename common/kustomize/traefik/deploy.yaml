@@ -1,0 +1,44 @@
+# kustomize/base/traefik-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 2 # Recommended for high availability
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      containers:
+        - name: traefik
+          image: traefik:v3.0 # Use a specific version for stability
+          ports:
+            - name: web
+              containerPort: 80
+            - name: websecure
+              containerPort: 443
+            - name: traefik
+              containerPort: 8080 # For the dashboard/API
+            - name: metrics
+              containerPort: 8082 # For Prometheus metrics
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: "500m"
+              memory: "500Mi"
+          # Volume mounts for ACME storage and access logs
+          volumeMounts:
+            - name: acme-log-volume
+              mountPath: /var/log/traefik
+      volumes:
+        - name: acme-log-volume
+          emptyDir: {} # Or a persistent volume for logs if needed

@@ -1,5 +1,0 @@
-FROM ${NAMESPACE}/{{ kubler.default_builder }}
-LABEL maintainer="${MAINTAINER}"
-
-CMD ["/bin/bash"]
-

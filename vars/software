@@ -1,0 +1,113 @@
+software:
+  traefik:
+    version: v3.4.5
+    installed:
+      pattern: "traefik"
+    latest:
+      type: github
+      params:
+        repo: traefik/traefik
+  istio:
+    version: 1.25.1
+    installed:
+      pattern: "istio"
+    latest:
+      type: github
+      params:
+        repo: istio/istio
+  oauth2_proxy:
+    version: v7.10.0
+    installed:
+      pattern: "oauth2-proxy:"
+    latest:
+      type: github
+      params:
+        repo: oauth2-proxy/oauth2-proxy
+  zigbee2mqtt:
+    version: 2.5.1
+    latest:
+      type: github
+      params:
+        repo: koenkk/zigbee2mqtt
+  mosquitto:
+    version: v2.0.22
+    max_entries: 2
+    latest:
+      type: github-tags
+      params:
+        repo: eclipse-mosquitto/mosquitto
+        arch: arm64
+  home-assistant:
+    version: "2025.7.2"
+    installed:
+      pattern: "home-assistant:"
+    latest:
+      type: dockerhub
+      params:
+        repo: homeassistant/home-assistant
+        arch: arm64
+  kiali:
+    version: v1.89.0
+    latest:
+      type: quay
+      params:
+        repo: kiali/kiali
+  helm:
+    version: 3.17.2
+    latest:
+      type: gentoo
+      params:
+        repo: app-admin/helm
+  registry:
+    version: v3.0.0
+    latest:
+      type: dockerhub
+      params:
+        repo: library/registry
+        arch: arm64
+  postgresql:
+    version: 17.5
+    latest:
+      type: gentoo
+      params:
+        repo: dev-db/postgresql
+  descheduler:
+    version: "v0.33.0"
+    latest:
+      type: github
+      params: 
+        repo: kubernetes-sigs/descheduler
+  hydra:
+    version: "v2.3.0"
+    latest:
+      type: github
+      params:
+        repo: ory/hydra
+  tempo:
+    version: 2.4.0
+    latest:
+      type: dockerhub
+      params:
+        repo: grafana/tempo-query
+        arch: arm64
+  tempo_query:
+    version: 2.4.0
+    latest:
+      type: dockerhub
+      params:
+        repo: grafana/tempo-query
+        arch: arm64
+  dashboard:
+    version: kubernetes-dashboard-7.5.0
+    latest:
+      type: github
+      params:
+        repo: kubernetes/dashboard
+  longhorn:
+    version: v1.9.1
+    installed:
+      pattern: "longhorn-ui:"
+    latest:
+      type: github
+      params:
+        repo: longhorn/longhorn

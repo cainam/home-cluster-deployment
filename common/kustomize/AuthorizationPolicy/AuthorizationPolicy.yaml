@@ -1,0 +1,37 @@
+apiVersion: v1
+items:
+- apiVersion: security.istio.io/v1
+  kind: AuthorizationPolicy
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: istiod-config
+      meta.helm.sh/release-namespace: istio-system
+    creationTimestamp: "2024-11-28T19:19:56Z"
+    generation: 7
+    labels:
+      app.kubernetes.io/managed-by: Helm
+    name: ext-authz
+    namespace: istio-system
+    resourceVersion: "91349137"
+    uid: 02b2b7ea-4a9c-4097-bc74-ee8da25f8584
+  spec:
+    action: CUSTOM
+    provider:
+      name: oauth2-proxy
+    rules:
+    - to:
+      - operation:
+          hosts:
+          - my-lb.adm13
+          - '*.my-lb.adm13'
+          - adm13.dnshome.de:*
+          notPaths:
+          - /oauth2-hydra/callback
+          - /hydra/*
+          - /idp/*
+    selector:
+      matchLabels:
+        istio: gateway
+kind: List
+metadata:
+  resourceVersion: ""

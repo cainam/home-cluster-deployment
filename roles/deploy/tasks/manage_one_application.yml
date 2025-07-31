@@ -1,0 +1,178 @@
+- name: set app fact
+  set_fact:
+    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
+    app: "{{ application.key }}"
+        
+#- block: # this is a run_once playbook, but local storage configuration has to be done on all nodes
+#  - name: app:{{ app }} storage
+#    include_tasks: common/storage_brick.yml
+#    when: application.value.storage is defined #|| storage is defined
+#    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+#  when: application.value.storage is defined
+
+#- block:
+#  - name: "{{ name_prefix }} storage"
+#    include_tasks: common/storage.yml
+#    with_items: "{{ application.value.storage }}"
+#    loop_control:
+#      loop_var: storage
+#  when: application.value.storage is defined
+
+- name: set application vars as facts
+  set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ application.value.vars | dict2items }}"
+  when: application.value.vars is defined  
+    
+- block:
+  - block:
+    - name: "{{ name_prefix }} handle additional images"
+      vars:
+        limit_images: "{{ application.value.images }}"
+        default_section: "{{ namespace.key }}"
+      include_role:
+        name: gentoo-image-builder
+    when: application.value.images is defined
+
+  - block:
+    - name: "{{ name_prefix }} build helm"
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
+        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
+        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
+        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
+        {{ application.value.git_to_local_params | default("") }} 
+      register: build_out
+  
+    - name: "{{ name_prefix }} build output"
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ build_out  | dict2items }}"
+  
+    - name: "{{ name_prefix }} helm repo refresh"
+      shell: |
+        . set_env.sh "{{ namespace.key }}"
+        helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
+        helm repo index "${helm_repo_dir}" --url "${helm_url}"
+        helm repo update
+    when: (application.value.deployment_type| default("helm")) == "helm"
+  when: "'build' in ansible_run_tags" 
+    
+- name: "{{ name_prefix }} files"
+  include_tasks: files.yml
+  loop: "{{ application.value.files | dict2items }}"
+  loop_control:
+    loop_var: file
+  when: application.value.files is defined
+
+- block:
+  - name: "{{ name_prefix }} create patch from mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
+    template:
+      src: "mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
+      dest: "/tmp/hook-{{ item.key }}.yaml"
+    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
+
+  - name: "{{ name_prefix }} apply patch "
+    shell: |
+      kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ item.key }}.yaml"
+    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
+  when: application.value.network.proxy_sidecar is defined
+
+- block:
+  - name: "{{ name_prefix }} install or upgrade"
+    shell: |
+      . set_env.sh "{{ namespace.key }}"
+      set -x
+       helm upgrade --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
+       {{ applications[namespace.key][application.key].helm_options | default('') }} \
+       {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
+    register: out
+    when: "application.value.install | default(true)"
+  when: (application.value.deployment_type| default("helm")) == "helm"
+
+- block:
+  - name: "{{ name_prefix }} certificates for internal service"
+    vars:
+      cert_var: "reg_cert"
+      key_var: "reg_key"
+      caBundle_var: "caBundle"
+      ca_init: false
+      ca_openssl_path: /data/mine/certs
+      ca_common_name: FreeAsABird
+      ca_country_name: XX
+      ca_passphrase: "{{ cert_pass }}"
+      ca_organization_name: FreeAsABird
+      ca_organizational_unit_name: Anarchists
+      ca_state_or_province_name: Some-State
+      ca_email_address: a.b@c.de
+      ca_requests:
+      - name: "{{ application.key }}.{{ namespace.key }}.svc"
+        alt_names: 
+        - "{{ application.key }}.{{ namespace.key }}.svc"
+    include_role: 
+      name: certificates
+    when: "'flags' in application.value and 'certs' in application.value.flags"
+
+  - name: "{{ title }} - run helper to process kustomize templates"
+    include_role:
+      name: shared_helper
+      tasks_from: template_directory.yaml
+    vars:
+      dir_var: build_dir
+      template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
+      kustom: "{{ application.value.kustom | default({}) | combine({
+         'namespace': namespace.key,
+         'name': application.key, 
+         'storage': application.value.storage | default({}), 
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+(software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
+         }) }}"
+  - name: "{{ name_prefix }} kustomize"
+    vars:
+      kustom: "{{ kustome | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
+    shell: |
+      kubectl apply -k {{ build_dir }}
+  when: (application.value.deployment_type| default("helm")) == "kustomize"
+  run_once: true
+  
+- block:
+  - name: "{{ name_prefix }} manage application requirements"
+    include_tasks: manage_application_requirements.yaml
+    with_items: "{{ application.value.requires }}"
+    loop_control:
+      loop_var: requires
+  when: application.value.requires is defined
+
+- name: "{{ name_prefix }} undef application vars again"
+  set_fact:
+    "{{ item.key }}": !!null # "{{ undef() }}" doesn't work for facts, so nulling it instead
+  loop: "{{ application.value.vars | dict2items }}"
+  when: application.value.vars is defined  
+
+- name: "{{ name_prefix }} debug before vs preparation"
+  debug:
+    msg: "network defined?: {{ application.value.network | default('no') }} and install?: {{(application.value.install | default(true))}}"
+  loop: "{{ out  | dict2items }}"
+  
+- name: "{{ name_prefix }} record application with gateway for VirtualService"
+  set_fact:
+    gateways: "{{ gateways | combine(
+      {application.value.network.gateway | default(default_gateway): 
+        {'VirtualService': [{
+          'namespace': namespace.key,
+          'application': application.key,
+          'network': application.value.network}] } }, list_merge='append', recursive=True) }}"
+  when: application.value.network is defined and (application.value.install | default(true))
+
+- name: "{{ name_prefix }} debug gateways"
+  debug:
+    msg: "gateways: {{ gateways | to_yaml}}"
+
+- block:
+  - name: "{{ name_prefix }} affinity - label node"
+    shell: |
+      kubectl label node {{ application.value.affinity }} {{ application.key }}={{ application.key }}
+  when: application.value.affinity is defined
+

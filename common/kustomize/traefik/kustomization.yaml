@@ -1,0 +1,86 @@
+# kustomize/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: traefik # All resources will be deployed into the 'traefik' namespace
+
+resources:
+#  - namespace.yaml
+  - rbac.yaml
+  - deploy.yaml
+  - service.yaml
+  - dashboard-ingressroute.yaml
+ # - traefik-acme-pvc.yaml # Persistent storage for Let's Encrypt certificates
+
+# Define the Traefik IngressClass, which is referenced by Ingress/IngressRoute resources
+# This allows you to have multiple ingress controllers in your cluster.
+patches:
+- target:
+    kind: Deployment
+    name: traefik
+  patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.web.http.redirections.entrypoint.to=websecure
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.web.http.redirections.entrypoint.scheme=https
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.websecure.http.tls=true
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.websecure.http.tls.certresolver=myresolver
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --certificatesresolvers.myresolver.acme.email=your-email@example.com # !! IMPORTANT: Replace with your actual email
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --certificatesresolvers.myresolver.acme.storage=/data/acme.json
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --providers.kubernetescrd # Enable Traefik's Custom Resource Definition provider
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --api.dashboard=true # Enable the Traefik dashboard
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --api.insecure=false # Dashboard should not be insecure in production
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --log.level=INFO # Adjust log level as needed
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --accesslog=true # Enable access logs
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --accesslog.filepath=/var/log/traefik/access.log
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --accesslog.format=json
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --metrics.prometheus=true
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --metrics.prometheus.entrypoint=metrics
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.metrics.address=:8082 # Metrics endpoint
+    - op: add
+      path: /spec/template/spec/containers/0/args/-
+      value: --entrypoints.traefik.address=:8080 # API/Dashboard endpoint
+    - op: add
+      path: /spec/template/spec/volumes/-
+      value:
+        name: acme-storage
+        persistentVolumeClaim:
+          claimName: traefik-acme-pvc
+    - op: add
+      path: /spec/template/spec/containers/0/volumeMounts/-
+      value:
+        name: acme-storage
+        mountPath: /data
