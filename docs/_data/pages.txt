@@ -1,2 +1,2 @@
-test
+helm-vs-kustomize
 index
