@@ -159,15 +159,15 @@ TODO:
 - kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
-- images_processed not considered for recursion, test if when for loop_var solves this already  '   loop_control:         loop_var: "{{ 'loop_'~t.name }}"
 - PSA: turn to restricted
 - PSA: remove exemption for home
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
-- github pages: helm vs. kustomize
 - github pages: bazel build
 - lifeness and readiness probes: generate from application config
-- image tag: default to   tag: "{{ software.[name].version }}"
 - create namespaces via kustomize
+- keepalived.conf: generate file with external IPs, not with statically defined ones
 - kubler: change kubler with root.tar to  multi-image build: requires=[image1, image2], run multi-stage builds for each stage individually with --target to store the builder images
 - kubler: nodejs - build with corepack use flag: (like /etc/portage/package.use => "net-libs/nodejs corepack")
 - kustomize: authorizationpolicy (already in common/kustomize/Auth... ) 
+- traefik: manage certificate during deployment
+- security: generate random ports (e.g. for traefik during each deployment) and mention it for security

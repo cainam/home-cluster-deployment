@@ -1,8 +1,11 @@
 ---
 applications:
-  ingress:
+  gateway:
     traefik:
       deployment_type: kustomize
+      kustom:
+        ports:
+          traefik: 13579
       images:
       - traefik
       
@@ -39,7 +42,7 @@ applications:
       helm_options_for_presistent_storage: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true 
       helm_options: >-
         --set hydra.config.dsn=memory 
-        --set image.repository=auth/hydra --set image.tag="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'hydra' ) | map(attribute='tag')|first}}"
+        --set image.repository=auth/hydra --set image.tag="{{ software.hydra.version }}"
       remove_dependencies: hydra-maester
       requires:
       - type: default
@@ -77,7 +80,7 @@ applications:
       subdir: helm/oauth2-proxy
       git_to_local_params:  --fix_source=.image.repository= --fix_source=.image.tag=""
       helm_options: >-
-        --set proxyVarsAsSecrets=false --set image.tag="{{ software.oauth2_proxy.version }}"
+        --set proxyVarsAsSecrets=false --set image.tag="{{ software['oauth2-proxy'].version }}"
         --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'oauth2-proxy' ) | map(attribute='section') | first }}/oauth2-proxy"
       images:
       - oauth2-proxy

@@ -1,4 +1,3 @@
-# kustomize/base/traefik-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -20,7 +19,7 @@ spec:
       targetPort: websecure
     - protocol: TCP
       name: traefik-api
-      port: 8080
+      port: {{ kustom.ports.traefik }}
       targetPort: traefik # For the dashboard/API
     - protocol: TCP
       name: metrics

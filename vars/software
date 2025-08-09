@@ -15,7 +15,7 @@ software:
       type: github
       params:
         repo: istio/istio
-  oauth2_proxy:
+  oauth2-proxy:
     version: v7.10.0
     installed:
       pattern: "oauth2-proxy:"

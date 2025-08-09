@@ -21,7 +21,7 @@
     - gentoo
     - images-only
     loop:
-    - vars/kubler
+    - vars/build-images.yaml
     - vars/software
     - vars/images
     run_once: true

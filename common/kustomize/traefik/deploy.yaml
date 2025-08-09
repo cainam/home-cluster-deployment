@@ -6,7 +6,7 @@ metadata:
   labels:
     app: traefik
 spec:
-  replicas: 2 # Recommended for high availability
+  replicas: 1
   selector:
     matchLabels:
       app: traefik
@@ -15,17 +15,30 @@ spec:
       labels:
         app: traefik
     spec:
-      serviceAccountName: traefik
+      serviceAccountName: traefik-ingress-controller
       containers:
         - name: traefik
-          image: traefik:v3.0 # Use a specific version for stability
+          image: {{ kustom.image }}
+          command: ['/bin/traefik']
+          args:
+            - "--api.dashboard=true"
+            - --ping=true
+            - --ping.entrypoint=traefik
+            - "--providers.kubernetesingress"
+            - "--providers.kubernetesingress.ingressclass=traefik"
+            - "--providers.kubernetesingress.labelselector=app=my-app-ingress"
+            - "--providers.kubernetescrd"
+            - "--entrypoints.web.address=:9980"
+            - "--entrypoints.websecure.address=:9443"
+            - "--entrypoints.traefik.address=:{{ kustom.ports.traefik }}"
+            - "--log.level=DEBUG"
           ports:
             - name: web
-              containerPort: 80
+              containerPort: 9980
             - name: websecure
-              containerPort: 443
+              containerPort: 9443
             - name: traefik
-              containerPort: 8080 # For the dashboard/API
+              containerPort: {{ kustom.ports.traefik }}
             - name: metrics
               containerPort: 8082 # For Prometheus metrics
           resources:
@@ -35,10 +48,12 @@ spec:
             limits:
               cpu: "500m"
               memory: "500Mi"
-          # Volume mounts for ACME storage and access logs
-          volumeMounts:
-            - name: acme-log-volume
-              mountPath: /var/log/traefik
-      volumes:
-        - name: acme-log-volume
-          emptyDir: {} # Or a persistent volume for logs if needed
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: {{ kustom.ports.traefik }}
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: {{ kustom.ports.traefik }}
+

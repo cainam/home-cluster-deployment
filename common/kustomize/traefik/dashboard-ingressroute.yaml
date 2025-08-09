@@ -1,5 +1,5 @@
 # kustomize/base/traefik-dashboard-ingressroute.yaml
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: traefik-dashboard
@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.your-domain.com`) && PathPrefix(`/dashboard`) # !! IMPORTANT: Replace with your actual domain for the dashboard
+    - match: Host(`traefik.my-lb.adm13`) && PathPrefix(`/traefik-board`)
       kind: Rule
       services:
         - name: api@internal # Traefik's internal API service for the dashboard
@@ -15,5 +15,6 @@ spec:
       middlewares:
         # Optional: Add basic authentication for the dashboard
         # - name: dashboard-auth@kubernetescrd # Define this middleware separately
+        - name: traefik-stripprefix
   tls:
-    certResolver: myresolver # Use the Let's Encrypt resolver
+    secretName: certs
