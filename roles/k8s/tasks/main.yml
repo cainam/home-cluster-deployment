@@ -157,7 +157,6 @@
     template:
       src: coredns.cm.yaml
       dest: /tmp/coredns.cm.yaml
-    #with_items: "{{ gateways }}"
 
   - name: additional DNS entries and external CoreDNS IP
     shell: |

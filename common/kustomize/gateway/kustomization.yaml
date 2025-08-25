@@ -1,3 +1,4 @@
+namespace: {{ kustom.namespace }}
 resources:
 - Deployment.yaml
 - HorizontalPodAutoscaler.yaml
@@ -5,5 +6,27 @@ resources:
 - Role.yaml
 - ServiceAccount.yaml
 - Service.yaml
+- gateway.yaml
   
-namespace: {{ kustom.namespace }}
+secretGenerator:
+- name: tls-{{ kustom.name }}
+  files:
+  - tls.crt=tls.crt
+  - tls.key=tls.key
+  type: "kubernetes.io/tls"
+generatorOptions:
+  disableNameSuffixHash: true
+
+
+replacements:
+  - source:
+      kind: Secret
+      name: tls-{{ kustom.name }}
+      fieldPath: metadata.name     # We want the *generated name* of the Secret (with hash)
+    targets:
+      - select:
+          kind: Gateway
+          name: {{ kustom.name }}
+        fieldPaths:
+        - spec.servers.0.tls.credentialName
+

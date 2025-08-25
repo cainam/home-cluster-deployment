@@ -25,7 +25,7 @@ replacements:
     targets:
       - select:
           kind: Deployment
-          name: valmut
+          name: {{ kustom.name }}
         # Path to the secretName field in the volume definition
         fieldPaths:
         - spec.template.spec.volumes.[name=tls-certs-volume].secret.secretName

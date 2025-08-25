@@ -26,21 +26,32 @@ certs:
   dest: /shared/helm/certs
 
 net:
+  domain_external: adm13.dnshome.de
   open_access:
   - /oauth2-hydra/callback
   - /hydra/*
   - /idp/*
+  routes:
+  - domain: my-lb.adm13
+    gateway: istio
+    external_port: 44354
+    endpointIP: 192.168.4.100
+  - domain: traefik.my-lb.adm13
+    gateway: traefik
+    external_port: 51234
+    endpointIP: 192.168.4.106
+  - domain: ha.my-lb.adm13
+    gateway: istio
+    endpointIP: 192.168.4.101
 
 base_domain: my-lb.adm13
 oauth2_path: /oauth2-hydra
-base_domain_ext: adm13.dnshome.de
-port_ext: 44354
 
 volumes_to_exempt:
   - helm
   - registry
 
-default_gateway: gateway
+default_gateway: my-lb-adm13
 default_gateway_namespace: istio-ingress
 
 # supported storage types are longhorn, gluster and local
@@ -51,60 +62,7 @@ external_coredns_ip: 192.168.4.111
 podSubnet: 10.244.0.0/16
 
 gateway_install:
-  xgit: https://github.com/istio/istio.git
-  xsubdir: manifests/charts/gateway
-  ybranch: "{{ software.istio.version }}"
-  ychart: gateway
-  yhelm_options: --set-json podAnnotations='{"sidecar.istio.io/componentLogLevel":"misc:error,lua:info"}'
   deployment_type: kustomize
+  flags: ['certs']
   kustom:
     application: gateway
-  ports:
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: 443
-
-gateways:
-  gateway:
-    domain: "{{ base_domain }}"
-    hosts:
-    - "{{ base_domain }}"
-    - adm13.dnshome.de
-    external_ip: 192.168.4.100
-    virtualservice_inject:
-      http:
-      - name: dummy
-        directResponse:
-          status: 598
-        match:
-        - uri:
-            prefix: /dummy
-  dashboard-gw:
-    domain: "dashboard.{{ base_domain }}"
-    hosts:
-    - "dashboard.{{ base_domain }}"
-    - adm13.dnshome.de
-    external_ip: 192.168.4.105
-    virtualservice_inject:
-      http:
-      - name: dummy
-        directResponse:
-          status: 592
-        match:
-        - uri:
-            prefix: /dummy
-  ha-gw:
-    domain: "ha.{{ base_domain }}"
-    hosts:
-    - "ha.{{ base_domain }}"
-    - adm13.dnshome.de
-    external_ip: 192.168.4.101
-    virtualservice_inject:
-      http:
-      - name: dummy
-        directResponse:
-          status: 592
-        match:
-        - uri:
-            prefix: /dummy

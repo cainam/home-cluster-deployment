@@ -8,7 +8,11 @@ applications:
           traefik: 13579
       images:
       - traefik
-      
+      storage:
+      - name: traefik-plugins
+        size: 5Mi
+        type: local_folder
+        config: true
   istio-system:
     base: 
       git: https://github.com/istio/istio.git
@@ -28,7 +32,7 @@ applications:
     istiod-config:
       git: "{{ own_git_url }}"
       subdir: charts/istiod-config
-      helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ base_domain_ext }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ base_domain_ext }}:{{ port_ext }}"
+      helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ net.domain_external }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ net.domain_external }}:{{ net.routes | selectattr('gateway','equalto','istio')  | map(attribute='external_port') | first }}"
   auth:
     ory-commons:
       git: https://github.com/ory/k8s.git
@@ -84,7 +88,7 @@ applications:
         --set image.repository="{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'oauth2-proxy' ) | map(attribute='section') | first }}/oauth2-proxy"
       images:
       - oauth2-proxy
-      remove_dependencies: redis
+      remove_dependencies: redis-ha
       chart: oauth2-proxy
       files:
         values:
@@ -121,7 +125,7 @@ applications:
     home-assistant:
       deployment_type: kustomize
       kustom:
-        runAsGroup: "{% raw %}{{ applicationSecurity[application.key].runAsGroup}}{% endraw %}"
+        runAsGroup: "{{ applicationSecurity['home-assistant'].runAsGroup}}"
       images:
       - home-assistant
       storage:
@@ -129,9 +133,9 @@ applications:
         size: 100Mi
         config: true
       network:
-        prefix: 
         svcPort: 8123
-        gateway: ha-gw
+        prefix: "/"
+        domain: ha.my-lb.adm13
         old_proxy_sidecar: 
           app.kubernetes.io/instance: home-assistant
       requires:
@@ -154,12 +158,12 @@ applications:
         image: "local/fastapi:{{ images | selectattr('name', 'equalto', 'fastapi') | map(attribute='tag') | first }}"
       images:
       - fastapi
+      network: true
       storage:
       - name: infopage
         size: 5Mi
         type: local_folder
         config: true
-      network: true
     kiali-server:
       git: https://github.com/kiali/helm-charts.git
       subdir: kiali-server
@@ -181,13 +185,9 @@ applications:
       git_to_local_params: --fix_source=.metricsScraper.image= --fix_source=.metricsScraper.enabled=false --fix_source=.kong.image= --fix_source=.kong.enabled=false
       remove_dependencies: metrics-server,ingress-nginx,cert-manager,kong
       network:
-        gateway: dashboard-gw
-        xxprefix: /kubernetes-dashboard/
         prefix: /
-        xgateway: dashboard-gw
         svcPort: 8000
         svcName: kubernetes-dashboard-web
-        xxaddition: '"headers":{"request":{"add":{"x-forwarded-prefix":"/kubernetes-dashboard"}}}'
     kube-state-metrics:
       git: https://github.com/prometheus-community/helm-charts.git
       subdir: charts/kube-state-metrics

@@ -4,27 +4,6 @@
     name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
   run_once: true
 
-- block: # generate helm_options from applications for gateways 
-  - name: "{{ name_prefix }} print application.value"
-    debug:
-      msg: "{{ application.value }}"
-    when: "'debug' in ansible_run_tags"
-      
-  - name: "{{ name_prefix }} generate helm_options from applications for gateways" # from ports array
-    set_fact: 
-      applications: "{{ applications | combine(
-         {namespace.key : 
-           {application.key: 
-              {'helm_options': (applications[namespace.key][application.key].helm_options | default('--set name='~application.key))~' --set service.ports['~port_idx~'].name='~port.name~',service.ports['~port_idx~'].port='~port.port~',service.ports['~port_idx~'].protocol='~port.protocol~',service.ports['~port_idx~'].targetPort='~port.targetPort~' ' } 
-          }}, recursive=true)}}"
-    loop: "{{ application.value.ports }}"
-    loop_control:
-      loop_var: port
-      index_var: port_idx
-#  when: application.value.type is defined and application.value.type=='gateway' (25.11.24)
-  when: application.key in gateways
-  run_once: true
-
 - block:
   - name: "{{ name_prefix }} empty variable storage_new array" # don't remove this, the variable has to be purge for each iteration
     set_fact:

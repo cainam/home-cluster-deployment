@@ -11,6 +11,9 @@
     state: file
   register: tmp_file
 
+- debug:
+    var: net.routes
+
 - name: .{{ name_prefix }} copy template to tempfile
   template:
     src: "{{ file.value.file }}"

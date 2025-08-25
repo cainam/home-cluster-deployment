@@ -16,22 +16,29 @@ spec:
         app: traefik
     spec:
       serviceAccountName: traefik-ingress-controller
+      volumes:
+      - name: traefik-plugins
+        persistentVolumeClaim:
+          claimName: traefik-plugins
       containers:
         - name: traefik
           image: {{ kustom.image }}
           command: ['/bin/traefik']
           args:
-            - "--api.dashboard=true"
+            - --api.dashboard=true
             - --ping=true
             - --ping.entrypoint=traefik
-            - "--providers.kubernetesingress"
-            - "--providers.kubernetesingress.ingressclass=traefik"
-            - "--providers.kubernetesingress.labelselector=app=my-app-ingress"
-            - "--providers.kubernetescrd"
-            - "--entrypoints.web.address=:9980"
-            - "--entrypoints.websecure.address=:9443"
-            - "--entrypoints.traefik.address=:{{ kustom.ports.traefik }}"
-            - "--log.level=DEBUG"
+            - --providers.kubernetesingress
+            - --providers.kubernetesingress.ingressclass=traefik
+            #- --providers.kubernetesingress.labelselector=app=my-app-ingress
+            #- --providers.kubernetesingress.allowCrossNamespace=true
+            - --experimental.localPlugins.rewriteResponse.moduleName=traefik-plugin-rewrite-response-headers
+            - --providers.kubernetescrd
+            - --providers.kubernetescrd.allowCrossNamespace=true
+            - --entrypoints.web.address=:9980
+            - --entrypoints.websecure.address=:9443
+            - --entrypoints.traefik.address=:{{ kustom.ports.traefik }}
+            - --log.level=INFO
           ports:
             - name: web
               containerPort: 9980
@@ -56,4 +63,7 @@ spec:
             httpGet:
               path: /ping
               port: {{ kustom.ports.traefik }}
+          volumeMounts:
+          - mountPath: /plugins-local/src
+            name: traefik-plugins
 

@@ -98,6 +98,7 @@ images:
       strip  oauth2-proxy
       mkdir "${_EMERGE_ROOT}/bin"
       mv oauth2-proxy "${_EMERGE_ROOT}/bin/"
+      cd && rm -rf /oauth2-proxy /root/.??* /root/*
 
 - name: registry
   section: local
@@ -114,7 +115,7 @@ images:
       mkdir "${_EMERGE_ROOT}/bin"
       mv bin/registry "${_EMERGE_ROOT}/bin/"
       cd ..
-      rm -rf distribution
+      rm -rf distribution /root/.??* /root/*
 
 - name: nodejs
   tag: 2025.4

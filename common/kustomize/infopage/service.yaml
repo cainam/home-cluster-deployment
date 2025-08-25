@@ -6,8 +6,8 @@ metadata:
   name: {{ kustom.name }}
 spec:
   ports:
-  - name: http
-    port: 1111
+  - name: http-{{ kustom.network.svcPort }}
+    port: {{ kustom.network.svcPort }}
     protocol: TCP
     targetPort: {{ kustom.name }}
   selector:

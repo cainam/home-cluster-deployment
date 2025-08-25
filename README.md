@@ -169,5 +169,5 @@ TODO:
 - kubler: change kubler with root.tar to  multi-image build: requires=[image1, image2], run multi-stage builds for each stage individually with --target to store the builder images
 - kubler: nodejs - build with corepack use flag: (like /etc/portage/package.use => "net-libs/nodejs corepack")
 - kustomize: authorizationpolicy (already in common/kustomize/Auth... ) 
-- traefik: manage certificate during deployment
 - security: generate random ports (e.g. for traefik during each deployment) and mention it for security
+- deployment standard: revisionHistory to 3 (less replicasets)

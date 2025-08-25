@@ -79,17 +79,6 @@
       name: "{{ requires.config.database }}"
       owner: "{{ requires.config.username }}"
       
-  #- name: "{{ title_app_reqs }}set user privs"
-    #postgresql_privs:
-      #login_host: localhost
-      #port: "{{ read_port.stdout }}"
-      #login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-      #login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-      #roles: "{{ requires.config.username }}"
-      ##type: schema
-      #objs: ALL_IN_SCHEMA
-      #database: "{{ requires.config.database }}"
-      #privs: ALL     
   when: requires.type == "postgresql"
   
 - name: fail

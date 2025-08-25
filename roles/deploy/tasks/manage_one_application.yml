@@ -2,23 +2,6 @@
   set_fact:
     name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
-        
-#- block: # this is a run_once playbook, but local storage configuration has to be done on all nodes
-#  - name: app:{{ app }} storage
-#    include_tasks: common/storage_brick.yml
-#    when: application.value.storage is defined #|| storage is defined
-#    with_items: "{{ application.value.storage }}"
-#    loop_control:
-#      loop_var: storage
-#  when: application.value.storage is defined
-
-#- block:
-#  - name: "{{ name_prefix }} storage"
-#    include_tasks: common/storage.yml
-#    with_items: "{{ application.value.storage }}"
-#    loop_control:
-#      loop_var: storage
-#  when: application.value.storage is defined
 
 - name: set application vars as facts
   set_fact:
@@ -109,9 +92,12 @@
       ca_state_or_province_name: Some-State
       ca_email_address: a.b@c.de
       ca_requests:
-      - name: "{{ application.key }}.{{ namespace.key }}.svc"
+      - name: "{{ application.value.network.domain }}"
         alt_names: 
-        - "{{ application.key }}.{{ namespace.key }}.svc"
+        - "{{ application.value.network.domain }}"
+      #- name: "{{ application.key }}.{{ namespace.key }}.svc"
+      #  alt_names: 
+      #  - "{{ application.key }}.{{ namespace.key }}.svc"
     include_role: 
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
@@ -126,12 +112,14 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': namespace.key,
          'name': application.key, 
-         'storage': application.value.storage | default({}), 
-         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+(software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
+         'storage': application.value.storage | default({}),
+         'network':  application.value.network | default({}),
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+
+            (software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
          }) }}"
   - name: "{{ name_prefix }} kustomize"
     vars:
-      kustom: "{{ kustome | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
+      kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
       kubectl apply -k {{ build_dir }}
   when: (application.value.deployment_type| default("helm")) == "kustomize"
@@ -149,26 +137,94 @@
   set_fact:
     "{{ item.key }}": !!null # "{{ undef() }}" doesn't work for facts, so nulling it instead
   loop: "{{ application.value.vars | dict2items }}"
-  when: application.value.vars is defined  
-
-- name: "{{ name_prefix }} debug before vs preparation"
-  debug:
-    msg: "network defined?: {{ application.value.network | default('no') }} and install?: {{(application.value.install | default(true))}}"
-  loop: "{{ out  | dict2items }}"
+  when: application.value.vars is defined
   
-- name: "{{ name_prefix }} record application with gateway for VirtualService"
-  set_fact:
-    gateways: "{{ gateways | combine(
-      {application.value.network.gateway | default(default_gateway): 
-        {'VirtualService': [{
-          'namespace': namespace.key,
-          'application': application.key,
-          'network': application.value.network}] } }, list_merge='append', recursive=True) }}"
-  when: application.value.network is defined and (application.value.install | default(true))
+# traefik
+- block:
+  - name: "{{ name_prefix }} ingressroute"
+    shell: | 
+      kubectl apply -f - <<EOF
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      metadata:
+        name: "{{ application.key }}-{{ item.name }}"
+        namespace: gateway
+      spec:
+        entryPoints:
+        - websecure
+        routes:
+        - kind: Rule
+          match: Host("{% if item.name != 'ext' -%}traefik.{% endif -%}{{ item.domain }}") && PathPrefix("/{{ application.key }}/")
+          middlewares:
+          {% if item.name  == 'ext' -%}
+          - name: redirect-rewriter
+          {% endif -%}
+          - name: oauth2-proxy
+          - name: {{ application.key }}-stripprefix
+          services:
+          - name: {{ application.key }}
+            namespace: {{ namespace.key }}
+            port: {{ application.value.network.svcPort }}
+        tls:
+          secretName: certs
+      EOF
+    loop: "{{ net.routes }}"
+    
+  - name: "{{ name_prefix }} Middleware stripprefix"
+    shell: | 
+      kubectl apply -f - <<EOF
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: {{ application.key }}-stripprefix
+        namespace: gateway
+      spec:
+        stripPrefix:
+          prefixes:
+          - /{{ application.key }}
+      EOF
+  when: application.value.network is defined and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
 
-- name: "{{ name_prefix }} debug gateways"
-  debug:
-    msg: "gateways: {{ gateways | to_yaml}}"
+# istio
+- block:
+  - name: "{{ name_prefix }} VirtualService(istio)"
+    vars:
+      gateway: "{{ application.value.network.domain|replace('.','-') }}"
+    shell: | 
+      kubectl apply --force --grace-period=0 -f - <<EOF
+      apiVersion: networking.istio.io/v1
+      kind: VirtualService
+      metadata:
+        name: {{ application.key }}
+        namespace: {{ default_gateway_namespace }}
+      spec:
+        gateways:
+         - {{ default_gateway_namespace }}/{{ gateway }}
+        hosts:
+        {% for host in application.value.network.hosts %}
+        - {{ host }}
+        {% endfor -%}
+        http:
+        - directResponse:
+            status: 592
+          match:
+          - uri:
+              prefix: /dummy
+          name: dummy
+        - match:
+          - uri:
+              prefix: {{ application.value.network.prefix | default('/'~application.key~'/') }}
+          name: {{ application.key }}
+          route:
+          - destination:
+              host: "{{ application.value.network.svcName | default(application.key) }}.{{ namespace.key }}.svc.cluster.local"
+              {% if application.value.network.network.svcPort is defined %},
+              port:
+                number: {{ application.value.network.network.svcPort }} 
+              {% endif %}
+
+      EOF
+  when: application.value.network is defined and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
 
 - block:
   - name: "{{ name_prefix }} affinity - label node"

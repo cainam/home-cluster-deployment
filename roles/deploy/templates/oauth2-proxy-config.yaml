@@ -1,3 +1,10 @@
+{%- set domains=[] %}
+{%- for r in net.routes -%}
+{%- set d = domains.append ('"'~ r.domain ~'"') %}
+{%- if r.external_port is defined -%}
+{%- set d = domains.append ('"'~ net.domain_external ~ '.' ~ r.external_port ~'"') %}
+{%- endif -%}
+{%- endfor -%}
 config:
   cookieSecret: "7Yb4qhHeNE74dMDIloVtx2EaWbUr-dM6H6APRbrQOR4=" # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview
   # cookieName: "_oauth2_proxy"    # Name of the cookie that oauth2-proxy creates, if not set defaults to "_oauth2_proxy"
@@ -7,9 +14,9 @@ config:
         cookie_secret = "{{ cookie_secret }}"
         ssl_insecure_skip_verify = true
         redirect_url = "https://{{base_domain }}{{ oauth2_path }}/callback"
-        cookie_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}","{{base_domain_ext}}:{{port_ext}}"]
+        cookie_domains = {{ '[' ~ domains | join(',') ~ ']' }}
         cookie_csrf_per_request = true
-        whitelist_domains = [".{{base_domain }}","*.{{base_domain }}","{{base_domain }}" ]
+        whitelist_domains = {{ '[' ~ domains | join(',') ~ ']' }}
         errors_to_info_log = true
         proxy_prefix = "/oauth2-hydra"
         reverse_proxy = true

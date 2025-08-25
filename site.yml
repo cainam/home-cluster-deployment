@@ -58,8 +58,3 @@
       tags:
         - never
         - certs-only
-    - role: testing
-      tags:
-        - never
-        - testing
-

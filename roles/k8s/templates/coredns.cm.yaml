@@ -4,8 +4,8 @@ data:
    .:53 {
     errors
     hosts {
-    {% for i in gateways %}
-      {{ gateways[i].external_ip }} {{ gateways[i].domain }}
+    {% for i in net.routes %}
+      {{ net.routes[i].endpointIP }} {{ net.routes[i].domain }}
     {% endfor %}
       fallthrough
     }

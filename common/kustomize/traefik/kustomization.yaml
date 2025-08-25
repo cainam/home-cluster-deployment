@@ -11,3 +11,7 @@ resources:
   - service.yaml
   - serviceaccount.yaml
   - dashboard-ingressroute.yaml
+  - Middleware-stripprefix.yaml
+  - Middleware-oauth2-proxy.yaml
+  - Middleware-redirect-rewriter.yaml
+  - pvc.yaml

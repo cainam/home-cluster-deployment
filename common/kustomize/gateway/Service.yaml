@@ -8,7 +8,7 @@ metadata:
 spec:
   allocateLoadBalancerNodePorts: true
   externalIPs:
-  - 192.168.4.101
+  - {{ kustom.network.endpointIP }}
   externalTrafficPolicy: Cluster
   internalTrafficPolicy: Cluster
   ports:
