@@ -31,4 +31,3 @@
     dest: "{{ dest_dir }}/{{ item | replace( template_source_dir , '') }}"
   loop: "{{ templates_files }}"
 
-  

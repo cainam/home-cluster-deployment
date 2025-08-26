@@ -3,7 +3,6 @@
   - set_fact:
       apps: "{{ applications }}"
       net: "{{ net }}"
-
       
 # add istio gateways as application to list of applications
   - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
@@ -61,7 +60,7 @@
         rewrite: "/"
         svcPort: "{{ 65536|random(1024) }}"
         svcName: "{{ app.name }}"
-        prefix: "{{ '/'~app.name~'/'}}"
+        prefix: "{{ '/'~app.name}}"
         domain: "{{ base_domain }}"
         hosts: |
           {%- set domain_list = [app.network.domain|default(base_domain)] -%}

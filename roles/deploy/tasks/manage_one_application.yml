@@ -114,14 +114,14 @@
          'name': application.key, 
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
-         'image': application.value.kustom.image | default( namespace.key+'/'+application.key+':'+
+         'image': application.value.kustom.image | default( namespace.key+'/'+application.key~':'~
             (software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
          }) }}"
   - name: "{{ name_prefix }} kustomize"
     vars:
       kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
-      kubectl apply -k {{ build_dir }}
+      kubectl apply -k {{ build_dir }} --force-conflicts --server-side
   when: (application.value.deployment_type| default("helm")) == "kustomize"
   run_once: true
   
@@ -213,14 +213,18 @@
           name: dummy
         - match:
           - uri:
-              prefix: {{ application.value.network.prefix | default('/'~application.key~'/') }}
+              prefix: {{ application.value.network.prefix~'/' }}
+          - uri:
+              exact: {{ application.value.network.prefix }}
           name: {{ application.key }}
+          rewrite:
+            uri: {{ application.value.network.rewrite }}
           route:
           - destination:
               host: "{{ application.value.network.svcName | default(application.key) }}.{{ namespace.key }}.svc.cluster.local"
-              {% if application.value.network.network.svcPort is defined %},
+              {% if application.value.network.svcPort is defined -%}
               port:
-                number: {{ application.value.network.network.svcPort }} 
+                number: {{ application.value.network.svcPort }} 
               {% endif %}
 
       EOF
