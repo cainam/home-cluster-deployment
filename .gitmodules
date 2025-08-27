@@ -1,0 +1,3 @@
+[submodule "common/kustomize"]
+	path = common/kustomize
+	url = https://github.com/cainam/kustomize.git
