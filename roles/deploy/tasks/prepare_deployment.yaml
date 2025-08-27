@@ -56,6 +56,7 @@
       my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
       rq: "{{ app.requires|default([])+[{'name': app.network.domain|default(base_domain)|replace('.','-'),'namespace': default_gateway_namespace, 'type': 'gateway' }] }}"
       # network_defaults is assigned in each loop to have new random values
+      my_dom: "{{ app.network.domain|default(base_domain) }}"
       network_defaults: 
         rewrite: "/"
         svcPort: "{{ 65536|random(1024) }}"
@@ -63,8 +64,8 @@
         prefix: "{{ '/'~app.name}}"
         domain: "{{ base_domain }}"
         hosts: |
-          {%- set domain_list = [app.network.domain|default(base_domain)] -%}
-          {%- if app.network.endpointIP is defined -%}
+          {%- set domain_list = [my_dom] -%}
+          {%- if (net.routes | selectattr('domain','equalto',my_dom)|first).endpointIP is defined -%}
           {%- set _d = domain_list.append(net.domain_external) -%}
           {%- endif -%}
           {{ domain_list }}

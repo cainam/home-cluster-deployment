@@ -21,12 +21,6 @@ elif (echo "$action" | grep -q ^l); then
   search=$2
 fi
 
-#if (echo "$atype" | grep -q ^s); then
-#  atype=svc
-#elif (echo "$atype" | grep -q ^p); then
-#  atype=pod
-#fi
-#
 case "$atype" in
   s)
     atype="svc"

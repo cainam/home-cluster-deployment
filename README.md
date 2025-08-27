@@ -171,4 +171,4 @@ TODO:
 - kustomize: authorizationpolicy (already in common/kustomize/Auth... ) 
 - security: generate random ports (e.g. for traefik during each deployment) and mention it for security
 - deployment standard: revisionHistory to 3 (less replicasets)
-- move istiod-config chart to kustomize
+- see how to turn kustomize into sub-repository

@@ -1,5 +1,0 @@
-resources:
-- Deployment.yaml
-- resources.yaml
-  
-namespace: {{ kustom.namespace }}

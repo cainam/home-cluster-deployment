@@ -30,9 +30,10 @@ applications:
         values:
           file: istiod-mesh.yaml
     istiod-config:
-      git: "{{ own_git_url }}"
-      subdir: charts/istiod-config
-      helm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ net.domain_external }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ net.domain_external }}:{{ net.routes | selectattr('gateway','equalto','istio')  | map(attribute='external_port') | first }}"
+      deployment_type: kustomize
+      Agit: "{{ own_git_url }}"
+      Asubdir: charts/istiod-config
+      Ahelm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ net.domain_external }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ net.domain_external }}:{{ net.routes | selectattr('gateway','equalto','istio')  | map(attribute='external_port') | first }}"
   auth:
     ory-commons:
       git: https://github.com/ory/k8s.git

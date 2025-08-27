@@ -95,6 +95,7 @@
       - name: "{{ application.value.network.domain }}"
         alt_names: 
         - "{{ application.value.network.domain }}"
+        - "{{ net.domain_external }}"
       #- name: "{{ application.key }}.{{ namespace.key }}.svc"
       #  alt_names: 
       #  - "{{ application.key }}.{{ namespace.key }}.svc"

@@ -1,4 +1,0 @@
-namespace: {{ kustom.namespace }}
-resources:
-- AuthorizationPolicy.yaml
-- lua-filter.yaml

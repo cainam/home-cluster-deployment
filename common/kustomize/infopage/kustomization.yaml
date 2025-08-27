@@ -1,9 +1,0 @@
-resources:
-- clusterrolebinding.yaml
-- clusterrole.yaml
-- deploy.yaml
-- pvc.yaml
-- service.yaml
-- serviceaccount.yaml
-  
-namespace: {{ kustom.namespace }}

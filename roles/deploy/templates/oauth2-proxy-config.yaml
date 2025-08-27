@@ -2,7 +2,7 @@
 {%- for r in net.routes -%}
 {%- set d = domains.append ('"'~ r.domain ~'"') %}
 {%- if r.external_port is defined -%}
-{%- set d = domains.append ('"'~ net.domain_external ~ '.' ~ r.external_port ~'"') %}
+{%- set d = domains.append ('"'~ net.domain_external ~ ':' ~ r.external_port ~'"') %}
 {%- endif -%}
 {%- endfor -%}
 config:
