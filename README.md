@@ -170,3 +170,10 @@ TODO:
 - kustomize: authorizationpolicy (already in common/kustomize/Auth... ) 
 - security: generate random ports (e.g. for traefik during each deployment) and mention it for security
 - deployment standard: revisionHistory to 3 (less replicasets)
+- network:true required for gateways?
+- 
+- mutating settings:
+1. add to application yaml
+2. create cm per application
+3. read the needed cm by Awebhook
+

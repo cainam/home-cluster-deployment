@@ -3,6 +3,7 @@
   - set_fact:
       apps: "{{ applications }}"
       net: "{{ net }}"
+      k8s: "{{ k8s | combine({'mutate': {'name': k8s.mutate, 'namespace': (applications.items() | selectattr('1', 'contains', k8s.mutate) | map(attribute='0') | first)  }}) }}"
       
 # add istio gateways as application to list of applications
   - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway

@@ -1,6 +1,4 @@
-
 from valmut_model import AdmissionReview, AdmissionResponse
-
 async def parse_request(request):
     import json
     from fastapi.responses import JSONResponse
@@ -52,4 +50,45 @@ def convert_keys_to_snake_case(data: Any) -> Any: # recursive!
     else:
         return data
         
+
+def get_configmap_data(configmap_name):
+    from kubernetes import client, config
+    def get_current_namespace():
+        namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+        if os.path.exists(namespace_path):
+            with open(namespace_path, "r") as f:
+                return f.read().strip()
+        return None
+
+    namespace = get_current_namespace()
+    if not namespace:
+        print("Could not determine the current namespace. Are you running in a Pod?")
+        return None
+
+    print(f"Running in namespace: {namespace}")
+
+    try:
+        # Load the Kubernetes configuration for in-cluster access.
+        config.load_incluster_config()
+    except config.ConfigException:
+        print("Could not configure Kubernetes client for in-cluster access.")
+        return None
+
+    v1 = client.CoreV1Api()
+    try:
+        # Attempt to read the specific ConfigMap.
+        configmap = v1.read_namespaced_config_map(name=configmap_name, namespace=namespace)
+
+        print(f"Found ConfigMap: {configmap.metadata.name}")
+        return configmap.data
+
+    except client.ApiException as e:
+        # Check if the error is a 404 Not Found.
+        if e.status == 404:
+            print(f"ConfigMap '{configmap_name}' not found.")
+            return None
+        else:
+            # Re-raise or handle other API errors.
+            print(f"An unexpected error occurred: {e}")
+            raise
 

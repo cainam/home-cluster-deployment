@@ -31,9 +31,6 @@ applications:
           file: istiod-mesh.yaml
     istiod-config:
       deployment_type: kustomize
-      Agit: "{{ own_git_url }}"
-      Asubdir: charts/istiod-config
-      Ahelm_options: --set PolicyName=ext-authz --set-json 'hosts=["{{ base_domain }}","*.{{ base_domain }}","{{ net.domain_external }}:*"]' --set-json 'open_access={{ net.open_access | to_json }}' --set gateway="{{ default_gateway }}" --set external_address="{{ net.domain_external }}:{{ net.routes | selectattr('gateway','equalto','istio')  | map(attribute='external_port') | first }}"
   auth:
     ory-commons:
       git: https://github.com/ory/k8s.git
@@ -122,7 +119,12 @@ applications:
       storage:
       - name: mosquitto
         size: 1Gi
-      network: true
+      mutate:
+        identifiedBy: label
+        label: app.kubernetes.io/name
+        set:
+          mosquitto:
+            uid: 1883
     home-assistant:
       deployment_type: kustomize
       kustom:
@@ -148,11 +150,6 @@ applications:
           username: ha
           password: same
   tools:
-    tempo:
-      git: https://github.com/grafana/helm-charts.git
-      subdir: charts/tempo
-      branch:  tempo-1.7.2
-      git_to_local_params: --fix_source=.tempo.tag="{{ software.tempo.version }}" --fix_source=.tempoQuery.tag="{{ software.tempo_query.version }}"
     infopage:
       deployment_type: kustomize
       kustom:
@@ -165,62 +162,6 @@ applications:
         size: 5Mi
         type: local_folder
         config: true
-    kiali-server:
-      git: https://github.com/kiali/helm-charts.git
-      subdir: kiali-server
-      git_to_local_params: --fix_source=.image.repo=kiali/kiali --fix_source=.image.tag="{{ software.kiali.version }}" --fix_source=.deployment.version_label="{{ software.kiali.version }}" --fix_source=.deployment.image_version="{{ software.kiali.version }}"
-      network:
-        svcPort: 20001
-        svcName: kiali
-        prefix: /kiali
-        rewrite: /kiali
-      helm_options: --set auth.strategy=anonymous --set istio_namespace=istio-system
-      files:
-        values:
-          file: kiali-config.yaml
-    kubernetes-dashboard:
-      git: https://github.com/kubernetes/dashboard.git
-      branch: "{{ software.dashboard.version }}"
-      subdir: charts/kubernetes-dashboard
-      helm_options: --set protocolHttp=true --set service.externalPort=9090 --set extraArgs="{--enable-insecure-login=false}" --set serviceAccount.name=kubernetes-dashboard --set rbac.clusterReadOnlyRole=true --set metricsScraper.enabled=false --set web.containers.args[0]="--v=2" --set auth.containers.args[0]="--v=2"
-      git_to_local_params: --fix_source=.metricsScraper.image= --fix_source=.metricsScraper.enabled=false --fix_source=.kong.image= --fix_source=.kong.enabled=false
-      remove_dependencies: metrics-server,ingress-nginx,cert-manager,kong
-      network:
-        prefix: /
-        svcPort: 8000
-        svcName: kubernetes-dashboard-web
-    kube-state-metrics:
-      git: https://github.com/prometheus-community/helm-charts.git
-      subdir: charts/kube-state-metrics
-      branch: kube-state-metrics-5.16.1
-      git_to_local_params: --fix_source=.image.tag=v2.10.1
-      install: false
-    prometheus-node-exporter:
-      git: https://github.com/prometheus-community/helm-charts.git
-      subdir: charts/prometheus-node-exporter
-      branch: prometheus-node-exporter-4.30.3
-      git_to_local_params: --fix_source=.image.tag=v1.6.1
-      install: false
-    prometheus-pushgateway:
-      git: https://github.com/prometheus-community/helm-charts.git
-      subdir: charts/prometheus-pushgateway
-      branch: prometheus-pushgateway-2.7.1
-      git_to_local_params: --fix_source=.image.tag=v1.6.2
-      install: false
-    prometheus:
-      git: https://github.com/prometheus-community/helm-charts.git
-      subdir: charts/prometheus
-      branch: prometheus-25.15.0
-      helm_options: --set prometheus-node-exporter.hostRootFsMount.enabled=false --set server.persistentVolume.volumeName=prometheus-server --set server.securityContext.runAsUser=100100 --set server.securityContext.fsGroup=100100 --set server.prefixURL=/prometheus --set server.baseURL="https://{{ base_domain }}/prometheus/" --set alertmanager.enabled=false
-      remove_dependencies: alertmanager
-      git_to_local_params: --fix_source=.server.image.tag=v2.50.1
-      storage: 
-      - name: prometheus-server
-        type: longhorn
-        size: 2Gi
-      network:
-        svcName: prometheus-server
-        rewrite: /prometheus
   db:
     postgresql:
       deployment_type: kustomize
@@ -228,7 +169,7 @@ applications:
         image: "db/postgresql:{{ software.postgresql.version }}"
         user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
         pass: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-        trustedSubnet: "{{ podSubnet }}"
+        trustedSubnet: "{{ k8s.podSubnet }}"
         runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
         storage:
           class: longhorn
@@ -263,7 +204,6 @@ applications:
         size: 5Mi
         type: local_folder
         config: true
-      network: true
       
     descheduler:
       git: https://github.com/kubernetes-sigs/descheduler.git

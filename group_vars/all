@@ -58,8 +58,10 @@ default_gateway_namespace: istio-ingress
 default_storage_type: gluster
 
 # K8s
-external_coredns_ip: 192.168.4.111
-podSubnet: 10.244.0.0/16
+k8s:
+  mutate: valmut
+  external_coredns_ip: 192.168.4.111
+  podSubnet: 10.244.0.0/16
 
 gateway_install:
   deployment_type: kustomize

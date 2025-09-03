@@ -128,7 +128,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- Mutating WebHook Endpoint ---
+# one function for validation and mutation as the same items are addressed
 def process_requested_object(req_object, mutate, exemptions=None):
     import copy, random, re
     pod_definition = copy.deepcopy(req_object)
@@ -140,6 +140,8 @@ def process_requested_object(req_object, mutate, exemptions=None):
     exemption_list = []
     pod2container = {}
     config = {}
+    
+    get_configmap_data(configmap_name):
     for name, data in exemptions.get('pods', {}).items():
       match = False
       if data.get('identifiedBy') == 'label':
@@ -357,7 +359,6 @@ def process_requested_object(req_object, mutate, exemptions=None):
 async def mutate_webhook(request: Request): # preferred over mutate_webhook(admission_review: AdmissionReview) as the data validation happens inside the function and allows error handling
     """
     Handles mutating admission requests from Kubernetes.
-    This example adds a 'fastapi-webhook' label and annotation to pods if they don't exist.
     """
     admission_review = await valmut_helper.parse_request(request)
     if isinstance(admission_review, JSONResponse):
@@ -422,6 +423,7 @@ async def validate_webhook(request: Request):
     This example denies any pod creation if it has a label 'admission-webhook-example.com/deny: "true"'.
     """
     
+    logger.info("/validate called")
     admission_review = await valmut_helper.parse_request(request)
     if isinstance(admission_review, JSONResponse): 
         logger.error(admission_review.body)
@@ -459,6 +461,7 @@ async def validate_webhook(request: Request):
             logger.warning(full_message)
     else:
         allowed = True
+
     response = AdmissionResponse(
         uid=req.uid,
         allowed=allowed,
@@ -468,7 +471,6 @@ async def validate_webhook(request: Request):
     return JSONResponse(content=AdmissionReview(response=response).model_dump(by_alias=True, exclude_none=True))
 
 # --- Health Check Endpoint ---
-
 @app.get("/healthz")
 async def health_check():
     """Simple health check endpoint."""

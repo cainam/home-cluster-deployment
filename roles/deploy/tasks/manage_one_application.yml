@@ -2,12 +2,6 @@
   set_fact:
     name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
-
-- name: set application vars as facts
-  set_fact:
-    "{{ item.key }}": "{{ item.value }}"
-  loop: "{{ application.value.vars | dict2items }}"
-  when: application.value.vars is defined  
     
 - block:
   - block:
@@ -43,13 +37,30 @@
         helm repo update
     when: (application.value.deployment_type| default("helm")) == "helm"
   when: "'build' in ansible_run_tags" 
-    
+
 - name: "{{ name_prefix }} files"
   include_tasks: files.yml
   loop: "{{ application.value.files | dict2items }}"
   loop_control:
     loop_var: file
   when: application.value.files is defined
+
+- debug:
+    msg: "k8s.mutate:{{k8s.mutate}}"
+    
+- name: "{{ name_prefix }} mutating config"
+  shell: |
+    kubectl apply -f - <<EOF
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: "{{ application.key }}"
+      namespace: "{{ k8s.mutate.namespace }}"
+    data:
+      mutate: |
+        {{ application.value.mutate | to_nice_yaml | indent(width=4) }}
+    EOF
+  when: application.value.mutate is defined
 
 - block:
   - name: "{{ name_prefix }} create patch from mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
@@ -92,10 +103,8 @@
       ca_state_or_province_name: Some-State
       ca_email_address: a.b@c.de
       ca_requests:
-      - name: "{{ application.value.network.domain }}"
-        alt_names: 
-        - "{{ application.value.network.domain }}"
-        - "{{ net.domain_external }}"
+      - name: "{%- if application.value.network is defined -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ namespace.key }}.svc{%- endif -%}"
+        alt_names: "{%- if application.value.network is defined -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ namespace.key }}.svc']{%- endif -%}"
       #- name: "{{ application.key }}.{{ namespace.key }}.svc"
       #  alt_names: 
       #  - "{{ application.key }}.{{ namespace.key }}.svc"

@@ -161,7 +161,7 @@
   - name: additional DNS entries and external CoreDNS IP
     shell: |
       kubectl replace -f /tmp/coredns.cm.yaml
-      kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ external_coredns_ip }}"] }}'
+      kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ k8s.external_coredns_ip }}"] }}'
 
   - name: ensure /var/lib/kubelet/config.yaml is refreshed
     shell: |

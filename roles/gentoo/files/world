@@ -44,6 +44,7 @@ sys-process/iotop
 www-servers/lighttpd
 sys-kernel/linux-firmware
 sys-kernel/raspberrypi-image
+app-misc/tmux
 
 # only for longhorn
 sys-block/open-iscsi
