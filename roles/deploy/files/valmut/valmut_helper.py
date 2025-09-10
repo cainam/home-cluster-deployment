@@ -17,11 +17,10 @@ async def parse_request(request):
         )
 
     admission_review: Optional[AdmissionReview] = None
+    uid_from_request = raw_request_data.get('request', {}).get('uid', 'unknown')
     try:
         admission_review = AdmissionReview.model_validate(raw_request_data)
-        return admission_review
     except ValidationError as e:
-        uid_from_request = raw_request_data.get('request', {}).get('uid', 'unknown')
         error_message = f"Validation failed: {e.errors()[0].get('msg', 'Unknown validation error')}"
 
         error_response_content = AdmissionReview(
@@ -35,7 +34,23 @@ async def parse_request(request):
             )
         ).model_dump(by_alias=True, exclude_none=True)
         return JSONResponse(status_code=400, content=error_response_content)
-        
+
+    # check if request exists
+    req = admission_review.request
+    if not req:
+        logger.error("AdmissionReview request is missing after validation.")
+        error_response_content = AdmissionReview(
+            response=AdmissionResponse(
+                uid=uid_from_request,
+                allowed=False,
+                status={"message": "AdmissionReview request missing in payload."}
+            )
+        ).model_dump(by_alias=True, exclude_none=True)
+        return JSONResponse(status_code=400, content=error_response_content)
+
+
+    return admission_review
+
 def to_snake_case(camel_str: str) -> str:
     import re
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', camel_str) # split and insert _
@@ -49,46 +64,35 @@ def convert_keys_to_snake_case(data: Any) -> Any: # recursive!
         return [convert_keys_to_snake_case(elem) for elem in data]
     else:
         return data
-        
 
-def get_configmap_data(configmap_name):
+def get_current_namespace():
+    import os
+    namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+    if os.path.exists(namespace_path):
+        with open(namespace_path, "r") as f:
+            return f.read().strip()
+    return 'default'
+
+def get_configmap_data(namespace, configmap_name, logger):
     from kubernetes import client, config
-    def get_current_namespace():
-        namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
-        if os.path.exists(namespace_path):
-            with open(namespace_path, "r") as f:
-                return f.read().strip()
-        return None
-
-    namespace = get_current_namespace()
-    if not namespace:
-        print("Could not determine the current namespace. Are you running in a Pod?")
-        return None
-
-    print(f"Running in namespace: {namespace}")
-
     try:
-        # Load the Kubernetes configuration for in-cluster access.
         config.load_incluster_config()
     except config.ConfigException:
-        print("Could not configure Kubernetes client for in-cluster access.")
+        logger.error("Could not configure Kubernetes client for in-cluster access.")
         return None
 
     v1 = client.CoreV1Api()
     try:
-        # Attempt to read the specific ConfigMap.
         configmap = v1.read_namespaced_config_map(name=configmap_name, namespace=namespace)
-
-        print(f"Found ConfigMap: {configmap.metadata.name}")
+        logger.info(f"Found ConfigMap: {configmap.metadata.name}")
         return configmap.data
-
     except client.ApiException as e:
         # Check if the error is a 404 Not Found.
         if e.status == 404:
-            print(f"ConfigMap '{configmap_name}' not found.")
+            logger.info(f"ConfigMap '{configmap_name}' not found.")
             return None
         else:
             # Re-raise or handle other API errors.
-            print(f"An unexpected error occurred: {e}")
+            logger.error(f"An unexpected error occurred: {e}")
             raise
 

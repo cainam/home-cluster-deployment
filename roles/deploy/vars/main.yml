@@ -71,7 +71,6 @@ applications:
         size: 2Mi
         type: local_folder
         config: true
-      network: true
     idp:
       deployment_type: kustomize
       images:
@@ -120,8 +119,6 @@ applications:
       - name: mosquitto
         size: 1Gi
       mutate:
-        identifiedBy: label
-        label: app.kubernetes.io/name
         set:
           mosquitto:
             uid: 1883
@@ -171,11 +168,9 @@ applications:
         pass: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
         trustedSubnet: "{{ k8s.podSubnet }}"
         runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
-        storage:
-          class: longhorn
-          size: 2Gi
-          dataPath: /var/lib/postgresql
-          confPath: /conf
+        dataPath: /var/lib/postgresql
+        confPath: /conf
+        storageClass: local
       images:
       - postgresql
       storage: 
@@ -233,7 +228,7 @@ applications:
       subdir: chart
       branch: "{{ software.longhorn.version }}"
       lm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
-      helm_options: --set defaultSettings.logLevel=Info
+      helm_options: --set defaultSettings.logLevel=Info --set csi.kubeletRootDir=/var/lib/kubelet/
       network:
         svcName: longhorn-frontend
         prefix: /longhorn

@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import yaml
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -10,117 +11,26 @@ from kubernetes.client import models as k8s
 import valmut_helper
 from valmut_model import Status, PatchType, AdmissionRequest, AdmissionResponse, AdmissionReview
 
-exempt = {"pods": { 
-            'flannel': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'hostNetwork', 'readOnlyRootFilesystem', 'runAsNonRoot'],
-                'set': {
-                    'install-cni-plugin': { 'uid': 0, 'caps':["DAC_OVERRIDE", "FOWNER", "SYS_ADMIN"]},
-                    'install-cni': { 'uid': 0},
-                    'kube-flannel': {'uid': 0,  'caps':["DAC_OVERRIDE", "FOWNER", "SYS_ADMIN", 'NET_RAW', 'NET_ADMIN']}
-                }
-            },
-            'instance-manager': {
-                'identifiedBy': 'label',
-                'label': 'longhorn.io/component',
-                 'exemptions': ['privileged', 'hostPath', 'runAsNonRoot', 'readOnlyRootFilesystem'],
-                 'set': {'instance-manager': {'uid': 0}}
-            },
-            'engine-image': {
-                'identifiedBy': 'label',
-                'label': 'longhorn.io/component',
-                'exemptions': ['hostPath', 'runAsNonRoot','privileged'],
-                'set': {'engine-image-ei-62d76070': {'uid': 0}}
-            },
-            'csi-resizer': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'runAsNonRoot'],
-                'set': {'csi-resizer': {'uid': 0}}
-            },
-            'csi-snapshotter': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'runAsNonRoot'],
-                'set': {'csi-snapshotter': {'uid': 0}}
-            },
-            "csi-provisioner": {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'runAsNonRoot'],
-                'set': {'csi-provisioner': {'uid': 0}}
-            },
-            "csi-attacher": {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'runAsNonRoot'],
-                'set': {'csi-attacher': {'uid': 0}}
-            },
-            "longhorn-csi-plugin": {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'privileged', 'caps_add', 'runAsNonRoot'],
-                'set': {'longhorn-csi-plugin': {'uid': 0},'longhorn-liveness-probe': {'uid': 0}}
-            },
-            "longhorn-manager": {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['hostPath', 'privileged', 'runAsNonRoot', 'readOnlyRootFilesystem'],
-                'set': {'longhorn-manager': {'uid': 0}}
-            },
-            'longhorn-ui': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['caps_add'],
-                'emptyDir': [{'path': '/var/log/nginx', 'container': 'longhorn-ui'}, {'path': '/var/lib/nginx', 'container': 'longhorn-ui'}, {'path': '/run', 'container': 'istio-init'}],
-                'set': {'istio-init': {'uid': 0}}
-            },
-            'longhorn-driver-deployer': {
-                'label': 'app',
-                'pod2container': {'runAsUser': ['longhorn-driver-deployer']}
-            },
-            'discover-proc-kubelet-cmdline': {
-                'identifiedBy': 'name',
-                'exemptions': ['privileged']
-            },
-            "postgres": {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'exemptions': ['privileged', 'readOnlyRootFilesystem']
-            },
-            'mosquitto': {
-                'identifiedBy': 'label',
-                'label': 'app.kubernetes.io/name',
-                'set': {'mosquitto': {'uid': 1883}}
-            },
-            'zigbee2mqtt': {
-                'identifiedBy': 'label',
-                'label': 'app.kubernetes.io/name',
-                'exemptions': ['hostPath','privileged', 'readOnlyRootFilesystem', 'runAsNonRoot'],
-                'xset': {'zigbee2mqtt': {'gid': 20, 'caps':["CAP_AUDIT_READ","CAP_AUDIT_WRITE","CAP_BLOCK_SUSPEND","CAP_BPF","CAP_CHECKPOINT_RESTORE","CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_DAC_READ_SEARCH","CAP_FOWNER","CAP_FSETID","CAP_IPC_LOCK","CAP_IPC_OWNER","CAP_KILL","CAP_LEASE","CAP_LINUX_IMMUTABLE","CAP_MAC_ADMIN","CAP_MAC_OVERRIDE","CAP_MKNOD","CAP_NET_ADMIN","CAP_NET_BIND_SERVICE","CAP_NET_BROADCAST","CAP_NET_RAW","CAP_PERFMON","CAP_SETFCAP","CAP_SETGID","CAP_SETPCAP","CAP_SETUID","CAP_SYSLOG","CAP_SYS_ADMIN","CAP_SYS_BOOT","CAP_SYS_CHROOT","CAP_SYS_MODULE","CAP_SYS_NICE","CAP_SYS_PACCT","CAP_SYS_PTRACE","CAP_SYS_RAWIO","CAP_SYS_RESOURCE","CAP_SYS_TIME","CAP_SYS_TTY_CONFIG","CAP_WAKE_ALARM"]}},
-                'set': {'zigbee2mqtt': {'gid': 20, 'uid': 0}, 'caps':["CAP_SYS_RAWIO", "CAP_SYS_ADMIN"]},
-                'emptyDir': [{'path': '/log', 'container': 'zigbee2mqtt'}]
-                },
-            'istiodxx': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'set': {'discovery': { 'caps':["CAP_NET_BIND_SERVICE"]}}
-            },
-            'ha-gw': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'set': {'istio-proxy': { 'caps':["NET_BIND_SERVICE"]}}
-            },
-            'gateway': {
-                'identifiedBy': 'label',
-                'label': 'app',
-                'set': {'istio-proxy': { 'caps':["NET_BIND_SERVICE"]}}
-            },
-        }}
+config_namespace = valmut_helper.get_current_namespace()
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+config_path = '/config/valmut.conf'
+try:
+    with open(config_path, 'r') as file:
+        app_config = yaml.safe_load(file)
+    logger.info('app_config loaded:\n'+str(app_config))
+except FileNotFoundError:
+    logger.error(f"Error: The file '{config_path}' was not found.")
+except yaml.YAMLError as e:
+    logger.error(f"Error parsing YAML: {e}")
+
+name='valmut-mutate'
+mutating_config = valmut_helper.get_configmap_data(config_namespace, name, logger)
+#first_key = next(iter(mutating_config)) # the name of the key doesn't matter, we only need the content
+mutating_config = yaml.safe_load(mutating_config['mutate'])
+logger.info('found name: '+name+' mutating_config: '+str(mutating_config))
 
 app = FastAPI(
     title="Kubernetes Admission WebHook Server",
@@ -129,19 +39,18 @@ app = FastAPI(
 )
 
 # one function for validation and mutation as the same items are addressed
-def process_requested_object(req_object, mutate, exemptions=None):
+def process_pod_object(req_object, mutate, exemptions=None):
     import copy, random, re
     pod_definition = copy.deepcopy(req_object)
     patch_ops = []
     allowed = True
-    messages = [f"process_requested_object: provided object: {req_object}"]
+    messages = [f"process_pod_object: provided object: {req_object}"]
 
     pod_labels = req_object['metadata'].get('labels', {})
     exemption_list = []
     pod2container = {}
     config = {}
-    
-    get_configmap_data(configmap_name):
+
     for name, data in exemptions.get('pods', {}).items():
       match = False
       if data.get('identifiedBy') == 'label':
@@ -276,7 +185,7 @@ def process_requested_object(req_object, mutate, exemptions=None):
         elif mutate:
             patch_ops.append({"op": "replace", "path": sc_path+'/runAsUser', "value": uid})
         if mutate:
-            if uid == 0 and 'runAsNonRoot' in exemption_lis:
+            if uid == 0 and 'runAsNonRoot' in exemption_list:
                 patch_ops.append({"op": "replace", "path": sc_path+'/runAsNonRoot', "value": False })
             else: # enforce runAsNonRoot setting: although normally inherited from Pod, PSA restricted requires this to be set again
                 patch_ops.append({"op": "replace", "path": sc_path+'/runAsNonRoot', "value": True })
@@ -347,13 +256,24 @@ def process_requested_object(req_object, mutate, exemptions=None):
                 if name == 'runAsUser' and setting == 0:
                   messages.append(f'container {c_name}: runAsUser:0 is set, so runAsNonRoot:false is required, too')
                   patch_ops.append({"op": "replace", "path": sc_path+"/runAsNonRoot", "value": False})
-
             else:
               allowed = False
               messages.append(f'setting {name} was requested to be shifted from pod to container, but is not defined{setting}')
 
     return patch_ops if mutate else allowed, messages
   
+def process_deployment_object(req_object, mutate, exemptions=None):
+    patch_ops = []
+    messages = ''
+    for name, data in exemptions.get('deployment', {}).items():
+        logger.info("deployment: "+name+" data: "+str(data))
+        #for name, data in data.get('deployment', {}).items():
+        if name == 'standards':
+            for path, value in data.items():
+                patch_ops.append({"op": "replace", "path": path, "value": value})
+
+    return patch_ops if mutate else allowed, messages
+
 
 @app.post("/mutate")
 async def mutate_webhook(request: Request): # preferred over mutate_webhook(admission_review: AdmissionReview) as the data validation happens inside the function and allows error handling
@@ -366,45 +286,30 @@ async def mutate_webhook(request: Request): # preferred over mutate_webhook(admi
         return admission_review
     
     req = admission_review.request
-    if not req:
-        logger.error("AdmissionReview request is missing after validation.")
-        uid_from_request = raw_request_data.get('request', {}).get('uid', 'unknown')
-        error_response_content = AdmissionReview(
-            response=AdmissionResponse(
-                uid=uid_from_request,
-                allowed=False,
-                status={"message": "AdmissionReview request missing in payload."}
-            )
-        ).model_dump(by_alias=True, exclude_none=True)
-        return JSONResponse(status_code=400, content=error_response_content)
-
-    patches = []
-
     if req.kind.get("kind") == "Pod":
         logger.info(f"Mutating Pod: {req.name} in namespace: {req.namespace}")
         if not req.object or not req.object.get('spec'):
             logger.warning(f"Pod {req.name} has no spec. Skipping mutation.")
             return JSONResponse(content=AdmissionReview(response=AdmissionResponse(uid=req.uid, allowed=True)).model_dump(by_alias=True, exclude_none=True))
 
-        pod_dict_snake_case = valmut_helper.convert_keys_to_snake_case(req.object)
-        pod = k8s.V1Pod(**pod_dict_snake_case)
-
-        p, messages = process_requested_object(req.object, True, exempt)
+        patches, messages = process_pod_object(req.object, True, mutating_config)
         full_message = f"Pod {req.object.get('metadata').get('name')} in namespace {req.object.get('metadata').get('namespace')} mutation: {'\n'.join(messages)}"
         logger.warning(full_message)
-        patches = patches + p
         
         if "metadata" not in req.object: patches.append({"op": "add", "path": "/metadata", "value": {}})
         if "annotations" not in req.object.get("metadata", {}): patches.append({"op": "add", "path": "/metadata/annotations", "value": {}})
         annotations = req.object.get("metadata", {}).get("annotations", {})
         if "mutated" not in annotations: patches.append({"op": "add", "path": "/metadata/annotations/admission-webhook-example.com~1mutated-by", "value": "yepp"})
+    elif req.kind.get("kind") == "Deployment":
+        logger.info(f"Mutating Deployment: {req.name} in namespace: {req.namespace}")
+        patches, messages = process_deployment_object(req.object, True, mutating_config)
     else: # non-Pod resources, just allow without modification
         logger.info(f"Allowing non-Pod resource of kind: {req.kind.get('kind')} without mutation.")
         return JSONResponse(content=AdmissionReview(response=AdmissionResponse(uid=req.uid, allowed=True)).model_dump(by_alias=True, exclude_none=True))
 
     response = AdmissionResponse(
         uid=req.uid,
-        allowed=True, # Allow the request, as we are mutating it
+        allowed=True, # always allowed, it is mutating
         patch=base64.b64encode(json.dumps(patches).encode('utf-8')).decode('utf-8'), # Encode the patch operations to base64
         patch_type=PatchType.type  # Important: Specify the patch type
     )
@@ -429,32 +334,23 @@ async def validate_webhook(request: Request):
         logger.error(admission_review.body)
         return admission_review
 
-    logger.info("Received validation request.\n"+str(admission_review))
+    logger.debug("Received validation request.\n"+str(admission_review))
     req = admission_review.request
-    logger.info("req.object\n"+str(req.object))
-    if not req:
-        logger.error("AdmissionReview request is missing.")
-        raise HTTPException(status_code=400, detail="AdmissionReview request missing.")
+    logger.debug("req.object\n"+str(req.object))
 
     if req.kind.get("kind") == "Pod":
         logger.info(f"Validating Pod: {req.name} in namespace: {req.namespace}")
 
         pod_dict = valmut_helper.convert_keys_to_snake_case(req.object)
         pod = k8s.V1Pod(**pod_dict)
-        #logger.info("pod metadata: "+str(pod.metadata))
+        logger.debug("pod metadata: "+str(pod.metadata))
 
         pod_metadata = pod.metadata if pod.metadata else {} # Sicherstellen, dass es ein dict ist
         pod_name = pod_metadata.get('name', "unknown")
         namespace = pod_metadata.get('namespace', "unknown")
         
-        # allowed, messages = checkPSA(pod, req.object, exempt)
-        allowed, messages = process_requested_object(req.object, False, exempt)
+        allowed, messages = process_pod_object(req.object, False, mutating_config)
         full_message = f"Pod {pod_name} in namespace {namespace} violates restricted security policy: {'\n'.join(messages)}"
-        status_object = Status(
-            message=full_message,
-            code=403,  # Beispiel: HTTP 403 Forbidden für verweigerte Aktionen
-            status="Failure" # Kubernetes Standard für Fehler
-        )
         if allowed:
             logger.info(f"Pod {pod_name} in namespace {namespace} conforms to restricted security policy. Allowing: {'\n'.join(messages)}")
         else:
@@ -465,7 +361,7 @@ async def validate_webhook(request: Request):
     response = AdmissionResponse(
         uid=req.uid,
         allowed=allowed,
-        status=None if allowed else status_object
+        status=None if allowed else Status(message=full_message, code=403, status="Failure")
     )
 
     return JSONResponse(content=AdmissionReview(response=response).model_dump(by_alias=True, exclude_none=True))

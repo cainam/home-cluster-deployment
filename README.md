@@ -132,7 +132,7 @@ Kubernetes Dashboard:
 - issue with publishing via HTTP => ISTIO (TLS), see https://github.com/kubernetes/dashboard/issues/9066 https://stackoverflow.com/questions/60281374/accessing-kubernetes-dashboard
 => reject with version > 7.5.0 or alternatives
 
-Networking:
+Networking Istio:
 - Load-balancer <=> Gateway: one to one relationship
 - Gateway <=> VirtualService: one to one relationship
 - VirtualService <=> Application: one to many relationship
@@ -167,13 +167,4 @@ TODO:
 - keepalived.conf: generate file with external IPs, not with statically defined ones
 - kubler: change kubler with root.tar to  multi-image build: requires=[image1, image2], run multi-stage builds for each stage individually with --target to store the builder images
 - kubler: nodejs - build with corepack use flag: (like /etc/portage/package.use => "net-libs/nodejs corepack")
-- kustomize: authorizationpolicy (already in common/kustomize/Auth... ) 
 - security: generate random ports (e.g. for traefik during each deployment) and mention it for security
-- deployment standard: revisionHistory to 3 (less replicasets)
-- network:true required for gateways?
-- 
-- mutating settings:
-1. add to application yaml
-2. create cm per application
-3. read the needed cm by Awebhook
-

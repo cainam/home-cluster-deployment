@@ -54,6 +54,7 @@ software:
         repo: kiali/kiali
   helm:
     version: 3.17.2
+    max_entries: 3
     latest:
       type: gentoo
       params:
