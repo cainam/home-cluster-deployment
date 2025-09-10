@@ -131,8 +131,6 @@
       dest: /etc/init.d/
     - file: haproxy.cfg
       dest: /etc/haproxy/
-    - file: keepalived.conf
-      dest: /etc/keepalived/
     - file: keepalived
       dest: /etc/sysctl.d/
     - file: registries.conf
@@ -217,6 +215,8 @@
       dest: /etc/conf.d/
     - file: conf.d/helm
       dest: /etc/conf.d/
+    - file: keepalived.conf
+      dest: /etc/keepalived/
 
 - name: mount boot
   shell: mountpoint -q /boot || mount /boot

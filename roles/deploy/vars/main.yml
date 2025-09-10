@@ -170,7 +170,6 @@ applications:
         runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
         dataPath: /var/lib/postgresql
         confPath: /conf
-        storageClass: local
       images:
       - postgresql
       storage: 

@@ -3,7 +3,7 @@ supervise_daemon_args="--respawn-delay 10 --respawn-max 0"
 command_background="yes"
 output_log="/var/log/kubelet/kubelet.log"
 error_log="/var/log/kubelet/kubelet.log"
-rc_need=crio
+rc_use=crio
 
 command_args="--container-runtime-endpoint='unix:///var/run/crio/crio.sock' --kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"
 command_args="--kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"

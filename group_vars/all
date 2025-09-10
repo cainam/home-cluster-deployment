@@ -27,6 +27,7 @@ certs:
 
 net:
   domain_external: adm13.dnshome.de
+  local_master_ip: 10.10.10.10
   open_access:
   - /oauth2-hydra/callback
   - /hydra/*

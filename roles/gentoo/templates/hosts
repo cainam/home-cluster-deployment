@@ -10,10 +10,8 @@
 {% endif %}
 {% endfor %}
 
-10.10.10.10 k8s.adm13 helm.adm13 myregistry.adm13
+{{ net.local_master_ip }} k8s.adm13 helm.adm13 myregistry.adm13
 
-192.168.4.100 {{ base_domain }}
-192.168.4.101 ha.{{ base_domain }}
-192.168.4.104 open.{{ base_domain }}
-192.168.4.105 dashboard.{{ base_domain }}
-
+{% for route in net.routes %}
+{{ route.endpointIP }} {{ route.domain }}
+{% endfor -%}
