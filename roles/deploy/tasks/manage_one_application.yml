@@ -1,6 +1,6 @@
 - name: set app fact
   set_fact:
-    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
+    name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
     
 - block:
@@ -8,7 +8,7 @@
     - name: "{{ name_prefix }} handle additional images"
       vars:
         limit_images: "{{ application.value.images }}"
-        default_section: "{{ namespace.key }}"
+        default_section: "{{ k8s_namespace.key }}"
       include_role:
         name: gentoo-image-builder
     when: application.value.images is defined
@@ -16,7 +16,7 @@
   - block:
     - name: "{{ name_prefix }} build helm"
       shell: |
-        . set_env.sh "{{ namespace.key }}"
+        . set_env.sh "{{ k8s_namespace.key }}"
         helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
         --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
         --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
@@ -31,7 +31,7 @@
   
     - name: "{{ name_prefix }} helm repo refresh"
       shell: |
-        . set_env.sh "{{ namespace.key }}"
+        . set_env.sh "{{ k8s_namespace.key }}"
         helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
         helm repo index "${helm_repo_dir}" --url "${helm_url}"
         helm repo update
@@ -78,11 +78,11 @@
 - block:
   - name: "{{ name_prefix }} install or upgrade"
     shell: |
-      . set_env.sh "{{ namespace.key }}"
+      . set_env.sh "{{ k8s_namespace.key }}"
       set -x
-       helm upgrade --install --reset-values --create-namespace -n {{ namespace.key }} {{ application.key }} {{ namespace.key }}/{{ application.value.chart | default(application.key) }} \
-       {{ applications[namespace.key][application.key].helm_options | default('') }} \
-       {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
+       helm upgrade --install --reset-values --create-namespace -n {{ k8s_namespace.key }} {{ application.key }} {{ k8s_namespace.key }}/{{ application.value.chart | default(application.key) }} \
+       {{ applications[k8s_namespace.key][application.key].helm_options | default('') }} \
+       {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[k8s_namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
     register: out
     when: "application.value.install | default(true)"
   when: (application.value.deployment_type| default("helm")) == "helm"
@@ -103,16 +103,16 @@
       ca_state_or_province_name: Some-State
       ca_email_address: a.b@c.de
       ca_requests:
-      - name: "{%- if application.value.network is defined -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ namespace.key }}.svc{%- endif -%}"
-        alt_names: "{%- if application.value.network is defined -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ namespace.key }}.svc']{%- endif -%}"
-      #- name: "{{ application.key }}.{{ namespace.key }}.svc"
+      - name: "{%- if application.value.network is defined -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
+        alt_names: "{%- if application.value.network is defined -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ k8s_namespace.key }}.svc']{%- endif -%}"
+      #- name: "{{ application.key }}.{{ k8s_namespace.key }}.svc"
       #  alt_names: 
-      #  - "{{ application.key }}.{{ namespace.key }}.svc"
+      #  - "{{ application.key }}.{{ k8s_namespace.key }}.svc"
     include_role: 
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
 
-  - name: "{{ title }} - run helper to process kustomize templates"
+  - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
       name: shared_helper
       tasks_from: template_directory.yaml
@@ -120,11 +120,11 @@
       dir_var: build_dir
       template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
       kustom: "{{ application.value.kustom | default({}) | combine({
-         'namespace': namespace.key,
+         'namespace': k8s_namespace.key,
          'name': application.key, 
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
-         'image': application.value.kustom.image | default( namespace.key+'/'+application.key~':'~
+         'image': application.value.kustom.image | default( k8s_namespace.key+'/'+application.key~':'~
             (software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
          }) }}"
   - name: "{{ name_prefix }} kustomize"
@@ -138,7 +138,7 @@
 - block:
   - name: "{{ name_prefix }} manage application requirements"
     include_tasks: manage_application_requirements.yaml
-    with_items: "{{ application.value.requires }}"
+    loop: "{{ application.value.requires }}"
     loop_control:
       loop_var: requires
   when: application.value.requires is defined
@@ -173,7 +173,7 @@
           - name: {{ application.key }}-stripprefix
           services:
           - name: {{ application.key }}
-            namespace: {{ namespace.key }}
+            namespace: {{ k8s_namespace.key }}
             port: {{ application.value.network.svcPort }}
         tls:
           secretName: certs
@@ -222,16 +222,20 @@
               prefix: /dummy
           name: dummy
         - match:
+            - uri:
+                regex: ^/{{ application.value.network.prefix }}/?(.*)$
+          rewrite:
+            uriRegexRewrite:
+                match: ^/{{ application.value.network.prefix }}/?(.*)$
+                rewrite: {{ application.value.network.prefix~'/' | regex_replace('//+', '/') }}\1
           - uri:
               prefix: {{ application.value.network.prefix~'/' }}
           - uri:
               exact: {{ application.value.network.prefix }}
           name: {{ application.key }}
-          rewrite:
-            uri: {{ application.value.network.rewrite }}
           route:
           - destination:
-              host: "{{ application.value.network.svcName | default(application.key) }}.{{ namespace.key }}.svc.cluster.local"
+              host: "{{ application.value.network.svcName | default(application.key) }}.{{ k8s_namespace.key }}.svc.cluster.local"
               {% if application.value.network.svcPort is defined -%}
               port:
                 number: {{ application.value.network.svcPort }} 

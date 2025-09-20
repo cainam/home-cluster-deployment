@@ -139,12 +139,10 @@ Networking Istio:
 - inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
 TODO: 
-- helm\:from_git_to_local.sh: chart_version inheritance applies to dependencies too, manage with parameters to pull_local
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
 - configure tempo in kiali
 - install grafana
-- import script: update Chart.yaml to contain the version of the software
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
@@ -155,16 +153,11 @@ TODO:
 - images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
-- kubler: implement build-tests to check if image is usable
-- kubler: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
+- image-builder: implement build-tests to check if image is usable
+- image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
-- PSA: turn to restricted
-- PSA: remove exemption for home
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
-- github pages: bazel build
 - lifeness and readiness probes: generate from application config
-- keepalived.conf: generate file with external IPs, not with statically defined ones
-- kubler: change kubler with root.tar to  multi-image build: requires=[image1, image2], run multi-stage builds for each stage individually with --target to store the builder images
-- kubler: nodejs - build with corepack use flag: (like /etc/portage/package.use => "net-libs/nodejs corepack")
-- security: generate random ports (e.g. for traefik during each deployment) and mention it for security
+- replace istio by traefik
+- zigbee vs fails for url without /

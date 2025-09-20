@@ -17,7 +17,7 @@
   when: (limit_namespace is not defined or namespace.key == limit_namespace)
   loop: "{{ applications | dict2items }}"
   loop_control:
-    loop_var: namespace
+    loop_var: k8s_namespace
 
 - name: stop here if prepare_only is set
   debug: 
@@ -35,33 +35,33 @@
   when: (limit_namespace is not defined or namespace.key == limit_namespace)
   loop: "{{ applications | dict2items }}"
   loop_control:
-    loop_var: namespace
+    loop_var: k8s_namespace
   run_once: true
 
-- name: "{{ post_inst }}list volumes to keep"
+- name: "list volumes to keep"
   debug:
     msg: "{{ item }}"
   loop: "{{ keep_volumes }}"
   run_once: true
 
-- name: "{{ post_inst }}list of existing volumes"
+- name: "list of existing volumes"
   shell: gluster vol list
   run_once: true
   register: existing_volumes
 
-- name: "{{ post_inst }}determine volumes for deletion"
+- name: "determine volumes for deletion"
   set_fact:
     volume2delete: "{{ existing_volumes.stdout_lines | difference(keep_volumes) }}"
   run_once: true
 
-- name: "{{ post_inst }}list volumes to delete"
+- name: "list volumes to delete"
   debug:
     msg: "{{ item }}"
   loop: "{{ volume2delete }}"
   run_once: true
 
 - block:
-    - name: "{{ post_inst }}purge volumes - get bricks"
+    - name: "purge volumes - get bricks"
       shell: |
         gluster vol info "{{ item }}" | grep "^Brick[0-9]" | cut -d : -f 3- | sort -u
       loop: "{{ volume2delete }}"

@@ -1,7 +1,7 @@
 - name: set app fact
   set_fact:
     app: "{{ application.key }}"
-    name_prefix: "namespace:{{ namespace.key }} app:{{ application.key }} -"
+    name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
   run_once: true
 
 - block:
@@ -23,7 +23,7 @@
   - name: "{{ name_prefix }} replace storage in applications"
     set_fact: 
       applications: "{{ applications | combine(
-         {namespace.key : 
+         {k8s_namespace.key : 
            {application.key: 
               {'storage': storage_new}
           }}, recursive=true)}}"
@@ -35,19 +35,19 @@
   - name: "{{ name_prefix }} storage brick"
     include_tasks: common/storage_brick.yml
     when: application.value.storage is defined
-    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    with_items: "{{ applications[k8s_namespace.key][application.key].storage }}"
     loop_control:
       loop_var: storage
   - name: "{{ name_prefix }} storage"
     include_tasks: common/storage.yml
-    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    with_items: "{{ applications[k8s_namespace.key][application.key].storage }}"
     run_once: true
     loop_control:
       loop_var: storage
   - name: "{{ name_prefix }} install storage content"
     include_tasks: storage_content.yml
     when: storage.config is defined and storage.config
-    with_items: "{{ applications[namespace.key][application.key].storage }}"
+    with_items: "{{ applications[k8s_namespace.key][application.key].storage }}"
     loop_control:
       loop_var: storage
   when: application.value.storage is defined

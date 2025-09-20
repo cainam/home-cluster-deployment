@@ -3,7 +3,6 @@
   - set_fact:
       apps: "{{ applications }}"
       net: "{{ net }}"
-      k8s: "{{ k8s | combine({'mutate': {'name': k8s.mutate, 'namespace': (applications.items() | selectattr('1', 'contains', k8s.mutate) | map(attribute='0') | first)  }}) }}"
       
 # add istio gateways as application to list of applications
   - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
@@ -55,7 +54,7 @@
   - name: apply defaults and requirements
     vars:
       my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
-      rq: "{{ app.requires|default([])+[{'name': app.network.domain|default(base_domain)|replace('.','-'),'namespace': default_gateway_namespace, 'type': 'gateway' }] }}"
+      rq: "{{ (app.requires|default([])|list)+[{'name': app.network.domain|default(base_domain)|replace('.','-'),'namespace': default_gateway_namespace, 'type': 'gateway' }] }}"
       # network_defaults is assigned in each loop to have new random values
       my_dom: "{{ app.network.domain|default(base_domain) }}"
       network_defaults: 
@@ -93,11 +92,11 @@
 
   - set_fact:
       only_apps: "{{[only_apps,]}}"
-    when: only_apps is string
+    when: only_apps is defined and only_apps is string
     
   - set_fact:
       only_ns: "{{[only_ns,]}}"
-    when: only_ns is string
+    when: only_ns is defined and only_ns is string
 
     # if namespace limitation given, add all applications of the namespace(s) to the list of limited applications
   - name: apps from limit_namespace
@@ -119,20 +118,20 @@
     vars:
       my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
       app_deps: |
-        {%- set loop_data={"reqs":[app.name],"app_list": app_list, 'all_req': []} -%}
-        {# length: {{ loop_data.reqs|length }} loop_data: {{ loop_data}}  #}
-        {%- for b in range(0,1000,1)  if (loop_data.reqs|length|int > 0) %} 
-        {%- set current=loop_data.reqs.pop() %}
-        {%- set req =     ((app_list | selectattr('name','eq',current)|list)[0]['requires'])  | default([])  | map(attribute='name' )| list %}
-        {%- set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) %}
-        {%-  set update_reqs_for_loops_with_more_apps = loop_data.update( {'reqs':  loop_data.reqs + req    } ) %}
-        {%-  set update_reqs_for_current_application = loop_data.update( {'all_req':  (loop_data.all_req + full_req) | unique     } ) %}
-        {# current:{{current}} reqs left: {{loop_data.reqs}} req: {{ req }} all_req: {{ loop_data.all_req  }} #}
+        {%- set loop_data={'all_req': []} -%}
+        {%- set reqs = [app.name] -%}
+        {%- for b in range(0,10,1)  if (reqs|length|int > 0) -%}
+        {%- set current=reqs[-1] %}
+        {%- set reqs=reqs[:-1] %}
+        {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
+        {%-   set req = (full_req | map(attribute='name')| list) -%}
+        {%-   set reqs = reqs + req %}
+        {%-  set update_reqs_for_current_application = loop_data.update( {'all_req': (loop_data.all_req+full_req) } ) %}
         {%- endfor %}
-        {{ loop_data.all_req }} 
+        {{ loop_data.all_req|unique }}
       new_app: "{{ app | ansible.utils.remove_keys(target=['requires'])| combine({'requires': app_deps}) }}"
     debug: 
-      msg: "my_idx:{{ my_idx }}\napp_deps:{{app_deps}}\nnew_app:{{new_app}}"
+      msg: "my_idx:{{ my_idx }}\napp_deps:{{app_deps}}\nnew_app:{{new_app}}\ntype of deps:{{ app_deps | type_debug }}"
     loop: "{{ app_list | selectattr('requires', 'defined')  }}"
     loop_control:
       loop_var: app
@@ -141,18 +140,20 @@
     vars:
       my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
       app_deps: |
-        {%- set loop_data={"reqs":[app.name],"app_list": app_list, 'all_req': []} -%}
-        {# length: {{ loop_data.reqs|length }} loop_data: {{ loop_data}}  #}
-        {%- for b in range(0,1000,1)  if (loop_data.reqs|length|int > 0) %} 
-        {%-   set current=loop_data.reqs.pop() %}
-        {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) %}
-        {%-   set req = (full_req | map(attribute='name' )| list) %}
-        {%-   set update_reqs_for_loops_with_more_apps = loop_data.update( {'reqs':  loop_data.reqs + req    } ) %}
-        {%-   set update_reqs_for_current_application = loop_data.update( {'all_req':  (loop_data.all_req + full_req) | unique     } ) %}
+        {%- set loop_data={'all_req': []} -%}
+        {%- set reqs = [app.name] -%}
+        {%- for b in range(0,10,1)  if (reqs|length|int > 0) -%}
+        {%- set current=reqs[-1] %}
+        {%- set reqs=reqs[:-1] %}
+        {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
+        {%-   set req = (full_req | map(attribute='name')| list) -%}
+        {%-   set reqs = reqs + req %}
+        {%-  set update_reqs_for_current_application = loop_data.update( {'all_req': (loop_data.all_req+full_req) } ) %}
         {%- endfor %}
-        {{ loop_data.all_req }} 
-      new_app: "{{ app | ansible.utils.remove_keys(target=['requires']) | combine({'requires': app_deps}) }}"
-    set_fact: 
+        {{ loop_data.all_req|unique }}
+      new_app: "{{ app | ansible.utils.remove_keys(target=['requires']) | combine({'requires': app_deps }) }}"
+    set_fact:
+      napp: "{{ new_app }}"
       app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_app]}}" # replace existing appliation list item by new_entry
     loop: "{{ app_list | selectattr('requires', 'defined')  }}"  # process only those applications which have requirements set
     loop_control:

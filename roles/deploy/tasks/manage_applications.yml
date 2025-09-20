@@ -1,12 +1,12 @@
 - name: set namespace fact
   set_fact:
-    ns: "{{ namespace.key }}"
+    ns: "{{ k8s_namespace.key }}"
 
 - name: "ensure namespace {{ ns }} exists"
   shell: kubectl get namespace {{ ns }} > /dev/null 2>&1 || kubectl create namespace {{ ns }}
 
 - name: "namespace: {{ ns }} - manage applications"
   include_tasks: manage_one_application.yml
-  loop: "{{ namespace.value | dict2items }}"
+  loop: "{{ k8s_namespace.value | dict2items }}"
   loop_control:
     loop_var: application

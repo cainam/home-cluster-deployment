@@ -52,7 +52,6 @@ volumes_to_exempt:
   - helm
   - registry
 
-default_gateway: my-lb-adm13
 default_gateway_namespace: istio-ingress
 
 # supported storage types are longhorn, gluster and local

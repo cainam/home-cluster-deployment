@@ -1,20 +1,26 @@
-kubler:
-  base: "/data/build/kubler"
-  git: https://github.com/edannenberg/kubler.git
+builder:
+  base: "/data/build/"
   build_dir: build
-  kubler_dir: kubler
   default_builder: my_builder
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
-  stage3_date: 20250831T234929Z
-  portage: 20250904
+  stage3_date: 20250914T224854Z
+  portage: 20250915
   portage_container: "portage"
-  builder:
-    configure_builder: |
-      fix_portage_profile_symlink
-      ##emaint binhost -f
-      export emerge_opt="-b -k --binpkg-respect-use=y"
+  env: |
+      ENV PKGDIR="/packages/aarch64-unknown-linux-musl"
+      ENV DISTDIR="/distfiles"
+      ENV FEATURES="-parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
+      ENV EMERGE_DEFAULT_OPTS="-b -k --binpkg-respect-use=y --quiet-build"
+      ENV EMERGE_OPT="-v --tree"
+      ENV USE="bindist threads -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -static-libs"
+      ENV NODOC=true
+      ENV NOINFO=true
+      ENV NOMAN=true
+      ENV LINGUAS="en"
+      ENV ACCEPT_LICENSE="*"
+  configure_builder: |
       cat >> /etc/portage/package.use/builder.conf <<EOF
       sys-devel/binutils gold
       dev-vcs/git -perl
@@ -27,16 +33,16 @@ kubler:
       done
       mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use}
       source /etc/profile
-      emerge ${emerge_opt} --newuse sys-apps/portage app-portage/flaggie app-portage/eix app-portage/gentoolkit
-      # candidates for removal: net-misc/iputils (ping) sys-apps/openrc sys-apps/net-tools app-editors/nano
+      emerge --newuse sys-apps/portage app-portage/gentoolkit dev-vcs/git # app-portage/flaggie app-portage/eix app-portage/gentoolkit
       remove="virtual/service-manager sys-apps/elfix sys-libs/libseccomp dev-python/pypax virtual/udev sys-apps/systemd-utils virtual/dev-manager net-misc/dhcpcd net-misc/iputils sys-apps/openrc sys-apps/net-tools app-editors/nano"
       for p in ${remove}; do
         qlist -Iv "${p}" >> /etc/portage/profile/package.provided
       done
       emerge --unmerge ${remove}
-      emerge ${emerge_opt} @preserved-rebuild
-      emerge ${emerge_opt} --newuse --deep @installed --tree
-      emerge ${emerge_opt} --depclean
-      eix-update
-      set +x
-
+      emerge @preserved-rebuild
+      emerge --newuse --deep @installed --tree
+      emerge --depclean
+  purge_image_root: |
+      rm -rf ${ROOT}/var/db/pkg ${ROOT}/usr/include ${ROOT}/var/cache/* ${ROOT}/var/lib/gentoo ${ROOT}/var/lib/portage ${ROOT}/etc/conf.d ${ROOT}/etc/init.d ${ROOT}/etc/portage
+      [ -d "${ROOT}" ] && find ${ROOT}/ -type f -name "*.a" -delete
+      true

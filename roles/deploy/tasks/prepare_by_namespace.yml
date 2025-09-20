@@ -1,9 +1,9 @@
 - name: set app fact
   set_fact:
-    ns: "{{ namespace.key }}"
+    ns: "{{ k8s_namespace.key }}"
 
 - name: ns:{{ ns }} prepare by application
   include_tasks: prepare_application.yml
-  loop: "{{ namespace.value | dict2items }}"
+  loop: "{{ k8s_namespace.value | dict2items }}"
   loop_control:
     loop_var: application

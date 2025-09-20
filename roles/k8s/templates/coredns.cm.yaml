@@ -4,8 +4,8 @@ data:
    .:53 {
     errors
     hosts {
-    {% for i in net.routes %}
-      {{ net.routes[i].endpointIP }} {{ net.routes[i].domain }}
+    {% for route in net.routes %}
+      {{ route.endpointIP }} {{ route.domain }}
     {% endfor %}
       fallthrough
     }
