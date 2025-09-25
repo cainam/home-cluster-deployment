@@ -213,7 +213,7 @@
       dest: "/etc/conf.d/net"
     - file: conf.d/registry
       dest: /etc/conf.d/
-    - file: conf.d/helm
+    - file: conf.d/home-cluster
       dest: /etc/conf.d/
     - file: keepalived.conf
       dest: /etc/keepalived/
