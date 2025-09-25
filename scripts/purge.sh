@@ -4,8 +4,6 @@ my_name=$(basename $0)
 exec 2>&1
 exec 1>> /var/log/${my_name}.log
 
-- cleanup script (build, containers), etcd defrag, containers (based on pod yaml image: list), registry garbage
-
 # cleanup build directories
 if [ ! -z "${build_dir}" -a "${build_dir}" != "/" ]; then
   find "${build_dir}"/ -type f -mtime +${age_before_purge} -print # -delete if ok
