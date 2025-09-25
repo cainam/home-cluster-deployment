@@ -4,8 +4,6 @@ my_name=$(basename $0)
 exec 2>&1
 exec 1>> /var/log/${my_name}.log
 
-. /usr/local/bin/set_env.sh
-
 # cleanup build directories
 if [ ! -z "${build_dir}" -a "${build_dir}" != "/" ]; then
   find "${build_dir}"/ -type f -mtime +${age_before_purge} -print # -delete if ok
@@ -22,7 +20,7 @@ podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${regis
   #image=$(echo "${image_with_id}" | cut -d : -f 1,2)
   #id=$(echo "${image_with_id}" | cut -d : -f 3)
   echo "${image}" | grep -Eq "${protected_images}" && continue
-  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || echo "delete $image"
+  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm -f "$image")
 done
 
 # registry garbage collect
