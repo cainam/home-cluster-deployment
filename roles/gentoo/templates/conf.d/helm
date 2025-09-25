@@ -1,3 +1,0 @@
-export registry="{{ registry }}"
-export helm_image="${registry}/local/helm:{{ software.helm.version}}"
-export helm_repo_base="{{ helm_repo_base }}"

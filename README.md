@@ -153,7 +153,6 @@ TODO:
 - images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
 - deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
 - deploy/vars/main.yaml: replace images: by new software-to-image mapping
-- image-builder: implement build-tests to check if image is usable
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
@@ -161,3 +160,7 @@ TODO:
 - lifeness and readiness probes: generate from application config
 - replace istio by traefik
 - zigbee vs fails for url without /
+- cleanup script (build, containers), etcd defrag, containers (based on pod yaml image: list), registry garbage
+- sync gentoo-image-builder to git
+- image-builder: implement build-tests to check if image is usable => check if test.log is written, update doc
+- standard: PullPolicy Always

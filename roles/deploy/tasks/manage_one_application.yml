@@ -223,15 +223,11 @@
           name: dummy
         - match:
             - uri:
-                regex: ^/{{ application.value.network.prefix }}/?(.*)$
+                regex: ^{{ application.value.network.prefix }}/?(.*)$
           rewrite:
             uriRegexRewrite:
-                match: ^/{{ application.value.network.prefix }}/?(.*)$
+                match: ^{{ application.value.network.prefix }}/?(.*)$
                 rewrite: {{ application.value.network.prefix~'/' | regex_replace('//+', '/') }}\1
-          - uri:
-              prefix: {{ application.value.network.prefix~'/' }}
-          - uri:
-              exact: {{ application.value.network.prefix }}
           name: {{ application.key }}
           route:
           - destination:

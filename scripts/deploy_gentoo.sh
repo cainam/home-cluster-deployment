@@ -1,11 +1,8 @@
 #!/bin/sh
 
 my_name=$(basename $0)
-run_file="/var/run/${my_name}"
-
 exec 2>&1
 exec 1>> /var/log/${my_name}.log
-
 
 . /usr/local/bin/set_env.sh 
 export ANSIBLE_DIR=/data/mine/home-cluster-deployment

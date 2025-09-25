@@ -29,7 +29,7 @@
       service: {{ item.name }}
       database: {{ item.config.database }} username: {{ item.config.username }}  password: {{ item.config.password }}"
     loop: "{{ application.value.requires }}"
-    when: "{{ item.type is defined and item.type == 'postgresql' }}"
+    when: item.type is defined and item.type == 'postgresql'
   when: application.value.requires is defined
   run_once: true
 

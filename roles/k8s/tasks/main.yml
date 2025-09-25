@@ -106,7 +106,7 @@
 # update if version is newer   
 - name: update k8s
   shell: |
-    KUBECONFIG=/etc/kubernetes/admin.conf kubeadm upgrade apply  --config /etc/kubernetes/kubeadm.conf --yes "{{ k8s_version }}"
+    KUBECONFIG={{ kubeconfig }} kubeadm upgrade apply  --config /etc/kubernetes/kubeadm.conf --yes "{{ k8s_version }}"
   throttle: 1
   when: k8s_upgrade or ('update' in ansible_run_tags)
   

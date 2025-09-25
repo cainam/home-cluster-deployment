@@ -1,13 +1,9 @@
 #!/bin/bash
 
-. /etc/conf.d/helm
+. /etc/conf.d/home-cluster
 
 export category=$1
-export KUBE_EDITOR=vi
-export KUBECONFIG=/etc/kubernetes/admin.conf
-LOCAL_CONF=/data/mine/local
 
-export helm_dir=/shared/helm
 export helm_options="--repository-config $helm_dir/config --repository-cache $helm_dir/cache "
 function helm(){
   export podman_options="-t --rm --network host -v /tmp:/tmp -v /etc/kubernetes:/etc/kubernetes -v /etc/ssl/certs:/etc/ssl/certs -v $helm_dir:$helm_dir --workdir $PWD -v $PWD:$PWD -e KUBECONFIG=$KUBECONFIG"

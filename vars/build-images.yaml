@@ -38,6 +38,9 @@ builder:
       for p in ${remove}; do
         qlist -Iv "${p}" >> /etc/portage/profile/package.provided
       done
+      for p in  sys-devel/gcc app-arch/bzip2; do # equery is more safe, e.g. qlist returns gcc-config when providing gcc
+        equery --quiet --no-color --no-pipe list "${p}" >> /etc/portage/profile/package.provided
+      done
       emerge --unmerge ${remove}
       emerge @preserved-rebuild
       emerge --newuse --deep @installed --tree
@@ -45,4 +48,5 @@ builder:
   purge_image_root: |
       rm -rf ${ROOT}/var/db/pkg ${ROOT}/usr/include ${ROOT}/var/cache/* ${ROOT}/var/lib/gentoo ${ROOT}/var/lib/portage ${ROOT}/etc/conf.d ${ROOT}/etc/init.d ${ROOT}/etc/portage
       [ -d "${ROOT}" ] && find ${ROOT}/ -type f -name "*.a" -delete
+      cat ${ROOT}/etc/ld-musl-aarch64.path
       true
