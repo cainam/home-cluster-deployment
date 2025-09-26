@@ -4,6 +4,8 @@ my_name=$(basename $0)
 exec 2>&1
 exec 1>> /var/log/${my_name}.log
 
+. /usr/local/bin/set_env.sh
+
 # cleanup build directories
 if [ ! -z "${build_dir}" -a "${build_dir}" != "/" ]; then
   find "${build_dir}"/ -type f -mtime +${age_before_purge} -print # -delete if ok
