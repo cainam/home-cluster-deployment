@@ -251,7 +251,7 @@
     - src: "/usr/share/zoneinfo/{{ timezone }}"
       path: /etc/localtime
 
-- name: cron: purge.sh
+- name: cron - purge.sh
   file:
     src: /usr/local/bin/purge.sh
     dest: /etc/cron.daily/purge.sh
