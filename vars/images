@@ -242,7 +242,7 @@ images:
       ( cd ${ROOT}/${HA_DIR}; 
           git clone --depth=1 -b "{{ software['home-assistant'].version }}" https://github.com/home-assistant/core.git
           cd core
-          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt hassil; do # pyudev; do
+          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy; do # pyudev; do
             grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
           done
           echo "home_assistant_intents" >> requirements.txt

@@ -1,6 +1,6 @@
 builder:
   base: "/data/build/"
-  build_dir: build
+  build_dir: work
   default_builder: my_builder
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
