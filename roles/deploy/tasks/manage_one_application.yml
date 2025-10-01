@@ -88,6 +88,8 @@
   when: (application.value.deployment_type| default("helm")) == "helm"
 
 - block:
+  - debug:
+      msg: "alt_names: {%- if application.value.network is defined and application.value.network != false -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ k8s_namespace.key }}.svc']{%- endif -%}"
   - name: "{{ name_prefix }} certificates for internal service"
     vars:
       cert_var: "reg_cert"
@@ -103,11 +105,8 @@
       ca_state_or_province_name: Some-State
       ca_email_address: a.b@c.de
       ca_requests:
-      - name: "{%- if application.value.network is defined -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
-        alt_names: "{%- if application.value.network is defined -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ k8s_namespace.key }}.svc']{%- endif -%}"
-      #- name: "{{ application.key }}.{{ k8s_namespace.key }}.svc"
-      #  alt_names: 
-      #  - "{{ application.key }}.{{ k8s_namespace.key }}.svc"
+      - name: "{%- if application.value.network is defined and application.value.network != false -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
+        alt_names: "{{ application.value.network.hosts | default([application.key~'.'~k8s_namespace.key~'.svc']) }}"
     include_role: 
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
@@ -122,6 +121,7 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
          'name': application.key, 
+         'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
          'image': application.value.kustom.image | default( k8s_namespace.key+'/'+application.key~':'~
@@ -131,7 +131,7 @@
     vars:
       kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
-      kubectl apply -k {{ build_dir }} --force-conflicts --server-side
+      kubectl apply -k {{ build_dir }} --force # -conflicts #--server-side
   when: (application.value.deployment_type| default("helm")) == "kustomize"
   run_once: true
   
@@ -193,7 +193,7 @@
           prefixes:
           - /{{ application.key }}
       EOF
-  when: application.value.network is defined and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
+  when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
 
 # istio
 - block:
@@ -223,11 +223,11 @@
           name: dummy
         - match:
             - uri:
-                regex: ^{{ application.value.network.prefix }}/?(.*)$
+                prefix: {{ application.value.network.prefix | regex_replace('//+', '/') }}
           rewrite:
             uriRegexRewrite:
-                match: ^{{ application.value.network.prefix }}/?(.*)$
-                rewrite: {{ application.value.network.prefix~'/' | regex_replace('//+', '/') }}\1
+                match: ^{{ (application.value.network.prefix~'/') | regex_replace('//+', '/') }}?(.*)$
+                rewrite: {{ (application.value.network.rewrite~'/') | regex_replace('//+', '/') }}\1
           name: {{ application.key }}
           route:
           - destination:
@@ -238,7 +238,7 @@
               {% endif %}
 
       EOF
-  when: application.value.network is defined and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
+  when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
 
 - block:
   - name: "{{ name_prefix }} affinity - label node"

@@ -3,7 +3,7 @@ images:
   tag: "{{ builder.portage }}"
   section: local
   type: gentoo-image-builder
-  test: sh -c 'which busybox'
+  test: sh -c 'busybox sh --help'
   build:
     packages: busybox
     finish_rootfs_build: ln -s usr/lib "${ROOT}/lib" && "${ROOT}"/bin/busybox --install "${ROOT}/bin"
@@ -238,14 +238,16 @@ images:
       emerge app-misc/jq 
     configure_rootfs_build: |
       set -x
-      HA_DIR=/ha && mkdir -p ${ROOT}/${HA_DIR}
+      HA_DIR=/ha && mkdir -p ${ROOT}/${HA_DIR} && ln -s ${ROOT}/${HA_DIR} ${HA_DIR}
       ( cd ${ROOT}/${HA_DIR}; 
           git clone --depth=1 -b "{{ software['home-assistant'].version }}" https://github.com/home-assistant/core.git
           cd core
-          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy; do # pyudev; do
+          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy mutagen; do # pyudev; do
             grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
           done
-          echo "home_assistant_intents" >> requirements.txt
+          for package in home_assistant_intents PyTurboJPEG; do
+            echo "${package}" >> requirements.txt
+          done
             
           for f in requirements.txt homeassistant/package_constraints.txt pyproject.toml homeassistant/helpers/network.py; do
             sed -i -e "/hass-nabucasa/d" -e "/hass_nabucasa/d" "${f}"
@@ -256,11 +258,10 @@ images:
           cp -dp homeassistant/components/default_config/manifest.json homeassistant/components/default_config/manifest.json.org
           jq  -a 'del(.dependencies[] | select(. == ("assist_pipeline","stream","go2rtc","cloud","conversation","zeroconf","usb","ssdp","dhcp","mobile_app","bluetooth") ) )' homeassistant/components/default_config/manifest.json.org > homeassistant/components/default_config/manifest.json
       )
-      ln -s ${ROOT}/${HA_DIR} ${HA_DIR}
       
       VIRTUAL_ENV=/py_env
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
-      pip install -r ${HA_DIR}/core/requirements.txt | tee ${ROOT}/py_env.log
+      pip install -r ${HA_DIR}/core/requirements.txt 2>&1 | tee ${ROOT}/py_env.log
       set +x
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env

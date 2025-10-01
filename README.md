@@ -126,6 +126,8 @@ flash:
 Mosquitto:
 - remove messages flagged for retain: # mosquitto_sub -h localhost -u x -P x -v --retained-only --remove-retained -t 'zigbee2mqtt/Zimmertr/availability' -E
 
+applicationSecurity: allows to configure locally security settings per application which are not pushed to github, e.g. runUser which is then not only used for the concerning securityContext entry of a pod, but also for the storage deployed for it
+
 Kubernetes Dashboard:
 - with update, skip-login was no longer possible, seems Authorization Header is required (https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md ), set-authorization-header can nolonger be used (https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config/)  => somehow set bearer token in oauth2-proxy or istio, see: https://elastisys.com/istio-and-oauth2-proxy-in-kubernetes-for-microservice-authentication/
 - follow https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
@@ -151,16 +153,11 @@ TODO:
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
 - images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
-- deploy/vars/main.yaml: add defaults, e.g. own_git and subdir if not set and default images (see next item too)
-- deploy/vars/main.yaml: replace images: by new software-to-image mapping
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
+- infopage: see if internal_port can only be defined in kustom.yaml files, removal from main.yaml config, maybe: generate random uid + gid for each application in the preparation playbook, but how to solve the uid/gid enforcement in valmut then ... 
 - rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
 - replace istio by traefik
-- zigbee vs fails for url without /
-- cleanup script (build, containers), etcd defrag, containers (based on pod yaml image: list), registry garbage
-- sync gentoo-image-builder to git
-- image-builder: implement build-tests to check if image is usable => check if test.log is written, update doc
-- standard: PullPolicy Always
+- standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py

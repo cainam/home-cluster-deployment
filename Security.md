@@ -23,6 +23,10 @@ Implementation:
 
 NetworkPolicy looks interesting but requires Calicio or Cilium CNI, Falco (runtime security) looks nice
 
+users/groups/permissions:
+settings for runAsUser, runAsGroup, mode for files and directories are added to the application declarations, either defaults or randoms are set or fixed settings from local secrets file are used
+This are only used if configured for the ValidatingWebhook/MutatingWebhook, if not the webhook enforces its own settings
+
 longhorn-system and kube-system seem to be implicitly exempted from PodSecurity. As this is not visible outside the cluster, only by its effects, both are explicitly exempted in the AdmissionController
 - audit log Policy: first match wins, so granular exclusions have to be early in the policy
 

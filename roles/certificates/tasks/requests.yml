@@ -20,6 +20,9 @@
           when:
             - request.passphrase is not defined
 
+    - debug: 
+        msg: "request.alt_names type: {{ request.alt_names | type_debug }}" 
+
     - name: requests | Generate requested certificate signing request
       community.crypto.openssl_csr:
         path: "{{ ca_path }}/{{ ca_requests_path }}/{{ request.name | default(request) }}.csr"

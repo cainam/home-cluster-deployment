@@ -9,8 +9,6 @@
     files_dirs: "{{      lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" -type d').split('\n')|reject('match', '^$')  }}"
     templates_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
     files_files: "{{     lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
-#    list_templates: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
-#    list_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_files_path +'\" ] || find \"'+ app_cfg_files_path +'\" -type d', wantlist=True)|reject('match', '^$')  }}"
 
 - name: determine destination hosts
   set_fact:
@@ -40,9 +38,9 @@
       path: "{{ dest_base_dir }}{{ item | replace (app_cfg_templates_path,'') }}"
       recurse: true
       state: directory
-      owner: "{{ applicationSecurity[application.key].runAsUser | default('root') }}"
-      group: "{{ applicationSecurity[application.key].runAsGroup | default('root') }}"
-      mode: "{{ applicationSecurity[application.key].directoryMode | default('u=rwx,g=rx,o=-rwx') }}"
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.directoryMode }}"
     loop: "{{ templates_dirs }}"
 
   - name: ensure destination directory exists for files
@@ -50,9 +48,9 @@
       path: "{{ dest_base_dir }}{{ item | replace (app_cfg_files_path,'') }}"
       recurse: true
       state: directory
-      owner: "{{ applicationSecurity[application.key].runAsUser | default('root') }}"
-      group: "{{ applicationSecurity[application.key].runAsGroup | default('root') }}"
-      mode: u=rwx,g=rx,o=rx
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.directoryMode }}"
     loop: "{{ files_dirs }}"
 
   - name: dbg files_dirs
@@ -69,18 +67,23 @@
 
   - name: create config from templates
     template:
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.fileMode }}"
       src: "{{ item }}"
       dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }}"
     loop: "{{ templates_files }}"
 
   - name: create config from files
     copy:
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.fileMode }}"
       src: "{{ item }}"
       dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }}"
     loop: "{{ files_files }}"
   
   when: "inventory_hostname in dest"
-#  run_once: true
 
 - name: Example using fail and when together
   ansible.builtin.fail:

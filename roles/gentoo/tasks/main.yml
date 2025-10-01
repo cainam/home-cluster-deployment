@@ -178,24 +178,9 @@
       {% endfor %}
     dest: /etc/ssh/ssh_known_hosts
 
-#- name: get root device
-#  shell: |
-#    l=$(blkid --output export --match-token LABEL=root | grep ^PARTUUID=)
-#    n_l=$(echo "${l}" | wc -l )
-#    if [ "${l}" = "" ];then
-#      echo "/dev/mmcblk0p2"
-#    elif [ $n_l -eq 1 ];then
-#      echo "${l}"
-#    else
-#      exit -1
-#    fi
-#  changed_when: false
-#  register: root_dev
-
 - name: deploy from templates
   vars: 
     data_uuid: '{{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
-#    boot_device: '{{ ansible_mounts | selectattr("mount","==","/boot") | map(attribute="uuid") | default(default_boot_device, true) }}' # replaced by static host variables boot_uuid in inventory file, reason: tricky to handle device names and prefixes such as UUID= and UUID is not available when /boot is not mounted
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"

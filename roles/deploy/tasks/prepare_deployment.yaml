@@ -57,7 +57,12 @@
       rq: "{{ (app.requires|default([])|list)+[{'name': app.network.domain|default(base_domain)|replace('.','-'),'namespace': default_gateway_namespace, 'type': 'gateway' }] }}"
       # network_defaults is assigned in each loop to have new random values
       my_dom: "{{ app.network.domain|default(base_domain) }}"
-      network_defaults: 
+      security:
+        runAsUser: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
+        runAsGroup: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
+        directoryMode: "{{ applicationSecurity[app.name].directoryMode | default('u=rwx,g=-rwx,o=-rwx') }}"
+        fileMode: "{{ applicationSecurity[app.name].fileMode| default('600') }}"
+      network_defaults:
         rewrite: "/"
         svcPort: "{{ 65536|random(1024) }}"
         svcName: "{{ app.name }}"
@@ -70,11 +75,12 @@
           {%- endif -%}
           {{ domain_list }}
       networkAsDict: "{{ (app.network is boolean) | ternary({}, app.network) }}"
-      network: "{{ network_defaults | combine(networkAsDict, recursive=true) }}"
-      new_entry: "{{app  | combine({'requires': rq, 'network': network }, recursive=true) }}"
+      Xnetwork: "{% if app.network is defined %}{{ network_defaults | combine(networkAsDict, recursive=true) }}{% else %}false|bool{% endif %}"
+      network: "{{ network_defaults | combine(networkAsDict, recursive=true) if app.network is defined else false|bool }}"
+      new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security }, recursive=true) }}"
     set_fact:
       app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_entry]}}" # replace existing appliation list item by new_entry
-    loop: "{{ app_list | selectattr('network', 'defined')  }}"
+    loop: "{{ app_list }}"
     loop_control:
       loop_var: app
     # failed_when: true

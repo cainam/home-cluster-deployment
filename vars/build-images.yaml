@@ -8,6 +8,7 @@ builder:
   stage3_date: 20250914T224854Z
   portage: 20250915
   portage_container: "portage"
+  image_root: /image-root
   env: |
       ENV PKGDIR="/packages/aarch64-unknown-linux-musl"
       ENV DISTDIR="/distfiles"
@@ -45,8 +46,9 @@ builder:
       emerge @preserved-rebuild
       emerge --newuse --deep @installed --tree
       emerge --depclean
-  purge_image_root: |
+  finish_build: |
+      qlist -C -I -v --root ${ROOT}/ > /package.provided-${image}
+      cp -rdp ${ROOT}/var/db/pkg /pkg-${image} 
       rm -rf ${ROOT}/var/db/pkg ${ROOT}/usr/include ${ROOT}/var/cache/* ${ROOT}/var/lib/gentoo ${ROOT}/var/lib/portage ${ROOT}/etc/conf.d ${ROOT}/etc/init.d ${ROOT}/etc/portage
       [ -d "${ROOT}" ] && find ${ROOT}/ -type f -name "*.a" -delete
-      cat ${ROOT}/etc/ld-musl-aarch64.path
       true

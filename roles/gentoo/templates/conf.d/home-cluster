@@ -6,7 +6,6 @@ export KUBE_EDITOR=vi
 export KUBECONFIG={{ kubeconfig }}
 LOCAL_CONF=/data/mine/local
 export helm_dir={{ shared_mounts }}/helm
-build_host
 build_dir={{ builder.base }}/{{ builder.build_dir }}
 foundation_dir={{ builder.base }}/data
 portage_release={{ builder.portage }}

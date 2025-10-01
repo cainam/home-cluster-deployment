@@ -63,7 +63,7 @@
   - name: "{{ title_app_reqs }}create user"
     postgresql_user:
       login_host: localhost
-      port: "{{ read_port.stdout }}"
+      login_port: "{{ read_port.stdout }}"
       login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
       name: "{{ requires.config.username }}"

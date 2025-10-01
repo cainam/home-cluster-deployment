@@ -110,8 +110,6 @@ applications:
         size: 1Gi
     home-assistant:
       deployment_type: kustomize
-      kustom:
-        runAsGroup: "{{ applicationSecurity['home-assistant'].runAsGroup}}"
       images:
       - home-assistant
       storage:
