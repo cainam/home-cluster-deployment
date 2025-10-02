@@ -148,7 +148,6 @@ TODO:
 - migrate prometheus-server volume to longhorn
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
-- ssh keys and authorized_keys management in playbook
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on gateway
 - generate playbook doc with tags described
@@ -156,8 +155,10 @@ TODO:
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - infopage: see if internal_port can only be defined in kustom.yaml files, removal from main.yaml config, maybe: generate random uid + gid for each application in the preparation playbook, but how to solve the uid/gid enforcement in valmut then ... 
-- rework ssh keys management: /etc/ssh/ssh_known_hosts to not require /root/.ssh/known_hosts, inclusion of gentoo-binhost 
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
 - replace istio by traefik
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
+
+- ssh_keys: key files and authorized keys for root
+

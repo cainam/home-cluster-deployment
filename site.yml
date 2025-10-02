@@ -13,7 +13,7 @@
     PATH: "{{ path }}"
     registry: "{{ registry }}"
   pre_tasks:
-  - name: include software
+  - name: load configuration
     include_vars: "{{ item }}"
     tags:
     - deploy

@@ -173,10 +173,26 @@
 - name: create /etc/ssh/known_hosts
   copy:
     content: |
-      {% for a in ssh_host_keys %}
-      {{ a }}
+      {% for i in ssh_host_keys %}
+      {{i~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
+      {{(i| split('.') | first)~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
+      {% if hostvars[i].alt_names is defined %}
+      {% for j in hostvars[i].alt_names %}
+      {{j~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
       {% endfor %}
+      {% endif %}
+      {% endfor %}   
     dest: /etc/ssh/ssh_known_hosts
+
+- name: host key public
+  copy:
+    content: "{{ ssh_host_keys[inventory_hostname].type~' '~ssh_host_keys[inventory_hostname].public}}"
+    dest: /etc/ssh/ssh_host_{{ ssh_host_keys[inventory_hostname].type }}_key.pub
+
+- name: host key private
+  copy:
+    content: "{{ ssh_host_keys[inventory_hostname].type~' '~ssh_host_keys[inventory_hostname].private}}"
+    dest: /etc/ssh/ssh_host_{{ ssh_host_keys[inventory_hostname].type }}_key
 
 - name: deploy from templates
   vars: 
@@ -247,13 +263,13 @@
     src: /usr/local/bin/deploy_gentoo.sh
     dest: /etc/cron.daily/deploy_gentoo.sh
     state: link
-  when: gentoo_build is defined
+  when: alt_names is defined and alt_names.gentoo_build is defined
 
 - name: unlink deploy cron
   file:
     dest: /etc/cron.daily/deploy_gentoo.sh
     state: absent
-  when: gentoo_build is not defined
+  when: alt_names is defined and alt_names.gentoo_build is not defined
 
 - name: set date if year is 1970
   shell: date +%Y | ( grep -q "^1970$" && date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" ) || echo "date ok"
@@ -309,7 +325,7 @@
   
   - name: emerge build
     shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-    when: gentoo_build is defined and 'emerge' in ansible_run_tags
+    when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
 
   - name: link check_and_fix.sh cron
     file:
@@ -319,7 +335,7 @@
  
   - name: emerge deploy
     shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-    when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+    when: alt_names is defined and alt_names.gentoo_build is not defined and 'emerge' in ansible_run_tags
   
   always:
   - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
@@ -330,7 +346,7 @@
   
 - name: eclean distfiles
   shell: eclean --deep distfiles
-  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+  when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
  
 - name: eclean packages
   shell: eclean packages
@@ -340,11 +356,11 @@
 
 - name: emerge preserved rebuild
   shell: emerge @preserved-rebuild
-  when: gentoo_build is defined and 'emerge' in ansible_run_tags
+  when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
 
 - name: emerge preserved rebuild
   shell: emerge @preserved-rebuild
-  when: gentoo_build is not defined and 'emerge' in ansible_run_tags
+  when: alt_names is defined and alt_names.gentoo_build is not defined and 'emerge' in ansible_run_tags
 
 - name: install additional modules from Ansible Galaxy
   shell: ansible-galaxy collection install gluster.gluster --upgrade #--collections-path /usr/lib/python3.12/site-packages/ansible_collections

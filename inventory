@@ -1,8 +1,9 @@
 all:
   hosts:
     k8s-3-int.adm13:
-      gentoo_build:
-      gentoo_binhost:
+      alt_names:
+        gentoo_build:
+        gentoo-binhost:
       boot_root: PARTUUID=10014c66-02
       boot_uuid: 4C9E-34AC
     k8s-1-int.adm13:
