@@ -141,6 +141,7 @@
     loop: "{{ app_list | selectattr('requires', 'defined')  }}"
     loop_control:
       loop_var: app
+    when: "'debug' in ansible_run_tags"
 
   - name: set - recursive requirements
     vars:

@@ -161,4 +161,4 @@ TODO:
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 
 - ssh_keys: key files and authorized keys for root
-
+- image tags: default is software.version, but could a next-level default be configured if no software version is found to fall back to builder.portage?

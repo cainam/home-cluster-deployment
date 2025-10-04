@@ -177,6 +177,7 @@
       {{i~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
       {{(i| split('.') | first)~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
       {% if hostvars[i].alt_names is defined %}
+      # alt_names is defined
       {% for j in hostvars[i].alt_names %}
       {{j~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
       {% endfor %}

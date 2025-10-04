@@ -24,7 +24,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.6.1
+    version: 2.6.2
     latest:
       type: github
       params:
@@ -38,7 +38,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2025.9.4"
+    version: "2025.10.0"
     installed:
       pattern: "home-assistant:"
     latest:

@@ -122,9 +122,11 @@ images:
       rm -rf distribution /root/.??* /root/*
 
 - name: nodejs
-  tag: 2025.4
+  tag: "{{ builder.portage }}"
   section: local
   type: gentoo-image-builder
+  env:
+     XXXLDFLAGS: "-static-libgcc -static-libstdc++"
   requires:
   - base
   build:
@@ -137,7 +139,6 @@ images:
       #provide_package sys-devel/gcc
       ln -s usr/lib "${ROOT}/lib"
     finish_rootfs_build: |
-      copy_gcc_libs
       ln -s ../../bin/env "${ROOT}/usr/bin/env"
 
 - name: idp
@@ -217,7 +218,7 @@ images:
     finish_rootfs_build: mkdir -p "${ROOT}/usr/local/lib"; for lib in $(find /usr/lib/ -name libgomp.so.1); do cp "${lib}" "${ROOT}/usr/local/lib"; done
 
 - name: ha-base
-  tag: 2025.06
+  tag: 2025.10
   section: home
   requires:
   - python3

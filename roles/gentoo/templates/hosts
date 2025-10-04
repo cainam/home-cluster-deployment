@@ -6,7 +6,7 @@
 
 {% for hname in hostvars +%}
 {% if hname != 'localhost' %}
-{{ hostvars[hname].my_cluster_ip }} {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if 'gentoo-binhost' in hostvars[hname].alt_names %}gentoo-binhost{% endif %}
+{{ hostvars[hname].my_cluster_ip }} {{ hostvars[hname].inventory_hostname }} {{ hostvars[hname].inventory_hostname | split('.') | first }} {% if hostvars[hname].alt_names is defined and 'gentoo-binhost' in hostvars[hname].alt_names %}gentoo-binhost{% endif %}
 {% endif %}
 {% endfor %}
 

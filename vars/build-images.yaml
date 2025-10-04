@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
-  stage3_date: 20250914T224854Z
-  portage: 20250915
+  stage3_date: 20250928T201839Z
+  portage: 20251001
   portage_container: "portage"
   image_root: /image-root
   env: |
@@ -16,11 +16,13 @@ builder:
       ENV EMERGE_DEFAULT_OPTS="-b -k --binpkg-respect-use=y --quiet-build"
       ENV EMERGE_OPT="-v --tree"
       ENV USE="bindist threads -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -static-libs"
+      ENV LDFLAGSXXX="-static-libgcc -static-libstdc++"
       ENV NODOC=true
       ENV NOINFO=true
       ENV NOMAN=true
       ENV LINGUAS="en"
       ENV ACCEPT_LICENSE="*"
+      ENV MAKEOPTS="-j3"
   configure_builder: |
       cat >> /etc/portage/package.use/builder.conf <<EOF
       sys-devel/binutils gold
