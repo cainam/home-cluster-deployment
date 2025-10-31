@@ -1,4 +1,6 @@
 - name: handle additional images
+  vars:
+    dry_run: false
   include_role: 
     name: gentoo-image-builder
 

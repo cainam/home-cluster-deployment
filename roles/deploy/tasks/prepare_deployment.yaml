@@ -5,16 +5,15 @@
       net: "{{ net }}"
       
 # add istio gateways as application to list of applications
-  - name: combine gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
+  - name: combine istio gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
     set_fact:
       apps: |
         {%- set domain_list = [item.domain] -%}
         {%- if item.endpointIP is defined -%}
         {%- set _d = domain_list.append(net.domain_external) -%}
         {%- endif -%}
-        {{ apps | combine( {default_gateway_namespace: {item.domain|replace('.','-'): gateway_install | combine(
+        {{ apps | combine( {net.default_gateway_namespace: {item.domain|replace('.','-'): gateway_install | combine(
                      {'network':{ 
-                          'endpointIP': item.endpointIP,
                           'hosts': domain_list,
                           'domain': item.domain
                      }})
@@ -54,9 +53,17 @@
   - name: apply defaults and requirements
     vars:
       my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
-      rq: "{{ (app.requires|default([])|list)+[{'name': app.network.domain|default(base_domain)|replace('.','-'),'namespace': default_gateway_namespace, 'type': 'gateway' }] }}"
+      my_dom: "{{ app.network.domain|default(net.base_domain) }}"
+      my_route: "{{ net.routes | selectattr('domain','equalto',my_dom)|first }}"
+      my_gw_rq: >-
+        {{
+         { 'name': ('traefik' if my_route.gateway == 'traefik' else my_dom | replace('.', '-')),
+         'namespace': (
+          app_list | selectattr('name', 'equalto', 'traefik') | first).namespace if my_route.gateway == 'traefik'
+          else net.default_gateway_namespace if my_route.gateway == 'istio'  else invalid
+         } | combine({'type': 'gateway'}) }}
+      rq: "{{ (app.requires|default([])|list)+[my_gw_rq] }}"
       # network_defaults is assigned in each loop to have new random values
-      my_dom: "{{ app.network.domain|default(base_domain) }}"
       security:
         runAsUser: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
         runAsGroup: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
@@ -67,23 +74,21 @@
         svcPort: "{{ 65536|random(1024) }}"
         svcName: "{{ app.name }}"
         prefix: "{{ '/'~app.name}}"
-        domain: "{{ base_domain }}"
+        domain: "{{ my_dom  }}"
         hosts: |
           {%- set domain_list = [my_dom] -%}
-          {%- if (net.routes | selectattr('domain','equalto',my_dom)|first).endpointIP is defined -%}
+          {%- if my_route.endpointIP is defined -%}
           {%- set _d = domain_list.append(net.domain_external) -%}
           {%- endif -%}
           {{ domain_list }}
       networkAsDict: "{{ (app.network is boolean) | ternary({}, app.network) }}"
-      Xnetwork: "{% if app.network is defined %}{{ network_defaults | combine(networkAsDict, recursive=true) }}{% else %}false|bool{% endif %}"
       network: "{{ network_defaults | combine(networkAsDict, recursive=true) if app.network is defined else false|bool }}"
-      new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security }, recursive=true) }}"
+      new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]) }, recursive=true) }}"
     set_fact:
       app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_entry]}}" # replace existing appliation list item by new_entry
     loop: "{{ app_list }}"
     loop_control:
       loop_var: app
-    # failed_when: true
 
 ## build only_apps list from limit_application and limit_namespace variables
   - name: assign limit_namespace to fact
@@ -149,7 +154,7 @@
       app_deps: |
         {%- set loop_data={'all_req': []} -%}
         {%- set reqs = [app.name] -%}
-        {%- for b in range(0,10,1)  if (reqs|length|int > 0) -%}
+        {%- for b in range(0,4,1)  if (reqs|length|int > 0) -%}
         {%- set current=reqs[-1] %}
         {%- set reqs=reqs[:-1] %}
         {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}

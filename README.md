@@ -27,14 +27,7 @@ solution: a combination of dynamic variables and a stack of them ensures that a 
 
 # notes on this ansible playbook
 Usage example: 
-    `# ansible-playbook  -i $PWD/inventory $PWD/site.yml --skip-tags k8s_images`
-
-New install:
-- stage3+portage+git-clone-firmware
-- enable net.end0+sshd
-- sync /lib/firmware/bmrc and /cypress and /var/db/repos/gentoo
-
-Usage:
+- `# ansible-playbook  -i $PWD/inventory $PWD/site.yml --skip-tags k8s_images`
 - build a dedicated image: eval $my_ansible site.yml --tags=images-only --extra-vars \''{"limit_images":["fastapi"]}'\'
 
 Notes:
@@ -141,24 +134,23 @@ Networking Istio:
 - inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
 TODO: 
+- auth-operator: fix:
+[2025-10-21 18:58:03,606] kopf._cogs.clients.w [ERROR   ] Request attempt #1/9 failed; will retry: GET https://10.96.0.1:443/api/v1/namespaces -> APIForbiddenError('namespaces is forbidden: User "system:serviceaccount:auth:auth-operator" cannot list resource "namespaces" in API group "" at the cluster scope', {'kind': 'Status', 'apiVersion': 'v1', 'metadata': {}, 'status': 'Failure', 'message': 'namespaces is forbidden: User "system:serviceaccount:auth:auth-operator" cannot list resource "namespaces" in API group "" at the cluster scope', 'reason': 'Forbidden', 'details': {'kind': 'namespaces'}, 'code': 403})
+
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
-- configure tempo in kiali
 - install grafana
-- migrate prometheus-server volume to longhorn
-- postgresql major version update: include docker build in playbook, parameterize versions and other vars set
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-- security: log all incoming connections on gateway
+- mutate: kube-flannel + replace helm by kustomize
+- security: log all incoming connections on gateway (traefik+istio log access to file => OpenTelemetry collector => Loki ) => see Security.md
 - generate playbook doc with tags described
-- images requires: include optional section and tag, but also helm options to update images: - imaga => image_helm: <repository>, tag_helm: <tag>
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
-- infopage: see if internal_port can only be defined in kustom.yaml files, removal from main.yaml config, maybe: generate random uid + gid for each application in the preparation playbook, but how to solve the uid/gid enforcement in valmut then ... 
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
-- replace istio by traefik
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 
-- ssh_keys: key files and authorized keys for root
-- image tags: default is software.version, but could a next-level default be configured if no software version is found to fall back to builder.portage?
+
+- postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
+=> how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual

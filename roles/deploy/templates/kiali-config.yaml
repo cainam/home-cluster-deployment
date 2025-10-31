@@ -6,7 +6,7 @@ external_services:
   tracing:
     in_cluster_url: http://jaeger-query.tools:16685/jaeger
     enabled: true
-    url: https://{{ base_domain }}/jaeger
+    url: https://{{ net.base_domain }}/jaeger
   istio:
     root_namespace: istio-system
     component_status:

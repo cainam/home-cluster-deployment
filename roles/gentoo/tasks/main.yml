@@ -148,7 +148,7 @@
     - file: locale.gen
       dest: /etc/
 
-- name: include secrets (wlan, ssh_host_keys)
+- name: include secrets (wlan, ssh_keys)
   include_vars: "{{ local_only }}/secrets"
 
 - name: first line in iwd security file
@@ -170,30 +170,48 @@
     regexp: '^PreSharedKey='
     line: "PreSharedKey={{ PreSharedKey }}"
 
-- name: create /etc/ssh/known_hosts
+- name: /etc/ssh/known_hosts
   copy:
     content: |
-      {% for i in ssh_host_keys %}
-      {{i~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
-      {{(i| split('.') | first)~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
+      {% for i in ssh_keys.hosts %}
+      {{i~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
+      {{(i| split('.') | first)~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
       {% if hostvars[i].alt_names is defined %}
       # alt_names is defined
       {% for j in hostvars[i].alt_names %}
-      {{j~' '~ssh_host_keys[i].type~' '~ssh_host_keys[i].public}}
+      {{j~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
       {% endfor %}
       {% endif %}
       {% endfor %}   
     dest: /etc/ssh/ssh_known_hosts
 
-- name: host key public
+- name: ssh keys
   copy:
-    content: "{{ ssh_host_keys[inventory_hostname].type~' '~ssh_host_keys[inventory_hostname].public}}"
-    dest: /etc/ssh/ssh_host_{{ ssh_host_keys[inventory_hostname].type }}_key.pub
+    content: "{{ item.content }}"
+    dest: "{{ item.dest }}"
+  loop:
+  - content: "{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
+    dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key.pub
+  - content: "{{ ssh_keys.hosts[inventory_hostname].private}}"
+    dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key
+  - content: "ssh-{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].admin_pub~' root@'~inventory_hostname }}"
+    dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}.pub
+  - content: "{{ ssh_keys.hosts[inventory_hostname].admin_key }}"
+    dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}
 
-- name: host key private
+- name: authorized_keys
   copy:
-    content: "{{ ssh_host_keys[inventory_hostname].type~' '~ssh_host_keys[inventory_hostname].private}}"
-    dest: /etc/ssh/ssh_host_{{ ssh_host_keys[inventory_hostname].type }}_key
+    content: |
+      {% for i in ssh_keys.hosts %}
+      ssh-{{ ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].admin_pub~' root@'~i }}
+      {% if ssh_keys.remote_admin is defined %}
+      {% for j in ssh_keys.remote_admin %}
+      {{ j }}
+      {% endfor %}
+      {% endif %}
+      {% endfor %}
+    dest: /root/.ssh/authorized_keys
+
 
 - name: deploy from templates
   vars: 
@@ -286,15 +304,13 @@
   shell: |
     if [ ! -d "/var/db/repos/gentoo/.git" ]; then
       profile_dir=/var/db/repos/gentoo/profiles
+      binpkgs="/var/cache/binpkgs"
       rsync -a {{ ansible_controller_hostname }}:${profile_dir} /tmp
       mv /etc/portage/make.profile /etc/portage/make.profile.bck || true
       ln -s /tmp/profiles/default/linux/arm64/23.0 /etc/portage/make.profile
-      rsync -a {{ ansible_controller_hostname }}:/var/cache/binpkgs/Packages /var/cache/binpkgs/Packages
- 
-      binpkgs="/var/cache/binpkgs"
+      rsync -a {{ ansible_controller_hostname }}:${binpkgs}/Packages ${binpkgs}/Packages
       atoms=$(USE="adns alt-svc ftp hsts http2 http3 httpsrr imap openssl pop3 psl quic smtp ssl tftp websockets" ACCEPT_LICENSE="*" emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e 's/-[0-9].*$//g')
       atoms_iwd=$(ACCEPT_LICENSE="*" emerge -1 --usepkg --pretend net-wireless/iwd 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e "s/-[0-9].*$//g")
-      #atoms="$(ACCEPT_LICENSE='*' emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep 'binary  N' | cut -d ']' -f 2 | cut -d ' ' -f 2 | sed -e 's/-[0-9].*$//g'")
       for atom in ${atoms} ${atoms_iwd}; do
         pkg_dir=${binpkgs}/${atom}
         mkdir -p ${pkg_dir}
@@ -302,7 +318,7 @@
         ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
       done
       rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
-      rsync -a k8s-2-int.adm13:/lib/firmware /lib
+      rsync -a {{ ansible_controller_hostname }}:/lib/firmware /lib
       /etc/init.d/dbus start
       /etc/init.d/iwd start
       rm /etc/portage/make.profile && mv /etc/portage/make.profile.bck /etc/portage/make.profile || true
@@ -311,7 +327,6 @@
 - name: emerge sync
   shell: emerge --sync
   ignore_errors: true
-#  when: "'emerge' in ansible_run_tags" # instead of using tags:, because it is not possible to use never inside here, when it is already used on the outside
 
 - name: portage profile
   shell: export LC_ALL=C && eselect profile show && eselect profile set default/linux/arm64/23.0 #/split-usr
@@ -336,7 +351,7 @@
  
   - name: emerge deploy
     shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-    when: alt_names is defined and alt_names.gentoo_build is not defined and 'emerge' in ansible_run_tags
+    when: (alt_names is not defined or (alt_names is defined and alt_names.gentoo_build is not defined)) and 'emerge' in ansible_run_tags
   
   always:
   - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)

@@ -15,8 +15,9 @@ builder:
       ENV FEATURES="-parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
       ENV EMERGE_DEFAULT_OPTS="-b -k --binpkg-respect-use=y --quiet-build"
       ENV EMERGE_OPT="-v --tree"
-      ENV USE="bindist threads -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -static-libs"
-      ENV LDFLAGSXXX="-static-libgcc -static-libstdc++"
+      ENV USE="bindist threads -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses "
+      ENV static_libs_use="-static-libs"
+      ENV LDFLAGS="-static-libgcc -static-libstdc++"
       ENV NODOC=true
       ENV NOINFO=true
       ENV NOMAN=true
@@ -31,6 +32,10 @@ builder:
       */* PYTHON_TARGETS: -* python3_13
       */* PYTHON_SINGLE_TARGET: -* python3_13
       EOF
+      # overlay
+      mkdir -p /etc/portage/repos.conf/
+      echo -e "[local]\nlocation = /portage-local\npriority = 9999" > /etc/portage/repos.conf/local.conf
+
       for remove_me in debug doc kerberos ldap pam perl systemd tcl test su seccomp udev systemd; do 
         echo "*/* -${remove_me}" >> /etc/portage/package.use/builder.conf
       done

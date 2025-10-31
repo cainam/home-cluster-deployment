@@ -2,17 +2,20 @@
   set_fact:
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
-    
+    images_details_var: "image_details"
+
 - block:
   - block:
     - name: "{{ name_prefix }} handle additional images"
       vars:
         limit_images: "{{ application.value.images }}"
         default_section: "{{ k8s_namespace.key }}"
+        dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
       include_role:
         name: gentoo-image-builder
-    when: application.value.images is defined
+  when: application.value.images is defined
 
+- block:
   - block:
     - name: "{{ name_prefix }} build helm"
       shell: |
@@ -120,7 +123,8 @@
       template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
-         'name': application.key, 
+         'name': application.key,
+         'images': lookup('vars', images_details_var),
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
@@ -138,48 +142,17 @@
 - block:
   - name: "{{ name_prefix }} manage application requirements"
     include_tasks: manage_application_requirements.yaml
-    loop: "{{ application.value.requires }}"
+    loop: "{{ application.value.requires|default([]) }}"
     loop_control:
-      loop_var: requires
-  when: application.value.requires is defined
+      loop_var: rq
 
 - name: "{{ name_prefix }} undef application vars again"
   set_fact:
     "{{ item.key }}": !!null # "{{ undef() }}" doesn't work for facts, so nulling it instead
-  loop: "{{ application.value.vars | dict2items }}"
-  when: application.value.vars is defined
+  loop: "{{ application.value.vars | default({}) | dict2items }}"
   
 # traefik
 - block:
-  - name: "{{ name_prefix }} ingressroute"
-    shell: | 
-      kubectl apply -f - <<EOF
-      apiVersion: traefik.io/v1alpha1
-      kind: IngressRoute
-      metadata:
-        name: "{{ application.key }}-{{ item.name }}"
-        namespace: gateway
-      spec:
-        entryPoints:
-        - websecure
-        routes:
-        - kind: Rule
-          match: Host("{% if item.name != 'ext' -%}traefik.{% endif -%}{{ item.domain }}") && PathPrefix("/{{ application.key }}/")
-          middlewares:
-          {% if item.name  == 'ext' -%}
-          - name: redirect-rewriter
-          {% endif -%}
-          - name: oauth2-proxy
-          - name: {{ application.key }}-stripprefix
-          services:
-          - name: {{ application.key }}
-            namespace: {{ k8s_namespace.key }}
-            port: {{ application.value.network.svcPort }}
-        tls:
-          secretName: certs
-      EOF
-    loop: "{{ net.routes }}"
-    
   - name: "{{ name_prefix }} Middleware stripprefix"
     shell: | 
       kubectl apply -f - <<EOF
@@ -193,6 +166,41 @@
           prefixes:
           - /{{ application.key }}
       EOF
+    when: '"no strip" not in application.value.flags'
+  - name: "{{ name_prefix }} ingressroute"
+    vars:
+      route: "{{ net.routes | selectattr('domain','equalto',application.value.network.domain)|first }}"
+    shell: | 
+      kubectl apply -f - <<EOF
+      apiVersion: traefik.io/v1alpha1
+      kind: IngressRoute
+      metadata:
+        name: "{{ application.key }}-{{ item }}"
+        namespace: gateway
+      spec:
+        entryPoints:
+        - websecure
+        routes:
+        - kind: Rule
+          match: Host("{{ route.domain if item == 'int' else net.domain_external }}") && PathPrefix("{{ application.value.network.prefix | default('/'~application.key) }}")
+          middlewares:
+          {% if item  == 'ext' -%}
+          - name: redirect-rewriter
+          {% endif -%}
+          {% if application.key not in net.open_services -%}
+          - name: oauth2-proxy
+          {% endif -%}
+          {% if 'no strip' not in application.value.flags -%}
+          - name: {{ application.key }}-stripprefix
+          {% endif -%}
+          services:
+          - name: {{ application.value.network.svcName | default(application.key) }}
+            namespace: {{ k8s_namespace.key }}
+            port: {{ application.value.network.svcPort }}
+        tls:
+          secretName: certs
+      EOF
+    loop: "{{ ['int','ext'] if 'external_port' in route else ['int'] }}"
   when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
 
 # istio
@@ -206,10 +214,10 @@
       kind: VirtualService
       metadata:
         name: {{ application.key }}
-        namespace: {{ default_gateway_namespace }}
+        namespace: {{ net.default_gateway_namespace }}
       spec:
         gateways:
-         - {{ default_gateway_namespace }}/{{ gateway }}
+         - {{ net.default_gateway_namespace }}/{{ gateway }}
         hosts:
         {% for host in application.value.network.hosts %}
         - {{ host }}
@@ -236,7 +244,6 @@
               port:
                 number: {{ application.value.network.svcPort }} 
               {% endif %}
-
       EOF
   when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
 

@@ -5,12 +5,7 @@
         
 - name: "{{ title_app_reqs }}debug requires"
   debug:
-    msg: "requires: {{ requires }}"
-
-#- name: "{{ title_app_reqs }}service secrets"
-#  debug:
-#    msg: "{{ item | to_yaml }}"
-#  loop: "{{ service | dict2items }}"
+    msg: "requires: {{ rq }}"
 
 - block: # start kubectl port-forward in async execute postgres commands and exist again
   - name: "{{ title_app_reqs }}tempfile for port_forwarder"
@@ -20,7 +15,7 @@
     register: pf_tmp
 
   - name: "{{ title_app_reqs }}map postgresql port to localhost" # hardcoded port to be replaced ! stdbuf to avoid buffering
-    shell: kubectl port-forward service/"{{ requires.name }}" -n db :5432 | stdbuf -o0 sed -e 's/^.*://g' -e 's/\s\+.*$//g' > "{{ pf_tmp.path }}"
+    shell: kubectl port-forward service/"{{ rq.name }}" -n db :5432 | stdbuf -o0 sed -e 's/^.*://g' -e 's/\s\+.*$//g' > "{{ pf_tmp.path }}"
     async: 120
     poll: 0
     register: port_forwarder
@@ -43,22 +38,13 @@
     debug:
       msg: "{{ pf_results| to_yaml }}"
       
-  #- name: "{{ title_app_reqs }}create tablespace"
-    #postgresql_tablespace:
-      #name: acme
-      #login_host: localhost
-      #port: "{{ read_port.stdout }}"
-      #login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-      #login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-      #db: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='database') | first }}"
-      
   - name: "{{ title_app_reqs }}create database"
     postgresql_db:
       login_host: localhost
       port: "{{ read_port.stdout|int }}"
       login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-      name: "{{ requires.config.database }}"
+      name: "{{ rq.config.database }}"
       
   - name: "{{ title_app_reqs }}create user"
     postgresql_user:
@@ -66,9 +52,9 @@
       login_port: "{{ read_port.stdout }}"
       login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-      name: "{{ requires.config.username }}"
-      password: "{{ requires.config.password }}"
-      login_db: "{{ requires.config.database }}"
+      name: "{{ rq.config.username }}"
+      password: "{{ rq.config.password }}"
+      login_db: "{{ rq.config.database }}"
       
   - name: "{{ title_app_reqs }}assign database owner"
     postgresql_db:
@@ -76,10 +62,10 @@
       port: "{{ read_port.stdout }}"
       login_password: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
       login_user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
-      name: "{{ requires.config.database }}"
-      owner: "{{ requires.config.username }}"
+      name: "{{ rq.config.database }}"
+      owner: "{{ rq.config.username }}"
       
-  when: requires.type == "postgresql"
+  when: rq.type == "postgresql"
   
 - name: fail
   ansible.builtin.fail:

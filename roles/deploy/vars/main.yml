@@ -90,13 +90,12 @@ applications:
       subdir: charts/grott
     zigbee2mqtt:
       deployment_type: kustomize
+      flags: ['no strip']
       affinity: k8s-2-int.adm13
       images:
       - zigbee2mqtt
       network:
         rewrite: /zigbee2mqtt
-        old_proxy_sidecar:
-          app.kubernetes.io/instance: zigbee2mqtt
       storage:
       - name: zigbee2mqtt
         size: 100Mi
@@ -133,9 +132,6 @@ applications:
   tools:
     infopage:
       deployment_type: kustomize
-      kustom:
-        image: "local/fastapi:{{ images | selectattr('name', 'equalto', 'fastapi') | map(attribute='tag') | first }}"
-        internal_port: "{{ 65536|random(1024) }}"
       images:
       - fastapi
       network: true
@@ -173,9 +169,6 @@ applications:
     valmut:
       deployment_type: kustomize
       flags: ['certs']
-      kustom:
-        image: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='section') | first }}/fastapi:{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', 'fastapi' ) | map(attribute='tag') | first }}"
-        podPort: 28382
       images:
       - fastapi
       storage:

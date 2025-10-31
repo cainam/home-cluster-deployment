@@ -1,122 +1,111 @@
+#!/usr/bin/env python3
 import kopf
-import kubernetes.client as k8s
+import kubernetes
+import logging
 
-# --- Configuration ---
-PULL_FAILURE_THRESHOLD = 3
-TARGET_NAMESPACE = 'default' # Adjust to your target namespace
-FALLBACK_POLICY = 'IfNotPresent'
-TARGET_POLICY = 'Always'
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-# Global counter to track ongoing backoff situations (optional, for cleanup)
-ON_BACKOFF_PODS = set()
+# Initialize Kubernetes API clients
+kubernetes.config.load_incluster_config()
+corev1 = kubernetes.client.CoreV1Api()
+appsv1 = kubernetes.client.AppsV1Api()
 
-# Initialize the Kubernetes API clients
-apps_v1 = k8s.AppsV1Api()
-core_v1 = k8s.CoreV1Api()
+# Global state: track modified Deployments
+modified_deployments = set()
 
-@kopf.on.event('', 'pods')
-def handle_pod_events(type, body, logger, **kwargs):
-    """
-    Handler to process Pod events, primarily for tracking pull failures.
-    We use the event handler to clean up our internal tracking set.
-    """
-    name = body.get('metadata', {}).get('name')
-    namespace = body.get('metadata', {}).get('namespace')
-
-    # When the pod is deleted or succeeds, remove it from our tracking set
-    if type in ('DELETED', 'MODIFIED'):
-        status = body.get('status', {}).get('phase')
-        if status in ('Succeeded', 'Failed'):
-             if name in ON_BACKOFF_PODS:
-                 logger.info(f"Pod {name} completed/failed, removing from tracking.")
-                 ON_BACKOFF_PODS.discard(name)
+# Constants
+FALLBACK_POLICY = "IfNotPresent"
+DEFAULT_POLICY = "Always"
+ANNOTATION_KEY = "operator.dev/pullPolicy"
 
 
-@kopf.timer('', 'pods', interval=60, field='status.phase', value='Pending')
-def check_image_pull_backoff(body, logger, **kwargs):
-    """
-    A timer-based handler that runs every 60 seconds for Pods in the 'Pending' phase.
-    This is where we check the actual retry count.
-    """
-    pod_name = body.get('metadata', {}).get('name')
-    namespace = body.get('metadata', {}).get('namespace')
-    owner = None
-    
-    # 1. Check for ImagePullBackOff reason
-    for container_status in body.get('status', {}).get('containerStatuses', []):
-        if container_status.get('state', {}).get('waiting', {}).get('reason') == 'ImagePullBackOff':
-            
-            # Find the Pod's owner (Deployment/DaemonSet)
-            for owner_ref in body.get('metadata', {}).get('ownerReferences', []):
-                if owner_ref['kind'] in ('Deployment', 'ReplicaSet', 'DaemonSet'):
-                    owner = owner_ref
-                    break
-            
-            if owner is None:
-                logger.debug(f"Pod {pod_name} is in backoff but has no relevant owner.")
-                return # Skip if no owner is found
-            
-            # 2. Count the 'Failed to pull image' events
-            events = core_v1.list_namespaced_event(namespace, field_selector=f'involvedObject.name={pod_name}').items
-            pull_failure_count = sum(1 for e in events if 'Failed to pull image' in e.message)
-            
-            logger.info(f"Pod {pod_name}: ImagePullBackOff detected. Failed pull attempts: {pull_failure_count}")
-
-            # 3. Apply the fallback policy if threshold is met
-            if pull_failure_count >= PULL_FAILURE_THRESHOLD:
-                
-                # Check if the policy has already been patched
-                current_policy = _get_current_pull_policy(owner, namespace, pod_name)
-                if current_policy == FALLBACK_POLICY:
-                    logger.info(f"Owner {owner['name']} is already patched to {FALLBACK_POLICY}.")
-                    ON_BACKOFF_PODS.discard(pod_name)
-                    return # Already fixed, stop here
-                
-                logger.warning(f"THRESHOLD REACHED ({pull_failure_count} >= {PULL_FAILURE_THRESHOLD}). Patching owner {owner['kind']}/{owner['name']} to use {FALLBACK_POLICY}.")
-                
-                _patch_owner_policy(owner, namespace, FALLBACK_POLICY, logger)
-                
-                # Optionally delete the current failing pod to force an immediate restart with the new policy
-                # core_v1.delete_namespaced_pod(pod_name, namespace)
-                
-                ON_BACKOFF_PODS.add(pod_name)
-                
-            return # Processed the first container in backoff and finished
-
-    # If the pod is no longer in backoff, remove it from the tracking set
-    if pod_name in ON_BACKOFF_PODS:
-        logger.info(f"Pod {pod_name} recovered from backoff, removing from tracking.")
-        ON_BACKOFF_PODS.discard(pod_name)
+# -----------------------------
+# Utility functions
+# -----------------------------
+def get_dep_name_from_pod(pod):
+    """Return Deployment name for the Pod, following ReplicaSet owner if needed"""
+    owners = pod.metadata.owner_references or []
+    if not owners:
+        return None
+    owner = owners[0]
+    if owner.kind == "Deployment":
+        return owner.name
+    elif owner.kind == "ReplicaSet":
+        rs = appsv1.read_namespaced_replica_set(owner.name, pod.metadata.namespace)
+        dep_owners = rs.metadata.owner_references or []
+        if dep_owners and dep_owners[0].kind == "Deployment":
+            return dep_owners[0].name
+    return None
 
 
-def _get_current_pull_policy(owner, namespace, pod_name):
-    """Helper to check the current pull policy of the owner's template."""
-    if owner['kind'] == 'Deployment':
-        deploy = apps_v1.read_namespaced_deployment(owner['name'], namespace)
-        return deploy.spec.template.spec.containers[0].image_pull_policy
-    # Add logic for DaemonSet, ReplicaSet, etc. here
-    return TARGET_POLICY # Assume initial target if owner not found/supported
+def patch_deployment_policy(dep_name, namespace, policy):
+    """Patch the Deployment template's imagePullPolicy"""
+    dep = appsv1.read_namespaced_deployment(dep_name, namespace)
+    tmpl = dep.spec.template
+    if tmpl.metadata.annotations is None:
+        tmpl.metadata.annotations = {}
+    tmpl.metadata.annotations[ANNOTATION_KEY] = policy
+    for c in tmpl.spec.containers:
+        c.image_pull_policy = policy
+    appsv1.patch_namespaced_deployment(
+        dep_name, namespace, {"spec": {"template": tmpl}}
+    )
+    logging.info(f"[{namespace}/{dep_name}] Patched imagePullPolicy to {policy}")
 
 
-def _patch_owner_policy(owner, namespace, new_policy, logger):
-    """Helper to patch the owner's Pod template."""
-    patch_body = {
-        'spec': {
-            'template': {
-                'spec': {
-                    'containers': [
-                        {'name': c.name, 'imagePullPolicy': new_policy}
-                        for c in apps_v1.read_namespaced_deployment(owner['name'], namespace).spec.template.spec.containers
-                    ]
-                }
-            }
-        }
-    }
-    
-    try:
-        if owner['kind'] == 'Deployment':
-            apps_v1.patch_namespaced_deployment(owner['name'], namespace, patch_body)
-            logger.info(f"Patched Deployment {owner['name']} with pullPolicy: {new_policy}")
-        # Add logic for DaemonSet, etc. here
-    except k8s.ApiException as e:
-        logger.error(f"Failed to patch owner {owner['name']}: {e}")
+def all_pods_healthy(namespace, dep_name):
+    """Check if all pods of a Deployment are Running and containers are ready"""
+    pods = corev1.list_namespaced_pod(namespace, label_selector=f'app={dep_name}').items
+    if not pods:
+        return False
+    return all(
+        p.status.phase == "Running" and
+        all(c.ready for c in (p.status.container_statuses or []))
+        for p in pods
+    )
+
+
+# -----------------------------
+# Main event handler
+# -----------------------------
+@kopf.on.event('pods')
+def on_pod_event(event, **_):
+    pod = event.get('object')
+    if not pod or not pod.metadata or not pod.status:
+        return
+
+    namespace = pod.metadata.namespace
+    pod_name = pod.metadata.name
+    dep_name = get_dep_name_from_pod(pod)
+    if not dep_name:
+        return
+    dep_key = f"{namespace}/{dep_name}"
+
+    # Check if pod is in pull failure
+    container_statuses = pod.status.container_statuses or []
+    pull_failures = any(
+        (cs.state and cs.state.waiting and cs.state.waiting.reason in ("ImagePullBackOff", "ErrImagePull"))
+        for cs in container_statuses
+    )
+
+    if pull_failures:
+        # Patch Deployment if not already patched
+        if dep_key not in modified_deployments:
+            logging.info(f"[{namespace}/{pod_name}] Pull failed, patching Deployment {dep_name}")
+            patch_deployment_policy(dep_name, namespace, FALLBACK_POLICY)
+            modified_deployments.add(dep_key)
+
+        # Delete the failing pod to trigger a restart
+        try:
+            corev1.delete_namespaced_pod(pod_name, namespace)
+            logging.info(f"[{namespace}/{pod_name}] Deleted failing pod to trigger restart")
+        except kubernetes.client.exceptions.ApiException as e:
+            logging.warning(f"[{namespace}/{pod_name}] Failed to delete pod: {e}")
+
+    # Check if pod is Running and Deployment was previously modified
+    elif dep_key in modified_deployments and pod.status.phase == "Running":
+        if all_pods_healthy(namespace, dep_name):
+            logging.info(f"[{namespace}/{dep_name}] All pods healthy, reverting Deployment")
+            patch_deployment_policy(dep_name, namespace, DEFAULT_POLICY)
+            modified_deployments.remove(dep_key)
+

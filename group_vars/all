@@ -27,14 +27,16 @@ certs:
 
 net:
   domain_external: adm13.dnshome.de
+  base_domain: my-lb.adm13
+  default_gateway_namespace: istio-ingress
   local_master_ip: 10.10.10.10
-  open_access:
-  - /oauth2-hydra/callback
-  - /hydra/*
-  - /idp/*
+  open_services:
+  - oauth2-proxy
+  - hydra
+  - idp
   routes:
   - domain: my-lb.adm13
-    gateway: istio
+    gateway: traefik
     external_port: 44354
     endpointIP: 192.168.4.100
   - domain: traefik.my-lb.adm13
@@ -45,14 +47,11 @@ net:
     gateway: istio
     endpointIP: 192.168.4.101
 
-base_domain: my-lb.adm13
 oauth2_path: /oauth2-hydra
 
 volumes_to_exempt:
   - helm
   - registry
-
-default_gateway_namespace: istio-ingress
 
 # supported storage types are longhorn, gluster and local
 default_storage_type: gluster

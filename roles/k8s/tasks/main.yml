@@ -29,6 +29,47 @@
   include_tasks: init.yml
   when: not k8s_init_done and inventory_hostname == selected_host
 
+- name: get kube-dns service IP
+  shell: kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
+  register: kube_dns_ip
+  run_once: true
+  delegate_to: "{{ healthy_node }}"
+
+- name: get etcd image
+  shell:  kubectl get pod -n kube-system etcd-{{ healthy_node }}  -o yaml -o jsonpath='{.spec.containers[?(@.name=="etcd")].image}'
+  register: shell_etcd_image
+  run_once: true
+  delegate_to: "{{ healthy_node }}"
+
+- name: set etcd image variable
+  set_fact:
+    etcd_image: "{{ shell_etcd_image.stdout }}"
+  run_once: true
+
+- name: kubelet configuration
+  vars:
+    dns_ip: "{{ kube_dns_ip.stdout }}"
+  template:
+    src: kubelet-config.yaml
+    dest: /var/lib/kubelet/config.yaml
+  when: kube_dns_ip is defined and kube_dns_ip.rc == 0
+
+- name: enable kubelet service
+  service:
+    name: kubelet
+    enabled: yes
+    state: restarted
+
+- name: kubernetes static manifests
+  template:
+    src: "{{ item }}"
+    dest: "/etc/kubernetes/{{ item }}"
+  loop:
+  - manifests/etcd.yaml
+  - manifests/kube-apiserver.yaml
+  - manifests/kube-controller-manager.yaml
+  - manifests/kube-scheduler.yaml
+
 - block:
   - name: build flannel
     shell: |
@@ -44,12 +85,12 @@
       kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
       helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
     register: flannel_install
+
+  - name: output flannel install
+    debug:
+      msg: "{{flannel_install}}"
   when: inventory_hostname == healthy_node and (not k8s_init_done or k8s_upgrade)
   
-- name: output flannel install
-  debug:
-      msg: "{{flannel_install}}"
-
 - block:
   - name: get token
     shell: kubeadm token create
@@ -110,34 +151,6 @@
   throttle: 1
   when: k8s_upgrade or ('update' in ansible_run_tags)
   
-- block:
-  - name: ensure kube-apiserver has audit-log with its volumes enabled
-    shell: |
-      yq -yi '
-      .spec.volumes = ((.spec.volumes // []) | map(select(.name != "admission-configuration" and .name != "audit" and .name != "audit-log"))+
-      [{name: "audit","hostPath": {type: "File",path: "/etc/kubernetes/audit-policy.yaml"}},
-       {name: "audit-log","hostPath": {type: "FileOrCreate",path: "{{ k8s_log_directory }}/audit.log"}},
-       {name: "admission-configuration","hostPath": {type: "File",path: "/etc/kubernetes/AdmissionConfiguration.yaml"}}
-       ]) |
-      .spec.containers[] |= (
-       if .name == "kube-apiserver" then
-         .command = ( (.command // []) # remove parameters if existing and add new ones
-              | map(select(startswith("--enable-admission-plugins=") | not))
-              + ["--enable-admission-plugins=NodeRestriction,PodSecurity"]
-              | map(select(startswith("--admission-control-config-file=") | not))
-              + ["--admission-control-config-file=/etc/kubernetes/AdmissionConfiguration.yaml"]
-              | map(select(startswith("--audit-log-path=") | not))
-              + ["--audit-log-path={{ k8s_log_directory }}/audit.log"]
-              | map(select(startswith("--audit-policy-file=") | not))
-              + ["--audit-policy-file=/etc/kubernetes/audit-policy.yaml"]
-         )|
-         .volumeMounts = ( (.volumeMounts // []) | map(select(.name != "admission-configuration" and .name != "audit" and .name != "audit-log"))+
-           [{name: "audit",mountPath: "/etc/kubernetes/audit-policy.yaml", readOnly: true},
-            {name: "audit-log",mountPath: "{{ k8s_log_directory }}/audit.log", readOnly: false},
-            {name: "admission-configuration",mountPath: "/etc/kubernetes/AdmissionConfiguration.yaml", readOnly: true}
-           ])
-       else . end )' /etc/kubernetes/manifests/kube-apiserver.yaml
-      
 - block:
   - name: taint to allow master nodes to run pods
     shell: |

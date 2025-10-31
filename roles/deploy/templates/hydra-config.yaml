@@ -27,11 +27,11 @@ hydra:
         - 172.16.0.0/12
         - 192.168.0.0/16
     urls:
-      consent: https://{{ base_domain }}/idp/consent
-      login: https://{{ base_domain }}/idp/login
+      consent: https://{{ net.base_domain }}/idp/consent
+      login: https://{{ net.base_domain }}/idp/login
       self:
         admin: http://hydra-admin.auth:4445
-        issuer: https://{{ base_domain }}/hydra
+        issuer: https://{{ net.base_domain }}/hydra
     webfinger:
       oidc_discovery:
         supported_claims:

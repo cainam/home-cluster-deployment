@@ -6,6 +6,8 @@ Features:
 
 Both, Istio and Traefik support these features
 
+Challenge:
+- routing external requests is challenging because only the Host header is seen, not the port used from external. subdomains (different hosts then) could be an option to distinguish and to map external subdomains to internal subdomains
 
 
 How to ...
@@ -27,28 +29,4 @@ How to ...
         match:
         - uri:
             prefix: /dummy
-
-
-
-- AuthenticationPolicy:
-apiVersion: security.istio.io/v1
-kind: AuthorizationPolicy
-metadata:
-  name: ext-authz
-  namespace: istio-system
-spec:
-#  selector:
-#    matchLabels:
-#      istio: gateway
-  action: CUSTOM
-  provider:
-    name: oauth2-proxy
-  rules:
-  - to:
-    - operation:
-        hosts:
-          - "*.{{ base_domain }}"
-          - "{{ base_domain }}"
-          - "{{ base_domain_ext }}"
-        notPaths: ["/oauth2*","/hydra/*","/idp/*"]
 
