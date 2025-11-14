@@ -244,6 +244,7 @@
               port:
                 number: {{ application.value.network.svcPort }} 
               {% endif %}
+
       EOF
   when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
 

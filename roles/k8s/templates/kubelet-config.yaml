@@ -1,0 +1,39 @@
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: cgroupfs
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+clusterDNS:
+- {{ dns_ip }}
+clusterDomain: cluster.local
+containerRuntimeEndpoint: unix:///var/run/crio/crio.sock
+crashLoopBackOff: {}
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+logging:
+  verbosity: 0
+memorySwap: {}
+rotateCertificates: true
+staticPodPath: /etc/kubernetes/manifests
+
+# --- Node status / heartbeats ---
+syncFrequency: 30s                 # default 10s → slower updates reduce CPU/API load
+nodeStatusUpdateFrequency: 30s     # default 10s
+nodeLeaseDurationSeconds: 120      # default 40s
+
+# --- Housekeeping / image management ---
+housekeepingInterval: 1m           # default 10s → reduces periodic work
+volumeStatsAggPeriod: 2m           # default 1m
+imageMinimumGCAge: 5m              # reduces frequent image garbage collection
+
+# --- API throttling ---
+kubeAPIQPS: 2
+kubeAPIBurst: 4
+

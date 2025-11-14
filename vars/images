@@ -65,7 +65,7 @@ images:
       cd descheduler
       make
       strip ./_output/bin/descheduler
-      mkdir "${ROOT}/bin"
+      mkdir -p "${ROOT}/bin"
       mv  ./_output/bin/descheduler "${ROOT}/bin/"
 
 - name: traefik

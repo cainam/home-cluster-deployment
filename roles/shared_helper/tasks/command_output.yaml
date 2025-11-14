@@ -1,0 +1,5 @@
+# execute a command and provide standard output via return variable
+# variables:
+# - command: command to be executed
+# - runOnce: true or false for run_once
+# - return_variable: variable with stdout from the command
