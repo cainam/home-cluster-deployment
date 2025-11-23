@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
-  stage3_date: 20250928T201839Z
-  portage: 20251001
+  stage3_date: 20251109T233053Z
+  portage: 20251114
   portage_container: "portage"
   image_root: /image-root
   env: |

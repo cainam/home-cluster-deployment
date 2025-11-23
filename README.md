@@ -105,6 +105,10 @@ Fritz.Box:
   - configure floating IP: stop floating IP in network, flush cache by changing the DHCP range, add portfreigabe an start floating IP again
   - DYNDNS: dyndns domain added to certificates as alt-names
 
+replace token in all my git repos:
+ find /data/mine/ -type d -name .git | while read d; do sed -i -e 's/Andi:.*@/Andi:token@/g' $d/config  | grep url; done
+
+
 Deconz:
 flash:
 # # git clone https://github.com/dresden-elektronik/gcfflasher.git
