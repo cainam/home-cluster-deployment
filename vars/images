@@ -6,7 +6,26 @@ images:
   build:
     packages: busybox
     finish_rootfs_build: ln -s usr/lib "${ROOT}/lib" && "${ROOT}"/bin/busybox --install "${ROOT}/bin"
-  
+
+- name: istiod
+  tag: 1.27-1
+  section: istio
+  type: gentoo-image-builder
+  requires:
+  - go
+  build:
+    entrypoint: ["/usr/local/bin/pilot-discovery"]
+    user: 1337
+    configure_rootfs_build: |
+      cd /var/tmp
+      git clone --single-branch -b release-1.27 https://github.com/istio/istio.git
+      cd istio/pilot/cmd/pilot-discovery
+      CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'
+    finish_rootfs_build: |
+      echo 'istio-proxy:x:1337:istio-proxy' > "${ROOT}/etc/group"
+      echo 'istio-proxy:x:1337:1337:Linux User,,,:/home/istio-proxy:/bin/sh' > "${ROOT}/etc/passwd"
+      mkdir -p "${ROOT}/usr/local/bin" && cp -dp pilot-discovery "${ROOT}/usr/local/bin"
+
 - name: postgresql
   section: db
   type: gentoo-image-builder
@@ -75,7 +94,7 @@ images:
   build:
     configure_builder: |
       echo "net-libs/nodejs npm corepack" > /etc/portage/package.use/97nodejs.conf
-      MAKEOPTS="-j1" emerge net-libs/nodejs
+      MAKEOPTS="-j3" emerge net-libs/nodejs dev-libs/icu
     configure_rootfs_build: |
       git clone --depth 1 --single-branch -b "{{ software.traefik.version }}" https://github.com/traefik/traefik.git
       set -x
@@ -107,7 +126,7 @@ images:
       cd oauth2-proxy
       go build
       strip  oauth2-proxy
-      mkdir "${ROOT}/bin"
+      mkdir -p "${ROOT}/bin"
       mv oauth2-proxy "${ROOT}/bin/"
       cd && rm -rf /oauth2-proxy /root/.??* /root/*
 
@@ -138,7 +157,7 @@ images:
     configure_builder: |
       echo "net-libs/nodejs npm" >> /etc/portage/package.use/97nodejs.conf
       echo "dev-lang/typescript ~arm64" > /etc/portage/package.accept_keywords/ts.conf && cat /etc/portage/package.accept_keywords/ts.conf
-      MAKEOPTS="-j1" emerge --tree --verbose net-libs/nodejs dev-lang/typescript
+      MAKEOPTS="-j3" emerge --tree --verbose net-libs/nodejs dev-lang/typescript
     configure_rootfs_build: |
       ln -s usr/lib "${ROOT}/lib"
     finish_rootfs_build: |
@@ -236,6 +255,9 @@ images:
     packages: dev-db/postgresql
     configure_builder: |
       sed -i -e '/oniguruma/d' -e '/jq/d' /etc/portage/profile/package.provided
+      # with -server pg_config is missing, so keeping it for a while: echo 'dev-db/postgresql -server' > /etc/portage/package.use/postgresql
+      # openjade includes opensp whose build breaks https://github.com/Distrotech/OpenSP/blob/master/intl/dcigettext.c - line 154 invalid getcwd definition
+      (cd /var/db/repos/gentoo/dev-db/postgresql/; for f in postgresql-*; do sed -i -e '/openjade/d' $f; ebuild $f manifest; done)
       emerge app-misc/jq 
     configure_rootfs_build: |
       set -x
@@ -293,22 +315,6 @@ images:
       echo "mosquitto:x:1883:1883:mosquitto:/var/empty:/sbin/nologin" >> ${ROOT}/etc/passwd
       strip ${ROOT}/usr/lib/* ${ROOT}/usr/bin/* ${ROOT}/usr/sbin/* || true
 
-- name: bazel2
-  tag: 2025.09-1
-  section: local
-  requires:
-  - bazel
-  type: gentoo-image-builder
-  env:
-    JAVA_HOME: /opt/zulu
-    USER: root
-  build:
-    finish_rootfs_build: |
-      mkdir $ROOT/usr/local/bin $ROOT/opt/
-      cp -rdp /opt/zulu $ROOT/opt/zulu
-      cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/14/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/14/libgcc_s.so.1* $ROOT/usr/lib
-      cp -dp /usr/local/bin/bazel $ROOT/usr/local/bin/
-
 - name: bazel
   tag: 2025.09-1
   section: local
@@ -345,6 +351,69 @@ images:
       cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/14/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/14/libgcc_s.so.1* $ROOT/usr/lib
       cp -dp output/bazel $ROOT/usr/local/bin /usr/local/bin/
  
+- name: envoy-base
+  tag: 2025.12-2
+  section: local
+  requires:
+  - bazel7-llvm
+  type: gentoo-image-builder
+  build:
+    packages: app-arch/zip
+    xadd:
+    - git: git@github.com:cainam/cainam.github.io.git#:compile-bazel-with-gentoo-musl-on-aarch64/bazel
+      dest: /bazel-build-for-envoy
+    configure_builder: |
+      cd /var/tmp
+      curl -OL https://github.com/libevent/libevent/releases/download/release-2.2.1-alpha/libevent-2.2.1-alpha-dev.tar.gz
+      tar xfz libevent-2.2.1-alpha-dev.tar.gz
+      cd libevent-2.2.1-alpha-dev
+      ./configure --prefix=/usr/local && make && make install
+      cd /var/tmp
+      curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
+      tar xfz liburing-2.12.tar.gz
+      cd liburing-liburing-2.12/ && ./configure --prefix=/usr/local && make && make install
+      cd /var/tmp
+      git clone --single-branch --branch v2.1.ROLLING  --filter=blob:none https://luajit.org/git/luajit.git
+      cd luajit/
+      make && make install
+      for a in /usr/local/include/luajit-2.1/*; do ln -s $a /usr/local/include; done
+      cd /var/tmp
+      curl -OL https://github.com/gperftools/gperftools/releases/download/gperftools-2.17.2/gperftools-2.17.2.tar.gz
+      tar xfz gperftools-2.17.2.tar.gz
+      cd gperftools-2.17.2
+      ./configure && make && make install
+      cd /var/tmp
+      #
+      git clone https://github.com/cainam/cainam.github.io.git /bazel-build-for-envoy
+      for ld in /usr/bin/aarch64-unknown-linux-musl-ld.bfd /usr/sbin/ld.bfd; do 
+      mv ${ld} ${ld}.org
+      cp -dp /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/bin/ld.bfd-wrapper "${ld}"
+      done
+      #opensuse wlan hotspot
+      emerge  llvm-core/lld
+- name: envoy
+  tag: 2025.12-2
+  section: local
+  requires:
+  - envoy-base
+  type: gentoo-image-builder
+  build:
+    configure_builder: |
+      cd /var/tmp; rm -rf *
+      export JAVA_HOME=/opt/zulu
+      export PATH=/usr/lib/llvm/20/bin/:${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      export CC=/usr/lib/llvm/20/bin/clang
+      git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/proxy.git; cd proxy
+      echo "build --define tcmalloc=gperftools # in .bazelrc" >> .bazelrc
+      cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
+      sed -i '/PATH/d' .bazelrc
+      sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
+      pwd; ls -l ; ls -l tools; find tools/
+      ln -s $PWD /proxy
+      for a in $(seq 1 10); do 
+      bazel build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index    -- //:envoy || true
+      done
+      bazel build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index    -- //:envoy 
 - name: bazel7-llvm
   tag: 2025.09-1
   section: local
@@ -388,11 +457,13 @@ images:
       # 8.4 bazel zip, patch applied, but script/BUILD failed, ignored
       patch -p1 < 0001-off64t-fix.patch || true
       sed -i -e 's/"abseil-cpp", version = "20230125.1"/"abseil-cpp", version = "20230802.0"/' MODULE.bazel
+      sed -i -e 's/^namespace blaze/#include <cstdint>\nnamespace blaze/g'  src/main/cpp/archive_utils.h
+      sed -i -e 's/^namespace blaze/#include <cstdint>\nnamespace blaze/g'  src/main/cpp/blaze.h
 
       EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
       mkdir $ROOT/usr/local/bin $ROOT/opt/
-      cp -rdp /opt/zulu $ROOT/opt/zulu
-      cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/14/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/14/libgcc_s.so.1* $ROOT/usr/lib
+      find /usr -name "libgcc_s.so.*"
+      cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/*/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/*/libgcc_s.so.1* $ROOT/usr/lib
       cp -dp output/bazel $ROOT/usr/local/bin
  
 - name: auth-operator

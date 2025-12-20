@@ -204,12 +204,12 @@
     content: |
       {% for i in ssh_keys.hosts %}
       ssh-{{ ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].admin_pub~' root@'~i }}
+      {% endfor %}
       {% if ssh_keys.remote_admin is defined %}
       {% for j in ssh_keys.remote_admin %}
       {{ j }}
       {% endfor %}
       {% endif %}
-      {% endfor %}
     dest: /root/.ssh/authorized_keys
 
 
@@ -365,7 +365,7 @@
   when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
  
 - name: eclean packages
-  shell: eclean packages
+  shell: eclean --deep packages
 
 - name: emerge depclean
   shell: emerge --depclean

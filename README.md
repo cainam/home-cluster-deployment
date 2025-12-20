@@ -158,3 +158,12 @@ TODO:
 
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
 => how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual
+=> home-assistant has hardcoded version for opensp compilation issue, see var/images
+=> opensp: patch https://bugs.gentoo.org/947175:
+#  else
+char *getcwd ();
+#  endif
+and surround it by: # if !defined HAVE_GETCWD
+
+
+-  eclean -p --deep --time-limit 90d packages to get /var/cache/binpkg clean, but see also to clean /data/build/data/packages

@@ -23,6 +23,10 @@ memorySwap: {}
 rotateCertificates: true
 staticPodPath: /etc/kubernetes/manifests
 
+# Image Garbage Collection Configuration
+imageGCHighThresholdPercent: 95
+imageGCLowThresholdPercent: 90
+
 # --- Node status / heartbeats ---
 syncFrequency: 30s                 # default 10s → slower updates reduce CPU/API load
 nodeStatusUpdateFrequency: 30s     # default 10s
