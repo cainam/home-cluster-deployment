@@ -94,7 +94,7 @@ images:
   build:
     configure_builder: |
       echo "net-libs/nodejs npm corepack" > /etc/portage/package.use/97nodejs.conf
-      MAKEOPTS="-j3" emerge net-libs/nodejs dev-libs/icu
+      PORTAGE_TMPDIR="/var/tmp/portage" MAKEOPTS="-j3" emerge net-libs/nodejs dev-libs/icu
     configure_rootfs_build: |
       git clone --depth 1 --single-branch -b "{{ software.traefik.version }}" https://github.com/traefik/traefik.git
       set -x
@@ -155,7 +155,7 @@ images:
   build:
     packages: net-libs/nodejs
     configure_builder: |
-      echo "net-libs/nodejs npm" >> /etc/portage/package.use/97nodejs.conf
+      echo "net-libs/nodejs npm corepack" > /etc/portage/package.use/97nodejs.conf
       echo "dev-lang/typescript ~arm64" > /etc/portage/package.accept_keywords/ts.conf && cat /etc/portage/package.accept_keywords/ts.conf
       MAKEOPTS="-j3" emerge --tree --verbose net-libs/nodejs dev-lang/typescript
     configure_rootfs_build: |
@@ -399,7 +399,7 @@ images:
   type: gentoo-image-builder
   build:
     configure_builder: |
-      cd /var/tmp; rm -rf *
+      cd /var/tmp; rm -rf * /root/.cache
       export JAVA_HOME=/opt/zulu
       export PATH=/usr/lib/llvm/20/bin/:${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       export CC=/usr/lib/llvm/20/bin/clang
@@ -408,12 +408,17 @@ images:
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
       sed -i '/PATH/d' .bazelrc
       sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
-      pwd; ls -l ; ls -l tools; find tools/
+      sed -e '/googleurl/d' -i envoy.bazelrc
+      emerge dev-libs/icu
       ln -s $PWD /proxy
-      for a in $(seq 1 10); do 
-      bazel build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index    -- //:envoy || true
+      for a in $(seq 1 20); do 
+      (
+      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index -c fastbuild --subcommands --check_direct_dependencies=error --logging=6 -- //:envoy; 
+      bash -c "echo > /dev/tcp/storage.googleapis.com/443"; 
+      bash -c "echo > /dev/tcp/github.com/443"; 
+      sleep 10) || true
       done
-      bazel build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index    -- //:envoy 
+      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild   -- //:envoy 
 - name: bazel7-llvm
   tag: 2025.09-1
   section: local

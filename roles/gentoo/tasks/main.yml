@@ -100,7 +100,7 @@
     line: "hostname=\"{{ item.line }}\""
     backup: yes
   loop:
-    - line: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+    - line: "{{ ansible_facts['fqdn']  }}"
       setting: hostname
       file: hostname
 
