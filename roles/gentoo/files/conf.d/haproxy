@@ -1,6 +1,6 @@
 # HAProxy config file(s), space separated
 #CONFIGS="/etc/haproxy/haproxy.cfg"
-supervisor="supervise-daemon"
+# doesn't work well because "-D" for daemonize is in init script, but then openrc loses track of the service - supervisor="supervise-daemon"
 
 # Additional HAProxy command line options
 HAPROXY_OPTS="-S /run/haproxy-master.sock"
