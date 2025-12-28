@@ -4,8 +4,8 @@ all:
       alt_names:
         gentoo_build:
         gentoo-binhost:
-      boot_root: PARTUUID=10014c66-02
-      boot_uuid: 4C9E-34AC
+      boot_root: PARTUUID=3a5a053b-02
+      boot_uuid: 88F0-9C43
     k8s-1-int.adm13:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D

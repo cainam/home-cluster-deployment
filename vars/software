@@ -24,7 +24,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.6.3
+    version: 2.7.1
     latest:
       type: github
       params:
@@ -79,7 +79,7 @@ software:
       params: 
         repo: kubernetes-sigs/descheduler
   hydra:
-    version: "v2.3.0"
+    version: v25.4.0
     latest:
       type: github
       params:

@@ -13,8 +13,7 @@
         dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
       include_role:
         name: gentoo-image-builder
-  when: application.value.images is defined
-
+    when: application.value.images is defined
 - block:
   - block:
     - name: "{{ name_prefix }} build helm"
@@ -121,6 +120,7 @@
     vars:
       dir_var: build_dir
       template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
+      image_entry: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', (application.value.images|default([])) | first | default(application.key))|first }}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
          'name': application.key,
@@ -128,7 +128,8 @@
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
-         'image': application.value.kustom.image | default( k8s_namespace.key+'/'+application.key~':'~
+         'image': image_entry.section~'/'~image_entry.name~':'~image_entry.tag,
+         'Ximage': application.value.kustom.image | default( k8s_namespace.key+'/'+application.key~':'~
             (software[application.key].version|default( images | selectattr('name', 'defined') | selectattr('name', 'equalto', application.key ) | map(attribute='tag')|first| default('latest')) ))
          }) }}"
   - name: "{{ name_prefix }} kustomize"
@@ -201,7 +202,7 @@
           secretName: certs
       EOF
     loop: "{{ ['int','ext'] if 'external_port' in route else ['int'] }}"
-  when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
+  when: application.value.network is defined and application.value.network.publish != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'
 
 # istio
 - block:
@@ -246,7 +247,7 @@
               {% endif %}
 
       EOF
-  when: application.value.network is defined and application.value.network != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
+  when: application.value.network is defined and application.value.network.publish != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'istio'
 
 - block:
   - name: "{{ name_prefix }} affinity - label node"

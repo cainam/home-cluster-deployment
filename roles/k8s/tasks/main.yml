@@ -18,12 +18,12 @@
     - never
     - force_reinstall
 
-- name: check kubernetes status
-  import_tasks: k8s-status.yaml
-
 - name: prepare images
   import_tasks: prepare_images.yml
   run_once: true
+
+- name: check kubernetes status
+  import_tasks: k8s-status.yaml
 
 - name: install cluster if needed
   include_tasks: init.yml
@@ -139,10 +139,16 @@
     vars: 
       join_ip: "{{ my_cluster_ip }}"
       cert_key: cert_key.stdout
-  - name: joining nodes
-    shell: kubeadm reset --force && rm -rf /etc/kubernetes/ && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}" --ignore-preflight-errors=DirAvailable--var-lib-etcd
+
+  - name: remove node object from cluster
+    run_once: true 
+    delegate_to: "{{ healthy_node }}"
+    shell:  (KUBECONFIG={{ kubeconfig }} kubectl delete node {{ inventory_hostname }} | true)
+
+  - name: joining node
+    shell: kubeadm reset --force && rm -f /etc/kubernetes/manifests/*.yaml /var/lib/kubelet/* /etc/kubernetes/kubelet.conf /etc/kubernetes/bootstrap-kubelet.conf /var/lib/etcd/* && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}" --ignore-preflight-errors=DirAvailable--var-lib-etcd
     throttle: 1
-  when: k8s_healthy and not k8s_installed
+  when: not k8s_installed
 
 # update if version is newer   
 - name: update k8s

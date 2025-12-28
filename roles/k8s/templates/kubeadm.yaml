@@ -3,12 +3,12 @@ apiVersion: kubelet.config.k8s.io/v1beta1
 cgroupDriver: cgroupfs
 ---
 kind: InitConfiguration
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 localAPIEndpoint:
   advertiseAddress: {{ internal_first_master_ip | default("0.0.0.0")  }}
 
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 kind: ClusterConfiguration
 imageRepository: "{{ registry }}/k8s"
 controlPlaneEndpoint: "{{ controlPlaneEndpoint }}"
@@ -17,7 +17,7 @@ networking:
 kubernetesVersion: "{{ k8s_version }}"
 ---
 kind: JoinConfiguration
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 controlPlane:
   localAPIEndpoint:
     advertiseAddress: {{ join_ip | default("0.0.0.0") }}
@@ -28,12 +28,3 @@ discovery:
     apiServerEndpoint: "{{ controlPlaneEndpoint }}"
     caCertHashes:
     - "{{ discovery_token_ca_cert_hash }}"
-#etcd:
-#    local:
-#        extraArgs:
-#          listen-peer-urls: https://{{ internal_secondary_master_ip | default("") }}:2380
-#          listen-client-urls: https://{{ internal_secondary_master_ip | default("") }}:2379
-#          initial-advertise-peer-urls: https://{{ inventory_hostname }}:2380
-#          advertise-client-urls: https://{{ inventory_hostname }}:2379
-#          data-dir: /data/etcd
-

@@ -215,7 +215,7 @@
 
 - name: deploy from templates
   vars: 
-    data_uuid: '{{ ansible_mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
+    data_uuid: '{{ ansible_facts.mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
@@ -303,12 +303,15 @@
 - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
   shell: |
     if [ ! -d "/var/db/repos/gentoo/.git" ]; then
+      set -e
       profile_dir=/var/db/repos/gentoo/profiles
       binpkgs="/var/cache/binpkgs"
       rsync -a {{ ansible_controller_hostname }}:${profile_dir} /tmp
       mv /etc/portage/make.profile /etc/portage/make.profile.bck || true
+      # see before, separate task - date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" # set the time from the Control node
       ln -s /tmp/profiles/default/linux/arm64/23.0 /etc/portage/make.profile
       rsync -a {{ ansible_controller_hostname }}:${binpkgs}/Packages ${binpkgs}/Packages
+      sed -i -e 's/^/#/g' /etc/portage/binrepos.conf/gentoobinhost.conf # use only self-build packages
       atoms=$(USE="adns alt-svc ftp hsts http2 http3 httpsrr imap openssl pop3 psl quic smtp ssl tftp websockets" ACCEPT_LICENSE="*" emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e 's/-[0-9].*$//g')
       atoms_iwd=$(ACCEPT_LICENSE="*" emerge -1 --usepkg --pretend net-wireless/iwd 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e "s/-[0-9].*$//g")
       for atom in ${atoms} ${atoms_iwd}; do
@@ -319,6 +322,7 @@
       done
       rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
       rsync -a {{ ansible_controller_hostname }}:/lib/firmware /lib
+      modprobe brcmfmac
       /etc/init.d/dbus start
       /etc/init.d/iwd start
       rm /etc/portage/make.profile && mv /etc/portage/make.profile.bck /etc/portage/make.profile || true

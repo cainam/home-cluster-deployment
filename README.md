@@ -15,14 +15,13 @@ solution: a combination of dynamic variables and a stack of them ensures that a 
 ### new node
 - populate /boot partition with copy and root from stage3-arm64-openrc
 - /boot/cmdline.txt => update root=PARTUUID from  lsblk -o NAME,UUID,PARTUUID /dev/sdf, set /etc/conf.d/hostname to FQDN and define FQDN in /etc/hosts
-- configure end0 in /etc/conf.d/net, authorized_keys, create net.end0 link net.lo and enable sshd and net.end0 in /etc/runlevel/default => boot!
+- configure end0 in /etc/conf.d/net, authorized_keys, create net.end0 link net.lo, admin + host keypair from secrets(key with go-r mod)  and enable sshd and net.end0 in /etc/runlevel/default => boot!
 - update UUID and PARTUUID in inventory file and if host to be installed is gentoo-build, remove this from the inventory
-- manage ssh keys and authorized_keys
-- run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world)
+- run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world), reboot to fix missing module issue for iwd - or fix the issue, check if interface is there,  modprobe brcmfmac got added to script
 - gluster: remove former bricks if any:  (for v in $(gluster vol list); do gluster vol heal $v info | grep k8s-3 | sed -e "s/^Brick/$v/g"; done) | while read v b;do (echo "y" | gluster vol remove-brick $v replica 2 $b force); done
 - gluster: gluster peer detach k8s-3-int.adm13 and gluster peer probe k8s-3-int.adm13
 - Emerge: missing binary packages can be created using e.g. quickpkg --include-config y lua
-- next time: check why ca-certs are not updated
+- remove node from k8s and from etcd
 - deploy k8s
 
 # notes on this ansible playbook
@@ -153,6 +152,10 @@ TODO:
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
+- kubelet/config.yaml: is created twice, first from template, 2nd from configmap - change it!
+- with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
+- try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
+- if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 
 
@@ -167,3 +170,4 @@ and surround it by: # if !defined HAVE_GETCWD
 
 
 -  eclean -p --deep --time-limit 90d packages to get /var/cache/binpkg clean, but see also to clean /data/build/data/packages
+- istio vs wrongly created for home-assistant (e.g. destination, prefix)

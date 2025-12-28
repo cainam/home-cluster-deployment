@@ -144,7 +144,7 @@ applications:
     postgresql:
       deployment_type: kustomize
       kustom:
-        image: "db/postgresql:{{ software.postgresql.version }}"
+        Ximage: "db/postgresql:{{ software.postgresql.version }}"
         user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
         pass: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
         trustedSubnet: "{{ k8s.podSubnet }}"

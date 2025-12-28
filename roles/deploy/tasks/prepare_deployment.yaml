@@ -72,17 +72,20 @@
       network_defaults:
         rewrite: "/"
         svcPort: "{{ 65536|random(1024) }}"
+        podPort: "{{ 65536|random(1024) }}"
         svcName: "{{ app.name }}"
         prefix: "{{ '/'~app.name}}"
         domain: "{{ my_dom  }}"
+        publish: "{{ (app.network is defined and app.network is boolean and app.network) or (app.network is defined and app.network is not boolean) | bool }}"
         hosts: |
           {%- set domain_list = [my_dom] -%}
           {%- if my_route.endpointIP is defined -%}
           {%- set _d = domain_list.append(net.domain_external) -%}
           {%- endif -%}
           {{ domain_list }}
-      networkAsDict: "{{ (app.network is boolean) | ternary({}, app.network) }}"
-      network: "{{ network_defaults | combine(networkAsDict, recursive=true) if app.network is defined else false|bool }}"
+      networkAsDict: "{{ (app.network is defined and app.network is boolean) | ternary({}, (app.network if app.network is defined else {})) }}"
+      network: "{{ network_defaults | combine(networkAsDict, recursive=true) }}"
+      network_old: "" # if app.network is defined else false|bool }}"
       new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]) }, recursive=true) }}"
     set_fact:
       app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_entry]}}" # replace existing appliation list item by new_entry

@@ -60,7 +60,7 @@
 - set_fact: # highlight
     healthy_node: "{{ (groups.all|
                        map('extract', hostvars)|
-                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_fqdn')| default([selected_host])
+                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_facts') |map(attribute='fqdn')| default([selected_host])
                        |shuffle)[0] }}"
   run_once: true
   when: k8s_init_done

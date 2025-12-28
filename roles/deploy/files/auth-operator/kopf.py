@@ -16,6 +16,11 @@ hydra_service_port = os.environ.get('HYDRA_SERVICE_PORT') # "4445"
 hydra_search_label_key = os.environ.get('HYDRA_SEARCH_LABEL_KEY')
 hydra_search_label_value = os.environ.get('HYDRA_SEARCH_LABEL_VALUE')
 
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+    # Disable cluster-wide namespace scanning
+    settings.scanning.disabled = True
+
 # extend with decorator for hydra
 @kopf.on.create('pods', labels={'app.kubernetes.io/instance': 'hydra'} )
 async def fun2(namespace, spec, body, logger, **kwargs):

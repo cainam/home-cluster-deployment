@@ -51,20 +51,10 @@ devices:
     friendly_name: Wegbeleuchtung
   '0x00158d0007bde782':
     friendly_name: Temperatur
-  '0xa4c1384521e152f5':
-    friendly_name: Pool
   '0xa4c1383fcaf256b0':
     friendly_name: Terrasse
-  '0xa4c138d122942108':
-    friendly_name: Telefon
-  '0xf0d1b8be24084e34':
-    friendly_name: Teich
-  '0xa4c138e2bc190354':
-    friendly_name: Carport
   '0x70b3d52b60024287':
     friendly_name: Büro-Ausgang
-  '0x70b3d52b60025cfa':
-    friendly_name: Bürotür
   '0x70b3d52b60076b69':
-    friendly_name: '0x70b3d52b60076b69'
+    friendly_name: Fritz
 version: 4

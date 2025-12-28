@@ -33,9 +33,12 @@ nodeStatusUpdateFrequency: 30s     # default 10s
 nodeLeaseDurationSeconds: 120      # default 40s
 
 # --- Housekeeping / image management ---
-housekeepingInterval: 1m           # default 10s → reduces periodic work
+housekeepingInterval: 10m           # default 10s → reduces periodic work
 volumeStatsAggPeriod: 2m           # default 1m
-imageMinimumGCAge: 5m              # reduces frequent image garbage collection
+imageMinimumGCAge: 168h
+evictionHard:
+  nodefs.available: "5%"
+  imagefs.available: "5%"
 
 # --- API throttling ---
 kubeAPIQPS: 2
