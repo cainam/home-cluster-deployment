@@ -20,6 +20,8 @@ hydra_search_label_value = os.environ.get('HYDRA_SEARCH_LABEL_VALUE')
 def configure(settings: kopf.OperatorSettings, **_):
     # Disable cluster-wide namespace scanning
     settings.scanning.disabled = True
+    # Disable peering / leader election (prevents getpass.getuser())
+    settings.peering.disabled = True
 
 # extend with decorator for hydra
 @kopf.on.create('pods', labels={'app.kubernetes.io/instance': 'hydra'} )
