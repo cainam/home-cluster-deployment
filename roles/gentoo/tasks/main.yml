@@ -147,6 +147,8 @@
       dest: /etc/iwd/main.conf
     - file: locale.gen
       dest: /etc/
+    - file: chrony.conf
+      dest: /etc/chrony/
 
 - name: include secrets (wlan, ssh_keys)
   include_vars: "{{ local_only }}/secrets"

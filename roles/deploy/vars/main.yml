@@ -3,6 +3,7 @@ applications:
   gateway:
     traefik:
       deployment_type: kustomize
+      network: true
       kustom:
         ports:
           traefik: 13579

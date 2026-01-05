@@ -137,12 +137,8 @@ Networking Istio:
 - inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
 TODO: 
-- auth-operator: fix:
-[2025-10-21 18:58:03,606] kopf._cogs.clients.w [ERROR   ] Request attempt #1/9 failed; will retry: GET https://10.96.0.1:443/api/v1/namespaces -> APIForbiddenError('namespaces is forbidden: User "system:serviceaccount:auth:auth-operator" cannot list resource "namespaces" in API group "" at the cluster scope', {'kind': 'Status', 'apiVersion': 'v1', 'metadata': {}, 'status': 'Failure', 'message': 'namespaces is forbidden: User "system:serviceaccount:auth:auth-operator" cannot list resource "namespaces" in API group "" at the cluster scope', 'reason': 'Forbidden', 'details': {'kind': 'namespaces'}, 'code': 403})
-
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
-- install grafana
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - mutate: kube-flannel + replace helm by kustomize
@@ -156,8 +152,10 @@ TODO:
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
+- var/images: split build script snippets so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
-
+- traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
+- kubelet config cleanup, file or configmap leading
 
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
 => how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual
