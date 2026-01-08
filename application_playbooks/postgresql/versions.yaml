@@ -1,0 +1,2 @@
+- set_fact:
+    {{ return_upgrade_required }}: False
