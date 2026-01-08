@@ -419,6 +419,7 @@
     - cronie
     - cpupower
     - iscsid
+    - iwd
   ignore_errors: yes
 
 - name: gluster

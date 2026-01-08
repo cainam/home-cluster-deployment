@@ -182,10 +182,9 @@
       kubectl replace -f /tmp/coredns.cm.yaml
       kubectl patch svc --namespace kube-system kube-dns --patch '{"spec": { "externalIPs": ["{{ k8s.external_coredns_ip }}"] }}'
 
-  - name: ensure /var/lib/kubelet/config.yaml is refreshed
+  - name: ensure configmap kublet-config is refreshed from /var/lib/kubelet/config.yaml
     shell: |
-      [ -f /var/lib/kubelet/config.yaml ] && cp -dp /var/lib/kubelet/config.yaml /var/lib/kubelet/config.yaml.bck
-      kubectl get configmaps -n kube-system kubelet-config -o jsonpath='{.data.kubelet}' > /var/lib/kubelet/config.yaml
+      [ -f /var/lib/kubelet/config.yaml ] && kubectl create configmap kubelet-config   --namespace kube-system   --from-file=kubelet=/var/lib/kubelet/config.yaml   --dry-run=client -o yaml | kubectl apply -f -
 
   - name: create storageClass local as default
     shell: |

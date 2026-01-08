@@ -117,7 +117,6 @@ applications:
         size: 100Mi
         config: true
       network:
-        XsvcPort: 8123
         prefix: "/"
         domain: ha.my-lb.adm13
         old_proxy_sidecar: 

@@ -3,6 +3,45 @@
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
     images_details_var: "image_details"
+    local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
+
+## move application playbook part to dedicated file
+- name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+  ansible.builtin.git:
+    repo: '{{ own_git_url }}'
+    dest: "{{ local_playbook_temp }}"
+    depth: 1
+  ignore_errors: true
+  delegate_to: localhost
+
+- name: "{{ name_prefix }} check if application playbooks exist"
+  ansible.builtin.stat:
+    path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+  register: playbook_dir_stat
+  delegate_to: localhost
+
+- name: "{{ name_prefix }} set playbook_dir_exists"
+  set_fact:
+    playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
+    playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+
+- block:
+  - name: "{{ name_prefix }} application playbook - versions - playbook check"
+    ansible.builtin.stat:
+      path: "{{ playbook_path }}/versions.yaml"
+    register: versions_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} application playbook - versions - playbook run}}"
+    vars:
+      return_upgrade_required: "{{ app }}_upgrade"
+    include_tasks: "{{ playbook_path }}/versions.yaml"
+    when: versions_stat.stat.exists and versions_stat.stat.isreg
+
+  - debug: 
+      msg: "return from versions: {{ lookup('vars', app~'_upgrade') }}"
+
+  when: playbook_dir_exists
 
 - block:
   - block:
@@ -98,7 +137,7 @@
       key_var: "reg_key"
       caBundle_var: "caBundle"
       ca_init: false
-      ca_openssl_path: /data/mine/certs
+      ca_openssl_path: "{{ cert_path }}"
       ca_common_name: FreeAsABird
       ca_country_name: XX
       ca_passphrase: "{{ cert_pass }}"
@@ -209,16 +248,17 @@
   - name: "{{ name_prefix }} VirtualService(istio)"
     vars:
       gateway: "{{ application.value.network.domain|replace('.','-') }}"
+      gateway_namespace: "{{ net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='namespace') | first }}"
     shell: | 
       kubectl apply --force --grace-period=0 -f - <<EOF
       apiVersion: networking.istio.io/v1
       kind: VirtualService
       metadata:
         name: {{ application.key }}
-        namespace: {{ net.default_gateway_namespace }}
+        namespace: {{ gateway_namespace }}
       spec:
         gateways:
-         - {{ net.default_gateway_namespace }}/{{ gateway }}
+         - {{ gateway_namespace }}/{{ gateway }}
         hosts:
         {% for host in application.value.network.hosts %}
         - {{ host }}

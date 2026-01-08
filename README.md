@@ -148,24 +148,20 @@ TODO:
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
-- kubelet/config.yaml: is created twice, first from template, 2nd from configmap - change it!
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
 - var/images: split build script snippets so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
-- kubelet config cleanup, file or configmap leading
 
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
 => how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual
-=> home-assistant has hardcoded version for opensp compilation issue, see var/images
-=> opensp: patch https://bugs.gentoo.org/947175:
-#  else
-char *getcwd ();
-#  endif
-and surround it by: # if !defined HAVE_GETCWD
+1. check if dedicated repo exists ("git ls-remote {{ git_repo_url }}", register: git_repo_check ignore_errors: true changed_when: false and use       when: git_repo_check.rc == 0)
+2. clone repo to localhost ( delegate_to: localhost)
+3. test if upgrade playbook exists (when: extra_tasks_file.stat.exists)
+3.1. determine current and new versions
+3.2. feed migrate playbook with vars include_tasks:
+4, continue
+## move application playbook part to dedicated file and create a dict for the possible playbooks as var
 
-
--  eclean -p --deep --time-limit 90d packages to get /var/cache/binpkg clean, but see also to clean /data/build/data/packages
-- istio vs wrongly created for home-assistant (e.g. destination, prefix)

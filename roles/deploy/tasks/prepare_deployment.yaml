@@ -2,7 +2,33 @@
 - block:
   - set_fact:
       apps: "{{ applications }}"
-      net: "{{ net }}"
+      net_routes: []
+
+  - name: add missing namespaces to net.routes
+    set_fact:
+      net_routes: >-
+        {{
+          net_routes+
+          [
+            item | combine({
+              'namespace': item.namespace
+                if item.namespace is defined
+                else (
+                  apps
+                  | dict2items
+                  | selectattr('value', 'defined')
+                  | selectattr('value', 'contains', item.gateway)
+                  | map(attribute='key')
+                  | first
+                )
+            })
+          ]
+        }}
+    loop: "{{ net.routes }}"
+  
+  - name: replace net.routes with normalized routes
+    set_fact:
+      net: "{{ net | combine({'routes': net_routes}, recursive=True) }}"
       
 # add istio gateways as application to list of applications
   - name: combine istio gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
@@ -12,13 +38,13 @@
         {%- if item.endpointIP is defined -%}
         {%- set _d = domain_list.append(net.domain_external) -%}
         {%- endif -%}
-        {{ apps | combine( {net.default_gateway_namespace: {item.domain|replace('.','-'): gateway_install | combine(
+        {{ apps | combine( {item.namespace: {item.domain|replace('.','-'): gateway_install | combine(
                      {'network':{ 
                           'hosts': domain_list,
                           'domain': item.domain
                      }})
         }}, recursive=true)}}
-    loop: "{{ net.routes | selectattr('gateway','equalto','istio') }}"# | map(attribute='domain') | list}}"
+    loop: "{{ net.routes | selectattr('gateway','equalto','istio') }}"
 
   - name: application list with Istio gateways added
     debug:
@@ -50,18 +76,20 @@
     loop: "{{ app_temp }}"
 
 # apply defaults and requirements
+  - name: prepare lists for defaults and requirements treatment
+    set_fact:
+      org_list: "{{ app_list }}"
+      app_list: "{{ [] }}"
   - name: apply defaults and requirements
     vars:
-      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
       my_dom: "{{ app.network.domain|default(net.base_domain) }}"
       my_route: "{{ net.routes | selectattr('domain','equalto',my_dom)|first }}"
       my_gw_rq: >-
         {{
-         { 'name': ('traefik' if my_route.gateway == 'traefik' else my_dom | replace('.', '-')),
-         'namespace': (
-          app_list | selectattr('name', 'equalto', 'traefik') | first).namespace if my_route.gateway == 'traefik'
-          else net.default_gateway_namespace if my_route.gateway == 'istio'  else invalid
-         } | combine({'type': 'gateway'}) }}
+         { 'name': my_dom | replace('.', '-'),
+         'type': 'gateway',
+         'namespace': my_route.namespace
+         } }}
       rq: "{{ (app.requires|default([])|list)+[my_gw_rq] }}"
       # network_defaults is assigned in each loop to have new random values
       security:
@@ -85,11 +113,10 @@
           {{ domain_list }}
       networkAsDict: "{{ (app.network is defined and app.network is boolean) | ternary({}, (app.network if app.network is defined else {})) }}"
       network: "{{ network_defaults | combine(networkAsDict, recursive=true) }}"
-      network_old: "" # if app.network is defined else false|bool }}"
       new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]) }, recursive=true) }}"
     set_fact:
-      app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_entry]}}" # replace existing appliation list item by new_entry
-    loop: "{{ app_list }}"
+      app_list: "{{ app_list+[new_entry] }}"
+    loop: "{{ org_list }}"
     loop_control:
       loop_var: app
 
@@ -128,51 +155,27 @@
     when: only_apps is defined
 
 # combine all multi-level requirements to requires
-  - name: debug - recursive requirements
-    vars:
-      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
-      app_deps: |
-        {%- set loop_data={'all_req': []} -%}
-        {%- set reqs = [app.name] -%}
-        {%- for b in range(0,10,1)  if (reqs|length|int > 0) -%}
-        {%- set current=reqs[-1] %}
-        {%- set reqs=reqs[:-1] %}
-        {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
-        {%-   set req = (full_req | map(attribute='name')| list) -%}
-        {%-   set reqs = reqs + req %}
-        {%-  set update_reqs_for_current_application = loop_data.update( {'all_req': (loop_data.all_req+full_req) } ) %}
-        {%- endfor %}
-        {{ loop_data.all_req|unique }}
-      new_app: "{{ app | ansible.utils.remove_keys(target=['requires'])| combine({'requires': app_deps}) }}"
-    debug: 
-      msg: "my_idx:{{ my_idx }}\napp_deps:{{app_deps}}\nnew_app:{{new_app}}\ntype of deps:{{ app_deps | type_debug }}"
-    loop: "{{ app_list | selectattr('requires', 'defined')  }}"
-    loop_control:
-      loop_var: app
-    when: "'debug' in ansible_run_tags"
-
-  - name: set - recursive requirements
-    vars:
-      my_idx: "{{ app_list | ansible.utils.index_of('eq', app.name, 'name') }}"
-      app_deps: |
-        {%- set loop_data={'all_req': []} -%}
-        {%- set reqs = [app.name] -%}
-        {%- for b in range(0,4,1)  if (reqs|length|int > 0) -%}
-        {%- set current=reqs[-1] %}
-        {%- set reqs=reqs[:-1] %}
-        {%-   set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
-        {%-   set req = (full_req | map(attribute='name')| list) -%}
-        {%-   set reqs = reqs + req %}
-        {%-  set update_reqs_for_current_application = loop_data.update( {'all_req': (loop_data.all_req+full_req) } ) %}
-        {%- endfor %}
-        {{ loop_data.all_req|unique }}
-      new_app: "{{ app | ansible.utils.remove_keys(target=['requires']) | combine({'requires': app_deps }) }}"
+  - name: merge application requirements
     set_fact:
-      napp: "{{ new_app }}"
-      app_list: "{%- set _ = app_list.pop(my_idx|int) %}{{app_list+[new_app]}}" # replace existing appliation list item by new_entry
-    loop: "{{ app_list | selectattr('requires', 'defined')  }}"  # process only those applications which have requirements set
-    loop_control:
-      loop_var: app
+      app_list: >-
+        {%- set loop_data={'all_apps': [], 'all_reqs': []} -%}
+        {%- for app in app_list -%}
+          {%- set reqs = [app.name] -%}
+          {%- set _ = loop_data.update( {'all_reqs': [] }) -%}
+          {%- for b in range(0,4,1)  if (reqs|length|int > 0) -%}
+            {%- set current=reqs[-1] %}
+            {%- set reqs=reqs[:-1] %}
+            {%- set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
+            {%- set _ = loop_data.update( {'all_reqs': (loop_data.all_reqs+full_req) } ) %}
+            {%- for r in full_req -%}
+              {%- set _ = reqs.append(r.name) -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {%- set new_app = app | combine({'requires': loop_data.all_reqs|unique}) -%}
+          {%- set _ = loop_data.update( {'all_apps': (loop_data.all_apps+[new_app]) } ) %}
+          {%- set _ = resolved.append(new_app) -%}
+        {%- endfor -%}
+        {{ loop_data.all_apps|unique }}
 
   - name: app_list
     debug: 
@@ -236,4 +239,4 @@
   - debug:
       msg: "applications:\n{{ applications | to_nice_yaml}}"
     failed_when: "'prepare' in ansible_run_tags"
-  run_once: true
+#  run_once: true

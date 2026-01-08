@@ -39,8 +39,8 @@ images:
     packages: ="{{ software.postgresql.latest.params.repo }}"-"{{ software.postgresql.version }}"
     finish_rootfs_build: |
       ln -s usr/lib "${ROOT}/lib" # && copy_gcc_libs
-      #(cd ${ROOT}; for f in usr/lib/postgresql*/bin/*; do (ls -l /usr/bin/$(basename $f) || true); ln -s /$f usr/bin/; done)
-      mkdir -p -m 3777 ${ROOT}/run/postgresql && chown postgres ${ROOT}/run/postgresql
+      (cd ${ROOT}; for f in usr/lib/postgresql*/bin/*; do ln -s /$f usr/bin/; done)
+      mkdir -p -m 3777 ${ROOT}/run/postgresql && chown 70 ${ROOT}/run/postgresql
       echo 'postgres:x:70:70:PostgreSQL program user:/var/lib/postgresql:/bin/sh' > "${ROOT}/etc/passwd"
       echo 'postgres:x:70:' > "${ROOT}/etc/group"
 
@@ -275,16 +275,10 @@ images:
       ( cd ${ROOT}/${HA_DIR}; 
           git clone --depth=1 -b "{{ software['home-assistant'].version }}" https://github.com/home-assistant/core.git
           cd core
-          for package in home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy mutagen; do # pyudev; do
+          for package in pyspeex-noise home-assistant-intents PyTurboJPEG home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy mutagen ha-ffmpeg hass-nabucasa pymicro-vad; do # pyudev; do
             grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
           done
-          for package in home_assistant_intents PyTurboJPEG; do
-            echo "${package}" >> requirements.txt
-          done
             
-          for f in requirements.txt homeassistant/package_constraints.txt pyproject.toml homeassistant/helpers/network.py; do
-            sed -i -e "/hass-nabucasa/d" -e "/hass_nabucasa/d" "${f}"
-          done
           sed -i -e "/hass_nabucasa/d" -e "s#remote.is_cloud_request.get()#False#" homeassistant/components/http/forwarded.py
             
           # remove from default configuration
@@ -294,13 +288,14 @@ images:
       
       VIRTUAL_ENV=/py_env
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
-      pip install -r ${HA_DIR}/core/requirements.txt 2>&1 | tee ${ROOT}/py_env.log
+      pip install --no-cache-dir -r ${HA_DIR}/core/requirements.txt 2>&1 | tee ${ROOT}/py_env.log
+      rm -rf /py_env/lib/python3.13/site-packages/hass_frontend/frontend_es5 # remove this ancient version 
       set +x
     finish_rootfs_build: |
       VIRTUAL_ENV=/py_env
       . "$VIRTUAL_ENV"/bin/activate
       ln -s ${ROOT}/usr/bin/pg_config* /usr/bin/pg_config
-      pip install psycopg2
+      pip --no-cache-dir install psycopg2
       find /py_env -name '*.so*' -exec strip {} \;
       pip uninstall --yes uv
       mv "$VIRTUAL_ENV" ${ROOT}/"$VIRTUAL_ENV"

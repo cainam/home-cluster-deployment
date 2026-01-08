@@ -1,16 +1,16 @@
-- name: print deployment information
-  debug:
-    msg: "namespace: {{ item }} application: {{ applications[item] }}" 
-  with_items: "{{ applications.keys() | list }}"
+- block:
+  - name: print deployment information
+    debug:
+      msg: "namespace: {{ item }} application: {{ applications[item] }}" 
+    with_items: "{{ applications.keys() | list }}"
+    
+  - name: init required volumes
+    set_fact:
+      keep_volumes: "{{ volumes_to_exempt }}"
+    
+  - name: prepare deployment
+    include_tasks: prepare_deployment.yaml
   run_once: true
-  
-- name: init required volumes
-  set_fact:
-    keep_volumes: "{{ volumes_to_exempt }}"
-  run_once: true
-  
-- name: prepare application prerequisites
-  include_tasks: prepare_deployment.yaml
     
 - name: prepare application prerequisites
   include_tasks: prepare_by_namespace.yml

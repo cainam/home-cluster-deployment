@@ -18,7 +18,7 @@ system_local_certs: /usr/local/share/ca-certificates
 local_ca_files:
 - "root-ca.crt"
 - "intermediate-ca.crt"
-#local_ca: "{{ lookup('file', local_ca_file) }}"
+
 certs:
 - name: myregistry.adm13
   dest: /shared/registry/certs
@@ -28,7 +28,6 @@ certs:
 net:
   domain_external: adm13.dnshome.de
   base_domain: my-lb.adm13
-  default_gateway_namespace: istio-ingress
   local_master_ip: 10.10.10.10
   open_services:
   - oauth2-proxy
@@ -45,6 +44,7 @@ net:
     endpointIP: 192.168.4.106
   - domain: ha.my-lb.adm13
     gateway: istio
+    namespace: istio-ingress
     endpointIP: 192.168.4.101
 
 oauth2_path: /oauth2-hydra

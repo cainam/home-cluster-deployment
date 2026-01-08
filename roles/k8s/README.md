@@ -5,6 +5,8 @@ check to apply the etcd tuning options:
           election-timeout: 3000
           experimental-warning-apply-duration: 300ms
 
+# kubelet
+kubelet configuration is deployed as a file and the kubelet configmap is refreshed from this file
 
 ## networking information
 ```
