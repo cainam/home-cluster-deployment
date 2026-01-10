@@ -81,7 +81,6 @@ def services_status(request: Request):
 
     output={}
     output["registry"] = subprocess.run(["curl","-k","-s","-X","GET","-I",registry+"/v2/_catalog"], capture_output=True).stdout.decode('ascii')
-    output["helm"] = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:9443"], capture_output=True).stdout.decode('ascii')
 
     stage3_html = subprocess.run(["curl","-s","http://distfiles.gentoo.org/releases/arm64/autobuilds/current-stage3-arm64-musl-hardened/"], capture_output=True).stdout.decode('ascii')
     stage3_pattern = re.compile(r'<a\s+href=["\'](.*?\.tar\.xz)["\'][^>]*>', re.IGNORECASE)
@@ -115,8 +114,6 @@ def services_status(request: Request):
             latest_date = current_date
             latest_file_name = full_file_name
     output['stage3'] = output['stage3'] + '\n' + latest_file_name
-
-
 
     # logger.info("response: "+response)
     return templates.TemplateResponse("general_pages/service_status.html",{"request":request, "content": output, "name": "service status" } )

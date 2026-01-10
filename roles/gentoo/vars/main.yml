@@ -3,6 +3,3 @@ gluster_vols:
   - name: registry
     size: 10G
     type: gluster
-  - name: helm
-    size: 1G
-    type: gluster

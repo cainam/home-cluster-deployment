@@ -54,7 +54,6 @@ def login(request: Request):
     challenge = bdy["challenge"]
     output={}
     output["registry"] = subprocess.run(["curl","-k","-s","-X","GET","-I",registry+"/v2/_catalog"], capture_output=True).stdout.decode('ascii')
-    output["helm"] = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:9443"], capture_output=True).stdout.decode('ascii')
 
     # logger.info("response: "+response)
     return templates.TemplateResponse("general_pages/login.html",{"request":request, "content": output, "name": "service status" } )
@@ -64,7 +63,6 @@ def login(request: Request):
 def consent(request: Request):
     output={}
     output["registry"] = subprocess.run(["curl","-k","-s","-X","GET","-I",registry+"/v2/_catalog"], capture_output=True).stdout.decode('ascii')
-    output["helm"] = subprocess.run(["curl","-k","-s","-X","GET","-I","https://10.10.10.10:9443"], capture_output=True).stdout.decode('ascii')
 
     # logger.info("response: "+response)
     return templates.TemplateResponse("general_pages/consent.html",{"request":request, "content": output, "name": "service status" } )

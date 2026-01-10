@@ -8,7 +8,6 @@ local_disk_directory: /data/disks
 remote_temp: /data/tmp
 default_boot_device: /dev/mmcblk0p1
 
-helm_repo_base: https://helm.adm13:9443/
 registry: myregistry.adm13:443
 shared_mounts: /shared
 default_platform: arm64
@@ -22,8 +21,6 @@ local_ca_files:
 certs:
 - name: myregistry.adm13
   dest: /shared/registry/certs
-- name: helm.adm13
-  dest: /shared/helm/certs
 
 net:
   domain_external: adm13.dnshome.de
@@ -50,7 +47,6 @@ net:
 oauth2_path: /oauth2-hydra
 
 volumes_to_exempt:
-  - helm
   - registry
 
 # supported storage types are longhorn, gluster and local

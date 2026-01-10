@@ -2,7 +2,6 @@
 applications:
   gateway:
     traefik:
-      deployment_type: kustomize
       network: true
       kustom:
         ports:
@@ -16,18 +15,11 @@ applications:
         config: true
   istio-system:
     istiod-config:
-      deployment_type: kustomize
     istiod:
-      deployment_type: kustomize
       images:
       - pilot
   auth:
-    Xory-commons:
-      git: https://github.com/ory/k8s.git
-      subdir: helm/charts/ory-commons
-      install: false
     hydra:
-      deployment_type: kustomize
       images:
       - hydra
       requires:
@@ -42,7 +34,6 @@ applications:
         svcName: hydra-public
         prefix: /hydra
     auth-operator: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true or =memory
-      deployment_type: kustomize
       images:
       - auth-operator
       storage:
@@ -51,12 +42,10 @@ applications:
         type: local_folder
         config: true
     idp:
-      deployment_type: kustomize
       images:
       - idp
       network: true
     oauth2-proxy:
-      deployment_type: kustomize
       images:
       - oauth2-proxy
       network:
@@ -68,7 +57,6 @@ applications:
       git: "{{ own_git_url }}"
       subdir: charts/grott
     zigbee2mqtt:
-      deployment_type: kustomize
       flags: ['no strip']
       affinity: k8s-2-int.adm13
       images:
@@ -80,14 +68,12 @@ applications:
         size: 100Mi
         config: true
     mosquitto:
-      deployment_type: kustomize
       images:
       - mosquitto
       storage:
       - name: mosquitto
         size: 1Gi
     home-assistant:
-      deployment_type: kustomize
       images:
       - home-assistant
       storage:
@@ -109,7 +95,6 @@ applications:
           password: same
   tools:
     infopage:
-      deployment_type: kustomize
       images:
       - fastapi
       network: true
@@ -120,9 +105,7 @@ applications:
         config: true
   db:
     postgresql:
-      deployment_type: kustomize
       kustom:
-        Ximage: "db/postgresql:{{ software.postgresql.version }}"
         user: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}"
         pass: "{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
         trustedSubnet: "{{ k8s.podSubnet }}"
@@ -135,17 +118,8 @@ applications:
       - name: data-postgresql-0
         type: longhorn
         size: 2Gi
-    dbperf:
-      git: https://github.com/cetic/helm-postgresql.git
-      chart: postgresql
-      helm_options: --set postgresql.username="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='username') | first }}" --set postgresql.password="{{ service_secrets | selectattr('type', 'match', 'db') | selectattr('name', 'match', 'postgres') | map(attribute='values') | map(attribute='password') | first }}"
-      git_to_local_params: --fix_source=.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.tag={{ software.postgresql.version }} --fix_source=.volumePermissions.image.repository=db/postgres
-      storage: 
-      - name: data-dbperf-postgresql-0
-        size: 11Gi
   kubext:
     valmut:
-      deployment_type: kustomize
       flags: ['certs']
       images:
       - fastapi
@@ -154,15 +128,11 @@ applications:
         size: 5Mi
         type: local_folder
         config: true
-      
     descheduler:
-      deployment_type: kustomize
       images:
       - descheduler
-    
   longhorn-system:
     longhorn:
-      deployment_type: kustomize
       images:
       - longhorn-manager
       - livenessprobe
@@ -177,10 +147,6 @@ applications:
       - longhorn-share-manager
       - longhorn-ui
       - support-bundle-kit
-      xgit: https://github.com/longhorn/longhorn.git
-      xsubdir: chart
-      xbranch: "{{ software.longhorn.version }}"
-      xhelm_options: --set defaultSettings.logLevel=Info --set csi.kubeletRootDir=/var/lib/kubelet/
       network:
         svcName: longhorn-frontend
         prefix: /longhorn

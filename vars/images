@@ -212,20 +212,6 @@ images:
       npm rebuild --build-from-source # otherwise segfault- to be tested: cannot it be merge with previous commands?
       npm prune --omit=dev --omit=optional
 
-- name: helm
-  type: gentoo-image-builder
-  requires:
-  - go
-  section: local
-  build:
-    packages: "=app-admin/helm-{{ software.helm.version }} app-misc/yq"
-    configure_rootfs_build: |
-      echo "=app-admin/helm-{{ software.helm.version }} ~arm64" > /etc/portage/package.accept_keywords/helm.conf && cat /etc/portage/package.accept_keywords/helm.conf
-      echo "=app-admin/helm-{{ software.helm.version }}" > /etc/portage/package.unmask/helm.conf && cat /etc/portage/package.unmask/helm.conf
-      #equery --quiet --no-color --no-pipe list sys-devel/gcc >> /etc/portage/profile/package.provided
-      ln -s usr/lib "${ROOT}/lib"
-    finish_rootfs_build: strip "${ROOT}/usr/bin/helm"
-  
 - name: python3
   section: local
   requires:

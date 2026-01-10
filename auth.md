@@ -18,7 +18,7 @@ lua TODO:
 - how to apply EnvoyProxy only for a certain domain or host requested?
 
 ## hydra deployment
-a dedicated hydra-config helm chart is deployed
+a dedicated hydra-config is deployed
 - to provide the optional PVC if persistent database is used
 - to configure client_id via post-install batch Job (not used) and
 - to deploy a Kubernetes Operator which configures the client_id upon hydra pod restart
@@ -28,7 +28,7 @@ a dedicated hydra-config helm chart is deployed
  - manually set client_id: curl -v -L -X POST 'http://hydra-admin.auth:4445/clients' -H 'Content-Type: application/json' --data-raw "$(cat /app/hydra-client.json)" with file content: { "client_name": "test", "client_secret": "oyoEa5qajmOqBFtJHWEg2iZhGli5nQu0", "grant_types": ["authorization_code", "refresh_token"], "redirect_uris": ["https://my-lb.adm13/oauth2-hydra/callback"], "response_types": ["code", "id_token"], "scope": "offline openid users.write users.read users.edit users.delete", "token_endpoint_auth_method": "client_secret_post" }
 
 ## hydra-config
-internal chart to implement k8s operator to handle client_id, but can also create a pvc for hydra if needed. A helm-job to run as post-install is included, but no longer used in favor of the k8s operator
+internal chart to implement k8s operator to handle client_id, but can also create a pvc for hydra if needed.
 
 # links
 all: 
@@ -53,7 +53,6 @@ curl -L -i -X GET -H "Authorization: Bearer xxx" https://ha.my-lb.adm13 # succes
 test in browser: https://192.168.4.100:2005/realms/test/protocol/openid-connect/auth?client_id=test&response_type=code
 
 istio: 
-helm upgrade --install -n istio-system istiod istio-system/istiod --set global.proxy.privileged=true --set pilot.image=istio/pilot:1.16.2 --set global.proxy.image=istio/proxyv2:1.16.2 --set global.proxy_init.image=istio/proxyv2:1.16.2 --set global.tracer.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=128Mi -f values-istiod.yaml 
   - standard ingress gateway + gw + vs
   - AuthorizationPolicy like
     - https://napo.io/posts/istio-oidc-authn--authz-with-oauth2-proxy/

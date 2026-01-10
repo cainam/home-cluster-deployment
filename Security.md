@@ -134,11 +134,3 @@ data:
           exporters: [loki]
 
 - Loki:
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
-helm install loki grafana/loki-stack \
-  --set promtail.enabled=false \
-  --set grafana.enabled=true \
-  --namespace monitoring --create-namespace
-
-

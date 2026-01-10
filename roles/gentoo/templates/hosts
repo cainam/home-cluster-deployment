@@ -10,7 +10,7 @@
 {% endif %}
 {% endfor %}
 
-{{ net.local_master_ip }} k8s.adm13 helm.adm13 myregistry.adm13
+{{ net.local_master_ip }} k8s.adm13 myregistry.adm13
 
 {% for route in net.routes %}
 {{ route.endpointIP }} {{ route.domain }}

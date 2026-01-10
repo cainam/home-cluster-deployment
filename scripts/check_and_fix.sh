@@ -133,27 +133,6 @@ fi
 ### internal central services
 if ( ip a 2>/dev/null | grep -q "10.10.10.10"; ); then
 
-# lighttpd
-name="lighttpd"
-out=$(curl -sv ${helm_url} 2>&1)
-#log "helm url: ${helm_url}"
-ret=$?
-if [ ${ret} -eq 35 ]; then
-  log "known error: restarting service"
-  rc-service lighttpd restart; sleep 5
-  out=$(curl -sv ${helm_url} 2>&1)
-  ret=$?
-  if [ ${ret} -ne 0 ]; then
-    log "problem NOT fixed"
-  else
-    log "problem fixed"
-  fi
-elif [ ${ret} -ne 0 ]; then
-  log "NOT ok, unknown error code: ${ret}: ${out}"
-else
-  log "ok"
-fi
-
 # registry
 name="registry"
 out=$(curl -sv -X GET https://${registry}/v2/_catalog 2>&1)

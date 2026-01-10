@@ -111,8 +111,6 @@
     mode: preserve
     backup: "{{ item.backup | default('yes') }}"
   loop:
-    - file: lighttpd.conf
-      dest: /etc/lighttpd/
     - file: 02-cgroup-manager.conf
       dest: /etc/crio/crio.conf.d/
     - file: 03-allowed-devices.conf

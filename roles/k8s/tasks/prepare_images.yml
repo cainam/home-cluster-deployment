@@ -14,7 +14,6 @@
 - name: handle additional images
   vars:
     limit_images:
-    - helm
     - registry
   include_role:
     name: gentoo-image-builder

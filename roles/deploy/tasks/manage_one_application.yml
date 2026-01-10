@@ -55,32 +55,6 @@
 
   when: playbook_dir_exists
 
-- block:
-  - block:
-    - name: "{{ name_prefix }} build helm"
-      shell: |
-        . set_env.sh "{{ k8s_namespace.key }}"
-        helm:from_git_to_local.sh --platform={{ application.value.platform | default(default_platform) }} \
-        --git_source={{ application.value.git }} --git_subdir={{ application.value.subdir | default("") }} \
-        --git_branch={{ application.value.branch | default("") }} --chart_version={{ application.value.chart_version | default("") }} \
-        --appVersion={{ application.value.appVersion | default("") }} --remove_dependencies={{ application.value.remove_dependencies | default("") }} \
-        {{ application.value.git_to_local_params | default("") }} 
-      register: build_out
-  
-    - name: "{{ name_prefix }} build output"
-      debug:
-        msg: "{{ item }}"
-      loop: "{{ build_out  | dict2items }}"
-  
-    - name: "{{ name_prefix }} helm repo refresh"
-      shell: |
-        . set_env.sh "{{ k8s_namespace.key }}"
-        helm repo add {{ ns }} "{{ helm_repo_base }}{{ ns }}"
-        helm repo index "${helm_repo_dir}" --url "${helm_url}"
-        helm repo update
-    when: (application.value.deployment_type| default("helm")) == "helm"
-  when: "'build' in ansible_run_tags" 
-
 - name: "{{ name_prefix }} files"
   include_tasks: files.yml
   loop: "{{ application.value.files | dict2items }}"
@@ -117,18 +91,6 @@
       kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ item.key }}.yaml"
     loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
   when: application.value.network.proxy_sidecar is defined
-
-- block:
-  - name: "{{ name_prefix }} install or upgrade"
-    shell: |
-      . set_env.sh "{{ k8s_namespace.key }}"
-      set -x
-       helm upgrade --install --reset-values --create-namespace -n {{ k8s_namespace.key }} {{ application.key }} {{ k8s_namespace.key }}/{{ application.value.chart | default(application.key) }} \
-       {{ applications[k8s_namespace.key][application.key].helm_options | default('') }} \
-       {% if application.value['files']['values']['file'] is defined %}  --values {{ applications[k8s_namespace.key][application.key]['files']['values']['tempfile'] }}  {% endif %}
-    register: out
-    when: "application.value.install | default(true)"
-  when: (application.value.deployment_type| default("helm")) == "helm"
 
 - block:
   - debug:
@@ -178,7 +140,6 @@
       kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
       kubectl apply -k {{ build_dir }} --force # -conflicts #--server-side
-  when: (application.value.deployment_type| default("helm")) == "kustomize"
   run_once: true
   
 - block:

@@ -15,9 +15,6 @@
       - name: myregistry.adm13
         alt_names: 
         - myregistry.adm13
-      - name: helm.adm13
-        alt_names: 
-        - helm.adm13
       - name: my-lb.adm13
         alt_names:
         - my-lb.adm13
