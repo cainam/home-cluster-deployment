@@ -48,8 +48,6 @@
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
 
-  - set_fact:
-      x: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', (application.value.images) )| first | default(None)}}"
   - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
       name: shared_helper
@@ -78,6 +76,7 @@
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
         var_additional_images: "{{ app }}_additional_images"
+        kustomize_dir: "{{ build_dir }}""
       include_tasks: "{{ playbook_path }}/additional_images.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
 

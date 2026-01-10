@@ -1,2 +1,27 @@
+
+- name: test for major version update
+  ansible.builtin.shell: |
+    set -o pipefail
+    kubectl diff -k . | grep -i "image:" | sort -u | awk '
+    /^-/ { match($0, /[0-9]+/); old = substr($0, RSTART, RLENGTH) }
+    /^\+/ { match($0, /[0-9]+/); new = substr($0, RSTART, RLENGTH) }
+    END { 
+      if (old != "" && new != "" && new > old) print "true"; 
+      else print "false" 
+    }'
+  register: major_upgrade_result
+  # kubectl diff returns 1 if differences exist, which is normal
+  failed_when: major_upgrade_result.rc > 1
+  changed_when: false
+
+- name: set upgrade fact
+  ansible.builtin.set_fact:
+    is_major_upgrade: "{{ major_upgrade_result.stdout | bool }}"
+
+- name: Display Result
+  ansible.builtin.debug:
+    msg: "Major version jump detected: {{ is_major_upgrade }}"
+
+
 - set_fact:
     "{{ return_upgrade_required }}": False
