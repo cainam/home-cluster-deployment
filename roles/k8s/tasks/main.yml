@@ -71,25 +71,21 @@
   - manifests/kube-scheduler.yaml
 
 - block:
-  - name: build flannel
-    shell: |
-      . set_env.sh kube-flannel
-      helm:from_git_to_local.sh --platform="{{ item.platform | default(default_platform) }}" --git_source=https://github.com/flannel-io/flannel.git
-      helm repo add kube-flannel "{{ helm_repo_base }}kube-flannel"
-      helm repo index "${helm_repo_dir}" --url "{{ helm_repo_base }}kube-flannel"
-    
   - name: install flannel pod network
     shell: |
-      . set_env.sh kube-flannel
-      kubectl get ns kube-flannel 2>/dev/null > /dev/null || kubectl create ns kube-flannel
-      kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
-      helm upgrade --reset-values --install -n kube-flannel kube-flannel kube-flannel/flannel --set 'flannel.args={--iface=end0,--ip-masq,--kube-subnet-mgr}'  
+      mkdir -p /tmp/flannel; cd /tmp/flannel
+      curl -O -L https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+      sed -i -e '/k8s-app:/d' -e 's/- --kube-subnet-mgr/- --kube-subnet-mgr\n        - --iface=end0/'  kube-flannel.yml
+      grep image kube-flannel.yml | awk '{print $2}' | sort -u | while read i; do echo "arm64 $i /k8s/ # required for kubernetes" | bash pull-tag-push.sh; done
+      echo -e 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: my-target-namespace\n  labels:\n    pod-security.kubernetes.io/enforce: privileged' > namespace.yaml
+      echo -e 'resources:\n- namespace.yaml\n- kube-flannel.yml' > kustomization.yaml
+      kubectl apply -k .
     register: flannel_install
 
   - name: output flannel install
     debug:
       msg: "{{flannel_install}}"
-  when: inventory_hostname == healthy_node and (not k8s_init_done or k8s_upgrade)
+  when: inventory_hostname == healthy_node # and (not k8s_init_done or k8s_upgrade)
   
 - block:
   - name: get token

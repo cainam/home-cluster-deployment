@@ -141,7 +141,7 @@ TODO:
 - dependencies: generalize waitdb initcontainer 
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-- mutate: kube-flannel + replace helm by kustomize
+- kube-flannel: use gentoo-image-builder in k8s
 - security: log all incoming connections on gateway (traefik+istio log access to file => OpenTelemetry collector => Loki ) => see Security.md
 - generate playbook doc with tags described
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
@@ -153,15 +153,19 @@ TODO:
 - if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
 - var/images: split build script snippets so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
+- render templates delegate_to:localhost and use then synchronize: of whole directory
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
+- remove helm
 
 - postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
 => how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual
-1. check if dedicated repo exists ("git ls-remote {{ git_repo_url }}", register: git_repo_check ignore_errors: true changed_when: false and use       when: git_repo_check.rc == 0)
-2. clone repo to localhost ( delegate_to: localhost)
-3. test if upgrade playbook exists (when: extra_tasks_file.stat.exists)
-3.1. determine current and new versions
-3.2. feed migrate playbook with vars include_tasks:
+- determine current and new versions => kubectl diff
+- build upgrade image => add to application.images list
+- stop service
+- run upgrade job
+- start service
+- delete job
+- feed migrate playbook with vars include_tasks:
 4, continue
 ## move application playbook part to dedicated file and create a dict for the possible playbooks as var
 

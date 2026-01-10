@@ -7,9 +7,9 @@ images:
     packages: busybox
     finish_rootfs_build: ln -s usr/lib "${ROOT}/lib" && "${ROOT}"/bin/busybox --install "${ROOT}/bin"
 
-- name: istiod
-  tag: 1.27-1
-  section: istio
+- name: pilot
+  tag: "{{ software.istio.version }}"
+  section: istio-system
   type: gentoo-image-builder
   requires:
   - go
@@ -18,13 +18,14 @@ images:
     user: 1337
     configure_rootfs_build: |
       cd /var/tmp
-      git clone --single-branch -b release-1.27 https://github.com/istio/istio.git
+      git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/istio.git
       cd istio/pilot/cmd/pilot-discovery
       CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'
     finish_rootfs_build: |
       echo 'istio-proxy:x:1337:istio-proxy' > "${ROOT}/etc/group"
       echo 'istio-proxy:x:1337:1337:Linux User,,,:/home/istio-proxy:/bin/sh' > "${ROOT}/etc/passwd"
       mkdir -p "${ROOT}/usr/local/bin" && cp -dp pilot-discovery "${ROOT}/usr/local/bin"
+      rm -rf /root/go /root/.cache
 
 - name: postgresql
   section: db
@@ -477,7 +478,6 @@ images:
       cp -dp output/bazel $ROOT/usr/local/bin
  
 - name: auth-operator
-  xtag: 2025.04
   section: auth
   requires:
   - python3
@@ -501,3 +501,82 @@ images:
       export PYTHONPATH=${VIRTUAL_ENV}/lib/python3.13/site-packages/
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate && pip install fastapi kubernetes
       mv  "${VIRTUAL_ENV}" "${ROOT}/${VIRTUAL_ENV}"
+
+- name: longhorn-manager
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/longhorn-manager
+
+- name: livenessprobe
+  tag: v2.17.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/livenessprobe
+
+- name: backing-image-manager
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/backing-image-manager
+
+- name: csi-attacher
+  tag: v4.10.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/csi-attacher
+
+- name: csi-node-driver-registrar
+  tag: v2.15.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/csi-node-driver-registrar
+
+- name: csi-provisioner
+  tag: v5.3.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/csi-provisioner
+
+- name: csi-resizer
+  tag: v1.14.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/csi-resizer
+
+- name: csi-snapshotter
+  tag: v8.4.0-20251030
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/csi-snapshotter
+
+- name: longhorn-engine
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/longhorn-engine
+
+- name: longhorn-instance-manager
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/longhorn-instance-manager
+
+- name: longhorn-share-manager
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/longhorn-share-manager
+
+- name: longhorn-ui
+  tag: "{{ software.longhorn.version }}"
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/longhorn-ui
+
+- name: support-bundle-kit
+  tag: v0.0.71
+  section: longhorn-system
+  type: fetch
+  source: docker.io/longhornio/support-bundle-kit
+

@@ -15,47 +15,25 @@ applications:
         type: local_folder
         config: true
   istio-system:
-    base: 
-      git: https://github.com/istio/istio.git
-      branch: "{{ software.istio.version }}"
-      subdir: manifests/charts/base
-    istiod: 
-      git: https://github.com/istio/istio.git
-      branch: "{{ software.istio.version }}"
-      subdir: manifests/charts/istio-control/istio-discovery
-      helm_options: --set global.proxy.privileged=true --set global.tracing.zipkin.address=jaeger-collector.tools:9411 --set pilot.resources.requests.memory=164Mi --set global.proxy.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo" --set global.proxy_init.image=istio-system/proxyv2:"{{ software.istio.version }}-gentoo"
-      git_to_local_params: --fix_source=.pilot.image=istio/pilot:"{{ software.istio.version }}" --fix_source=.global.proxy.image=istio/proxyv2:"{{ software.istio.version }}" --fix_source=.global.proxy_init.image=istio/proxyv2:"{{ software.istio.version }}"
-      vars:
-        oauth2_proxy: "oauth2-proxy"
-      files:
-        values:
-          file: istiod-mesh.yaml
     istiod-config:
       deployment_type: kustomize
+    istiod:
+      deployment_type: kustomize
+      images:
+      - pilot
   auth:
-    ory-commons:
+    Xory-commons:
       git: https://github.com/ory/k8s.git
       subdir: helm/charts/ory-commons
       install: false
     hydra:
-      git: https://github.com/ory/k8s.git
-      subdir: helm/charts/hydra
-      git_to_local_params: --fix_source=.watcher.image= --fix_source=.test.busybox.repository= --fix_source=.image.tag= --fix_source=.image.repository=
-      helm_options_for_memory: --set hydra.config.dsn=memory
-      helm_options_for_presistent_storage: --set hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true --set deployment.extraVolumeMounts[0].name=hydra --set deployment.extraVolumeMounts[0].mountPath=/data --set deployment.extraVolumes[0].name=hydra --set deployment.extraVolumes[0].persistentVolumeClaim.claimName=hydra --set hydra.automigration.type=initContainer --set hydra.automigration.enabled=true 
-      helm_options: >-
-        --set hydra.config.dsn=memory 
-        --set image.repository=auth/hydra --set image.tag="{{ software.hydra.version }}"
-      remove_dependencies: hydra-maester
+      deployment_type: kustomize
+      images:
+      - hydra
       requires:
       - type: default
         name: hydra-config
         namespace: auth
-      images:
-      - hydra
-      files:
-        values:
-          file: hydra-config.yaml
       storage:
       - name: hydra
         size: 5Mi 
@@ -178,34 +156,31 @@ applications:
         config: true
       
     descheduler:
-      git: https://github.com/kubernetes-sigs/descheduler.git
-      subdir: charts/descheduler
-      branch: "{{ software.descheduler.version }}"
-      git_to_local_params: --fix_source=.image.tag= --fix_source=.image.repository= 
+      deployment_type: kustomize
       images:
       - descheduler
-      helm_options: >-
-        --set deschedulerPolicy.strategies.RemoveDuplicates.enabled=false
-        --set deschedulerPolicy.strategies.RemovePodsHavingTooManyRestarts.enabled=false 
-        --set deschedulerPolicy.strategies.RemovePodsViolatingNodeTaints.enabled=false 
-        --set deschedulerPolicy.strategies.RemovePodsViolatingNodeAffinity.enabled=false 
-        --set deschedulerPolicy.strategies.RemovePodsViolatingInterPodAntiAffinity.enabled=false 
-        --set deschedulerPolicy.strategies.RemovePodsViolatingTopologySpreadConstraint.enabled=false 
-        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.cpu=50 
-        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.thresholds.memory=40 
-        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.cpu=60  
-        --set deschedulerPolicy.strategies.LowNodeUtilization.params.nodeResourceUtilizationThresholds.targetThresholds.memory=43 
-        --set cmdOptions.v=4 --set deschedulerPolicy.evictLocalStoragePods=true --set schedule="*/10 * * * *"
-        --set image.tag={{ software.descheduler.version }}
-        --set image.repository=kube-system/descheduler
     
   longhorn-system:
     longhorn:
-      git: https://github.com/longhorn/longhorn.git
-      subdir: chart
-      branch: "{{ software.longhorn.version }}"
-      lm_options: --set defaultSettings.defaultDataPath=/data/longhorn-1 --set defaultSettings.logLevel=Trace
-      helm_options: --set defaultSettings.logLevel=Info --set csi.kubeletRootDir=/var/lib/kubelet/
+      deployment_type: kustomize
+      images:
+      - longhorn-manager
+      - livenessprobe
+      - backing-image-manager
+      - csi-attacher
+      - csi-node-driver-registrar
+      - csi-provisioner
+      - csi-resizer
+      - csi-snapshotter
+      - longhorn-engine
+      - longhorn-instance-manager
+      - longhorn-share-manager
+      - longhorn-ui
+      - support-bundle-kit
+      xgit: https://github.com/longhorn/longhorn.git
+      xsubdir: chart
+      xbranch: "{{ software.longhorn.version }}"
+      xhelm_options: --set defaultSettings.logLevel=Info --set csi.kubeletRootDir=/var/lib/kubelet/
       network:
         svcName: longhorn-frontend
         prefix: /longhorn
