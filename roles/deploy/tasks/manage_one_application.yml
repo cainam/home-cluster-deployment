@@ -4,93 +4,25 @@
     app: "{{ application.key }}"
     local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
-- block:
-  - block:
-    - name: "{{ name_prefix }} handle additional images"
-      vars:
-        limit_images: "{{ application.value.images }}"
-        default_section: "{{ k8s_namespace.key }}"
-        dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
-        images_details_var: "images_info"
-      include_role:
-        name: gentoo-image-builder
-    when: application.value.images is defined
-
-## move application playbook part to dedicated file
-- name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
-  ansible.builtin.git:
-    repo: '{{ own_git_url }}'
-    dest: "{{ local_playbook_temp }}"
-    depth: 1
-  ignore_errors: true
-  delegate_to: localhost
-
-- name: "{{ name_prefix }} check if application playbooks exist"
-  ansible.builtin.stat:
-    path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
-  register: playbook_dir_stat
-  delegate_to: localhost
-
-- name: "{{ name_prefix }} set playbook_dir_exists"
-  set_fact:
-    playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
-    playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
-
-- block:
-  - name: "{{ name_prefix }} application playbook - versions - playbook check"
-    ansible.builtin.stat:
-      path: "{{ playbook_path }}/versions.yaml"
-    register: versions_stat
+- block: # prepare application playbook integration
+  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+    ansible.builtin.git:
+      repo: '{{ own_git_url }}'
+      dest: "{{ local_playbook_temp }}"
+      depth: 1
+    ignore_errors: true
     delegate_to: localhost
 
-  - name: "{{ name_prefix }} application playbook - versions - playbook run}}"
-    vars:
-      return_upgrade_required: "{{ app }}_upgrade"
-      version_target: "{{ image_info.tag }}"
-    include_tasks: "{{ playbook_path }}/versions.yaml"
-    when: versions_stat.stat.exists and versions_stat.stat.isreg
+  - name: "{{ name_prefix }} check if application playbooks exist"
+    ansible.builtin.stat:
+      path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+    register: playbook_dir_stat
+    delegate_to: localhost
 
-  - debug: 
-      msg: "return from versions: {{ lookup('vars', app~'_upgrade') }}\nimage_info:{{ image_info | to_nice_yaml }}"
-
-  when: playbook_dir_exists
-
-- name: "{{ name_prefix }} files"
-  include_tasks: files.yml
-  loop: "{{ application.value.files | dict2items }}"
-  loop_control:
-    loop_var: file
-  when: application.value.files is defined
-
-- debug:
-    msg: "k8s.mutate:{{k8s.mutate}}"
-    
-- name: "{{ name_prefix }} mutating config"
-  shell: |
-    kubectl apply -f - <<EOF
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: "{{ application.key }}"
-      namespace: "{{ k8s.mutate.namespace }}"
-    data:
-      mutate: |
-        {{ application.value.mutate | to_nice_yaml | indent(width=4) }}
-    EOF
-  when: application.value.mutate is defined
-
-- block:
-  - name: "{{ name_prefix }} create patch from mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
-    template:
-      src: "mutatingwebhookconfiguration-istio-sidecar-injector.yaml"
-      dest: "/tmp/hook-{{ item.key }}.yaml"
-    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
-
-  - name: "{{ name_prefix }} apply patch "
-    shell: |
-      kubectl patch mutatingwebhookconfiguration istio-sidecar-injector --type=strategic --patch-file="/tmp/hook-{{ item.key }}.yaml"
-    loop: "{{ application.value.network.proxy_sidecar | dict2items() }}"
-  when: application.value.network.proxy_sidecar is defined
+  - name: "{{ name_prefix }} set playbook_dir_exists"
+    set_fact:
+      playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
+      playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
 
 - block:
   - debug:
@@ -135,6 +67,39 @@
          'network':  application.value.network | default({}),
          'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
          }) }}"
+
+  - block:
+    - name: "{{ name_prefix }} application playbook - additional_images - playbook check"
+      ansible.builtin.stat:
+        path: "{{ playbook_path }}/additional_images.yaml"
+      register: playbook_stat
+      delegate_to: localhost
+
+    - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
+      vars:
+        var_additional_images: "{{ app }}_additional_images"
+      include_tasks: "{{ playbook_path }}/additional_images.yaml"
+      when: playbook_stat.stat.exists and playbook_stat.stat.isreg
+
+    - debug:
+        msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}\nimage_info:{{ image_info | to_nice_yaml }}"
+    when: playbook_dir_exists
+
+  - block:
+    - name: "{{ name_prefix }} handle additional images"
+      vars:
+        limit_images: "{{ application.value.images + lookup('vars', app~'_additional_images') }}"
+        default_section: "{{ k8s_namespace.key }}"
+        dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
+        images_details_var: "images_info"
+      include_role:
+        name: gentoo-image-builder
+    when: application.value.images is defined
+
+  - debug:
+      msg: "development exit"
+    failed_when: true
+
   - name: "{{ name_prefix }} kustomize"
     vars:
       kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"

@@ -83,8 +83,6 @@ applications:
       network:
         prefix: "/"
         domain: ha.my-lb.adm13
-        old_proxy_sidecar: 
-          app.kubernetes.io/instance: home-assistant
       requires:
       - type: postgresql
         name: postgres
@@ -151,8 +149,6 @@ applications:
         svcName: longhorn-frontend
         prefix: /longhorn
         svcPort: 80
-        old_proxy_sidecar: 
-         app: longhorn-ui
       storage:
       - name: longhorn-1
         type: local
