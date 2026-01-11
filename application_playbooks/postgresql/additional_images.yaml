@@ -10,7 +10,6 @@
       else print "false" 
     }'
   register: major_upgrade_result
-  # kubectl diff returns 1 if differences exist, which is normal
   failed_when: major_upgrade_result.rc > 1
   changed_when: false
 
@@ -18,10 +17,18 @@
   ansible.builtin.set_fact:
     is_major_upgrade: "{{ major_upgrade_result.stdout | bool }}"
 
-- name: Display Result
-  ansible.builtin.debug:
-    msg: "Major version jump detected: {{ is_major_upgrade }}"
+- name: "set var {{ var_additional_images }}"
+  vars:
+    next: {{ software.postgresql.version.split('.')[0] | int }}
+    prev: {{ next - 1 }}
+  set_fact:
+    "{{ var_additional_images }}": "{{ 
+      [{
+        'name': 'pgupgrade'~software.postgresql.version,
+        'tag': software.postgresql.version,
+        'section': 'db',
+        'type': 'gentoo-image-builder',
+        'requires': ['postgresql'],
+        'build': {'=dev-db/postgresql-'~prev~'*' }
 
-
-- set_fact:
-    "{{ return_upgrade_required }}": False
+      }] if is_major_upgrade else [] }}"

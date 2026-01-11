@@ -54,7 +54,7 @@ software:
         repo: library/registry
         arch: arm64
   postgresql:
-    xversion: 17.7
+    #version: 17.7
     version: 18.1
     latest:
       type: gentoo
