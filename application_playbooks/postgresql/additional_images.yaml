@@ -2,7 +2,7 @@
 - name: test for major version update
   ansible.builtin.shell: |
     set -o pipefail
-    kubectl diff -k . | grep -i "image:" | sort -u | awk '
+    kubectl diff -k {{ kustomize_dir }} | grep -i "image:" | sort -u | awk '
     /^-/ { match($0, /[0-9]+/); old = substr($0, RSTART, RLENGTH) }
     /^\+/ { match($0, /[0-9]+/); new = substr($0, RSTART, RLENGTH) }
     END { 

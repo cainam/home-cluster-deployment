@@ -4,6 +4,16 @@
     app: "{{ application.key }}"
     local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
+- block:
+  - name: "{{ name_prefix }} handle additional images" # to have the images dict recreated with defaults filled
+    vars:
+      limit_images: []
+      default_section: "{{ k8s_namespace.key }}"
+      dry_run: "{{ true }}"
+    include_role:
+      name: gentoo-image-builder
+  when: application.value.images is defined
+
 - block: # prepare application playbook integration
   - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
     ansible.builtin.git:
@@ -76,7 +86,7 @@
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
         var_additional_images: "{{ app }}_additional_images"
-        kustomize_dir: "{{ build_dir }}""
+        kustomize_dir: "{{ build_dir }}"
       include_tasks: "{{ playbook_path }}/additional_images.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
 
