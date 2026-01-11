@@ -29,6 +29,5 @@
         'section': 'db',
         'type': 'gentoo-image-builder',
         'requires': ['postgresql'],
-        'build': {'=dev-db/postgresql-'~prev~'*' }
-
+        'build': {'packages': '=dev-db/postgresql-'~prev~'*' }
       }] if is_major_upgrade else [] }}"
