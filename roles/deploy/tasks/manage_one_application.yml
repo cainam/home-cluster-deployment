@@ -97,7 +97,8 @@
   - block:
     - name: "{{ name_prefix }} handle additional images"
       vars:
-        limit_images: "{{ application.value.images + lookup('vars', app~'_additional_images') }}"
+        limit_images: "{{ application.value.images + (lookup('vars', app~'_additional_images')|map(attribute="name"))}}"
+        images: "{{ images + lookup('vars', app~'_additional_images') }}"
         default_section: "{{ k8s_namespace.key }}"
         dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
         images_details_var: "images_info"
