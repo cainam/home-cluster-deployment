@@ -19,8 +19,8 @@
 
 - name: "set var {{ var_additional_images }}"
   vars:
-    next: {{ software.postgresql.version.split('.')[0] | int }}
-    prev: {{ next - 1 }}
+    next: "{{ software.postgresql.version.split('.')[0] | int }}"
+    prev: "{{ next - 1 }}"
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
