@@ -24,8 +24,8 @@
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
-        'name': 'pgupgrade'~software.postgresql.version,
-        'tag': software.postgresql.version,
+        'name': 'pgupgrade'~next,
+        'tag': prev,
         'section': 'db',
         'type': 'gentoo-image-builder',
         'requires': ['postgresql'],
