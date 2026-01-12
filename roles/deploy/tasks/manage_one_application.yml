@@ -98,8 +98,8 @@
   - block:
     - name: "{{ name_prefix }} update images variables"
       set_fact:
-        current_app_images: "{{ images + lookup('vars', app ~ '_additional_images') }}"
-        current_limit_images: "{{ application.value.images + (lookup('vars', app ~ '_additional_images') | map(attribute='name') | list) }}"
+        current_app_images: "{{ images + lookup('vars', app ~ '_additional_images')|default([]) }}"
+        current_limit_images: "{{ application.value.images + (lookup('vars', app ~ '_additional_images') | map(attribute='name') | list|default([])) }}"
 
     - name: "{{ name_prefix }} handle additional images"
       vars:
