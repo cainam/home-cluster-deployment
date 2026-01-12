@@ -1,4 +1,12 @@
 - block:
+  - name: stop service
+    shell: |
+      kubectl scale --replicas=0 -n {{ k8s_namespace }} statefulset postgres
+  - name: run upgrade job
+    shell: |
+      kubectl apply -f - <<EOF
+      {{ postgres_upgrade_job }} 
+      EOF
   vars:
    postgres_upgrade_job: |
     apiVersion: batch/v1
@@ -36,12 +44,3 @@
           - name: pg-data
             persistentVolumeClaim:
               claimName: data-postgres-0
-  tasks:
-  - name: stop service
-    shell: |
-      kubectl scale --replicas=0 -n {{ k8s_namespace }} statefulset postgres
-  - name: run upgrade job
-    shell: |
-      kubectl apply -f - <<EOF
-      {{ postgres_upgrade_job }} 
-      EOF
