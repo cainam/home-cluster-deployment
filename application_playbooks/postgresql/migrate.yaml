@@ -36,9 +36,9 @@
                   --new-datadir=$PGDATA/data_new \
                   --old-bindir=/usr/lib/postgresql-17/bin \
                   --new-bindir=/usr/lib/postgresql-18/bin \
-                  -U postgres
-                  --verbose
-                  --link
+                  -U postgres \
+                  --verbose \
+                  --link \
                   --check
           volumes:
           - name: pg-data
