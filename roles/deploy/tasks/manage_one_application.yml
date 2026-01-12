@@ -119,7 +119,7 @@
       register: playbook_stat
       delegate_to: localhost
 
-    - name: "{{ name_prefix }} application playbook - migrate - playbook run}}"
+    - name: "{{ name_prefix }} application playbook - migrate - playbook run"
       include_tasks: "{{ playbook_path }}/migrate.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
 
