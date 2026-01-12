@@ -14,11 +14,12 @@
       target_node: "{{ attachment_node.stdout }}"
     shell: |
       kubectl delete job -n {{ k8s_namespace.key }} postgres-upgrade
-      kubectl apply -f - <<EOF
+      kubectl apply -f - <<"EOF"
       {{ postgres_upgrade_job }} 
       EOF
   vars:
    pg_claim: "data-postgres-0"
+   pg_dir: "/var/lib/postgresql"
    postgres_upgrade_job: |
     apiVersion: batch/v1
     kind: Job
