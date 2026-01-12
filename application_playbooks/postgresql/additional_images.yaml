@@ -20,14 +20,14 @@
 - name: "set var {{ var_additional_images }}"
   vars:
     pg_next: "{{ software.postgresql.version|string|split('.')|first|int }}"
-    pg_prev: "{{ next - 1 }}"
+    pg_prev: "{{ pg_next - 1 }}"
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
-        'name': 'pgupgrade'~next,
-        'tag': prev,
+        'name': 'pgupgrade'~pg_next,
+        'tag': pg_prev,
         'section': 'db',
         'type': 'gentoo-image-builder',
         'requires': ['postgresql'],
-        'build': {'packages': '=dev-db/postgresql-'~prev~'*' }
+        'build': {'packages': '=dev-db/postgresql-'~pg_prev~'*' }
       }] if is_major_upgrade else [] }}"
