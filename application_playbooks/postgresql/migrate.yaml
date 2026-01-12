@@ -46,16 +46,13 @@
             command: ["/bin/sh", "-c"]
             args:
               - |
-                cd /tmp/; rm -rf $PGDATA/data_new ; \
-                /usr/lib/postgresql-{{ pg_next }}/bin/initdb -D $PGDATA/data_new; \
-                  pg_upgrade --old-datadir=$PGDATA/data \
-                  --new-datadir=$PGDATA/data_new \
-                  --old-bindir=/usr/lib/postgresql-{{ pg_next - 1 }}/bin \
-                  --new-bindir=/usr/lib/postgresql-{{ pg_next }}/bin \
-                  -U postgres \
-                  --verbose \
-                  --link \
-                  --check
+                cd /tmp/; rm -rf $PGDATA/data_new ;
+                /usr/lib/postgresql-{{ pg_next }}/bin/initdb -D $PGDATA/data_new;
+                UPGRADE_CMD="/usr/lib/postgresql-{{ pg_next }}/bin/pg_upgrade --old-datadir=$PGDATA/data --new-datadir=$PGDATA/data_new \
+                --old-bindir=/usr/lib/postgresql-{{ pg_next - 1 }}/bin --new-bindir=/usr/lib/postgresql-{{ pg_next }}/bin -U postgres --verbose --link"
+                echo "Running pg_upgrade --check..."
+                $UPGRADE_CMD --check && \
+                echo "Check successful! Running actual upgrade..."
           volumes:
           - name: pg-data
             persistentVolumeClaim:
