@@ -46,7 +46,7 @@
             command: ["/bin/sh", "-c"]
             args:
               - |
-                mkdir -p $PGDATA/data_new ;  chown postgres:postgres $PGDATA/data_new ;pg_upgrade \
+                cd /tmp/; mkdir -p $PGDATA/data_new ;  chown postgres:postgres $PGDATA/data_new ;pg_upgrade \
                   --old-datadir=$PGDATA/data \
                   --new-datadir=$PGDATA/data_new \
                   --old-bindir=/usr/lib/postgresql-17/bin \
