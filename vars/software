@@ -1,6 +1,6 @@
 software:
   traefik:
-    version: v3.6.5
+    version: v3.6.6
     installed:
       pattern: "traefik"
     latest:

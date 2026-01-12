@@ -50,16 +50,6 @@ images:
       echo 'postgres:x:70:70:PostgreSQL program user:/var/lib/postgresql:/bin/sh' > "${ROOT}/etc/passwd"
       echo 'postgres:x:70:' > "${ROOT}/etc/group"
 
-- name: pg_migrate
-  tag: 17to18
-  section: db
-  type: gentoo-image-builder
-  requires: 
-  - base
-  build:
-    user: postgres
-#    packages: "={{ software.postgresql.latest.params.repo }}-17.6-r1 ={{ software.postgresql.latest.params.repo }}-18.0"
-
 - name: go
   section: local
   type: gentoo-image-builder

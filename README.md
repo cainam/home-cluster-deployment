@@ -3,7 +3,7 @@
 - k8s operator written in python
 - simple status page using FastAPI which async calls to fetch information from the systems
 - EnvoyFilter with Lua script to modify authentication responses - really cool!
-- loading of additional playbooks per application (additional_images, migrate, post_deployment)
+- loading of additional playbooks per application (additional_images, migrate, post_deployment): this makes it possible to include specific application playbooks where needed, like postgresql major version update)
 
 # usage
 some additional files are required for handling sensitive information (like passwords), these are to be stored at $local_conf (files: secret)
@@ -142,32 +142,20 @@ TODO:
 - dependencies: generalize waitdb initcontainer 
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-- kube-flannel: use gentoo-image-builder in k8s
 - security: log all incoming connections on gateway (traefik+istio log access to file => OpenTelemetry collector => Loki ) => see Security.md
-- generate playbook doc with tags described
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
+- var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
-- var/images: split build script snippets so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
-- render templates delegate_to:localhost and use then synchronize: of whole directory
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
+- kube-flannel: use gentoo-image-builder in k8s
 
-- postgresql major version update: include docker build in playbook, parameterize versions and other vars set, triggered for major version upgrade
-=> how to detect a major upgrade? dynamically load role from outside main ansible playbook, then perform update, then continue as usual
-- determine current and new versions => kubectl diff
-- build upgrade image => add to application.images list
-- stop service
-- run upgrade job
-- start service
-- delete job
-- feed migrate playbook with vars include_tasks:
-4, continue
-## move application playbook part to dedicated file and create a dict for the possible playbooks as var
+- render templates delegate_to:localhost and use then synchronize: of whole directory
 
-- test if vars can be remove from kustomize apply task
-- test to remove "undef application vars again" task
+- test if vars can be remove from kustomize apply task => remove, now test
+- test to remove "undef application vars again" task => remove, now test

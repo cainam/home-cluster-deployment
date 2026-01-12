@@ -125,8 +125,6 @@
     when: playbook_dir_exists
 
   - name: "{{ name_prefix }} kustomize"
-    vars:
-      kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
     shell: |
       kubectl apply -k {{ build_dir }} --force # -conflicts #--server-side
 
@@ -149,11 +147,6 @@
     loop_control:
       loop_var: rq
 
-- name: "{{ name_prefix }} undef application vars again"
-  set_fact:
-    "{{ item.key }}": !!null # "{{ undef() }}" doesn't work for facts, so nulling it instead
-  loop: "{{ application.value.vars | default({}) | dict2items }}"
-  
 # traefik
 - block:
   - name: "{{ name_prefix }} Middleware stripprefix"
