@@ -17,16 +17,15 @@
   ansible.builtin.set_fact:
     is_major_upgrade: "{{ major_upgrade_result.stdout | bool }}"
     pg_next: "{{ software.postgresql.version|string|split('.')|first|int }}"
-    pg_prev: "{{ pg_next - 1 }}"
 
 - name: "set var {{ var_additional_images }}"
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
         'name': 'pgupgrade'~pg_next,
-        'tag': pg_prev,
+        'tag': (pg_next-1),
         'section': 'db',
         'type': 'gentoo-image-builder',
         'requires': ['postgresql'],
-        'build': {'packages': '=dev-db/postgresql-'~pg_prev~'*' }
+        'build': {'packages': '=dev-db/postgresql-'~(pg_next-1)~'*' }
       }] if is_major_upgrade else [] }}"

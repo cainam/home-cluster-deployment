@@ -21,7 +21,7 @@
           restartPolicy: Never
           containers:
           - name: upgrade
-            image: {{ k8s_namespace.key }}/pgupgrade{{ pg_prev }}:{{ pg_next }}
+            image: {{ k8s_namespace.key }}/pgupgrade{{ pg_next - 1 }}:{{ pg_next }}
             volumeMounts:
             - name: pg-data
               mountPath: /var/lib/postgresql
