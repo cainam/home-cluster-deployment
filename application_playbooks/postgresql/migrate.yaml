@@ -30,7 +30,7 @@
       template:
         spec:
           nodeSelector:
-              kubernetes.io/hostname: "{{ target_node }}"
+              kubernetes.io/hostname: "{{ attachment_node.stdout }}"
           restartPolicy: Never
           containers:
           - name: upgrade
