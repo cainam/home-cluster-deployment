@@ -36,7 +36,7 @@
           - name: pg-data
             persistentVolumeClaim:
               claimName: data-postgres-0
-
+  tasks:
   - name: stop service
     shell: |
       kubectl scale --replicas=0 -n {{ k8s_namespace }} statefulset postgres
