@@ -124,6 +124,12 @@
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
     when: playbook_dir_exists
 
+  - name: "{{ name_prefix }} kustomize"
+    vars:
+      kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
+    shell: |
+      kubectl apply -k {{ build_dir }} --force # -conflicts #--server-side
+
   - block:
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
       ansible.builtin.stat:
@@ -135,16 +141,6 @@
       include_tasks: "{{ playbook_path }}/post_deployment.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
     when: playbook_dir_exists
-  - debug:
-      msg: "development exit"
-    failed_when: true
-
-  - name: "{{ name_prefix }} kustomize"
-    vars:
-      kustom: "{{ kustom | combine({'crt': reg_cert.content|b64decode, 'key': reg_key.content|b64decode }) }}"
-    shell: |
-      kubectl apply -k {{ build_dir }} --force # -conflicts #--server-side
-  run_once: true
   
 - block:
   - name: "{{ name_prefix }} manage application requirements"

@@ -3,7 +3,7 @@
     shell: |
       kubectl scale --replicas=0 -n {{ k8s_namespace.key }} statefulset postgres
 
-  - name: determine node where volume is attached
+  - name: determine node where volume is attached (requires that postgres was running before and the volume is still attached)
     shell: |
       pvc=$(kubectl get pvc {{ pg_claim }} -n {{ k8s_namespace.key }} -o jsonpath='{.spec.volumeName}')
       kubectl get volumeattachments -o json | jq -r '.items[] | select(.spec.source.persistentVolumeName=="'$pvc'" and .status.attached==true) | .spec.nodeName'
@@ -58,8 +58,8 @@
                 --old-bindir=/usr/lib/postgresql-{{ pg_next - 1 }}/bin --new-bindir=/usr/lib/postgresql-{{ pg_next }}/bin -U postgres --verbose --link"
                 echo "Running pg_upgrade --check..."
                 $UPGRADE_CMD --check && \
-                echo "Check successful! Running actual upgrade..." #&& \
-                #$UPGRADE_CMD && mv $PGDATA/data $PGDATA/data_old && mv $PGDATA/data_new $PGDATA/data
+                echo "Check successful! Running actual upgrade..." && \
+                $UPGRADE_CMD && mv $PGDATA/data $PGDATA/data_old && mv $PGDATA/data_new $PGDATA/data
           volumes:
           - name: pg-data
             persistentVolumeClaim:

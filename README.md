@@ -169,3 +169,5 @@ TODO:
 4, continue
 ## move application playbook part to dedicated file and create a dict for the possible playbooks as var
 
+- test if vars can be remove from kustomize apply task
+- test to remove "undef application vars again" task
