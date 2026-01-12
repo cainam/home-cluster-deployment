@@ -1,8 +1,9 @@
-# what is included
+# what is included/features
 - custom ansible filter plugin
 - k8s operator written in python
 - simple status page using FastAPI which async calls to fetch information from the systems
 - EnvoyFilter with Lua script to modify authentication responses - really cool!
+- loading of additional playbooks per application (additional_images, migrate, post_deployment)
 
 # usage
 some additional files are required for handling sensitive information (like passwords), these are to be stored at $local_conf (files: secret)

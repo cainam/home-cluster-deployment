@@ -14,7 +14,7 @@
       target_node: "{{ attachment_node.stdout }}"
     shell: |
       kubectl delete job -n {{ k8s_namespace.key }} {{ upgrade_job_name }}
-      kubectl apply -f - <<"EOF"
+      xkubectl apply -f - <<"EOF"
       {{ postgres_upgrade_job }} 
       EOF
 
@@ -58,7 +58,7 @@
                 --old-bindir=/usr/lib/postgresql-{{ pg_next - 1 }}/bin --new-bindir=/usr/lib/postgresql-{{ pg_next }}/bin -U postgres --verbose --link"
                 echo "Running pg_upgrade --check..."
                 $UPGRADE_CMD --check && \
-                echo "Check successful! Running actual upgrade..." #&& \
+                echo "Check successful! Running actual upgrade..." && false #&& \
                 #$UPGRADE_CMD && mv $PGDATA/data $PGDATA/data_old && mv $PGDATA/data_new $PGDATA/data
           volumes:
           - name: pg-data
