@@ -1,7 +1,7 @@
 - block:
   - name: stop service
     shell: |
-      kubectl scale --replicas=0 -n {{ k8s_namespace }} statefulset postgres
+      kubectl scale --replicas=0 -n {{ k8s_namespace.key }} statefulset postgres
   - name: run upgrade job
     shell: |
       kubectl apply -f - <<EOF
@@ -13,7 +13,7 @@
     kind: Job
     metadata:
       name: postgres-upgrade
-      namespace: {{ k8s_namespace }}
+      namespace: {{ k8s_namespace.key }}
     spec:
       backoffLimit: 0
       template:
@@ -21,7 +21,7 @@
           restartPolicy: Never
           containers:
           - name: upgrade
-            image: {{ k8s_namespace }}/pgupgrade{{ pg_prev }}:{{ pg_next }}
+            image: {{ k8s_namespace.key }}/pgupgrade{{ pg_prev }}:{{ pg_next }}
             volumeMounts:
             - name: pg-data
               mountPath: /var/lib/postgresql
