@@ -39,18 +39,19 @@
             image: {{ k8s_namespace.key }}/pgupgrade{{ pg_next }}:{{ pg_next - 1 }}
             volumeMounts:
             - name: pg-data
-              mountPath: /var/lib/postgresql
+              mountPath: {{ pg_dir }}
             env:
             - name: PGDATA
-              value: /var/lib/postgresql
+              value: {{ pg_dir }}
             command: ["/bin/sh", "-c"]
             args:
               - |
-                cd /tmp/; mkdir -p $PGDATA/data_new ;  chown postgres:postgres $PGDATA/data_new ;pg_upgrade \
-                  --old-datadir=$PGDATA/data \
+                cd /tmp/; mkdir -p $PGDATA/data_new ;  chown postgres:postgres $PGDATA/data_new ; \
+                /usr/lib/postgresql-{{ pg_next }}/bin/initdb -D $PGDATA/data_new; \
+                  pg_upgrade --old-datadir=$PGDATA/data \
                   --new-datadir=$PGDATA/data_new \
-                  --old-bindir=/usr/lib/postgresql-17/bin \
-                  --new-bindir=/usr/lib/postgresql-18/bin \
+                  --old-bindir=/usr/lib/postgresql-{{ pg_next - 1 }}/bin \
+                  --new-bindir=/usr/lib/postgresql-{{ pg_next }}/bin \
                   -U postgres \
                   --verbose \
                   --link \
