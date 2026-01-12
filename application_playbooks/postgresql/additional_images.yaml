@@ -16,11 +16,10 @@
 - name: set upgrade fact
   ansible.builtin.set_fact:
     is_major_upgrade: "{{ major_upgrade_result.stdout | bool }}"
-
-- name: "set var {{ var_additional_images }}"
-  vars:
     pg_next: "{{ software.postgresql.version|string|split('.')|first|int }}"
     pg_prev: "{{ pg_next - 1 }}"
+
+- name: "set var {{ var_additional_images }}"
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
