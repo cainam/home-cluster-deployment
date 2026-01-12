@@ -13,6 +13,7 @@
     vars:
       target_node: "{{ attachment_node.stdout }}"
     shell: |
+      kubectl delete job -n {{ k8s_namespace.key }} postgres-upgrade
       kubectl apply -f - <<EOF
       {{ postgres_upgrade_job }} 
       EOF
