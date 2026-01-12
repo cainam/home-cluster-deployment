@@ -25,6 +25,7 @@
       name: postgres-upgrade
       namespace: {{ k8s_namespace.key }}
     spec:
+      ttlSecondsAfterFinished: 300 
       backoffLimit: 0
       template:
         spec:
