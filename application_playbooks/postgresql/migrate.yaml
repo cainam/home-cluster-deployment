@@ -1,0 +1,47 @@
+- block:
+  vars:
+   postgres_upgrade_job: |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: postgres-upgrade
+      namespace: {{ k8s_namespace }}
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: upgrade
+            image: {{ k8s_namespace }}/pgupgrade{{ pg_prev }}:{{ pg_next }}
+            volumeMounts:
+            - name: pg-data
+              mountPath: /var/lib/postgresql
+            env:
+            - name: PGDATA
+              value: /var/lib/postgresql
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                pg_upgrade \
+                  --old-datadir=$PGDATA/data \
+                  --new-datadir=$PGDATA/data_new \
+                  --old-bindir=/usr/lib/postgresql-17/bin \
+                  --new-bindir=/usr/lib/postgresql-18/bin \
+                  -U postgres
+                  --verbose
+                  --link
+                  --check
+          volumes:
+          - name: pg-data
+            persistentVolumeClaim:
+              claimName: data-postgres-0
+
+  - name: stop service
+    shell: |
+      kubectl scale --replicas=0 -n {{ k8s_namespace }} statefulset postgres
+  - name: run upgrade job
+    shell: |
+      kubectl apply -f - <<EOF{{ postgres_upgrade_job }} 
+      EOF
+  - delete job

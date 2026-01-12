@@ -112,6 +112,21 @@
         name: gentoo-image-builder
     when: application.value.images is defined
 
+  - block:
+    - name: "{{ name_prefix }} application playbook - migrate - playbook check"
+      ansible.builtin.stat:
+        path: "{{ playbook_path }}/migrate.yaml"
+      register: playbook_stat
+      delegate_to: localhost
+
+    - name: "{{ name_prefix }} application playbook - migrate - playbook run}}"
+      include_tasks: "{{ playbook_path }}/migrate.yaml"
+      when: playbook_stat.stat.exists and playbook_stat.stat.isreg
+
+    - debug:
+        msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}"
+    when: playbook_dir_exists
+
   - debug:
       msg: "development exit"
     failed_when: true
