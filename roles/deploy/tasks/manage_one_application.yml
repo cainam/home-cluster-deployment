@@ -122,11 +122,19 @@
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"
       include_tasks: "{{ playbook_path }}/migrate.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
-
-    - debug:
-        msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}"
     when: playbook_dir_exists
 
+  - block:
+    - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
+      ansible.builtin.stat:
+        path: "{{ playbook_path }}/post_deployment.yaml"
+      register: playbook_stat
+      delegate_to: localhost
+
+    - name: "{{ name_prefix }} application playbook - post_deployment - playbook run"
+      include_tasks: "{{ playbook_path }}/post_deployment.yaml"
+      when: playbook_stat.stat.exists and playbook_stat.stat.isreg
+    when: playbook_dir_exists
   - debug:
       msg: "development exit"
     failed_when: true
