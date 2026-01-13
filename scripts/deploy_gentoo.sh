@@ -19,8 +19,6 @@ fi
 
 logger "starting $my_name"
 
-ansible-galaxy role  install -r requirements.yaml --roles-path "${ANSIBLE_DIR}"
-
 eval $my_ansible ${ANSIBLE_DIR}/site.yml --tags=gentoo,emerge
 
 eval $my_ansible ${ANSIBLE_DIR}/site.yml --tags=deploy --extra-vars limit_application=infopage

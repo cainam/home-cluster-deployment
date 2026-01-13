@@ -16,8 +16,10 @@
   - name: "include secrets"
     include_vars: "{{ local_only }}/secrets"
     
-  - name: install additional roles required
-    ansible.builtin.command: ansible-galaxy install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
+  - name: install additional roles and collections if required
+    shell: |
+      ansible-galaxy role install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
+      ansible-galaxy collection install -r requirements.yaml --collections-path {{ playbook_dir }}/collections
     delegate_to: localhost
   run_once: true
 
