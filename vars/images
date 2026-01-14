@@ -407,7 +407,6 @@ images:
       done
       bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild   -- //:envoy 
 - name: bazel7-llvm
-  tag: 2025.09-1
   section: local
   requires:
   - bazel7
@@ -418,7 +417,6 @@ images:
       cp -dp /bazel/output/bazel /usr/local/bin/
 
 - name: bazel7
-  tag: 2025.09-1
   section: local
   requires:
   - python3

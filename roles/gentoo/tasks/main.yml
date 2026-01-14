@@ -24,14 +24,6 @@
       uid: 100200
       group: k8s-keycloak
 
-- name: mount /data
-  mount:
-    path: /data
-    src: /dev/sda1
-    fstype: ext4
-    opts: noatime
-    state: mounted
-
 - name: ensure required directories exist
   file:
     path: "{{ item.path }}"
@@ -215,7 +207,7 @@
 
 - name: deploy from templates
   vars: 
-    data_uuid: '{{ ansible_facts.mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first }}'
+    data_uuid: '{{ ansible_facts.mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first | default(None) }}'
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
@@ -238,8 +230,8 @@
     - file: keepalived.conf
       dest: /etc/keepalived/
 
-- name: mount boot
-  shell: mountpoint -q /boot || mount /boot
+- name: ensure all filesystems are mounted
+  shell: mount -a && (grep /boot /etc/fstab | grep -v ^# |  awk '{print $2}' | xargs mount)
   changed_when: false 
 
 - name: deploy from templates to /boot
@@ -320,8 +312,8 @@
         rsync -a {{ ansible_controller_hostname }}:${pkg_dir}/* ${pkg_dir}/
         ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
       done
-      rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
-      rsync -a {{ ansible_controller_hostname }}:/lib/firmware /lib
+      #rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
+      #rsync -a {{ ansible_controller_hostname }}:/lib/firmware /lib
       modprobe brcmfmac
       /etc/init.d/dbus start
       /etc/init.d/iwd start

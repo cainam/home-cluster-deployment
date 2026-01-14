@@ -29,8 +29,7 @@ start()
 
         # ensure image exists
 	if ! (podman image ls | awk '{print $1":"$2}' | grep -q "^${service_image}" ); then
-          podman pull docker.io/library/registry:2.8.3
-	  podman tag docker.io/library/registry:2.8.3 "${service_image}"
+          podman pull "${service_image}"
 	fi
 
         # claim IP

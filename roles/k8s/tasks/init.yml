@@ -13,10 +13,11 @@
     internal_first_master_ip: "{{ my_cluster_ip }}"
 - name: install k8s
   shell: ETCD_DATA_DIR=/data/etcd kubeadm init --upload-certs --config "{{ kubeadm_tmp.path }}"
-  egister: init_out
+  register: init_out
   
 - name: set k8s_installed for this nodes now
   set_fact:
     k8s_installed: true
+    healthy_node: "{{ selected_host }}"
     
 - debug: var=init_out

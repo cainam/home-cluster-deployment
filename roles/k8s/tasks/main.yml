@@ -1,11 +1,6 @@
 ---
-- name: get seed
-  shell: echo $RANDOM
-  run_once: true
-  register: seed
-  
 - set_fact:
-    selected_host: "{{ ansible_play_hosts | random(seed=seed.stdout) }}"
+    selected_host: "{{ {{ groups['all'] | map('extract', hostvars) | selectattr('roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') | map(attribute='inventory_hostname') | random }}"
 
 - name: system configurations
   import_tasks: system.yml
@@ -85,8 +80,9 @@
   - name: output flannel install
     debug:
       msg: "{{flannel_install}}"
-  when: inventory_hostname == healthy_node # and (not k8s_init_done or k8s_upgrade)
-  
+  run_once: true
+  delegate_to: "{{ healthy_node }}"
+
 - block:
   - name: get token
     shell: kubeadm token create

@@ -6,11 +6,22 @@ all:
         gentoo-binhost:
       boot_root: PARTUUID=3a5a053b-02
       boot_uuid: 88F0-9C43
+      system_roles:
+      - control_plane
+    k8s-4-int.adm13:
+      boot_root: PARTUUID=bda80f2a-d2dd-df4a-b95e-121c81790c0c
+      boot_uuid: 40A8-6A62
+      system_roles:
+      - image_builder
+      - worker
     k8s-1-int.adm13:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
+      system_roles:
+      - control_plane
     k8s-2-int.adm13:
       boot_root: PARTUUID=2e93d72b-02
       boot_uuid: 92BE-3FCF
-      xgentoo_binhost:
+      system_roles:
+      - control_plane
 
