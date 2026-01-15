@@ -388,8 +388,8 @@ images:
     configure_builder: |
       cd /var/tmp; rm -rf * /root/.cache
       export JAVA_HOME=/opt/zulu
-      export PATH=/usr/lib/llvm/20/bin/:${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      export CC=/usr/lib/llvm/20/bin/clang
+      export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      export CC=$(which clang)
       git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/proxy.git; cd proxy
       echo "build --define tcmalloc=gperftools # in .bazelrc" >> .bazelrc
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
