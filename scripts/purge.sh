@@ -22,13 +22,13 @@ etcdctl defrag
 
 # purge unused container images
 configured_images=$(kubectl get pods --all-namespaces -o jsonpath='{.items[*].spec.containers[*].image} {.items[*].spec.initContainers[*].image}' | tr -s '[[:space:]]' '\n' | sort -u)
-protected_images="registry:|pause|my_builder|stage3-|go:|base:|nodejs:|python3:"
+protected_images="registry:|pause|my_builder|stage3-|go:|base:|nodejs:|python3:|envoy|bazel"
 podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${registry}/##g" | while read image id; do
   #image=$(echo "${image_with_id}" | cut -d : -f 1,2)
   #id=$(echo "${image_with_id}" | cut -d : -f 3)
   echo "${image}" | grep -Eq "${protected_images}" && continue
   echo "${image}" | grep -Eq "<none>:<none>$" && (echo "delete $image"; podman image rm -f "${id}") && continue
-#  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm -f "$image")
+  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm -f "$image")
 done
 
 # registry garbage collect
