@@ -16,7 +16,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.13.0
+    version: v7.14.2
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -38,7 +38,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2025.12.5"
+    version: "2026.1.2"
     installed:
       pattern: "home-assistant:"
     latest:

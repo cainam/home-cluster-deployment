@@ -8,10 +8,10 @@ roles:
 #  scm: git
 #  version: main
 
-collections:
-  - name: git+https://github.com/cainam/ansible_helper_playbooks.git
-    type: git
-    version: main
+#collections:
+#  - name: git+https://github.com/cainam/ansible_helper_playbooks.git
+#    type: git
+#    version: main
 
 #- src: git+https://github.com/robertdebock/ansible-role-ca.git
 #  version: master

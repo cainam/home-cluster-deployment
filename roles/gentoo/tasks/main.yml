@@ -119,8 +119,6 @@
       dest: /etc/portage/
     - file: init.d/
       dest: /etc/init.d/
-    - file: haproxy.cfg
-      dest: /etc/haproxy/
     - file: keepalived
       dest: /etc/sysctl.d/
     - file: registries.conf
@@ -229,6 +227,8 @@
       dest: /etc/conf.d/
     - file: keepalived.conf
       dest: /etc/keepalived/
+    - file: haproxy.cfg
+      dest: /etc/haproxy/
 
 - name: ensure all filesystems are mounted
   shell: mount -a && (grep /boot /etc/fstab | grep -v ^# |  awk '{print $2}' | xargs mount)

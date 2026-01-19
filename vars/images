@@ -257,10 +257,9 @@ images:
       ( cd ${ROOT}/${HA_DIR}; 
           git clone --depth=1 -b "{{ software['home-assistant'].version }}" https://github.com/home-assistant/core.git
           cd core
-          for package in pyspeex-noise home-assistant-intents PyTurboJPEG home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy mutagen ha-ffmpeg hass-nabucasa pymicro-vad; do # pyudev; do
+          for package in file-read-backwards pyspeex-noise home-assistant-intents PyTurboJPEG home-assistant-frontend pyotp PyQRCode paho-mqtt hassil numpy mutagen ha-ffmpeg hass-nabucasa pymicro-vad; do # pyudev; do
             grep -q "${package}==" requirements.txt  || grep "^${package}==" requirements_all.txt >> requirements.txt
           done
-            
           sed -i -e "/hass_nabucasa/d" -e "s#remote.is_cloud_request.get()#False#" homeassistant/components/http/forwarded.py
             
           # remove from default configuration
@@ -274,13 +273,15 @@ images:
       rm -rf /py_env/lib/python3.13/site-packages/hass_frontend/frontend_es5 # remove this ancient version 
       set +x
     finish_rootfs_build: |
+      set -x
       VIRTUAL_ENV=/py_env
       . "$VIRTUAL_ENV"/bin/activate
-      ln -s ${ROOT}/usr/bin/pg_config* /usr/bin/pg_config
+      export PATH=$(stat --printf="%n" $ROOT/usr/lib/postgresql-*/bin):$PATH
       pip --no-cache-dir install psycopg2
       find /py_env -name '*.so*' -exec strip {} \;
       pip uninstall --yes uv
       mv "$VIRTUAL_ENV" ${ROOT}/"$VIRTUAL_ENV"
+      set +x
 
 - name: mosquitto
   section: home
@@ -336,13 +337,13 @@ images:
       mkdir $ROOT/usr/local/bin $ROOT/opt/
       cp -rdp /opt/zulu $ROOT/opt/zulu
       cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/14/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/14/libgcc_s.so.1* $ROOT/usr/lib
-      cp -dp output/bazel $ROOT/usr/local/bin /usr/local/bin/
+      cp -dp output/bazel /usr/local/bin/
  
 - name: envoy-base
   tag: 2025.12-2
   section: local
   requires:
-  - bazel7-llvm
+  - bazel7
   type: gentoo-image-builder
   build:
     packages: app-arch/zip
@@ -350,6 +351,7 @@ images:
     - git: git@github.com:cainam/cainam.github.io.git#:compile-bazel-with-gentoo-musl-on-aarch64/bazel
       dest: /bazel-build-for-envoy
     configure_builder: |
+      emerge llvm-core/clang llvm-runtimes/libcxx llvm-core/lld
       cd /var/tmp
       curl -OL https://github.com/libevent/libevent/releases/download/release-2.2.1-alpha/libevent-2.2.1-alpha-dev.tar.gz
       tar xfz libevent-2.2.1-alpha-dev.tar.gz
@@ -376,10 +378,28 @@ images:
       mv ${ld} ${ld}.org
       cp -dp /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/bin/ld.bfd-wrapper "${ld}"
       done
-      #opensuse wlan hotspot
-      emerge  llvm-core/lld
+
+- name: proxyv2
+  section: istio-system
+  requires:
+  - envoy
+  type: gentoo-image-builder
+  build:
+    entrypoint: ["/usr/local/bin/pilot-agent"]
+    user: 1337
+    configure_rootfs_build: |
+      cd /var/tmp
+      git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/istio.git
+      cd istio/pilot/cmd/pilot-agent
+      CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'
+    finish_rootfs_build: |
+      echo 'istio-proxy:x:1337:istio-proxy' > "${ROOT}/etc/group"
+      echo 'istio-proxy:x:1337:1337:Linux User,,,:/home/istio-proxy:/bin/sh' > "${ROOT}/etc/passwd"
+      mkdir -p "${ROOT}/usr/local/bin" && cp -dp pilot-agent "${ROOT}/usr/local/bin"
+      mkdir -p "${ROOT}/var/lib/istio/envoy/" && cp -dp ../../../tools/packaging/common/envoy_bootstrap.json "${ROOT}/var/lib/istio/envoy/envoy_bootstrap_tmpl.json"
+      rm -rf /root/go /root/.cache
+
 - name: envoy
-  tag: 2025.12-2
   section: local
   requires:
   - envoy-base
@@ -397,24 +417,22 @@ images:
       sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
       emerge dev-libs/icu
+      emerge @preserved-rebuild
+      emerge --depclean
       ln -s $PWD /proxy
-      for a in $(seq 1 20); do 
-      (
-      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index -c fastbuild --subcommands --check_direct_dependencies=error --logging=6 --define=musl=true -- //:envoy; 
-      bash -c "echo > /dev/tcp/storage.googleapis.com/443"; 
-      bash -c "echo > /dev/tcp/github.com/443"; 
-      sleep 10) || true
-      done
-      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true   -- //:envoy 
-- name: bazel7-llvm
-  section: local
-  requires:
-  - bazel7
-  type: gentoo-image-builder
-  build:
-    configure_builder: emerge llvm-core/clang llvm-runtimes/libcxx
+      MUSL_EXT=(
+       --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
+       --copt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
+       --copt="-Dstrtod_l(s,p,l)=strtod(s,p)"
+       --cxxopt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
+       --cxxopt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
+       --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
+      )
+      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
     finish_rootfs_build: |
-      cp -dp /bazel/output/bazel /usr/local/bin/
+      strip bazel-bin/envoy
+      cp -drp /usr/local/lib/* bazel-bin/envoy  ${ROOT}/usr/local/bin/
+      cp /lib/ld-musl-aarch64.so.1 /lib/libc++.so.1 /lib/libc++abi.so.1 /lib/libcares.so.2 /lib/libcrypto.so.3 /lib/libicudata.so.77 /lib/libicuuc.so.77 /lib/libnghttp2.so.14 /lib/libssl.so.3 /lib/libz.so.1 /lib/libzstd.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libatomic.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libstdc++.so.6 ${ROOT}/usr/local/bin/ || true
 
 - name: bazel7
   section: local
@@ -453,8 +471,9 @@ images:
       EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
       mkdir $ROOT/usr/local/bin $ROOT/opt/
       find /usr -name "libgcc_s.so.*"
-      cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/*/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/*/libgcc_s.so.1* $ROOT/usr/lib
-      cp -dp output/bazel $ROOT/usr/local/bin
+      cp -dp /bazel/output/bazel /usr/local/bin/
+      #cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/*/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/*/libgcc_s.so.1* $ROOT/usr/lib
+      #cp -dp output/bazel $ROOT/usr/local/bin
  
 - name: auth-operator
   section: auth

@@ -19,7 +19,12 @@
   - name: install additional roles and collections if required
     shell: |
       ansible-galaxy role install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
-      ansible-galaxy collection install -r requirements.yaml --collections-path {{ playbook_dir }}/collections
+      #ansible-galaxy collection install -r requirements.yaml --collections-path {{ playbook_dir }}/collections # replaced by git submodule to have a full local git repo
+      (cd "{{ playbook_dir }}"
+        git submodule add https://github.com/cainam/ansible_helper_playbooks.git roles/shared_helper
+        git submodule update --init --recursive
+        git submodule update --remote --merge
+      )
     delegate_to: localhost
   run_once: true
 

@@ -10,6 +10,7 @@
       limit_images: []
       default_section: "{{ k8s_namespace.key }}"
       dry_run: "{{ true }}"
+      image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
     include_role:
       name: gentoo-image-builder
   when: application.value.images is defined
@@ -107,6 +108,7 @@
         images: "{{ current_app_images }}"
         default_section: "{{ k8s_namespace.key }}"
         dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
+        image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
         images_details_var: "images_info"
       include_role:
         name: gentoo-image-builder
