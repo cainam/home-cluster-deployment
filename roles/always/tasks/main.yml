@@ -21,7 +21,10 @@
       ansible-galaxy role install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
       #ansible-galaxy collection install -r requirements.yaml --collections-path {{ playbook_dir }}/collections # replaced by git submodule to have a full local git repo
       (cd "{{ playbook_dir }}"
-        git submodule add https://github.com/cainam/ansible_helper_playbooks.git roles/shared_helper
+        if ! git config --file .gitmodules --get submodule.submodules/ansible_helper_playbooks.path > /dev/null; then
+          git submodule add https://github.com/cainam/ansible_helper_playbooks.git submodules/ansible_helper_playbooks
+        fi
+        [ ! -L "roles/shared_helper" ]  && ln -s ../submodules/ansible_helper_playbooks/roles/shared_helper roles/shared_helper
         git submodule update --init --recursive
         git submodule update --remote --merge
       )

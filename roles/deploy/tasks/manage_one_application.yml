@@ -61,7 +61,7 @@
 
   - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
-      name: cainam.ansible_helper_playbooks.shared_helper
+      name: shared_helper
       tasks_from: template_directory.yaml
     vars:
       dir_var: build_dir

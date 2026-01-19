@@ -1,3 +1,6 @@
 [submodule "common/kustomize"]
 	path = common/kustomize
 	url = https://github.com/cainam/kustomize.git
+[submodule "submodules/ansible_helper_playbooks"]
+	path = submodules/ansible_helper_playbooks
+	url = https://github.com/cainam/ansible_helper_playbooks.git
