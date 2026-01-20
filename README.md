@@ -147,7 +147,7 @@ TODO:
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - lifeness and readiness probes: generate from application config
-- var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder)
+- var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - if can be executed only on control host: replace getting vars from shell output via register, use     task_timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}" instead, if it is reading files, use slurp
@@ -163,3 +163,6 @@ TODO:
 - test if vars can be remove from kustomize apply task => remove, now test
 - test to remove "undef application vars again" task => remove, now test
 - regression tests: implement continuous testing of the features to detect regressions
+
+- turn gentoo-image-builder into a git submodule like the shared helper
+- envoy build: instead of overwriting files like BUILD sed them

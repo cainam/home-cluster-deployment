@@ -351,16 +351,21 @@ images:
     - git: git@github.com:cainam/cainam.github.io.git#:compile-bazel-with-gentoo-musl-on-aarch64/bazel
       dest: /bazel-build-for-envoy
     configure_builder: |
-      emerge llvm-core/clang llvm-runtimes/libcxx llvm-core/lld
+      emerge llvm-core/clang llvm-runtimes/libcxx llvm-core/lld dev-libs/icu
+      export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):$PATH
+      export CC=clang
+      export CXX=clang++
+      export CONFIGURE="--prefix=/usr/local"
+      cd /var/tmp
+      curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
+      tar xfz liburing-2.12.tar.gz
+      cd liburing-liburing-2.12/ && ./configure $CONFIGURE && make && make install
+      export CONFIGURE="$CONFIGURE --enable-shared=no --enable-static=yes --enable-pic=yes"
       cd /var/tmp
       curl -OL https://github.com/libevent/libevent/releases/download/release-2.2.1-alpha/libevent-2.2.1-alpha-dev.tar.gz
       tar xfz libevent-2.2.1-alpha-dev.tar.gz
       cd libevent-2.2.1-alpha-dev
-      ./configure --prefix=/usr/local && make && make install
-      cd /var/tmp
-      curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
-      tar xfz liburing-2.12.tar.gz
-      cd liburing-liburing-2.12/ && ./configure --prefix=/usr/local && make && make install
+      ./configure $CONFIGURE && make && make install
       cd /var/tmp
       git clone --single-branch --branch v2.1.ROLLING  --filter=blob:none https://luajit.org/git/luajit.git
       cd luajit/
@@ -370,7 +375,7 @@ images:
       curl -OL https://github.com/gperftools/gperftools/releases/download/gperftools-2.17.2/gperftools-2.17.2.tar.gz
       tar xfz gperftools-2.17.2.tar.gz
       cd gperftools-2.17.2
-      ./configure && make && make install
+      ./configure $CONFIGURE && make && make install
       cd /var/tmp
       #
       git clone https://github.com/cainam/cainam.github.io.git /bazel-build-for-envoy
@@ -378,6 +383,8 @@ images:
       mv ${ld} ${ld}.org
       cp -dp /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/bin/ld.bfd-wrapper "${ld}"
       done
+      # remove the following line again, it is in bazel7
+      cp -dp /bazel/output/bazel /usr/local/bin/
 
 - name: proxyv2
   section: istio-system
@@ -387,9 +394,11 @@ images:
   build:
     entrypoint: ["/usr/local/bin/pilot-agent"]
     user: 1337
+    configure_builder: |
+      emerge dev-lang/go
     configure_rootfs_build: |
       cd /var/tmp
-      git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/istio.git
+      [ -d "istio" ] && rm -rf istio; git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/istio.git
       cd istio/pilot/cmd/pilot-agent
       CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'
     finish_rootfs_build: |
@@ -398,6 +407,9 @@ images:
       mkdir -p "${ROOT}/usr/local/bin" && cp -dp pilot-agent "${ROOT}/usr/local/bin"
       mkdir -p "${ROOT}/var/lib/istio/envoy/" && cp -dp ../../../tools/packaging/common/envoy_bootstrap.json "${ROOT}/var/lib/istio/envoy/envoy_bootstrap_tmpl.json"
       rm -rf /root/go /root/.cache
+      # remove the following two lines again
+      #cp -drp /usr/local/lib/*  ${ROOT}/usr/local/lib/
+      #cp /lib/libc++.so.1 /lib/libc++abi.so.1 /lib/libcares.so.2 /lib/libcrypto.so.3 /lib/libicudata.so.77 /lib/libicuuc.so.77 /lib/libnghttp2.so.14 /lib/libssl.so.3 /lib/libz.so.1 /lib/libzstd.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libatomic.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libstdc++.so.6 ${ROOT}/usr/local/lib/ || true
 
 - name: envoy
   section: local
@@ -416,9 +428,6 @@ images:
       sed -i '/PATH/d' .bazelrc
       sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
-      emerge dev-libs/icu
-      emerge @preserved-rebuild
-      emerge --depclean
       ln -s $PWD /proxy
       MUSL_EXT=(
        --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
@@ -428,11 +437,13 @@ images:
        --cxxopt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
        --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
       )
-      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
+      # working: bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
+      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
     finish_rootfs_build: |
       strip bazel-bin/envoy
-      cp -drp /usr/local/lib/* bazel-bin/envoy  ${ROOT}/usr/local/bin/
-      cp /lib/ld-musl-aarch64.so.1 /lib/libc++.so.1 /lib/libc++abi.so.1 /lib/libcares.so.2 /lib/libcrypto.so.3 /lib/libicudata.so.77 /lib/libicuuc.so.77 /lib/libnghttp2.so.14 /lib/libssl.so.3 /lib/libz.so.1 /lib/libzstd.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libatomic.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libstdc++.so.6 ${ROOT}/usr/local/bin/ || true
+      cp -dp bazel-bin/envoy  ${ROOT}/usr/local/bin/
+      cp -drp /usr/local/lib/*  ${ROOT}/usr/local/lib/
+      cp /lib/libc++.so.* /lib/libc++abi.so.* /lib/libcares.so.* /lib/libcrypto.so.* /lib/libicudata.so.* /lib/libicuuc.so.77 /lib/libnghttp2.so.14 /lib/libssl.so.3 /lib/libz.so.1 /lib/libzstd.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/*/lib* ${ROOT}/usr/local/lib/ || true
 
 - name: bazel7
   section: local
@@ -444,7 +455,7 @@ images:
     USER: root
   build:
     packages: app-arch/zip
-    configure_builder: emerge app-arch/zip
+    configure_builder: emerge app-arch/zip 
     finish_rootfs_build: |
       zulu=zulu21.46.19-ca-jdk21.0.9-linux_musl_aarch64.tar.gz
       ZULU_DIR=/opt/zulu
@@ -472,8 +483,6 @@ images:
       mkdir $ROOT/usr/local/bin $ROOT/opt/
       find /usr -name "libgcc_s.so.*"
       cp -dp /bazel/output/bazel /usr/local/bin/
-      #cp -dp /usr/lib/gcc/aarch64-unknown-linux-musl/*/libstdc++.so.6* /usr/lib/gcc/aarch64-unknown-linux-musl/*/libgcc_s.so.1* $ROOT/usr/lib
-      #cp -dp output/bazel $ROOT/usr/local/bin
  
 - name: auth-operator
   section: auth

@@ -383,6 +383,16 @@
 #    enabled: no
 #    state: stopped
 #  loop:
+
+- name: enable keepalive only on control_plane nodes 
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: reloaded
+  loop:
+    - keepalived
+  when: inventory_hostname in (groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') | map(attribute='inventory_hostname') )
+
 - name: only enable and reload services, but don't force a restart 
   service:
     name: "{{ item }}"
