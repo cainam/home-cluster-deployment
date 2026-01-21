@@ -360,7 +360,7 @@ images:
       curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
       tar xfz liburing-2.12.tar.gz
       cd liburing-liburing-2.12/ && ./configure $CONFIGURE && make && make install
-      export CONFIGURE="$CONFIGURE --enable-shared=no --enable-static=yes --enable-pic=yes"
+      #export CONFIGURE="$CONFIGURE --enable-shared=no --enable-static=yes --enable-pic=yes"
       cd /var/tmp
       curl -OL https://github.com/libevent/libevent/releases/download/release-2.2.1-alpha/libevent-2.2.1-alpha-dev.tar.gz
       tar xfz libevent-2.2.1-alpha-dev.tar.gz
@@ -438,7 +438,8 @@ images:
        --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
       )
       # working: bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
-      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
+      bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
+      # failing? bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index   -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
     finish_rootfs_build: |
       strip bazel-bin/envoy
       cp -dp bazel-bin/envoy  ${ROOT}/usr/local/bin/

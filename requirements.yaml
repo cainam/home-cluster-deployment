@@ -1,7 +1,7 @@
-roles:
-- src: git+https://github.com/cainam/gentoo-image-builder.git
-  version: main
-  name: gentoo-image-builder
+#roles:
+#- src: git+https://github.com/cainam/gentoo-image-builder.git
+#  version: main
+#  name: gentoo-image-builder
 
 #- name: shared_helper
 #  src: git+https://github.com/cainam/ansible_helper_playbooks.git

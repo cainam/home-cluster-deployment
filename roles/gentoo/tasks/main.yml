@@ -280,7 +280,7 @@
   file:
     dest: /etc/cron.daily/deploy_gentoo.sh
     state: absent
-  when: alt_names is defined and alt_names.gentoo_build is not defined
+  when: alt_names is not defined or alt_names.gentoo_build is not defined
 
 - name: set date if year is 1970
   shell: date +%Y | ( grep -q "^1970$" && date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" ) || echo "date ok"

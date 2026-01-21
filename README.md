@@ -160,9 +160,6 @@ TODO:
 
 - render templates delegate_to:localhost and use then synchronize: of whole directory
 
-- test if vars can be remove from kustomize apply task => remove, now test
-- test to remove "undef application vars again" task => remove, now test
 - regression tests: implement continuous testing of the features to detect regressions
 
-- turn gentoo-image-builder into a git submodule like the shared helper
 - envoy build: instead of overwriting files like BUILD sed them

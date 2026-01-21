@@ -4,3 +4,6 @@
 [submodule "submodules/ansible_helper_playbooks"]
 	path = submodules/ansible_helper_playbooks
 	url = https://github.com/cainam/ansible_helper_playbooks.git
+[submodule "submodules/gentoo-image-builder"]
+	path = submodules/gentoo-image-builder
+	url = https://github.com/cainam/gentoo-image-builder.git

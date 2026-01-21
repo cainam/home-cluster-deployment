@@ -18,15 +18,17 @@
     
   - name: install additional roles and collections if required
     shell: |
-      ansible-galaxy role install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
+      #ansible-galaxy role install -r {{ playbook_dir }}/requirements.yaml --roles-path {{ playbook_dir }}/roles
       #ansible-galaxy collection install -r requirements.yaml --collections-path {{ playbook_dir }}/collections # replaced by git submodule to have a full local git repo
       (cd "{{ playbook_dir }}"
-        if ! git config --file .gitmodules --get submodule.submodules/ansible_helper_playbooks.path > /dev/null; then
-          git submodule add https://github.com/cainam/ansible_helper_playbooks.git submodules/ansible_helper_playbooks
+      {% for role in additional_roles %}
+        if ! git config --file .gitmodules --get submodule.submodules/{{ role.repo | basename | regex_replace('\.git$', '') }}.path > /dev/null; then
+          git submodule add {{ role.repo }} submodules/{{ role.repo | basename | regex_replace('\.git$', '') }}
         fi
-        [ ! -L "roles/shared_helper" ]  && ln -s ../submodules/ansible_helper_playbooks/roles/shared_helper roles/shared_helper
+        [ ! -L "roles/{{ role.role }}" ]  && ln -s ../submodules/{{ role.repo | basename | regex_replace('\.git$', '') }}/roles/{{ role.role }} roles/{{ role.role }}
         git submodule update --init --recursive
         git submodule update --remote --merge
+        {% endfor %}
       )
     delegate_to: localhost
   run_once: true

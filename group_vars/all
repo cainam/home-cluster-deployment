@@ -1,3 +1,9 @@
+additional_roles:
+- repo: https://github.com/cainam/ansible_helper_playbooks.git
+  role: shared_helper
+- repo: https://github.com/cainam/gentoo-image-builder.git
+  role: gentoo-image-builder
+
 auto_silent: true
 own_git_url: https://github.com/cainam/krysyntyz.git
 timezone: Europe/Amsterdam
