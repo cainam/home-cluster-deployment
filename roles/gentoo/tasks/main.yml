@@ -229,6 +229,20 @@
       dest: /etc/keepalived/
     - file: haproxy.cfg
       dest: /etc/haproxy/
+  when: false
+
+- name: set my role_path
+  set_fact:
+    my_role_path: "{{ role_path }}"
+
+- name: deploy etc from templates
+  include_role:
+    name: shared_helper
+    tasks_from: template_directory.yaml
+  vars:
+    destination_dir: "/etc"
+    template_source_dir: "{{ my_role_path }}/templates/etc"
+    data_uuid: '{{ ansible_facts.mounts | selectattr("mount","==","/data") | map(attribute="uuid") | first | default(None) }}'
 
 - name: ensure all filesystems are mounted
   shell: mount -a && (grep /boot /etc/fstab | grep -v ^# |  awk '{print $2}' | xargs mount)
@@ -399,7 +413,6 @@
     enabled: yes
     state: reloaded
   loop:
-    - keepalived
     - autofs
     - sshd
     - haproxy
