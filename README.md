@@ -158,8 +158,8 @@ TODO:
 - longhorn: add disk creation (truncate -s xxG file + mount point)
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node
 
-- render templates delegate_to:localhost and use then synchronize: of whole directory
 
 - regression tests: implement continuous testing of the features to detect regressions
 
 - envoy build: instead of overwriting files like BUILD sed them
+- render templates delegate_to:localhost and use then synchronize: of whole directory (duration: 46secs, go back to remote rendering, maybe change it to async and poll mechanism)

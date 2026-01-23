@@ -97,6 +97,15 @@
       file: hostname
 
 - name: deploy from files
+  synchronize:
+    src: "{{ role_path }}/files/./"
+    dest: "/"
+    archive: yes
+    recursive: yes
+    rsync_opts:
+      - "--relative"
+
+- name: deploy from files
   copy:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
@@ -137,6 +146,7 @@
       dest: /etc/
     - file: chrony.conf
       dest: /etc/chrony/
+  when: false
 
 - name: include secrets (wlan, ssh_keys)
   include_vars: "{{ local_only }}/secrets"
