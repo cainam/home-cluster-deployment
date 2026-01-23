@@ -1,0 +1,91 @@
+- set_fact:
+    app_cfg_templates_path: "{{ role_path }}/templates/{{ storage.name }}"
+    app_cfg_files_path: "{{ role_path }}/files/{{ storage.name}}"
+    dest_base_dir: "{% if storage.type == 'local_folder' %}{{ local_disk_directory }}{% else %}{{ shared_mounts }}{% endif %}/{{ storage.name }}"
+
+- name: set directories
+  set_fact:
+    templates_dirs: "{{  lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" -type d').split('\n')|reject('match', '^$')  }}"
+    files_dirs: "{{      lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" -type d').split('\n')|reject('match', '^$')  }}"
+    templates_files: "{{ lookup('pipe', '[ ! -d \"'+ app_cfg_templates_path +'\" ] || find \"'+ app_cfg_templates_path +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+    files_files: "{{     lookup('pipe', '[ ! -d \"'+ app_cfg_files_path     +'\" ] || find \"'+ app_cfg_files_path     +'\" ! -type d').split('\n')|reject('match', '^$')  }}"
+
+- name: determine destination hosts
+  set_fact:
+    dest: "{% if storage.type == 'local_folder' %}{{ hostvars.keys() }}{% else %}{{ [hostvars.keys() | first] }}{% endif %}"
+  run_once: true
+
+- name: list destination hosts
+  debug:
+    msg: "destination hosts:\n{{ dest }}"
+  run_once: true
+
+- block:
+  - name: pg details
+    debug:
+      msg: "pg namespace:{{ item.namespace }}
+      service: {{ item.name }}
+      database: {{ item.config.database }} username: {{ item.config.username }}  password: {{ item.config.password }}"
+    loop: "{{ application.value.requires }}"
+    when: item.type is defined and item.type == 'postgresql'
+  when: application.value.requires is defined
+  run_once: true
+
+- block:
+  - debug: var=inventory_hostname
+  - name: ensure destination directory exists for templates
+    file:
+      path: "{{ dest_base_dir }}{{ item | replace (app_cfg_templates_path,'') }}"
+      recurse: true
+      state: directory
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.directoryMode }}"
+    loop: "{{ templates_dirs }}"
+
+  - name: ensure destination directory exists for files
+    file:
+      path: "{{ dest_base_dir }}{{ item | replace (app_cfg_files_path,'') }}"
+      recurse: true
+      state: directory
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.directoryMode }}"
+    loop: "{{ files_dirs }}"
+
+  - name: dbg files_dirs
+    debug:
+      msg: "loop var: {{ item }} app_cfg_files_path: {{ app_cfg_files_path }} dest: {{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }} count: {{ files_dirs| length}}"
+    loop: "{{ files_dirs }}"
+    when: "'debug' in ansible_run_tags"
+
+  - name: dbg templates_dirs
+    debug:
+      msg: "loop var: -{{ item }}- app_cfg_templates_path: {{ app_cfg_templates_path }} dest: {{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }} count: {{ templates_dirs| length}}"
+    loop: "{{ templates_dirs }}"
+    when: "'debug' in ansible_run_tags"
+
+  - name: create config from templates
+    template:
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.fileMode }}"
+      src: "{{ item }}"
+      dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }}"
+    loop: "{{ templates_files }}"
+
+  - name: create config from files
+    copy:
+      owner: "{{ application.value.security.runAsUser }}"
+      group: "{{ application.value.security.runAsGroup }}"
+      mode: "{{ application.value.security.fileMode }}"
+      src: "{{ item }}"
+      dest: "{{ dest_base_dir }}/{{ item | replace( app_cfg_files_path , '') }}"
+    loop: "{{ files_files }}"
+  
+  when: "inventory_hostname in dest"
+
+- name: Example using fail and when together
+  ansible.builtin.fail:
+    msg: let's stop here
+  when: false

@@ -154,12 +154,8 @@ TODO:
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
 - kube-flannel: use gentoo-image-builder in k8s
-- gentoo role: change templates deployment to shared helper
 - longhorn: add disk creation (truncate -s xxG file + mount point)
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node
-
-
 - regression tests: implement continuous testing of the features to detect regressions
-
-- envoy build: instead of overwriting files like BUILD sed them
-- render templates delegate_to:localhost and use then synchronize: of whole directory (duration: 46secs, go back to remote rendering, maybe change it to async and poll mechanism)
+- envoy build: instead of overwriting files sed WORKSPACE
+- shared_helper: storage_content.yaml (see storage_content.yml, owner and perms)

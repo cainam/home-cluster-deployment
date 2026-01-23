@@ -95,7 +95,7 @@
       security:
         runAsUser: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
         runAsGroup: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
-        directoryMode: "{{ applicationSecurity[app.name].directoryMode | default('u=rwx,g=-rwx,o=-rwx') }}"
+        directoryMode: "{{ applicationSecurity[app.name].directoryMode | default('700') }}"
         fileMode: "{{ applicationSecurity[app.name].fileMode| default('600') }}"
       network_defaults:
         rewrite: "/"
