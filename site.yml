@@ -35,18 +35,10 @@
     - role: always
       tags:
         - always
-    - role: k8s
-      tags: 
-        - never
-        - k8s
     - role: gentoo
       tags: 
         - never
         - gentoo
-    - role: deploy
-      tags:
-        - never
-        - deploy
     - role: raspberry
       tags:
         - never
@@ -59,9 +51,27 @@
     - block:
         - name: import role
           import_role:
+            name: deploy
+      vars: 
+        image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
+      tags:
+        - never
+        - deploy
+    - block:
+        - name: import role
+          import_role:
             name: images-only
       vars: 
         image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
       tags:
         - never
         - images-only
+    - block:
+        - name: import role
+          import_role:
+            name: k8s
+      vars: 
+        image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
+      tags:
+        - never
+        - k8s

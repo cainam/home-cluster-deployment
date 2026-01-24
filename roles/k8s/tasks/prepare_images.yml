@@ -1,15 +1,14 @@
-- name: get list of images
-  shell: kubeadm config images list --kubernetes-version "{{ k8s_version }}" 2>/dev/null
-  register: required_images
-  changed_when: false
+- block:
+  - name: get list of images
+    shell: kubeadm config images list --kubernetes-version "{{ k8s_version }}" 2>/dev/null
+    register: required_images
+    changed_when: false
 
-- debug:
-    msg: "images to download: {{ required_images.stdout_lines }}"
-
-- name: pull, tag and push k8s images
-  shell: |
-    echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
-  with_items: "{{ required_images.stdout_lines }}"
+  - name: pull, tag and push k8s images
+    shell: |
+      echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
+    with_items: "{{ required_images.stdout_lines }}"
+  when: inventory_hostname == healthy_node
 
 - name: handle additional images
   vars:
@@ -17,6 +16,4 @@
     - registry
   include_role:
     name: gentoo-image-builder
-
-
 

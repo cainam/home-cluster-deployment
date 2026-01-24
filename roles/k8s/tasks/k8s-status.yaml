@@ -54,13 +54,12 @@
   set_fact: 
     k8s_init_done: "{{ groups.all | map('extract',hostvars,'k8s_installed') | or_array }}"
 
-- set_fact:
-    healthy_node: "{{selected_host}}"
+#- set_fact:
+#    healthy_node: "{{selected_host}}"
 
 - set_fact: # highlight
-    healthy_node: "{{ (groups.all|
-                       map('extract', hostvars)|
-                       selectattr('k8s_installed', 'eq', True)|map(attribute='ansible_facts') |map(attribute='fqdn')| default([selected_host])
+    healthy_node: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') 
+                       | map(attribute='ansible_facts') |map(attribute='fqdn')| default([selected_host])
                        |shuffle)[0] }}"
   run_once: true
   when: k8s_init_done

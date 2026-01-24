@@ -86,15 +86,10 @@
       setting: rc_verbose
 
 - name: hostname in /etc/conf.d
-  lineinfile:
-    path: "/etc/conf.d/{{ item.file }}"
-    regexp: "^{{ item.setting }}"
-    line: "hostname=\"{{ item.line }}\""
-    backup: yes
-  loop:
-    - line: "{{ ansible_facts['fqdn']  }}"
-      setting: hostname
-      file: hostname
+  copy:
+    content: >
+      hostname="{{ ansible_facts.fqdn }}"
+    dest: /etc/conf.d/hostname
 
 - name: deploy from files
   synchronize:
@@ -191,15 +186,12 @@
   template:
     src: "{{ item.file }}"
     dest: "{{ item.dest }}"
-    backup: "{{ item.backup | default('yes') }}"
+    backup: no
   loop:
     - file: cmdline.txt
       dest: /boot/
-      backup: no
     - file: config.txt
       dest: /boot/
-      backup: no
-
 
 - name: symlinks for net.lo and localtime
   file:

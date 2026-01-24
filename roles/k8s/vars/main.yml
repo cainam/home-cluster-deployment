@@ -1,7 +1,7 @@
 ---
-xk8s_check_file: /etc/kubernetes/manifests/kube-controller-manager.yaml
 k8s_check_file: /etc/kubernetes/kubelet.conf
-k8s_version: v1.34.2
+kubelet_config: /var/lib/kubelet/config.yaml
+k8s_version: v1.35.0
 controlPlaneEndpoint: "k8s.adm13:7443"
 k8s_log_directory: /var/log/kubernetes
 serviceSubnet: 10.96.0.0/12

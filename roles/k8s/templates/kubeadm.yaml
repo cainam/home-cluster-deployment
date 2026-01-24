@@ -18,7 +18,7 @@ kubernetesVersion: "{{ k8s_version }}"
 ---
 kind: JoinConfiguration
 apiVersion: kubeadm.k8s.io/v1beta4
-{% if 'control_plane' in roles %}
+{% if 'control_plane' in system_roles %}
 controlPlane:
   localAPIEndpoint:
     advertiseAddress: {{ join_ip | default("0.0.0.0") }}

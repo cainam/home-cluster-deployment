@@ -1,27 +1,6 @@
 - set_fact:
-    app_cfg_templates_path: "{{ role_path }}/templates/{{ storage.name }}"
-    app_cfg_files_path: "{{ role_path }}/files/{{ storage.name}}"
     dest_base_dir: "{% if storage.type == 'local_folder' %}{{ local_disk_directory }}{% else %}{{ shared_mounts }}{% endif %}/{{ storage.name }}"
-
-- name: determine destination hosts
-  set_fact:
     dest: "{% if storage.type == 'local_folder' %}{{ hostvars.keys() }}{% else %}{{ [hostvars.keys() | first] }}{% endif %}"
-  run_once: true
-
-- name: list destination hosts
-  debug:
-    msg: "destination hosts:\n{{ dest }}"
-  run_once: true
-
-- block:
-  - name: pg details
-    debug:
-      msg: "pg namespace:{{ item.namespace }}
-      service: {{ item.name }}
-      database: {{ item.config.database }} username: {{ item.config.username }}  password: {{ item.config.password }}"
-    loop: "{{ application.value.requires }}"
-    when: item.type is defined and item.type == 'postgresql'
-  when: application.value.requires is defined
   run_once: true
 
 - block:
@@ -30,8 +9,8 @@
       name: shared_helper
       tasks_from: template_directory.yaml
     vars:
-      destination_dir: "{{ dest_base_dir }}/{{ item | replace( app_cfg_templates_path , '') }}"
-      template_source_dir: "{{ app_cfg_templates_path }}"
+      destination_dir: "{{ dest_base_dir }}/"
+      template_source_dir: "{{ role_path }}/templates/{{ storage.name }}"
       owner: "{{ application.value.security.runAsUser }}"
       group: "{{ application.value.security.runAsGroup }}"
       directoryMode: "{{ application.value.security.directoryMode }}"
@@ -39,10 +18,8 @@
 
   - name: deploy from files
     synchronize:
-      src: "{{ app_cfg_files_path }}./"
-      dest: "{{ dest_base_dir }}{{ item | replace (app_cfg_files_path,'') }}"
-      archive: yes
-      recursive: yes
+      src: "{{ role_path }}/files/{{ storage.name }}/./"
+      dest: "{{ dest_base_dir }}/"
       rsync_opts:
         - "--relative"
         - "--chown={{ application.value.security.runAsUser }}:{{ application.value.security.runAsGroup }}"

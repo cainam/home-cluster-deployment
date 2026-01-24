@@ -1,10 +1,10 @@
+kind: ConfigMap
 apiVersion: v1
+metadata:
+  name: myca
+  namespace: default
 data:
 {% for f in local_ca_files %}
   {{ f }}: |
       {{ lookup('file', system_local_certs+"/"+f) | indent( width=6, first=False) }}
 {% endfor %}
-kind: ConfigMap
-metadata:
-  name: myca
-  namespace: default
