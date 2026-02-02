@@ -46,9 +46,12 @@
     debug:
       msg: "my_cluster_ip:{{ my_cluster_ip }}"
 
-  - name: "ensure that {{ remote_temp }}(remote_temp) exists"
+  - name: "ensure directories exist"
     file:
-      path: "{{ remote_temp }}"
+      path: "{{ item }}"
       recurse: true
       state: directory
+    loop:
+    - "{{ local_disk_directory }}"
+    - "{{ remote_temp }}"
 

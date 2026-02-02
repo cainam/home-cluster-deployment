@@ -6,7 +6,9 @@ exec 1>> /var/log/${my_name}.log
 
 . /usr/local/bin/set_env.sh 
 export ANSIBLE_DIR=/data/mine/home-cluster-deployment
-cd ${ANSIBLE_DIR}
+[ ! -d "${ANSIBLE_DIR}" ] && mkdir -p $(dirname "${ANSIBLE_DIR}") && cd $(dirname "${ANSIBLE_DIR}") && git clone "${own_git_url}"
+
+cd "${ANSIBLE_DIR}"
 git pull
 
 procs=$(pgrep -c -f "$0")

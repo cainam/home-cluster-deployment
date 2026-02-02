@@ -16,9 +16,9 @@ solution: a combination of dynamic variables and a stack of them ensures that a 
 ### new node
 - populate /boot partition with copy and root from stage3-arm64-openrc
 - /boot/cmdline.txt => update root=PARTUUID from  lsblk -o NAME,UUID,PARTUUID /dev/sdf, set /etc/conf.d/hostname to FQDN and define FQDN in /etc/hosts
-- configure end0 in /etc/conf.d/net, authorized_keys, create net.end0 link net.lo, admin + host keypair from secrets(key with go-r mod)  and enable sshd and net.end0 in /etc/runlevel/default => boot!
-- update UUID and PARTUUID in inventory file and if host to be installed is gentoo-build, remove this from the inventory
-- run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world), reboot to fix missing module issue for iwd - or fix the issue, check if interface is there,  modprobe brcmfmac got added to script
+- configure end0 in /etc/conf.d/net, link sshd and net.end0 in etc/runlevels/default,  authorized_keys, admin + host keypair from secrets(key with go-r mod), sync /lib/firmware+/lib/modules => boot!
+- update UUID and PARTUUID in inventory file and if host to be installed is gentoo-build, remove this from the inventory ( lsblk -o NAME,UUID,PARTUUID /dev/sda )
+- run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world), emaint binhost -f if facing binary package issues
 - gluster: remove former bricks if any:  (for v in $(gluster vol list); do gluster vol heal $v info | grep k8s-3 | sed -e "s/^Brick/$v/g"; done) | while read v b;do (echo "y" | gluster vol remove-brick $v replica 2 $b force); done
 - gluster: gluster peer detach k8s-3-int.adm13 and gluster peer probe k8s-3-int.adm13
 - Emerge: missing binary packages can be created using e.g. quickpkg --include-config y lua
@@ -155,5 +155,12 @@ TODO:
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node
 - regression tests: implement continuous testing of the features to detect regressions
-- envoy build: instead of overwriting files sed WORKSPACE
 - longhorn: add disk creation (truncate -s xxG file + mount point) => /var/lib/longhorn mount to autofs, truncate to system.yaml in k8s
+
+- envoy remove -ltcmalloc options from ld.bfd
+
+- registry: hen-egg problem, registry image is stored in the registry. Daily pull from registry, keepalive script to check if registry is local, otherwise suicide
+- longhorn storage: from k8s to longhorn application playbook (new one to run on all systems)  => clone to happen in prepare_deployment, disk creation in prepare_application
+- zigbee2mqtt: different locations for configuration.yaml and database.db/state.json can be achieved via symlinks
+
+- build one python target only image

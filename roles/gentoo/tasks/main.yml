@@ -256,8 +256,6 @@
         rsync -a {{ ansible_controller_hostname }}:${pkg_dir}/* ${pkg_dir}/
         ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
       done
-      #rsync -a {{ ansible_controller_hostname }}:/lib/modules/$(uname -r) /lib/modules/
-      #rsync -a {{ ansible_controller_hostname }}:/lib/firmware /lib
       modprobe brcmfmac
       /etc/init.d/dbus start
       /etc/init.d/iwd start

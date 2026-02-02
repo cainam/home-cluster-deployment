@@ -3,9 +3,14 @@
     selected_host: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') | map(attribute='inventory_hostname') | random }}"
     control_plane: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') | map(attribute='inventory_hostname') }}"
     worker: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'worker') | map(attribute='inventory_hostname') }}"
+    clusterDNS: >-
+      {%- set base_ip = serviceSubnet.split('/')[0] -%}
+      {%- set octets = base_ip.split('.') -%}
+      {{ octets[0] }}.{{ octets[1] }}.{{ octets[2] }}.{{ octets[3]|int + 10 }}
+  run_once: true
 
 - name: system configurations
-  import_tasks: system.yml
+  include_tasks: system.yml
   when: inventory_hostname in worker or inventory_hostname in control_plane
 
 - name: force-reinstall
@@ -18,6 +23,7 @@
 
 - name: check kubernetes status
   import_tasks: k8s-status.yaml
+  failed_when: true
 
 - name: prepare images
   import_tasks: prepare_images.yml
@@ -26,38 +32,22 @@
   include_tasks: init.yml
   when: not k8s_init_done and inventory_hostname == selected_host
 
-- name: get kube-dns service IP
-  shell: kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
-  register: kube_dns_ip
-  run_once: true
-  delegate_to: "{{ healthy_node }}"
-
-- name: get etcd image
-  shell:  kubectl get pod -n kube-system etcd-{{ healthy_node }}  -o yaml -o jsonpath='{.spec.containers[?(@.name=="etcd")].image}'
-  register: shell_etcd_image
-  run_once: true
-  delegate_to: "{{ healthy_node }}"
-
-- name: set etcd image variable
-  set_fact:
-    etcd_image: "{{ shell_etcd_image.stdout }}"
-  run_once: true
-
 - name: kubelet configuration
-  vars:
-    dns_ip: "{{ kube_dns_ip.stdout }}"
   template:
     src: kubelet-config.yaml
     dest: "{{ kubelet_config }}"
-  when: kube_dns_ip is defined and kube_dns_ip.rc == 0 
 
-- name: enable kubelet service
-  service:
-    name: kubelet
-    enabled: yes
-    state: restarted
+- name: get etcd image
+  #shell:  kubectl get pod -n kube-system etcd-{{ healthy_node }}  -o yaml -o jsonpath='{.spec.containers[?(@.name=="etcd")].image}'
+  shell:  "kubeadm config images list --kubernetes-version {{ current_k8s_version if current_k8s_version else k8s_version }} --image-repository {{ registry }}/{{ kubernetes_image_section }} | grep /etcd:"
+  register: shell_etcd_image
+  run_once: true
+  delegate_to: "{{ selected_host }}"
+  #when: healthy_node is defined
 
 - name: kubernetes static manifests
+  vars:
+    etcd_image: "{{ shell_etcd_image.stdout }}"
   template:
     src: "{{ item }}"
     dest: "/etc/kubernetes/{{ item }}"
@@ -67,6 +57,12 @@
   - manifests/kube-controller-manager.yaml
   - manifests/kube-scheduler.yaml
 
+- name: enable kubelet service
+  service:
+    name: kubelet
+    enabled: yes
+    state: restarted
+
 - block:
   - name: install flannel pod network
     shell: |
@@ -75,7 +71,8 @@
       sed -i -e '/k8s-app:/d' -e 's/- --kube-subnet-mgr/- --kube-subnet-mgr\n        - --iface=end0/'  kube-flannel.yml
       grep image kube-flannel.yml | awk '{print $2}' | sort -u | while read i; do echo "arm64 $i /k8s/ # required for kubernetes" | bash pull-tag-push.sh; done
       #echo -e 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: my-target-namespace\n  labels:\n    pod-security.kubernetes.io/enforce: privileged' > namespace.yaml
-      echo -e 'resources:\n- namespace.yaml\n- kube-flannel.yml' > kustomization.yaml
+      #echo -e 'resources:\n- namespace.yaml\n- kube-flannel.yml' > kustomization.yaml
+      echo -e 'resources:\n- kube-flannel.yml' > kustomization.yaml
       kubectl apply -k .
     register: flannel_install
 
@@ -114,7 +111,8 @@
     delegate_to: "{{ item }}"
     delegate_facts: true
     loop: "{{ groups['all'] }}"
-  when: inventory_hostname == healthy_node
+  run_once: true
+  delegate_to: "{{ healthy_node }}"
 
 - name: debug join command
   debug:
@@ -134,13 +132,21 @@
       join_ip: "{{ my_cluster_ip }}"
       cert_key: cert_key.stdout
 
-  - name: remove node object from cluster
+  - name: remove node object from kubernetes cluster
     run_once: true 
     delegate_to: "{{ healthy_node }}"
-    shell:  (KUBECONFIG={{ kubeconfig }} kubectl delete node {{ inventory_hostname }} | true)
+    shell:  (KUBECONFIG={{ kubeconfig }} kubectl delete node {{ inventory_hostname }} | true) 
+
+  - name: remove node object from etcd cluster
+    run_once: true
+    delegate_to: "{{ healthy_node }}"
+    shell: |
+      params="-- etcdctl   --endpoints=https://127.0.0.1:2379   --cacert=/etc/kubernetes/pki/etcd/ca.crt   --cert=/etc/kubernetes/pki/etcd/server.crt   --key=/etc/kubernetes/pki/etcd/server.key"
+      member_id=$(kubectl exec -n kube-system etcd-{{ healthy_node }} ${params} member list | grep ", {{ inventory_hostname }}, " | cut -d , -f 1)
+      [ "${member_id}" != "" ] && kubectl exec -n kube-system etcd-{{ healthy_node }} ${params} member remove ${member_id}
 
   - name: joining node
-    shell: kubeadm reset --force && rm -f /etc/kubernetes/manifests/*.yaml /var/lib/kubelet/* /etc/kubernetes/kubelet.conf /etc/kubernetes/bootstrap-kubelet.conf /var/lib/etcd/* && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}" --ignore-preflight-errors=DirAvailable--var-lib-etcd
+    shell: rc-service kubelet stop; kubeadm reset --force && rm -f /etc/kubernetes/manifests/*.yaml /var/lib/kubelet/* /etc/kubernetes/kubelet.conf /etc/kubernetes/bootstrap-kubelet.conf /var/lib/etcd/* && kubeadm join "{{ controlPlaneEndpoint }}" --config "{{ kubeadm_tmp.path }}" --ignore-preflight-errors=DirAvailable--var-lib-etcd
     throttle: 1
   when: not k8s_installed
 

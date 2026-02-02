@@ -36,11 +36,6 @@ applications:
     auth-operator: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true or =memory
       images:
       - auth-operator
-      storage:
-      - name: auth-operator
-        size: 2Mi
-        type: local_folder
-        config: true
     idp:
       images:
       - idp
@@ -71,8 +66,8 @@ applications:
       images:
       - mosquitto
       storage:
-      - name: mosquitto
-        size: 1Gi
+      - type: longhorn
+        size: 3Mi
     home-assistant:
       images:
       - home-assistant
@@ -121,11 +116,6 @@ applications:
       flags: ['certs']
       images:
       - fastapi
-      storage:
-      - name: valmut
-        size: 5Mi
-        type: local_folder
-        config: true
     descheduler:
       images:
       - descheduler
@@ -149,8 +139,3 @@ applications:
         svcName: longhorn-frontend
         prefix: /longhorn
         svcPort: 80
-      storage:
-      - name: longhorn-1
-        type: local
-        size: 30Gi
-        mountpoint: /var/lib/longhorn

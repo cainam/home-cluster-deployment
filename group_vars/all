@@ -5,7 +5,7 @@ additional_roles:
   role: gentoo-image-builder
 
 auto_silent: true
-own_git_url: https://github.com/cainam/krysyntyz.git
+own_git_url: https://github.com/cainam/home-cluster-deployment.git
 timezone: Europe/Amsterdam
 path: /usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin
 

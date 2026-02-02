@@ -2,4 +2,3 @@ UUID={{boot_uuid}}          /boot           auto            noauto,noatime  1 2
 /dev/root          /               ext4            noatime,shared  0 1
 {% if data_uuid %}UUID={{data_uuid}}               /data           ext4 noatime 0 0
 {% endif %}
-{{ local_disk_directory }}/longhorn-1.disk   /var/lib/longhorn/ auto         shared          0 0

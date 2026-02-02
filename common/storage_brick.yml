@@ -38,7 +38,7 @@
       [ ! -d "{{ storage.mountpoint }}" ] && mkdir -p "{{ storage.mountpoint }}";
       mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
       mount --make-shared "{{ storage.mountpoint }}"
-  when: storage.type=='local'
+  when: storage.type=='local-XXX'
 
 - name: app:{{ app }} create local folder
   file:

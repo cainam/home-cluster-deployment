@@ -6,9 +6,10 @@
 
   - name: pull, tag and push k8s images
     shell: |
-      echo "arm64 {{ item }} /k8s/ # required for kubernetes" | bash pull-tag-push.sh
+      echo "arm64 {{ item }} /{{ kubernetes_image_section }}/ # required for kubernetes" | bash pull-tag-push.sh
     with_items: "{{ required_images.stdout_lines }}"
-  when: inventory_hostname == healthy_node
+  when:
+  - inventory_hostname == selected_host
 
 - name: handle additional images
   vars:

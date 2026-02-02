@@ -226,17 +226,6 @@
         {%- endfor -%}
         {{ apps }}
 
-  - name: remove items which are not required
-    set_fact:
-      appOOlications: >-
-        {{
-          (applications|default({})) | combine({ item.key: item.value | dict2items | selectattr('key', 'in', only_apps) | items2dict })
-        }}
-    loop: "{{ apps | dict2items }}"
-    loop_control:
-      loop_var: item
-      
   - debug:
       msg: "applications:\n{{ applications | to_nice_yaml}}"
     failed_when: "'prepare' in ansible_run_tags"
-#  run_once: true

@@ -45,25 +45,40 @@
   - name: set unhealthy
     set_fact: 
       k8s_healthy: false
-    delegate_to: "{{ item }}"
-    delegate_facts: true
-    loop: "{{ groups['all'] }}"
+    #delegate_to: "{{ item }}"
+    #delegate_facts: true
+    #loop: "{{ groups['all'] }}"
   when: k8s_installed and livez.rc != 0
 
 - name: set k8s_exists
   set_fact: 
     k8s_init_done: "{{ groups.all | map('extract',hostvars,'k8s_installed') | or_array }}"
 
-#- set_fact:
-#    healthy_node: "{{selected_host}}"
-
-- set_fact: # highlight
-    healthy_node: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') 
-                       | map(attribute='ansible_facts') |map(attribute='fqdn')| default([selected_host])
-                       |shuffle)[0] }}"
-  run_once: true
-  when: k8s_init_done
+#- vars:
+#    candis: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane')| selectattr('k8s_healthy', 'eq', True)  | map(attribute='ansible_facts') |map(attribute='fqdn')| shuffle) }}"
+#  set_fact: # highlight
+#    #healthy_node: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') 
+#    #                   | selectattr('k8s_healthy', 'eq', True)  | map(attribute='ansible_facts') |map(attribute='fqdn')| shuffle)[0] | default(omit) }}"
+#
+#  run_once: true
+#  when: k8s_init_done
+- name: Set healthy_node
+  set_fact:
+    healthy_node: "{{ candis | first }}"
+  vars:
+    candis: "{{ groups.all | map('extract', hostvars) 
+                | selectattr('k8s_installed', 'defined')
+                | selectattr('k8s_installed', 'eq', True)
+                | selectattr('system_roles', 'defined')
+                | selectattr('system_roles', 'contains', 'control_plane')
+                | selectattr('k8s_healthy', 'defined')
+                | selectattr('k8s_healthy', 'eq', True)
+                | map(attribute='ansible_facts', default={}) 
+                | map(attribute='fqdn', default=omit)
+                | select('defined')
+                | list | shuffle }}"
+  when: candis | default([]) | length > 0
 
 - name: check result
   debug:
-    msg: "livez:{{ livez.rc }} k8s_installed:{{k8s_installed}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} current_k8s_version:{{current_k8s_version}} k8s_upgrade:{{k8s_upgrade}} healthy node: {{healthy_node}}"
+    msg: "livez:{{ livez.rc }} k8s_installed:{{k8s_installed}} k8s_healthy: {{ k8s_healthy }} k8s_init_done:{{ k8s_init_done }} current_k8s_version:{{current_k8s_version}} k8s_upgrade:{{k8s_upgrade}} healthy node: {{healthy_node|default('none') }}"

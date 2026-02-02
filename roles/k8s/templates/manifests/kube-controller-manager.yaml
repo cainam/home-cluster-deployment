@@ -33,7 +33,7 @@ spec:
     - --concurrent-deployment-syncs=1
     - --concurrent-replicaset-syncs=1
     - --concurrent-service-syncs=1
-    image: myregistry.adm13:443/k8s/kube-controller-manager:{{ current_k8s_version }}
+    image: myregistry.adm13:443/k8s/kube-controller-manager:{{ current_k8s_version if current_k8s_version else k8s_version }}
     imagePullPolicy: IfNotPresent
     livenessProbe:
       failureThreshold: 8

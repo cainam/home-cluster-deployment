@@ -11,7 +11,7 @@ authentication:
 authorization:
   mode: Webhook
 clusterDNS:
-- {{ dns_ip }}
+- {{ clusterDNS }}
 clusterDomain: cluster.local
 containerRuntimeEndpoint: unix:///var/run/crio/crio.sock
 crashLoopBackOff: {}
@@ -21,7 +21,9 @@ logging:
   verbosity: 0
 memorySwap: {}
 rotateCertificates: true
+{% if 'control_plane' in system_roles %}
 staticPodPath: /etc/kubernetes/manifests
+{% endif %}
 
 # Image Garbage Collection Configuration
 imageGCHighThresholdPercent: 95

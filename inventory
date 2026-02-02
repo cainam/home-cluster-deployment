@@ -4,8 +4,8 @@ all:
       alt_names:
         gentoo_build:
         gentoo-binhost:
-      boot_root: PARTUUID=3a5a053b-02
-      boot_uuid: 88F0-9C43
+      boot_root: PARTUUID=1a08736c-02
+      boot_uuid: B986-19BF
       system_roles:
       - control_plane
     k8s-4-int.adm13:
@@ -15,6 +15,9 @@ all:
       - image_builder
       - worker
     k8s-1-int.adm13:
+      alt_names:
+        Xgentoo_build:
+        Xgentoo-binhost:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
       system_roles:

@@ -17,7 +17,7 @@ spec:
     - --leader-elect=true
     - --kube-api-qps=2
     - --kube-api-burst=4
-    image: myregistry.adm13:443/k8s/kube-scheduler:{{ current_k8s_version }}
+    image: myregistry.adm13:443/k8s/kube-scheduler:{{ current_k8s_version if current_k8s_version else k8s_version }}
     imagePullPolicy: IfNotPresent
     livenessProbe:
       failureThreshold: 8
