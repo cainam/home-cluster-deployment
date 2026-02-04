@@ -21,7 +21,8 @@
       src: "{{ role_path }}/files/{{ storage.name }}/./"
       dest: "{{ dest_base_dir }}/"
       rsync_opts:
-        - "--relative"
-        - "--chown={{ application.value.security.runAsUser }}:{{ application.value.security.runAsGroup }}"
-        - "--chmod=D{{ application.value.security.directoryMode }},F{{ application.value.security.fileMode }}"
+      - "--relative"
+      - "--copy-links"
+      - "--chown={{ application.value.security.runAsUser }}:{{ application.value.security.runAsGroup }}"
+      - "--chmod=D{{ application.value.security.directoryMode }},F{{ application.value.security.fileMode }}"
   when: "inventory_hostname in dest"

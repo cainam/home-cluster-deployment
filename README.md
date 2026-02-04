@@ -160,7 +160,6 @@ TODO:
 - envoy remove -ltcmalloc options from ld.bfd
 
 - registry: hen-egg problem, registry image is stored in the registry. Daily pull from registry, keepalive script to check if registry is local, otherwise suicide
-- longhorn storage: from k8s to longhorn application playbook (new one to run on all systems)  => clone to happen in prepare_deployment, disk creation in prepare_application
+- longhorn storage: from k8s to longhorn application playbook (new one to run on all systems)  => clone to happen in prepare_deployment, disk creation in prepare_application, store application playbook vars in dict with application as key and values for playbook_dir_exists and playbook_dir
 - zigbee2mqtt: different locations for configuration.yaml and database.db/state.json can be achieved via symlinks
 
-- build one python target only image
