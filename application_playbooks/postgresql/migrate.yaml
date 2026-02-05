@@ -64,3 +64,4 @@
           - name: pg-data
             persistentVolumeClaim:
               claimName: {{ pg_claim }}
+  when: is_major_upgrade
