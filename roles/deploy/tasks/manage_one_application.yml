@@ -2,7 +2,7 @@
   set_fact:
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
-    local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
+    # local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
 - block:
   - name: "{{ name_prefix }} handle additional images" # to have the images dict recreated with defaults filled
@@ -34,6 +34,7 @@
     set_fact:
       playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
       playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+  when: false # moved to prepare_application.yml, can be removed here
 
 - block:
   - debug:
@@ -80,7 +81,7 @@
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook check"
       ansible.builtin.stat:
-        path: "{{ playbook_path }}/additional_images.yaml"
+        path: "{{ application_playbooks[app] }}/additional_images.yaml"
       register: playbook_stat
       delegate_to: localhost
 
@@ -88,12 +89,12 @@
       vars:
         var_additional_images: "{{ app }}_additional_images"
         kustomize_dir: "{{ build_dir }}"
-      include_tasks: "{{ playbook_path }}/additional_images.yaml"
+      include_tasks: "{{ application_playbooks[app] }}/additional_images.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
 
     - debug:
         msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}"
-    when: playbook_dir_exists
+    when: app in application_playbooks
 
 
   - block:
@@ -117,14 +118,14 @@
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook check"
       ansible.builtin.stat:
-        path: "{{ playbook_path }}/migrate.yaml"
+        path: "{{ application_playbooks[app] }}/migrate.yaml"
       register: playbook_stat
       delegate_to: localhost
 
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"
-      include_tasks: "{{ playbook_path }}/migrate.yaml"
+      include_tasks: "{{ application_playbooks[app] }}/migrate.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
-    when: playbook_dir_exists
+    when: app in application_playbooks
 
   - name: "{{ name_prefix }} kustomize"
     shell: |
@@ -133,14 +134,14 @@
   - block:
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
       ansible.builtin.stat:
-        path: "{{ playbook_path }}/post_deployment.yaml"
+        path: "{{ application_playbooks[app] }}/post_deployment.yaml"
       register: playbook_stat
       delegate_to: localhost
 
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook run"
-      include_tasks: "{{ playbook_path }}/post_deployment.yaml"
+      include_tasks: "{{ application_playbooks[app] }}/post_deployment.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
-    when: playbook_dir_exists
+    when: app in application_playbooks
   
 - block:
   - name: "{{ name_prefix }} manage application requirements"

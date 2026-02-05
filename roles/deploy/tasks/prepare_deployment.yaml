@@ -3,6 +3,7 @@
   - set_fact:
       apps: "{{ applications }}"
       net_routes: []
+      application_playbooks: {}
 
   - name: add missing namespaces to net.routes
     set_fact:

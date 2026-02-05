@@ -2,7 +2,32 @@
   set_fact:
     app: "{{ application.key }}"
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
+    application_playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
   run_once: true
+
+- block: # prepare application playbook integration
+  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+    ansible.builtin.git:
+      repo: '{{ own_git_url }}'
+      dest: "{{ local_playbook_temp }}"
+      depth: 1
+    ignore_errors: true
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} check if application playbooks exist"
+    ansible.builtin.stat:
+      path: "{{ application_playbook_path }}"
+    register: playbook_dir_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} set playbook_dir_exists"
+    set_fact:
+      application_playbooks: "{{ application_playbooks | combine({application.key: application_playbook_path }, recursive=True) }}"
+      #playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
+      #playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+    when: playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir
+  run_once: true
+
 
 - block:
   - name: "{{ name_prefix }} empty variable storage_new array" # don't remove this, the variable has to be purge for each iteration

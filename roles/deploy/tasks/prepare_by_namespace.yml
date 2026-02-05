@@ -1,6 +1,7 @@
 - name: set app fact
   set_fact:
     ns: "{{ k8s_namespace.key }}"
+    local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
 - name: ns:{{ ns }} prepare by application
   include_tasks: prepare_application.yml
