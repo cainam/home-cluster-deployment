@@ -402,9 +402,9 @@ images:
       sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
       sed -i -e '/ip_range_matc/d' bazel/extension_config/extensions_build_config.bzl
-      sed -i -e '/istio_stats/d' -e '/workload_discovery/d' BUILD
-      sed -i -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e 's/^envoy_cc_binary/old_envoy_cc_binary/' BUILD
+      sed -e '/istio_stats/d' -e '/workload_discovery/d' -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e '/envoy_cc_binary(/,/^)/d' -i BUILD 
       ln -s $PWD /proxy
+      # - sed to remove old block
       MUSL_EXT=(
        --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
        --copt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
@@ -414,11 +414,11 @@ images:
        --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
       )
       # --define tcmalloc=disabled
-      bazel_options='--output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc  -c fastbuild --define=musl=true '
+      #bazel_options='--output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc  -c fastbuild --define=musl=true '
       #bazel  --output_user_root=$PWD/../cache build --python_path=/usr/bin/python3  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc  -c fastbuild --define=musl=true "${MUSL_EXT[@]}"  -- //:envoy 
-      bazel_options="--output_user_root=$PWD/../cache --python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH=/opt/zulu/bin:$PATH   --action_env=JAVA_HOME=/opt/zulu  --copt="-I /usr/local/include" --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true"
-      until bazel fetch $(eval echo "${bazel_options}") "${MUSL_EXT[@]}"  -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
-      bazel build $(eval echo "${bazel_options}") "${MUSL_EXT[@]}"  -- //:envoy
+      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true'
+      until bazel --output_user_root=$PWD/../cache fetch ${bazel_options} "${MUSL_EXT[@]}"  -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
+      bazel  --output_user_root=$PWD/../cache build ${bazel_options}  "${MUSL_EXT[@]}"  -- //:envoy
     finish_rootfs_build: |
       strip bazel-bin/envoy
       cp -dp bazel-bin/envoy  ${ROOT}/usr/local/bin/

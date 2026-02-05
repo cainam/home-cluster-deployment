@@ -59,9 +59,8 @@ applications:
       network:
         rewrite: /zigbee2mqtt
       storage:
-      - name: zigbee2mqtt
+      - type: longhorn
         size: 100Mi
-        config: true
     mosquitto:
       images:
       - mosquitto

@@ -12,6 +12,9 @@ Challenges:
 ### recursion with playbooks
 challenge: images are build using playbooks, but they have downstream dependencies and within the build another build has to be triggered first, but there is no task level scope of variables in Ansible
 solution: a combination of dynamic variables and a stack of them ensures that a build within a build can be performed 
+### hen-egg registry
+challenge: the image to run the registry is in the registry itself and it cannot be pulled
+solution: registry init script accesses the registry filesystem, builds a tar which is then imported
 
 ### new node
 - populate /boot partition with copy and root from stage3-arm64-openrc
@@ -159,7 +162,6 @@ TODO:
 
 - envoy remove -ltcmalloc options from ld.bfd
 
-- registry: hen-egg problem, registry image is stored in the registry. Daily pull from registry, keepalive script to check if registry is local, otherwise suicide
 - longhorn storage: from k8s to longhorn application playbook (new one to run on all systems)  => clone to happen in prepare_deployment, disk creation in prepare_application, store application playbook vars in dict with application as key and values for playbook_dir_exists and playbook_dir
-- zigbee2mqtt: different locations for configuration.yaml and database.db/state.json can be achieved via symlinks
+- mosquitto: replace password_file by password-file plugin
 

@@ -11,6 +11,23 @@ depend()
         use root
 }
 
+load_image(){
+    registry_content="/shared/registry/docker/registry/v2"
+    cd $(mktemp --directory)
+    reg_sha=$(cut -d : -f 2 ${registry_content}/repositories/local/registry/_manifests/tags/${service_image##*:}/current/link )
+    config_sha=$(cat ${registry_content}/blobs/sha256/$(echo "$reg_sha"| cut -c -2)/$reg_sha/data | jq -r .config.digest  | cut -d : -f 2)
+    echo '[{"Config": "'$config_sha'.json","RepoTags": ["'${service_image}'"],"Layers": []}]' > manifest.json
+    ln -s  ${registry_content}/blobs/sha256/$(echo "$config_sha" | cut -c -2)/$config_sha/data $config_sha.json
+    tars=""; for blob_sha in $(cat ${registry_content}/blobs/sha256/$(echo "$reg_sha"| cut -c -2)/$reg_sha/data | jq -r .layers[].digest | cut -d : -f 2); do
+      ln -s ${registry_content}/blobs/sha256/$(echo "$blob_sha" | cut -c -2)/$blob_sha/data $blob_sha.tar; 
+      nm=$(jq '.[0].Layers += ["'$blob_sha.tar'"]' manifest.json ); 
+      echo "$nm" > manifest.json; tars="$tars $blob_sha.tar"; 
+    done
+    tar  --dereference -cf reg.tar  manifest.json $config_sha.json $tars
+    podman load -i reg.tar
+    cd -
+}
+
 start()
 {
         ebegin "Starting registry"
@@ -29,7 +46,7 @@ start()
 
         # ensure image exists
 	if ! (podman image ls | awk '{print $1":"$2}' | grep -q "^${service_image}" ); then
-          podman pull "${service_image}"
+          load_image
 	fi
 
         # claim IP
