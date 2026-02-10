@@ -1,4 +1,20 @@
 software:
+  flannel:
+    version: v0.28.1
+    installed:
+      pattern: "flannel:"
+    latest:
+      type: github
+      params:
+        repo: flannel-io/flannel
+  flannel-cni-plugin:
+    version: v1.9.0-flannel1
+    installed:
+      pattern: "lannel-cni-plugin:"
+    latest:
+      type: github
+      params:
+        repo: flannel-io/cni-plugin
   traefik:
     version: v3.6.6
     installed:
@@ -30,7 +46,7 @@ software:
       params:
         repo: koenkk/zigbee2mqtt
   mosquitto:
-    version: v2.0.22
+    version: v2.1.2
     max_entries: 2
     latest:
       type: github-tags

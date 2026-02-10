@@ -2,39 +2,6 @@
   set_fact:
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
     app: "{{ application.key }}"
-    # local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
-
-- block:
-  - name: "{{ name_prefix }} handle additional images" # to have the images dict recreated with defaults filled
-    vars:
-      limit_images: []
-      default_section: "{{ k8s_namespace.key }}"
-      dry_run: "{{ true }}"
-      # image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
-    include_role:
-      name: gentoo-image-builder
-  when: application.value.images is defined
-
-- block: # prepare application playbook integration
-  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
-    ansible.builtin.git:
-      repo: '{{ own_git_url }}'
-      dest: "{{ local_playbook_temp }}"
-      depth: 1
-    ignore_errors: true
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} check if application playbooks exist"
-    ansible.builtin.stat:
-      path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
-    register: playbook_dir_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} set playbook_dir_exists"
-    set_fact:
-      playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
-      playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
-  when: false # moved to prepare_application.yml, can be removed here
 
 - block:
   - debug:
@@ -60,6 +27,15 @@
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
 
+  - name: "{{ name_prefix }} handle additional images" # to have the images dict recreated with defaults filled
+    vars:
+      limit_images: []
+      default_section: "{{ k8s_namespace.key }}"
+      dry_run: "{{ true }}"
+    include_role:
+      name: gentoo-image-builder
+  when: application.value.images is defined
+
   - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
       name: shared_helper
@@ -71,7 +47,7 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
          'name': application.key,
-         'images': images_info if images_info is defined else omit,
+         # 'DELMEimages': images_info if images_info is defined else omit,
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
@@ -109,8 +85,7 @@
         images: "{{ current_app_images }}"
         default_section: "{{ k8s_namespace.key }}"
         dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
-        # image_builder_node: "{{ groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'image_builder') | map(attribute='inventory_hostname') | first }}"
-        images_details_var: "images_info"
+        # unused images_details_var: "images_info"
       include_role:
         name: gentoo-image-builder
     when: application.value.images is defined

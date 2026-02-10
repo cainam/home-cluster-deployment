@@ -1,5 +1,10 @@
 ---
 applications:
+  kube-flannel:
+    kube-flannel:
+      images:
+      - flannel
+      - flannel-cni-plugin
   gateway:
     traefik:
       network: true

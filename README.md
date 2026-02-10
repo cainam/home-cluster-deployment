@@ -149,19 +149,13 @@ TODO:
 - image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
+- init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
 - lifeness and readiness probes: generate from application config
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
-- kube-flannel: use gentoo-image-builder in k8s
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
-- init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node
 - regression tests: implement continuous testing of the features to detect regressions
-- longhorn: add disk creation (truncate -s xxG file + mount point) => /var/lib/longhorn mount to autofs, truncate to system.yaml in k8s
 
-- envoy remove -ltcmalloc options from ld.bfd
-
-- longhorn storage: from k8s to longhorn application playbook (new one to run on all systems)  => clone to happen in prepare_deployment, disk creation in prepare_application, store application playbook vars in dict with application as key and values for playbook_dir_exists and playbook_dir
-- mosquitto: replace password_file by password-file plugin
-
+- mosquitto: replace password_file by password-file plugin and deactivate websocket

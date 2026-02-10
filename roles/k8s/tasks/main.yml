@@ -64,25 +64,6 @@
     state: restarted
 
 - block:
-  - name: install flannel pod network
-    shell: |
-      mkdir -p /tmp/flannel; cd /tmp/flannel
-      curl -O -L https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
-      sed -i -e '/k8s-app:/d' -e 's/- --kube-subnet-mgr/- --kube-subnet-mgr\n        - --iface=end0/'  kube-flannel.yml
-      grep image kube-flannel.yml | awk '{print $2}' | sort -u | while read i; do echo "arm64 $i /k8s/ # required for kubernetes" | bash pull-tag-push.sh; done
-      #echo -e 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: my-target-namespace\n  labels:\n    pod-security.kubernetes.io/enforce: privileged' > namespace.yaml
-      #echo -e 'resources:\n- namespace.yaml\n- kube-flannel.yml' > kustomization.yaml
-      echo -e 'resources:\n- kube-flannel.yml' > kustomization.yaml
-      kubectl apply -k .
-    register: flannel_install
-
-  - name: output flannel install
-    debug:
-      msg: "{{flannel_install}}"
-  run_once: true
-  delegate_to: "{{ healthy_node }}"
-
-- block:
   - name: get token
     shell: kubeadm token create
     register: token

@@ -1,20 +1,23 @@
 - block:
   - name: get list of images
-    shell: kubeadm config images list --kubernetes-version "{{ k8s_version }}" 2>/dev/null
+    shell: |
+      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }});do 
+        src="${img%:*}";
+        echo -e "- name: ${src##*/}\n  tag: ${img##*:}\n  section: {{ kubernetes_image_section }}\n  type: fetch\n  source: $src"; 
+      done
     register: required_images
     changed_when: false
 
-  - name: pull, tag and push k8s images
-    shell: |
-      echo "arm64 {{ item }} /{{ kubernetes_image_section }}/ # required for kubernetes" | bash pull-tag-push.sh
-    with_items: "{{ required_images.stdout_lines }}"
-  when:
-  - inventory_hostname == selected_host
+  - name: load image information as yaml
+    set_fact:
+      images: "{{ images + (required_images.stdout | from_yaml) }}"
+      image_names: "{{ ['registry','flannel','flannel-cni-plugin'] + (required_images.stdout | from_yaml | map(attribute='name')) }}"
+  run_once: true
+  delegate_to: "{{ selected_host }}"
 
 - name: handle additional images
   vars:
-    limit_images:
-    - registry
+    limit_images: "{{ image_names }}"
   include_role:
     name: gentoo-image-builder
 

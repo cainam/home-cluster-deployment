@@ -31,6 +31,7 @@
         {% endfor %}
       )
     delegate_to: localhost
+    failed_when: false # let's see how far we get with no internet connection
   run_once: true
 
 - block:
