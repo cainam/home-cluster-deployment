@@ -16,6 +16,12 @@
       directoryMode: "{{ application.value.security.directoryMode }}"
       fileMode: "{{ application.value.security.fileMode }}"
 
+  - name: check if source directory of files exists
+    ansible.builtin.stat:
+      path: "{{ role_path }}/files/{{ storage.name }}/"
+    register: src_dir
+    delegate_to: localhost
+
   - name: deploy from files
     synchronize:
       src: "{{ role_path }}/files/{{ storage.name }}/./"
@@ -25,4 +31,5 @@
       - "--copy-links"
       - "--chown={{ application.value.security.runAsUser }}:{{ application.value.security.runAsGroup }}"
       - "--chmod=D{{ application.value.security.directoryMode }},F{{ application.value.security.fileMode }}"
-  when: "inventory_hostname in dest"
+    when: src_dir.stat.exists and src_dir.stat.isdir
+  when: inventory_hostname in dest

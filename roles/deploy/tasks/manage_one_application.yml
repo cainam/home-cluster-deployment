@@ -34,7 +34,7 @@
       dry_run: "{{ true }}"
     include_role:
       name: gentoo-image-builder
-  when: application.value.images is defined
+    when: application.value.images is defined
 
   - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
@@ -47,7 +47,7 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
          'name': application.key,
-         # 'DELMEimages': images_info if images_info is defined else omit,
+         'DELMEimages': images_info if images_info is defined else omit,
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),

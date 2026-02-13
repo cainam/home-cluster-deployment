@@ -7,7 +7,7 @@ builder:
   stage3_base: stage3-arm64-musl-hardened
   stage3_date: 20260201T231555Z
   stage3_dateX: 20260112T121559Z
-  portage: 20260202
+  portage: 20260211
   portageX: 20260112
   portage_container: "portage"
   image_root: /image-root
@@ -17,7 +17,8 @@ builder:
       ENV FEATURES="-parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
       ENV EMERGE_DEFAULT_OPTS="-b -k --binpkg-respect-use=y --quiet-build"
       ENV EMERGE_OPT="-v --tree"
-      ENV USE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd static-libs"
+      ENV XXXUSE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd static-libs"
+      ENV USE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd"
       ENV static_libs_use="-static-libs"
       ENV LDFLAGS="-static-libgcc -static-libstdc++"
       ENV NODOC=true

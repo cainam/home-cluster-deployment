@@ -241,6 +241,7 @@ images:
   build:
     packages: "app-misc/jq app-crypt/gnupg dev-python/jinja2 dev-python/idna dev-python/certifi dev-python/requests dev-python/python-dateutil"
     run_with: python3 -m homeassistant --config /config --log-file /tmp/log --skip-pip
+    configure_builder: echo 'app-misc/jq -static-libs' > /etc/portage/package.use/jq
 
 - name: home-assistant
   section: home
@@ -321,14 +322,23 @@ images:
     - git: git@github.com:cainam/cainam.github.io.git#:compile-bazel-with-gentoo-musl-on-aarch64/bazel
       dest: /bazel-build-for-envoy
     configure_builder: |
-      emerge llvm-core/clang llvm-runtimes/libcxx llvm-core/lld dev-libs/icu
+      emerge llvm-core/clang llvm-runtimes/libcxx llvm-core/lld 
       printf "%s static-libs\n" dev-libs/icu net-dns/c-ares app-arch/zstd net-libs/nghttp2 sys-libs/zlib >> /etc/portage/package.use/static-libs
-      emerge -1v dev-libs/icu net-dns/c-ares app-arch/zstd sys-libs/zlib
+      emerge -1v net-dns/c-ares app-arch/zstd sys-libs/zlib
       EXTRA_ECONF="--enable-static" emerge -v1 --usepkg=n net-libs/nghttp2
       export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):$PATH
       export CC=clang
       export CXX=clang++
       export CONFIGURE="--prefix=/usr/local"
+      export CXXFLAGS="-stdlib=libc++ -fPIC"
+      export LDFLAGS="-stdlib=libc++"
+      export LIBS="-lc++ -lc++abi"
+      cd /var/tmp
+      #curl -C - -L -O https://github.com/unicode-org/icu/archive/refs/tags/release-77-1.tar.gz
+      git clone --single-branch --depth 1 -b release-77-1 https://github.com/unicode-org/icu.git
+      cd icu/icu4c/source/
+      ./configure $CONFIGURE --enable-static --disable-shared --with-library-bits=64 --disable-samples --disable-tests # --disable-renaming
+      make -j 3 && make install
       cd /var/tmp
       curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
       tar xfz liburing-2.12.tar.gz
@@ -390,7 +400,7 @@ images:
       export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       export CC=$(which clang)
       emerge llvm-runtimes/libunwind
-      emerge -C sys-devel/gcc
+      #emerge -C sys-devel/gcc
       git clone --depth 1 --single-branch -b release-1.28 https://github.com/istio/proxy.git; cd proxy
       echo "build --define tcmalloc=disabled # in .bazelrc" >> .bazelrc
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
@@ -405,6 +415,7 @@ images:
       ln -s $PWD /proxy
       bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --linkopt=-static-libstdc++ --host_linkopt=-static-libgcc --host_linkopt=-static-libstdc++ --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true --host_linkopt=-Wl,-Bstatic --host_linkopt=-lunwind  --host_linkopt=-Wl,-Bdynamic --linkopt=-rtlib=compiler-rt --linkopt=-unwindlib=libunwind'
       bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --linkopt=-static-libstdc++ --host_linkopt=-static-libgcc --host_linkopt=-static-libstdc++ --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true --linkopt=-rtlib=compiler-rt --linkopt=-unwindlib=libunwind'
+      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  -c fastbuild --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=-unwindlib=libunwind --host_linkopt=/usr/lib/libc.a  --linkopt=/icu/lib/libicui18n.a   --linkopt=/icu/lib/libicuuc.a --linkopt=/icu/lib/libicudata.a '
       until bazel --output_user_root=$PWD/../cache fetch ${bazel_options}   -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
       bazel  --output_user_root=$PWD/../cache build ${bazel_options}    -- //:envoy
     finish_rootfs_build: |
