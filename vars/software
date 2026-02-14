@@ -89,7 +89,7 @@ software:
       params:
         repo: ory/hydra
   longhorn:
-    version: v1.10.1
+    version: v1.11.0
     installed:
       pattern: "longhorn-ui:"
     latest:

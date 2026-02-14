@@ -3,16 +3,10 @@
 # 2. add fixed version imagers
 
 
-- name: test for major version update
+- name: write declaration locally
   ansible.builtin.shell: |
     set -o pipefail
-    kubectl diff -k {{ kustomize_dir }} | grep -i "image:" | sort -u | awk '
-    /^-/ { match($0, /[0-9]+/); old = substr($0, RSTART, RLENGTH) }
-    /^\+/ { match($0, /[0-9]+/); new = substr($0, RSTART, RLENGTH) }
-    END { 
-      if (old != "" && new != "" && new > old) print "true"; 
-      else print "false" 
-    }'
+    kubectl kustomize {{ kustomize_dir }} > {{ kustomize_dir }}/out.yaml
   register: major_upgrade_result
   failed_when: major_upgrade_result.rc > 1
   changed_when: false

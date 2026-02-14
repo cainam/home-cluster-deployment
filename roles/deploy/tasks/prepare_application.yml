@@ -37,14 +37,8 @@
     delegate_to: localhost
 
   - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
-    vars:
-      var_additional_images: "{{ app }}_additional_images"
-      kustomize_dir: "{{ build_dir }}"
     include_tasks: "{{ application_playbooks[app] }}/pre_system.yaml"
     when: playbook_stat.stat.exists and playbook_stat.stat.isreg
-
-  - debug:
-      msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}"
   when: app in application_playbooks
 
 

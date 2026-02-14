@@ -15,7 +15,7 @@
       /var/lib/longhorn -fstype=auto,loop,shared,noatime :{{ longhorn_disk }}
   notify: restart autofs
 
-- name: ensure Longhorn direct map is in auto.master
+- name: ensure longhorn direct map is in auto.master
   lineinfile:
     path: /etc/autofs/auto.master
     regexp: '^/-\s+/etc/autofs/auto\.longhorn'
