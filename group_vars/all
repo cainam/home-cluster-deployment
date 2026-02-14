@@ -67,5 +67,7 @@ k8s:
 gateway_install:
   deployment_type: kustomize
   flags: ['certs']
+  images:
+  - proxyv2
   kustom:
     application: gateway

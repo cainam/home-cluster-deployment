@@ -24,7 +24,7 @@ software:
       params:
         repo: traefik/traefik
   istio:
-    version: 1.27
+    version: 1.28.3
     installed:
       pattern: "istio"
     latest:

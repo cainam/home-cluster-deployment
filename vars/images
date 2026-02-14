@@ -25,7 +25,7 @@ images:
     user: 1337
     configure_rootfs_build: |
       cd /var/tmp
-      git clone --depth 1 --single-branch -b release-1.27 https://github.com/istio/istio.git
+      git clone --depth 1 --single-branch -b {{ software.istio.version }} https://github.com/istio/istio.git
       cd istio/pilot/cmd/pilot-discovery
       CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'
     finish_rootfs_build: |
@@ -364,6 +364,7 @@ images:
 
 - name: proxyv2
   section: istio-system
+  tag: "{{ software.istio.version }}"
   requires:
   - envoy
   type: gentoo-image-builder
@@ -383,12 +384,10 @@ images:
       mkdir -p "${ROOT}/usr/local/bin" && cp -dp pilot-agent "${ROOT}/usr/local/bin"
       mkdir -p "${ROOT}/var/lib/istio/envoy/" && cp -dp ../../../tools/packaging/common/envoy_bootstrap.json "${ROOT}/var/lib/istio/envoy/envoy_bootstrap_tmpl.json"
       rm -rf /root/go /root/.cache
-      # remove the following two lines again
-      #cp -drp /usr/local/lib/*  ${ROOT}/usr/local/lib/
-      #cp /lib/libc++.so.1 /lib/libc++abi.so.1 /lib/libcares.so.2 /lib/libcrypto.so.3 /lib/libicudata.so.77 /lib/libicuuc.so.77 /lib/libnghttp2.so.14 /lib/libssl.so.3 /lib/libz.so.1 /lib/libzstd.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libatomic.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libstdc++.so.6 ${ROOT}/usr/local/lib/ || true
 
 - name: envoy
   section: local
+  tag: "{{ software.istio.version }}"
   requires:
   - envoy-base
   type: gentoo-image-builder
@@ -399,35 +398,32 @@ images:
       export JAVA_HOME=/opt/zulu
       export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       export CC=$(which clang)
-      emerge llvm-runtimes/libunwind
-      #emerge -C sys-devel/gcc
-      git clone --depth 1 --single-branch -b release-1.28 https://github.com/istio/proxy.git; cd proxy
+      #USE="$USE static-libs" emerge llvm-runtimes/libunwind
+      git clone --depth 1 --single-branch -b {{ software.istio.version }} https://github.com/istio/proxy.git; cd proxy
       echo "build --define tcmalloc=disabled # in .bazelrc" >> .bazelrc
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
       sed -i -e '/repo:http/r add-pt1.txt' -e '/url = /r add-pt2.txt' WORKSPACE
       sed -i '/PATH/d' .bazelrc
-      #sed -e 's/%:libstdc++.a/stdc++/' -e 's/%:libc++.a/c++/g' -e 's/%:libc++abi.a/c++abi/g' -i envoy.bazelrc
-      sed -i -e 's/libc++abi\.a/libc++abi.a:-l%:libunwind.a/'  envoy.bazelrc 
+      #sed -i -e 's/libc++abi\.a/libc++abi.a:-l%:libunwind.a/'  envoy.bazelrc 
       sed -e '/googleurl/d' -i envoy.bazelrc
       sed -i -e '/ip_range_matc/d' bazel/extension_config/extensions_build_config.bzl
       sed -e '/istio_stats/d' -e '/workload_discovery/d' -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e '/envoy_cc_binary(/,/^)/d' -i BUILD 
       sed -i -e '/metadata/d' BUILD
       ln -s $PWD /proxy
-      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --linkopt=-static-libstdc++ --host_linkopt=-static-libgcc --host_linkopt=-static-libstdc++ --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true --host_linkopt=-Wl,-Bstatic --host_linkopt=-lunwind  --host_linkopt=-Wl,-Bdynamic --linkopt=-rtlib=compiler-rt --linkopt=-unwindlib=libunwind'
-      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --linkopt=-static-libgcc --linkopt=-static-libstdc++ --host_linkopt=-static-libgcc --host_linkopt=-static-libstdc++ --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   -c fastbuild --define=musl=true --linkopt=-rtlib=compiler-rt --linkopt=-unwindlib=libunwind'
-      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  -c fastbuild --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=-unwindlib=libunwind --host_linkopt=/usr/lib/libc.a  --linkopt=/icu/lib/libicui18n.a   --linkopt=/icu/lib/libicuuc.a --linkopt=/icu/lib/libicudata.a '
+      #bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  -c fastbuild --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=-unwindlib=libunwind --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a '
+      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=sizeopt --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  -c fastbuild --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a '
       until bazel --output_user_root=$PWD/../cache fetch ${bazel_options}   -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
       bazel  --output_user_root=$PWD/../cache build ${bazel_options}    -- //:envoy
     finish_rootfs_build: |
       strip bazel-bin/envoy
       cp -dp bazel-bin/envoy  ${ROOT}/usr/local/bin/
       # cp /lib/libc++.so.* /lib/libc++abi.so.*  /lib/libicudata.so.* /usr/lib/gcc/aarch64-unknown-linux-musl/*/lib* ${ROOT}/usr/local/lib/ || true
-      cp -dp /lib/libicudata.so.* /usr/lib/libicuuc* ${ROOT}/usr/local/lib/ || true
+      #cp -dp /lib/libicudata.so.* /usr/lib/libicuuc* ${ROOT}/usr/local/lib/ || true
 
 - name: bazel7
   section: local
   requires:
-  - python3
+  - base
   type: gentoo-image-builder
   env:
     JAVA_HOME: /opt/zulu
@@ -446,21 +442,14 @@ images:
 
       bazel_version=7.7.1
       bazel_dist=bazel-$bazel_version-dist.zip
-      mkdir /bazel
-      cd bazel
+      mkdir /bazel && cd bazel
       curl -L -O https://github.com/bazelbuild/bazel/releases/download/$bazel_version/$bazel_dist
       unzip -q $bazel_dist
       curl https://gitlab.alpinelinux.org/alpine/aports/-/raw/master/testing/bazel7/0001-off64t-fix.patch?ref_type=heads -O
-
       patch -p1 < 0001-off64t-fix.patch || true
-      #sed -i -e 's/"abseil-cpp", version = "20230125.1"/"abseil-cpp", version = "20230802.0"/' MODULE.bazel
-      #sed -i -e 's/^namespace blaze/#include <cstdint>\nnamespace blaze/g'  src/main/cpp/archive_utils.h
-      #sed -i -e 's/^namespace blaze/#include <cstdint>\nnamespace blaze/g'  src/main/cpp/blaze.h
      
-      #EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
       BAZEL_DEV_VERSION_OVERRIDE="${bazel_version}"  EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
-
-      mkdir $ROOT/usr/local/bin $ROOT/opt/
+      mkdir -p $ROOT/usr/local/bin 
       find /usr -name "libgcc_s.so.*"
       cp -dp /bazel/output/bazel /usr/local/bin/
  

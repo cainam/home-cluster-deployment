@@ -23,6 +23,7 @@ applications:
     istiod:
       images:
       - pilot
+      - proxyv2
   auth:
     hydra:
       images:

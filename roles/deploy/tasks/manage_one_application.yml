@@ -31,7 +31,7 @@
     vars:
       limit_images: []
       default_section: "{{ k8s_namespace.key }}"
-      dry_run: "{{ true }}"
+      dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
     include_role:
       name: gentoo-image-builder
     when: application.value.images is defined
