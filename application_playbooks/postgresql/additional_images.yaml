@@ -24,7 +24,7 @@
       [{
         'name': 'pgupgrade'~pg_next,
         'tag': (pg_next-1),
-        'section': 'db',
+        'section': registry_path,
         'type': 'gentoo-image-builder',
         'requires': ['postgresql'],
         'build': {'packages': '=dev-db/postgresql-'~(pg_next-1)~'*' }

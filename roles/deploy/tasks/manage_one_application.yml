@@ -65,6 +65,7 @@
       vars:
         var_additional_images: "{{ app }}_additional_images"
         kustomize_dir: "{{ build_dir }}"
+        registry_path: "{{ k8s_namespace.key }}"
       include_tasks: "{{ application_playbooks[app] }}/additional_images.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
 

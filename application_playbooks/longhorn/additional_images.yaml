@@ -19,7 +19,7 @@
       [{
         'name': item | split(':') | first | split('/') | last,
         'tag': item | split(':') | last,
-        'section': k8s_namespace,
+        'section': registry_path,
         'type': 'fetch',
         'source': item
       }] }}"
