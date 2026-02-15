@@ -8,7 +8,7 @@
     cat longhorn.yaml |yq -r 'select(.metadata.name == "longhorn-driver-deployer")|.spec.template.spec.containers[]|select(.name == "longhorn-driver-deployer") |.env[] |select(.name|endswith("IMAGE")) |.value'
     )
     for i in ${I}; do
-      sed -i -e "s#$i#{{ kustom.namespace }}/"$(basename "$i")"#g" longhorn.yaml
+      sed -i -e "s#$i#{{ registry_path }}/"$(basename "$i")"#g" longhorn.yaml
     done
     yq -iy '.resources=["longhorn.yaml"]' kustomization.yaml
     echo "$I"
