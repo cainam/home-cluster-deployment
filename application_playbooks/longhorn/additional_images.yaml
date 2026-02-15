@@ -15,13 +15,16 @@
 
 - name: "set var {{ var_additional_images }}"
   set_fact:
-    "{{ var_additional_images }}": "{{ 
-      [{
-        'name': item | split(':') | first | split('/') | last,
-        'tag': item | split(':') | last,
-        'section': registry_path,
-        'type': 'fetch',
-        'source': item
-      }] }}"
-  loop: "{{ source_images.stdout_lines }}"
+    "{{ var_additional_images }}": >-
+      {% set results = [] %}
+      {% for img in source_images.stdout_lines %}
+        {% set _ = results.append({
+          'name': img.split('/')[-1].split(':')[0],
+          'tag': img.split(':')[-1],
+          'section': registry_path,
+          'type': 'fetch',
+          'source': item
+        }) %}
+      {% endfor %}
+      {{ results }}
   failed_when: true
