@@ -1,8 +1,3 @@
-
-# 1. get the version from the longhorn.yaml file
-# 2. add fixed version imagers
-
-
 - name: write declaration locally
   ansible.builtin.shell: |
     set -o pipefail
@@ -27,7 +22,3 @@
         }) %}
       {% endfor %}
       {{ results }}
-- name: x
-  debug:
-    msg: "lj"
-  failed_when: true
