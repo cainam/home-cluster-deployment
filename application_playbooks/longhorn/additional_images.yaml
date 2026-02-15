@@ -7,24 +7,21 @@
   ansible.builtin.shell: |
     set -o pipefail
     kubectl kustomize {{ kustomize_dir }} > {{ kustomize_dir }}/out.yaml
-  register: major_upgrade_result
-  failed_when: major_upgrade_result.rc > 1
+    cat /tmp/ansible.bdleh2pc_template_remote/out.yaml |  yq -r 'select(.metadata.name == "longhorn-manager") | select(.kind == "DaemonSet") | .spec.template.spec.containers[] | select(.name == "longhorn-manager") | .command[] ' | grep "/" | grep :
+    cat /tmp/ansible.bdleh2pc_template_remote/out.yaml |  yq -r 'select(.metadata.name == "longhorn-manager") | select(.kind == "DaemonSet") | .spec.template.spec.containers[] | select(.name == "longhorn-manager") | .command[] ' | grep "/"
+  register: source_images
+  failed_when: source_images.rc > 1
   changed_when: false
-
-- name: set upgrade fact
-  ansible.builtin.set_fact:
-    is_major_upgrade: "{{ major_upgrade_result.stdout | bool }}"
-    pg_next: "{{ software.postgresql.version|string|split('.')|first|int }}"
 
 - name: "set var {{ var_additional_images }}"
   set_fact:
     "{{ var_additional_images }}": "{{ 
       [{
-        'name': 'pgupgrade'~pg_next,
-        'tag': (pg_next-1),
-        'section': 'db',
-        'type': 'gentoo-image-builder',
-        'requires': ['postgresql'],
-        'build': {'packages': '=dev-db/postgresql-'~(pg_next-1)~'*' }
-      }] if is_major_upgrade else [] }}"
+        'name': item | split(':') | first | split('/') | last,
+        'tag': item | split(':') | last,
+        'section': k8s_namespace,
+        'type': 'fetch',
+        'source': item
+      }] }}"
+  loop: source_images.stdout_lines
   failed_when: true
