@@ -9,7 +9,6 @@
   changed_when: false
 
 - name: "set var {{ var_additional_images }}"
-  when: false
   set_fact:
     "{{ var_additional_images }}": >-
       {% set results = [] %}
@@ -23,8 +22,27 @@
         }) %}
       {% endfor %}
       {{ results }}
+  when: false
 
 - name: "set var {{ var_additional_images }}"
+  when: false
   set_fact:
     "{{ var_additional_images }}": >-
       {{ source_images.stdout_lines | map('regex_replace', '^(.*)/(.*):(.*)$', '{"name": "\\2", "tag": "\\3", "section": "' ~ registry_path ~ '", "type": "fetch", "source": "\\0"}') | map('from_json') | list }}
+
+
+
+- name: "Build image list for {{ var_additional_images }}"
+  set_fact:
+    temp_img_list: "{{ temp_img_list|default([])  + [ {
+        'name': (item.split('/')[-1]).split(':') | first,
+        'tag': item.split(':') | last,
+        'section': registry_path,
+        'type': 'fetch',
+        'source': item
+      } ] }}"
+  loop: "{{ source_images.stdout_lines }}"
+
+- name: "set var {{ var_additional_images }}"
+  set_fact:
+    "{{ var_additional_images }}": "{{ temp_img_list }}"
