@@ -27,4 +27,7 @@
         }) %}
       {% endfor %}
       {{ results }}
+- name: x
+  debug:
+    msg: "lj"
   failed_when: true
