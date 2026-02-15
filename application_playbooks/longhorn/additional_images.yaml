@@ -9,6 +9,7 @@
   changed_when: false
 
 - name: "set var {{ var_additional_images }}"
+  when: false
   set_fact:
     "{{ var_additional_images }}": >-
       {% set results = [] %}
@@ -22,3 +23,8 @@
         }) %}
       {% endfor %}
       {{ results }}
+
+- name: "set var {{ var_additional_images }}"
+  set_fact:
+    "{{ var_additional_images }}": >-
+      {{ source_images.stdout_lines | map('regex_replace', '^(.*)/(.*):(.*)$', '{"name": "\2", "tag": "\3", "section": "' ~ registry_path ~ '", "type": "fetch", "source": "\0"}') | map('from_json') | list }}
