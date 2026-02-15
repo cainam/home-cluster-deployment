@@ -23,5 +23,5 @@
         'type': 'fetch',
         'source': item
       }] }}"
-  loop: source_images.stdout_lines
+  loop: "{{ source_images.stdout_lines }}"
   failed_when: true
