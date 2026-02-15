@@ -7,8 +7,8 @@
   ansible.builtin.shell: |
     set -o pipefail
     kubectl kustomize {{ kustomize_dir }} > {{ kustomize_dir }}/out.yaml
-    cat /tmp/ansible.bdleh2pc_template_remote/out.yaml |  yq -r 'select(.metadata.name == "longhorn-manager") | select(.kind == "DaemonSet") | .spec.template.spec.containers[] | select(.name == "longhorn-manager") | .command[] ' | grep "/" | grep :
-    cat /tmp/ansible.bdleh2pc_template_remote/out.yaml |  yq -r 'select(.metadata.name == "longhorn-manager") | select(.kind == "DaemonSet") | .spec.template.spec.containers[] | select(.name == "longhorn-manager") | .command[] ' | grep "/"
+    cat {{ kustomize_dir }}/out.yaml |yq -r 'select(.metadata.name == "longhorn-manager")|select(.kind == "DaemonSet")|.spec.template.spec.containers[] |select(.name == "longhorn-manager") |.command[] ' |grep "/" |grep :
+    cat {{ kustomize_dir }}/out.yaml |yq -r 'select(.metadata.name == "longhorn-driver-deployer")|.spec.template.spec.containers[]|select(.name == "longhorn-driver-deployer") |.env[] |select(.name|endswith("IMAGE")) |.value'
   register: source_images
   failed_when: source_images.rc > 1
   changed_when: false
