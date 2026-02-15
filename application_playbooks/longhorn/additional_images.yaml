@@ -39,7 +39,7 @@
         'tag': item.split(':') | last,
         'section': registry_path,
         'type': 'fetch',
-        'source': item
+        'source': (item.rsplit(':', 1) | first)
       } ] }}"
   loop: "{{ source_images.stdout_lines }}"
 

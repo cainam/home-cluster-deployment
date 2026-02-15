@@ -47,7 +47,6 @@
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
          'name': application.key,
-         'DELMEimages': images_info if images_info is defined else omit,
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
