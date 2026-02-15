@@ -23,7 +23,7 @@
           'tag': img.split(':')[-1],
           'section': registry_path,
           'type': 'fetch',
-          'source': item
+          'source': img
         }) %}
       {% endfor %}
       {{ results }}
