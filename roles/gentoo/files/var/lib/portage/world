@@ -49,3 +49,4 @@ app-misc/tmux
 sys-block/open-iscsi
 
 net-misc/chrony
+app-admin/ansible-molecule
