@@ -42,6 +42,7 @@ Notes:
 - remove claimRef to free PV: kubectl patch pv keycloak -p '{"spec":{"claimRef": null}}'
 - some variables are not part of the git repo, secrets which one has to define additionally like wifi WEP
 - gentoo_build and gentoo_binhost are usually assigned to the same host, but in case of recovery having two variables allows to disable build while configuring another available host as binhost
+- replace github token: set variable $newtoken and run `find /data/mine -name config | while read cfg; do sed  -E "s|(https://Andi:)[^@]+(@.*)|\1$newtoken\2|" -i  $cfg; done`
 
 Manage Registry:
 - remove from registry: # list_images.sh | grep keycloak | grep 19 | awk '{print $2" "$5}' | xargs delete_image.sh
