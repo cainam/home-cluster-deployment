@@ -6,6 +6,7 @@
     I=$(
     cat longhorn.yaml |yq -r 'select(.metadata.name == "longhorn-manager")|select(.kind == "DaemonSet")|.spec.template.spec.containers[] |select(.name == "longhorn-manager") |.command[] ' |grep "/" |grep :
     cat longhorn.yaml |yq -r 'select(.metadata.name == "longhorn-driver-deployer")|.spec.template.spec.containers[]|select(.name == "longhorn-driver-deployer") |.env[] |select(.name|endswith("IMAGE")) |.value'
+    cat longhorn.yaml |yq -r 'select(.metadata.name == "longhorn-ui")|select(.kind == "Deployment")|.spec.template.spec.containers[] |select(.name == "longhorn-ui") |.image'
     )
     for i in ${I}; do
       sed -i -e "s#$i#{{ registry_path }}/"$(basename "$i")"#g" longhorn.yaml
