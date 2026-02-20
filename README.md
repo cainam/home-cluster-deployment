@@ -158,5 +158,42 @@ TODO:
 - check to use different /etc/portage between builder deploys and image-root deploys
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
+- longhorn: include engine upgrade in playbook
 - regression tests: implement continuous testing of the features to detect regressions
   - molucule image
+  - run as podman run -it \
+  -v /run/user/1000/podman/podman.sock:/run/podman/podman.sock:Z \
+  -e CONTAINER_HOST=unix:///run/podman/podman.sock \
+  -v $(pwd):/tmp/project:Z \
+  -w /tmp/project \
+  my-molecule-image molecule test
+  - local command so far: MOLECULE_FILE=/data/mine/home-cluster-deployment/molecule.yaml  MOLECULE_SCENARIO_NAME=test_directory_sync  molecule --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync 
+  - if container works, remove it from world
+  - ACCEPT_KEYWORDS="~arm64" maybe globally?
+  - molecule in container:  podman run -it --env USER=root --workdir $PWD/roles/shared_helper --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260211 /py_env/bin/python -m molecule --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
+
+
+envoy changes in build:
+fake_python changed
+WORKSPACE + BUILD changed
+--action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake
+luajit options added in command line
+tools/cmake override + command line option
+remove the MUSL_EXT and test which module requires them
+
+
+k8s-4: orphaned procs commands
+k8s-4-int ~ # grep -iE "error|fail|2687096" /var/log/crio/crio.log | grep -v -e /etc/group: -e /etc/passwd
+time="2026-02-19T08:37:25.482744972+01:00" level=warning msg="Stdout copy error: read /dev/ptmx: input/output error"
+time="2026-02-19T08:38:07.734144702+01:00" level=error msg="Killing container e063a32ea2246e071894ad03dd7f1135a0f2d69ec12f0cf0a59f82f403a2b741 failed: `/bin/crun --root /run/crun kill e063a32ea2246e071894ad03dd7f1135a0f2d69ec12f0cf0a59f82f403a2b741 KILL` failed: process not running: No such process\n : exit status 1" id=c0fe7a74-882f-437c-bfee-a51e2dcc4211 name=/runtime.v1.RuntimeService/StopContainer
+time="2026-02-19T09:24:43.135734027+01:00" level=warning msg="Stdout copy error: read /dev/ptmx: input/output error"
+
+:k8s-4-int ~ #  for ns in $(ip netns list | cut -d' ' -f1); do   echo "Checking namespace: $ns";   ip netns exec "$ns" netstat -tulpn | grep :9502; done
+Checking namespace: 3dd150a1-3571-4770-ab78-8b947fe280b5
+tcp        0      0 0.0.0.0:9502            0.0.0.0:*               LISTEN      2687096/longhorn-ma
+
+k8s-4-int ~ #  ps -o pid,ppid,stat,comm -p 2687096
+    PID    PPID STAT COMMAND
+2687096 2687094 Ssl  longhorn-manage
+
+
