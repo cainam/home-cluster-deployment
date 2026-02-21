@@ -239,15 +239,18 @@ images:
   - python3
   type: gentoo-image-builder
   build:
-    packages: app-admin/ansible-molecule app-containers/podman sys-apps/shadow sys-apps/acl sys-apps/attr
+    packages: app-admin/ansible-molecule app-containers/podman sys-apps/shadow sys-apps/acl sys-apps/attr sys-apps/shadow
     configure_builder: |
       echo 'ACCEPT_KEYWORDS="~arm64"' >> /etc/portage/make.conf
       echo "net-firewall/iptables nftables" >> /etc/portage/package.use/iptables
+      emerge dev-libs/glib
     configure_rootfs_build: |
       VIRTUAL_ENV=/py_env
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
       pip install --no-cache-dir molecule-plugins[podman]
       mv "$VIRTUAL_ENV" ${ROOT}/"$VIRTUAL_ENV"
+      find ${ROOT}/etc
+      export LD_LIBRARY_PATH=$ROOT/usr/lib
     finish_rootfs_build: cp /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgomp.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 ${ROOT}/usr/lib
 
 - name: ha-base
@@ -418,22 +421,39 @@ images:
       sed -i '/PATH/d' .bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
       sed -i -e '/ip_range_matc/d' bazel/extension_config/extensions_build_config.bzl
-      sed -e '/istio_stats/d' -e '/workload_discovery/d' -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e '/envoy_cc_binary(/,/^)/d' -i BUILD 
-      sed -i -e '/metadata/d' BUILD
+      #sed -e '/istio_stats/d' -e '/workload_discovery/d' -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e '/envoy_cc_binary(/,/^)/d' -i BUILD 
+      sed -i -e '/istio_stats/d' -e '/workload_discovery/d' -e '/metadata/d' BUILD
       #echo -e '#include "source/exe/main_common.h"\nextern "C" {\nconst char build_scm_revision[] = "'$(git rev-parse HEAD)'"\nconst char build_scm_status[] = "clean";\n}\nint main(int argc, char** argv) {return Envoy::MainCommon::main(argc, argv);}' > main.cc
-      echo -e '#include "source/exe/main_common.h"\n\nint main(int argc, char** argv) {return Envoy::MainCommon::main(argc, argv);}' > main.cc
-      echo -e 'extern const char build_scm_revision[];\nextern const char build_scm_status[];\n\nconst char build_scm_revision[] = "'$(git rev-parse HEAD)'";\nconst char build_scm_status[] = "Modified";\n' > envoy_version_stub.cc
-      cat envoy_version_stub.cc
-      ln -s $PWD /proxy
-      MUSL_EXT=(
-       --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
-       --copt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
-       --copt="-Dstrtod_l(s,p,l)=strtod(s,p)"
-       --cxxopt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
-       --cxxopt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
-       --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
+      #echo -e '#include "source/exe/main_common.h"\n\nint main(int argc, char** argv) {return Envoy::MainCommon::main(argc, argv);}' > main.cc
+      #echo -e 'extern const char build_scm_revision[];\nextern const char build_scm_status[];\n\nconst char build_scm_revision[] = "'$(git rev-parse HEAD)'";\nconst char build_scm_status[] = "Modified";\n' > envoy_version_stub.cc
+      #cat envoy_version_stub.cc
+      mkdir tools/cmake
+      echo 'load("@rules_foreign_cc//toolchains/native_tools:native_tools_toolchain.bzl", "native_tool_toolchain")
+      native_tool_toolchain(
+        name = "gentoo_cmake_resource",
+        path = "/usr/bin/cmake",
+        visibility = ["//visibility:public"],
       )
-      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a '
+      
+      toolchain(
+        name = "my_cmake_toolchain",
+        exec_compatible_with = [
+          "@platforms//os:linux",
+          "@platforms//cpu:aarch64",  # Changed from x86_64 to aarch64
+        ],
+        toolchain = ":gentoo_cmake_resource",
+        toolchain_type = "@rules_foreign_cc//toolchains:cmake_toolchain",
+      )' > tools/cmake/BUILD
+      ln -s $PWD /proxy
+      #MUSL_EXT=(
+      # --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
+      # --copt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
+      # --copt="-Dstrtod_l(s,p,l)=strtod(s,p)"
+      # --cxxopt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
+      # --cxxopt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
+      # --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
+      #)
+      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a --define=contrib=disabled --define=dlb=disabled  --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include --incompatible_enable_cc_toolchain_resolution=false --extra_toolchains=//tools/cmake:my_cmake_toolchain --sandbox_debug --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 '
       until bazel --output_user_root=$PWD/../cache fetch ${bazel_options}   -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
       bazel  --output_user_root=$PWD/../cache build ${bazel_options}  "${MUSL_EXT[@]}" --stamp -- //:envoy
     finish_rootfs_build: |

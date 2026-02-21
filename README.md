@@ -179,7 +179,7 @@ WORKSPACE + BUILD changed
 --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake
 luajit options added in command line
 tools/cmake override + command line option
-remove the MUSL_EXT and test which module requires them
+remove the MUSL_EXT and replace by --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=1
 
 
 k8s-4: orphaned procs commands
@@ -187,10 +187,14 @@ k8s-4-int ~ # grep -iE "error|fail|2687096" /var/log/crio/crio.log | grep -v -e 
 time="2026-02-19T08:37:25.482744972+01:00" level=warning msg="Stdout copy error: read /dev/ptmx: input/output error"
 time="2026-02-19T08:38:07.734144702+01:00" level=error msg="Killing container e063a32ea2246e071894ad03dd7f1135a0f2d69ec12f0cf0a59f82f403a2b741 failed: `/bin/crun --root /run/crun kill e063a32ea2246e071894ad03dd7f1135a0f2d69ec12f0cf0a59f82f403a2b741 KILL` failed: process not running: No such process\n : exit status 1" id=c0fe7a74-882f-437c-bfee-a51e2dcc4211 name=/runtime.v1.RuntimeService/StopContainer
 time="2026-02-19T09:24:43.135734027+01:00" level=warning msg="Stdout copy error: read /dev/ptmx: input/output error"
-
 :k8s-4-int ~ #  for ns in $(ip netns list | cut -d' ' -f1); do   echo "Checking namespace: $ns";   ip netns exec "$ns" netstat -tulpn | grep :9502; done
 Checking namespace: 3dd150a1-3571-4770-ab78-8b947fe280b5
 tcp        0      0 0.0.0.0:9502            0.0.0.0:*               LISTEN      2687096/longhorn-ma
+"Error parsing metadata" in crio.log, only on node 4 after restart
+k8s-4-int ~ # cat /etc/crio/crio.conf.d/02-cgroup-manager.conf
+[crio]
+internal_wipe = false
+=> changed, system clened, lets etest
 
 k8s-4-int ~ #  ps -o pid,ppid,stat,comm -p 2687096
     PID    PPID STAT COMMAND
