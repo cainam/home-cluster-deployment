@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.6.6
+    version: v3.6.9
     installed:
       pattern: "traefik"
     latest:
@@ -54,7 +54,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2026.2.1"
+    version: "2026.2.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -71,13 +71,13 @@ software:
         arch: arm64
   postgresql:
     #version: 17.7
-    version: 18.1
+    version: 18.3
     latest:
       type: gentoo
       params:
         repo: dev-db/postgresql
   descheduler:
-    version: "v0.34.0"
+    version: "v0.35.0"
     latest:
       type: github
       params: 

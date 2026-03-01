@@ -175,11 +175,22 @@ TODO:
 
 envoy changes in build:
 fake_python changed
-WORKSPACE + BUILD changed
+WORKSPACE changed , BUILD just /d unwanted extensions
 --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake
 luajit options added in command line
 tools/cmake override + command line option
 remove the MUSL_EXT and replace by --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=1
+python + phython3  no longer links to python2exec but to python executable
+duplicate cel symbols at linking:
+repo_mapping = {
+    "@dev_cel": "@com_google_cel_spec",
+}
+=> fails, next attempt using --override_repository=dev_cel=/var/tmp/empty_dev_cel  with touch'd BUILD and WORKSPACE files
+issue:  ERROR: @toolchains_llvm//toolchain/config:compiler-rt :: Error loading option @toolchains_llvm//toolchain/config:compiler-rt: no such package '@@toolchains_llvm//toolchain/config': The repository '@@toolchains_llvm' could not be resolved: Repository '@@toolchains_llvm' is not defined:
+try: sed -i -e '/toolchains_llvm/d' envoy.bazelrc
+=> solution: remove llvm toolchain at the end completely
+
+
 
 
 k8s-4: orphaned procs commands
