@@ -108,22 +108,17 @@ images:
       git clone --depth 1 --single-branch -b "{{ software.traefik.version }}" https://github.com/traefik/traefik.git
       set -x
       cd traefik/webui
-      corepack enable
-      sed -i -e 's/^}$/,"optionalDependencies": {"@rollup\/rollup-linux-x64-musl": "4.9.5"}}/g' package.json
-      rm yarn.lock # ???
-      echo "Y" | yarn install
-      echo "Y" | yarn workspaces focus --all --production # to keep only production ready deps
-      ##npm install -D vitest@^4 @vitest/coverage-v8@^4
-      ##npm i
-      ##yarn install
-      #yarn build
+      cat buildx.Dockerfile | grep -v -e ^FROM -e ^EXPOSE -e ^$ -e WEBUI_DIR -e COPY | sed -e 's/RUN //g'  -e 's/ENV /export /g' -e 's/WORKDIR/cd/g' | sed -e "s/^\(corepack.*\)$/\1\nyarn config set supportedArchitectures --json '{\"os\": [\"linux\"], \"cpu\": [\"arm64\"], \"libc\": [\"musl\"]}'/" > buildx.sh 
+      bash -x buildx.sh
+      yarn build
       cd ..
-      #(go run ./cmd/internal/gen/ || true)
-      #(./script/code-gen.sh || true)
-      go generate
-      go build -ldflags "-w -s" ./cmd/traefik
+      bash -x -c "$(make -n | grep -A 99999 CGO)"
     finish_rootfs_build: |
-      mkdir -p "${ROOT}/bin" && cp -dp ./traefik "${ROOT}/bin"
+      mkdir -p "${ROOT}/bin" && cp -dp ./dist/linux/arm64/traefik "${ROOT}/bin" #&& mkdir -p  "${ROOT}/src" && cp -rdp /src/webui "${ROOT}/src/webui"
+      export PLUGIN_PATH=github.com/jamesmcroft/traefik-plugin-rewrite-response-headers
+      mkdir -p "${ROOT}/plugins-local/src/$(dirname $PLUGIN_PATH)"
+      cd "${ROOT}/plugins-local/src/$(dirname $PLUGIN_PATH)"
+      git clone --depth 1 --single-branch "https://${PLUGIN_PATH}.git"
 
 - name: oauth2-proxy
   section: auth
@@ -357,11 +352,6 @@ images:
       ./configure $CONFIGURE --enable-static --disable-shared --with-library-bits=64 --disable-samples --disable-tests # --disable-renaming
       make -j 3 && make install
       cd /var/tmp
-      curl -LO https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz
-      tar xfz liburing-2.12.tar.gz
-      cd liburing-liburing-2.12/ && ./configure $CONFIGURE && make && make install
-      #export CONFIGURE="$CONFIGURE --enable-shared=no --enable-static=yes --enable-pic=yes"
-      cd /var/tmp
       curl -OL https://github.com/libevent/libevent/releases/download/release-2.2.1-alpha/libevent-2.2.1-alpha-dev.tar.gz
       tar xfz libevent-2.2.1-alpha-dev.tar.gz
       cd libevent-2.2.1-alpha-dev; ./configure $CONFIGURE && make && make install
@@ -410,25 +400,19 @@ images:
   type: gentoo-image-builder
   build:
     configure_builder: |
-      # use build:libc++ --linkopt=-rtlib=compiler-rt and build:libc++ --linkopt=-unwindlib=libunwind instead of libunwind
       cd /var/tmp; rm -rf * /root/.cache
       export JAVA_HOME=/opt/zulu
       export PATH=$(stat --printf="%n" /usr/lib/llvm/*/bin):${JAVA_HOME}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      export CC=$(which clang)
       git clone --depth 1 --single-branch -b {{ software.istio.version }} https://github.com/istio/proxy.git; cd proxy
       echo "build --define tcmalloc=disabled # in .bazelrc" >> .bazelrc
-      ####
-      #### update this, today only jdk is valid anymore: cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/* .
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/tools/jdk/ tools
-      sed -i -e '/repo:http/r add-pt1.txt' -e '/url = /r add-pt2.txt' WORKSPACE
+      cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/add* .
+      sed  -e '/repo:http/r add-pt1.txt' -e '/sha256 = ENVOY_SHA256,/r add-pt2.txt' -e '/llvm/d' -i WORKSPACE
       sed -i '/PATH/d' .bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
-      #?? sed -i -e '/ip_range_matc/d' bazel/extension_config/extensions_build_config.bzl
-      #sed -e '/istio_stats/d' -e '/workload_discovery/d' -e '/^envoy_cc_binary/e cat add2BUILD.txt' -e '/envoy_cc_binary(/,/^)/d' -i BUILD 
-      sed -i -e '/istio_stats/d' -e '/workload_discovery/d' -e '/metadata/d' BUILD
-      #echo -e '#include "source/exe/main_common.h"\nextern "C" {\nconst char build_scm_revision[] = "'$(git rev-parse HEAD)'"\nconst char build_scm_status[] = "clean";\n}\nint main(int argc, char** argv) {return Envoy::MainCommon::main(argc, argv);}' > main.cc
-      #echo -e '#include "source/exe/main_common.h"\n\nint main(int argc, char** argv) {return Envoy::MainCommon::main(argc, argv);}' > main.cc
-      #echo -e 'extern const char build_scm_revision[];\nextern const char build_scm_status[];\n\nconst char build_scm_revision[] = "'$(git rev-parse HEAD)'";\nconst char build_scm_status[] = "Modified";\n' > envoy_version_stub.cc
-      #cat envoy_version_stub.cc
+      #sed -i -e '/istio_stats/d' -e '/workload_discovery/d' -e '/metadata/d' BUILD
+      sed -e '/BAZEL_DO_NOT_DETECT_CPP_TOOLCH/d' -i envoy.bazelrc
       mkdir tools/cmake
       echo -e 'load("@rules_foreign_cc//toolchains/native_tools:native_tools_toolchain.bzl", "native_tool_toolchain")\nnative_tool_toolchain(
         name = "gentoo_cmake_resource",
@@ -444,26 +428,15 @@ images:
         toolchain = ":gentoo_cmake_resource",
         toolchain_type = "@rules_foreign_cc//toolchains:cmake_toolchain",
       )' > tools/cmake/BUILD
-      ln -s $PWD /proxy
-      #MUSL_EXT=(
-      # --copt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
-      # --copt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
-      # --copt="-Dstrtod_l(s,p,l)=strtod(s,p)"
-      # --cxxopt="-Dstrtoll_l(s,p,b,l)=strtoll(s,p,b)"
-      # --cxxopt="-Dstrtoull_l(s,p,b,l)=strtoull(s,p,b)"
-      # --cxxopt="-Dstrtod_l(s,p,l)=strtod(s,p)"
-      #)
-      #bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a --define=contrib=disabled --define=dlb=disabled  --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include --incompatible_enable_cc_toolchain_resolution=false --extra_toolchains=//tools/cmake:my_cmake_toolchain --sandbox_debug --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 '
-      bazel_options='--python_path=/usr/bin/python3.13  --verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter --linkopt=-nostdlib++ --host_linkopt=-nostdlib++  --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a --define=contrib=disabled --define=dlb=disabled  --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include --incompatible_enable_cc_toolchain_resolution=false --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --cxxopt=-Wno-error=nontrivial-memcall'
-      bazel_options='  --verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a   --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include  --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --cxxopt=-Wno-error=nontrivial-memcall '
-      #until bazel --output_user_root=$PWD/../cache fetch ${bazel_options}   -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
-      #bazel  --output_user_root=$PWD/../cache build ${bazel_options} --stamp -- //:envoy
-      bazel  --output_user_root=$PWD/../cache build ${bazel_options} --stamp --subcommands --toolchain_resolution_debug --verbose_failures  --announce_rc    --incompatible_enable_cc_toolchain_resolution=true    --@rules_python//python/config_settings:py_linux_libc=musl --@rules_python//python/config_settings:py_freethreaded=no --cxxopt=--stdlib=libc++ --host_cxxopt=--stdlib=libc++ --linkopt=-lc++ --linkopt=-lc++abi --host_cxxopt=--stdlib=libc++ --host_linkopt=-lc++ --host_linkopt=-lc++abi --override_repository=dev_cel=external/com_google_cel_spec -- //:envoy
+      #bazel_options='--verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a   --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include  --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --cxxopt=-Wno-error=nontrivial-memcall  --stamp --subcommands --toolchain_resolution_debug --verbose_failures  --announce_rc    --incompatible_enable_cc_toolchain_resolution=true    --@rules_python//python/config_settings:py_linux_libc=musl --@rules_python//python/config_settings:py_freethreaded=no --cxxopt=--stdlib=libc++ --host_cxxopt=--stdlib=libc++ --linkopt=-lc++ --linkopt=-lc++abi --host_cxxopt=--stdlib=libc++ --host_linkopt=-lc++ --host_linkopt=-lc++abi '
+      #bazel_options='--verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH'  --action_env=JAVA_HOME=/opt/zulu  --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error  --cxxopt=-Wno-error --copt=-Wno-unused-parameter --cxxopt=-Wno-unused-parameter  --cxxopt=-Wno-error=unused-parameter   --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a   --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include  --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-I/usr/local/include --cxxopt=-I/usr/local/include --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --cxxopt=-Wno-error=nontrivial-memcall  --stamp --subcommands --announce_rc --incompatible_enable_cc_toolchain_resolution=true    --cxxopt=--stdlib=libc++ --host_cxxopt=--stdlib=libc++ --linkopt=-lc++ --linkopt=-lc++abi --host_cxxopt=--stdlib=libc++ --host_linkopt=-lc++ --host_linkopt=-lc++abi '
+      #bazel_options='--verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH' --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --features=-generate_gdb_index --host_features=-generate_gdb_index --copt=-Wno-error --cxxopt=-Wno-error=unused-parameter   --define=musl=true --host_linkopt=-rtlib=compiler-rt --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a   --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include  --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --stamp --subcommands --announce_rc --incompatible_enable_cc_toolchain_resolution=true    --cxxopt=--stdlib=libc++ --host_cxxopt=--stdlib=libc++ --linkopt=-lc++ --linkopt=-lc++abi --host_cxxopt=--stdlib=libc++ --host_linkopt=-lc++ --host_linkopt=-lc++abi '
+      bazel_options='--verbose_failures --strip=always --config=release --toolchain_resolution_debug=1 --copt=-Wno-error --java_runtime_version=local_jdk --tool_java_runtime_version=local_jdk --action_env=PATH='$PATH' --copt=-I/usr/local/include --copt=-Wno-sign-compare --copt=-Wno-error=deprecated-literal-operator --copt=-Wno-error=sign-compare --copt=-Wno-error=nullability-completeness --copt=-Wno-error --linkopt=-Wl,--no-gdb-index --host_linkopt=-static --linkopt=-static --host_linkopt=-Wl,--no-gdb-index --host_linkopt=-fuse-ld=lld --linkopt=-fuse-ld=bfd --copt=-Wno-error --cxxopt=-Wno-error=unused-parameter --define=musl=true --host_linkopt=/usr/lib/libc.a  --linkopt=/usr/local/lib/libicui18n.a   --linkopt=/usr/local/lib/libicuuc.a --linkopt=/usr/local/lib/libicudata.a   --action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake --define=lua=enabled --define=luajit=system --action_env=LUAJIT_LIB=/usr/local/lib   --action_env=LUAJIT_INCLUDE=/usr/local/include  --extra_toolchains=//tools/cmake:my_cmake_toolchain  --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=0 --copt=-Wno-error=nontrivial-memcall --stamp --subcommands --announce_rc --incompatible_enable_cc_toolchain_resolution=true    --cxxopt=--stdlib=libc++ --host_cxxopt=--stdlib=libc++ --linkopt=-lc++ --linkopt=-lc++abi --host_cxxopt=--stdlib=libc++ --host_linkopt=-lc++ --host_linkopt=-lc++abi '
+      until bazel --output_user_root=$PWD/../cache fetch ${bazel_options}   -- //:envoy; do echo "retry in some seconds..."; sleep 5; done
+      bazel  --output_user_root=$PWD/../cache build ${bazel_options} -- //:envoy
     finish_rootfs_build: |
       strip bazel-bin/envoy
       cp -dp bazel-bin/envoy  ${ROOT}/usr/local/bin/
-      # cp /lib/libc++.so.* /lib/libc++abi.so.*  /lib/libicudata.so.* /usr/lib/gcc/aarch64-unknown-linux-musl/*/lib* ${ROOT}/usr/local/lib/ || true
-      #cp -dp /lib/libicudata.so.* /usr/lib/libicuuc* ${ROOT}/usr/local/lib/ || true
 
 - name: bazel7
   section: local
@@ -495,7 +468,6 @@ images:
      
       BAZEL_DEV_VERSION_OVERRIDE="${bazel_version}"  EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
       mkdir -p $ROOT/usr/local/bin 
-      find /usr -name "libgcc_s.so.*"
       cp -dp /bazel/output/bazel /usr/local/bin/
  
 - name: auth-operator

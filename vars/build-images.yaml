@@ -6,9 +6,7 @@ builder:
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened
   stage3_date: 20260201T231555Z
-  stage3_dateX: 20260112T121559Z
-  portage: 20260211
-  portageX: 20260112
+  portage: 20260305
   portage_container: "portage"
   image_root: /image-root
   env: |

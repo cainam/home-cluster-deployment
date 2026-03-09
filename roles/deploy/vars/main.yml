@@ -7,17 +7,8 @@ applications:
       - flannel-cni-plugin
   gateway:
     traefik:
-      network: true
-      kustom:
-        ports:
-          traefik: 13579
       images:
       - traefik
-      storage:
-      - name: traefik-plugins
-        size: 5Mi
-        type: local_folder
-        config: true
   istio-system:
     istiod-config:
     istiod:
@@ -28,10 +19,6 @@ applications:
     hydra:
       images:
       - hydra
-      requires:
-      - type: default
-        name: hydra-config
-        namespace: auth
       storage:
       - name: hydra
         size: 5Mi 
@@ -126,20 +113,6 @@ applications:
       - descheduler
   longhorn-system:
     longhorn:
-      images:
-      - longhorn-manager
-      - livenessprobe
-      - backing-image-manager
-      - csi-attacher
-      - csi-node-driver-registrar
-      - csi-provisioner
-      - csi-resizer
-      - csi-snapshotter
-      - longhorn-engine
-      - longhorn-instance-manager
-      - longhorn-share-manager
-      - longhorn-ui
-      - support-bundle-kit
       network:
         svcName: longhorn-frontend
         prefix: /longhorn

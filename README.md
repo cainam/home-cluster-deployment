@@ -147,7 +147,6 @@ TODO:
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on gateway (traefik+istio log access to file => OpenTelemetry collector => Loki ) => see Security.md
-- image-builder: find solution to build envoy (JDK and bazel binary mandate JDK, how does alpine solve it?) 
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
@@ -157,7 +156,6 @@ TODO:
 - try to create modules for Ansible: kustom, gateway, dependencies, upgrades (e.g. postgresql), code (infopage/auth-operator)
 - check to use different /etc/portage between builder deploys and image-root deploys
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
-- traefik dashboard not accessible, webui is not compiled, yarn build:prod is missing in build, issue with command yarn build:prod, yarn install needs to run (maybe as very first?" to pull rollup musl
 - longhorn: include engine upgrade in playbook
 - regression tests: implement continuous testing of the features to detect regressions
   - molucule image
@@ -171,27 +169,6 @@ TODO:
   - if container works, remove it from world
   - ACCEPT_KEYWORDS="~arm64" maybe globally?
   - molecule in container:  podman run -it --env USER=root --workdir $PWD/roles/shared_helper --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260211 /py_env/bin/python -m molecule --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
-
-
-envoy changes in build:
-fake_python changed
-WORKSPACE changed , BUILD just /d unwanted extensions
---action_env=CMAKE=/usr/bin/cmake --repo_env=CMAKE=/usr/bin/cmake
-luajit options added in command line
-tools/cmake override + command line option
-remove the MUSL_EXT and replace by --copt=-DFLATBUFFERS_LOCALE_INDEPENDENT=1
-python + phython3  no longer links to python2exec but to python executable
-duplicate cel symbols at linking:
-repo_mapping = {
-    "@dev_cel": "@com_google_cel_spec",
-}
-=> fails, next attempt using --override_repository=dev_cel=/var/tmp/empty_dev_cel  with touch'd BUILD and WORKSPACE files
-issue:  ERROR: @toolchains_llvm//toolchain/config:compiler-rt :: Error loading option @toolchains_llvm//toolchain/config:compiler-rt: no such package '@@toolchains_llvm//toolchain/config': The repository '@@toolchains_llvm' could not be resolved: Repository '@@toolchains_llvm' is not defined:
-try: sed -i -e '/toolchains_llvm/d' envoy.bazelrc
-=> solution: remove llvm toolchain at the end completely
-
-
-
 
 k8s-4: orphaned procs commands
 k8s-4-int ~ # grep -iE "error|fail|2687096" /var/log/crio/crio.log | grep -v -e /etc/group: -e /etc/passwd
@@ -210,5 +187,4 @@ internal_wipe = false
 k8s-4-int ~ #  ps -o pid,ppid,stat,comm -p 2687096
     PID    PPID STAT COMMAND
 2687096 2687094 Ssl  longhorn-manage
-
 
