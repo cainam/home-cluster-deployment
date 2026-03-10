@@ -6,7 +6,6 @@
       bricks: "{{ gluster_directory }}/bricks/{{ app }}/{{ storage.name }}"
       force: yes
       replicas: "{{ replicas }}"
-      # directory: /data
       options:
         {
           cluster.quorum-type: 'fixed',

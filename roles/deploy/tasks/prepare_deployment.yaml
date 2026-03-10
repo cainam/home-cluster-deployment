@@ -15,12 +15,7 @@
               'namespace': item.namespace
                 if item.namespace is defined
                 else (
-                  apps
-                  | dict2items
-                  | selectattr('value', 'defined')
-                  | selectattr('value', 'contains', item.gateway)
-                  | map(attribute='key')
-                  | first
+                  apps | dict2items | selectattr('value', 'defined') | selectattr('value', 'contains', item.gateway) | map(attribute='key') | first
                 )
             })
           ]
@@ -92,17 +87,16 @@
          'namespace': my_route.namespace
          } }}
       rq: "{{ (app.requires|default([])|list)+[my_gw_rq] }}"
-      # network_defaults is assigned in each loop to have new random values
+      storage_new: "{{ (app.storage | default([])) | map('combine', { 'type': default_storage_type }) | list }}"
       security:
         runAsUser: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
-        runAsGroup: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
-        fsGroup: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
+        runAsGroup: "{{ applicationSecurity[app.name].runAsGroup | default(2147483647|random(65536)) }}"
+        fsGroup: "{{ applicationSecurity[app.name].fsGroup | default(2147483647|random(65536)) }}"
         directoryMode: "{{ applicationSecurity[app.name].directoryMode | default('700') }}"
         fileMode: "{{ applicationSecurity[app.name].fileMode| default('600') }}"
       network_defaults:
         rewrite: "/"
         svcPort: "{{ 65536|random(1024) }}"
-        podPort: "{{ 65536|random(1024) }}"
         svcName: "{{ app.name }}"
         prefix: "{{ '/'~app.name}}"
         domain: "{{ my_dom  }}"
@@ -115,7 +109,7 @@
           {{ domain_list }}
       networkAsDict: "{{ (app.network is defined and app.network is boolean) | ternary({}, (app.network if app.network is defined else {})) }}"
       network: "{{ network_defaults | combine(networkAsDict, recursive=true) }}"
-      new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]) }, recursive=true) }}"
+      new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]), 'storage': storage_new }, recursive=true) }}"
     set_fact:
       app_list: "{{ app_list+[new_entry] }}"
     loop: "{{ org_list }}"

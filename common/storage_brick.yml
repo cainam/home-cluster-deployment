@@ -7,8 +7,6 @@
   - name: app:{{ app }} ensure bricks for gluster
     shell: |
       set -e;
-      # exit if gluster volume exists already, better: do it upfront and outside
-      #gluster vol list | grep "^{{ storage.name }}$" && exit
       echo "brick: {{ brick }}\ndisk: {{ disk }}"
       if [ ! -f "{{ disk }}" ]; then
         mkdir -p "{{ gluster_directory }}/disks"
@@ -24,25 +22,4 @@
   - name: show brick and disk
     debug:
       msg: "brick: {{ brick }} disk: {{disk}}"
-  
   when: storage.type == 'gluster'
-
-- block:
-  - name: app:{{ app }} create local disk storage
-    shell: |
-      set -e;
-      if [ ! -f "{{ local_disk_directory }}/{{ storage.name }}.disk" ]; then
-        truncate -s "{{ storage.size }}B" "{{ local_disk_directory }}/{{ storage.name }}.disk"
-        mkfs.ext4 "{{ local_disk_directory }}/{{ storage.name }}.disk";
-      fi
-      [ ! -d "{{ storage.mountpoint }}" ] && mkdir -p "{{ storage.mountpoint }}";
-      mountpoint -q "{{ storage.mountpoint }}" || mount "{{ local_disk_directory }}/{{ storage.name }}.disk" "{{ storage.mountpoint }}"
-      mount --make-shared "{{ storage.mountpoint }}"
-  when: storage.type=='local-XXX'
-
-- name: app:{{ app }} create local folder
-  file:
-    path: "{{ local_disk_directory }}/{{ storage.name }}"
-    state: directory
-    mode: "u=rwx,g=rx,o=rx"
-  when: storage.type=='local_folder'

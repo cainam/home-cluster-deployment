@@ -69,9 +69,16 @@ software:
       params:
         repo: library/registry
         arch: arm64
+  kubernetes:
+    version: 1.35.0
+    max_entries: 3
+    latest:
+      type: gentoo
+      params:
+        repo: sys-cluster/kubeadm
   postgresql:
-    #version: 17.7
     version: 18.3
+    max_entries: 4
     latest:
       type: gentoo
       params:

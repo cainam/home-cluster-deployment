@@ -89,7 +89,7 @@ def software(name):
         vers = requests.get("https://api.github.com/repos/"+sw["software"][item]["latest"]["params"]["repo"]+"/tags") # | jq .tag_name
         vers.raise_for_status()
         raw += "\n  github version: "+str([item["name"] for item in vers.json()])
-        versions = [item["name"] for item in vers.json()][:max]
+        versions = [item["name"] for item in vers.json()]
       except requests.exceptions.HTTPError as exc:
         versions = ["error while fetching information: "+str(exc.response.status_code)]
         raw += "\n error while fetching information: "+str(exc.response.status_code)
@@ -132,7 +132,6 @@ def software(name):
         name = v["name"]
         if name[0:6] != "latest" and name.split("-")[0] in vspec:
           versions.append(name)
-      versions = versions[:max]
 
     elif sw["software"][item]["latest"]["type"] == "gentoo":
       try:
@@ -152,6 +151,6 @@ def software(name):
     else:
       versions = ["unknown type"]
 
-    content_item.append(versions)
+    content_item.append(versions[:max])
     return raw, content_item
 
