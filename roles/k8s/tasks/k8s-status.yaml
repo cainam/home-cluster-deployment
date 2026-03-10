@@ -10,13 +10,10 @@
   failed_when: false
   register: current_k8s_version
 
-- name: re-set k8s version
-  set_fact:
-    current_k8s_version: "{{ current_k8s_version.stdout }}"
-    
-- name: set k8s_upgrade to false
+- name: set k8s_upgrade to false and current_k8s_version
   set_fact:
     k8s_upgrade: false
+    current_k8s_version: "{{ current_k8s_version.stdout }}"
 
 - name: set k8s_upgrade to true if version is lower than new version
   set_fact:
@@ -28,16 +25,12 @@
     path: "{{ k8s_check_file }}"
   register: etc_k8s
 
-- name: dbg etc_k8s + livez
-  debug:
-    msg: "etc:{{ etc_k8s.stat.exists }} livez:{{ livez.rc }}"
-
 - name: re-set etc_k8s and kubernetes healthy flag
   set_fact:
     k8s_installed: "{{ etc_k8s.stat.exists }}"
     k8s_healthy: true
 
-- block: # this block is to look through the hostvars and see if the nodes are healthy on which a k8s configuration exists
+- block: # set k8s_healthy to false if not is installed but not livez
   - name: check if k8s operation possible
     debug: 
       msg: "k8s operation not possible, cluster is not stable"
@@ -45,24 +38,13 @@
   - name: set unhealthy
     set_fact: 
       k8s_healthy: false
-    #delegate_to: "{{ item }}"
-    #delegate_facts: true
-    #loop: "{{ groups['all'] }}"
   when: k8s_installed and livez.rc != 0
 
 - name: set k8s_exists
   set_fact: 
     k8s_init_done: "{{ groups.all | map('extract',hostvars,'k8s_installed') | or_array }}"
 
-#- vars:
-#    candis: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane')| selectattr('k8s_healthy', 'eq', True)  | map(attribute='ansible_facts') |map(attribute='fqdn')| shuffle) }}"
-#  set_fact: # highlight
-#    #healthy_node: "{{ (groups.all | map('extract', hostvars) | selectattr('k8s_installed', 'eq', True)  | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') 
-#    #                   | selectattr('k8s_healthy', 'eq', True)  | map(attribute='ansible_facts') |map(attribute='fqdn')| shuffle)[0] | default(omit) }}"
-#
-#  run_once: true
-#  when: k8s_init_done
-- name: Set healthy_node
+- name: set healthy_node to a control_plane node
   set_fact:
     healthy_node: "{{ candis | first }}"
   vars:
@@ -77,6 +59,7 @@
                 | map(attribute='fqdn', default=omit)
                 | select('defined')
                 | list | shuffle }}"
+  run_once: true
   when: candis | default([]) | length > 0
 
 - name: check result

@@ -38,12 +38,10 @@
     dest: "{{ kubelet_config }}"
 
 - name: get etcd image
-  #shell:  kubectl get pod -n kube-system etcd-{{ healthy_node }}  -o yaml -o jsonpath='{.spec.containers[?(@.name=="etcd")].image}'
   shell:  "kubeadm config images list --kubernetes-version {{ current_k8s_version if current_k8s_version else k8s_version }} --image-repository {{ registry }}/{{ kubernetes_image_section }} | grep /etcd:"
   register: shell_etcd_image
   run_once: true
   delegate_to: "{{ selected_host }}"
-  #when: healthy_node is defined
 
 - name: kubernetes static manifests
   vars:
@@ -149,14 +147,20 @@
   - name: taint to allow master nodes to run pods
     shell: kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- || true
 
-  - name: ca template
-    template:
-      src: ca
-      dest: /tmp/myca
-
   - name: create CA configmap
     shell: |
-      kubectl apply -f /tmp/myca
+      kubectl apply -f -<<EOF
+      kind: ConfigMap
+      apiVersion: v1
+      metadata:
+        name: myca
+        namespace: default
+      data:
+      {% for f in local_ca_files %}
+        {{ f }}: |
+            {{ lookup('file', system_local_certs+"/"+f) | indent( width=6, first=False) }}
+      {% endfor %}
+      EOF
 
   - name: coredns configmap template
     template:
@@ -184,5 +188,68 @@
       volumeBindingMode: WaitForFirstConsumer
       EOF
       kubectl patch storageclass local -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+  - name: create kube config with limited privileges
+    shell: |
+      cd /tmp
+      kubectl delete csr limited-csr || true
+      openssl genrsa -out limited.key 2048
+      openssl req -new -key limited.key -out limited.csr -subj "/CN=limited/O=ops-group"
+      kubectl apply -f -<<EOF
+      apiVersion: certificates.k8s.io/v1
+      kind: CertificateSigningRequest
+      metadata:
+        name: limited-csr
+      spec:
+        request: $(cat limited.csr | base64 | tr -d '\n')
+        signerName: kubernetes.io/kube-apiserver-client
+        usages:
+        - client auth
+      EOF
+      sleep 5
+      kubectl certificate approve limited-csr
+      sleep 5
+      kubectl get csr limited-csr -o jsonpath='{.status.certificate}' | base64 --decode > limited.crt
+      kubectl apply -f -<<EOF
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: global-pod-reader
+      rules:
+      - apiGroups: [""] # The core API group
+        resources: ["pods"]
+        verbs: ["get", "list", "watch"]
+      EOF
+      kubectl apply -f -<<EOF
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: read-all-pods-global
+      subjects:
+      - kind: User
+        name: limited
+        apiGroup: rbac.authorization.k8s.io
+      roleRef:
+        kind: ClusterRole
+        name: global-pod-reader
+        apiGroup: rbac.authorization.k8s.io
+      EOF
+      kubectl config set-cluster my-cluster --server=https://{{ controlPlaneEndpoint }} --certificate-authority=/etc/kubernetes/pki/ca.crt --embed-certs=true --kubeconfig=limited.conf
+      kubectl config set-credentials limited --client-certificate=limited.crt --client-key=limited.key --embed-certs=true --kubeconfig=limited.conf
+      kubectl config set-context limited --cluster=my-cluster --user=limited --namespace=default --kubeconfig=limited.conf
+      kubectl config use-context limited --kubeconfig=limited.conf
+  - name: read kube config for worker
+    ansible.builtin.slurp:
+      src: "/tmp/limited.conf"
+    register: kube_config_limited
+    delegate_to: "{{ healthy_node }}"
+    run_once: true
   when: inventory_hostname == healthy_node # to ensure this is executed on a healthy node only
      
+- block:
+  - name: deploy kube config to worker
+    ansible.builtin.copy:
+      content: "{{ kube_config_limited.content|b64decode }}"
+      dest: "/etc/kubernetes/limited.conf"
+      mode: "0644"
+  when: inventory_hostname in worker

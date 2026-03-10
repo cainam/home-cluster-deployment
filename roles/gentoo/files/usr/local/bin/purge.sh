@@ -5,6 +5,7 @@ exec 2>&1
 exec 1>> /var/log/${my_name}.log
 
 . /usr/local/bin/set_env.sh
+export  KUBECONFIG=/etc/kubernetes/limited.conf  
 
 # cleanup build directories
 if [ ! -z "${build_dir}" -a "${build_dir}" != "/" ]; then
@@ -29,7 +30,7 @@ podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${regis
   #id=$(echo "${image_with_id}" | cut -d : -f 3)
   echo "${image}" | grep -Eq "${protected_images}" && continue
   # this sadly deletes images in the making by podman build: echo "${image}" | grep -Eq "<none>:<none>$" && (echo "delete $image"; podman image rm "${id}") && continue
-  #echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm -f "$image")
+  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image") #; podman image rm -f "$image")
 done
 
 # registry garbage collect
