@@ -249,7 +249,7 @@
 - block:
   - name: deploy kube config to worker
     ansible.builtin.copy:
-      content: "{{ kube_config_limited.content|b64decode }}"
+      content: "{{ hostvars[healthy_node].kube_config_limited.content|b64decode }}"
       dest: "/etc/kubernetes/limited.conf"
       mode: "0644"
-  when: inventory_hostname in worker
+  #äwhen: inventory_hostname in worker

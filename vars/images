@@ -409,7 +409,7 @@ images:
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/tools/jdk/ tools
       cp -rv /bazel-build-for-envoy/compile-bazel-with-gentoo-musl-on-aarch64/bazel/add* .
       sed  -e '/repo:http/r add-pt1.txt' -e '/sha256 = ENVOY_SHA256,/r add-pt2.txt' -e '/llvm/d' -i WORKSPACE
-      sed -i '/PATH/d' .bazelrc
+      # sed -i '/PATH/d' .bazelrc
       sed -e '/googleurl/d' -i envoy.bazelrc
       sed -e '/BAZEL_DO_NOT_DETECT_CPP_TOOLCH/d' -i envoy.bazelrc
       mkdir tools/cmake

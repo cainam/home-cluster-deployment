@@ -7,10 +7,12 @@ exec 1>> /var/log/${my_name}.log
 . /usr/local/bin/set_env.sh
 export  KUBECONFIG=/etc/kubernetes/limited.conf  
 
+echo "startup ($(date +'%Y-%m-%d %H:%M:%S'))"
+
 # cleanup build directories
 if [ ! -z "${build_dir}" -a "${build_dir}" != "/" ]; then
   find "${build_dir}"/ -type f -mtime +${age_before_purge} -print # -delete if ok
-  find "${build_dir}"/ -type d -empty -print # -delete if ok
+  find "${build_dir}"/ -type d -empty -print -delete 
 fi
 
 # gentoo files for image building
