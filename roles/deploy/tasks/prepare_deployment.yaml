@@ -87,7 +87,13 @@
          'namespace': my_route.namespace
          } }}
       rq: "{{ (app.requires|default([])|list)+[my_gw_rq] }}"
-      storage_new: "{{ (app.storage | default([])) | map('combine', { 'type': default_storage_type }) | list }}"
+      xxstorage_new: "{{ (app.storage | default([])) | map('combine', { 'type': default_storage_type }) | list }}"
+      storage_new: |
+        {%- set updated_list = [] -%}
+        {%- for item in (app.storage | default([])) -%}
+          {%- set _ = updated_list.append({'type': default_storage_type} | combine(item)) -%}
+        {%- endfor -%}
+        {{ updated_list }}
       security:
         runAsUser: "{{ applicationSecurity[app.name].runAsUser | default(2147483647|random(65536)) }}"
         runAsGroup: "{{ applicationSecurity[app.name].runAsGroup | default(2147483647|random(65536)) }}"

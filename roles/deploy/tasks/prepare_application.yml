@@ -44,7 +44,7 @@
 - block:
   - name: "{{ name_prefix }} storage brick"
     include_tasks: common/storage_brick.yml
-    with_items: "{{ applications[k8s_namespace.key][application.key].storage }}"
+    loop: "{{ applications[k8s_namespace.key][application.key].storage }}"
     loop_control:
       loop_var: storage
   - name: "{{ name_prefix }} storage"
