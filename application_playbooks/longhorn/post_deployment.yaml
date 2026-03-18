@@ -12,7 +12,7 @@
 
 - name: upgrade volume engines to current default version
   shell: |
-    kubectl patch volume {{ item.metadata.name }} -n {{ k8s_namespace.key }} --type='json' -p='[{"op": "replace", "path": "/spec/image", "value":"{{ target_engine_image }}"}]'
+    kubectl patch volume {{ item }} -n {{ k8s_namespace.key }} --type='json' -p='[{"op": "replace", "path": "/spec/image", "value":"{{ target_engine_image }}"}]'
   when: item != target_engine_image
   loop: "{{ vols_out.stdout_lines }}"
 
