@@ -24,7 +24,7 @@
   register: volume_status
   # Loop until the condition is met
   until: >
-    volume_status.resources | map(attribute='status.currentImage') | unique | list == [target_engine_image]
+    volume_status.resources|default([]) | map(attribute='status.currentImage') | unique | list == [target_engine_image]
   retries: 30
   delay: 10
 
