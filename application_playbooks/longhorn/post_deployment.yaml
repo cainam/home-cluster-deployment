@@ -27,7 +27,6 @@
     volume_status.resources | map(attribute='status.currentImage') | unique | list == [target_engine_image]
   retries: 30
   delay: 10
-  description: "Checking if all volumes have transitioned to {{ target_engine_image }}"
 
 - name: Get all EngineImage resources
   kubernetes.core.k8s_info:
