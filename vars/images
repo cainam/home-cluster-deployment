@@ -236,14 +236,13 @@ images:
   build:
     packages: app-admin/ansible-molecule app-containers/podman app-shells/bash #sys-apps/shadow sys-apps/acl sys-apps/attr
     configure_builder: |
-      #echo 'ACCEPT_KEYWORDS="~arm64"' >> /etc/portage/make.conf
       echo 'app-admin/ansible-molecule ~arm64' > /etc/portage/package.accept_keywords/molecule
       echo 'dev-python/ansible-compat ~arm64' > /etc/portage/package.accept_keywords/ansible-compat
       echo 'dev-python/click-help-colors ~arm64' > /etc/portage/package.accept_keywords/click-help-colors
       echo 'dev-python/enrich ~arm64' > /etc/portage/package.accept_keywords/enrich
       echo 'dev-python/subprocess-tee ~arm64' > /etc/portage/package.accept_keywords/subprocess-tee
       echo "net-firewall/iptables nftables" >> /etc/portage/package.use/iptables
-      emerge dev-libs/glib
+      emerge dev-libs/glib app-admin/ansible-core
     configure_rootfs_build: |
       VIRTUAL_ENV=/py_env
       python -m venv --system-site-packages "$VIRTUAL_ENV" && . "$VIRTUAL_ENV"/bin/activate
@@ -251,6 +250,8 @@ images:
       mv "$VIRTUAL_ENV" ${ROOT}/"$VIRTUAL_ENV"
       find ${ROOT}/etc
       export LD_LIBRARY_PATH=$ROOT/usr/lib
+      export USER=root
+      ansible-galaxy collection install containers.podman -p ${ROOT}/usr/share/ansible/collections
     finish_rootfs_build: cp /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgomp.so.1 /usr/lib/gcc/aarch64-unknown-linux-musl/15/libgcc_s.so.1 ${ROOT}/usr/lib
 
 - name: molecule-tester
