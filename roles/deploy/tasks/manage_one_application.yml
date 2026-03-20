@@ -88,7 +88,6 @@
         # unused images_details_var: "images_info"
       include_role:
         name: gentoo-image-builder
-    when: application.value.images is defined
 
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook check"

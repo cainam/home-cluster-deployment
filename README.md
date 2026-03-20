@@ -156,18 +156,8 @@ TODO:
 - try to create modules for Ansible: kustom, gateway, dependencies, code (infopage/auth-operator)
   - move to application_deployment: kustomize + vars/images 
 - check to use different /etc/portage between builder deploys and image-root deploys
+- create ebuild for python-kubernetes
+- molecule ebuild
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
-- longhorn: include engine upgrade in playbook
 - regression tests: implement continuous testing of the features to detect regressions
-  - molecule: how to prevent galaxy is contacted
-  - molucule image
-  - run as podman run -it \
-  -v /run/user/1000/podman/podman.sock:/run/podman/podman.sock:Z \
-  -e CONTAINER_HOST=unix:///run/podman/podman.sock \
-  -v $(pwd):/tmp/project:Z \
-  -w /tmp/project \
-  my-molecule-image molecule test
-  - local command so far: MOLECULE_FILE=/data/mine/home-cluster-deployment/molecule.yaml  MOLECULE_SCENARIO_NAME=test_directory_sync  molecule --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync 
-  - if container works, remove it from world
-  - ACCEPT_KEYWORDS="~arm64" maybe globally?
-  - molecule in container:  podman run -it --env USER=root --workdir $PWD/roles/shared_helper --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260211 /py_env/bin/python -m molecule --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
+  - molecule in container: podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
