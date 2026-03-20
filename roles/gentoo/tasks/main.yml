@@ -364,9 +364,15 @@
     - iwd
   ignore_errors: yes
 
+- name: virtual python environment
+  shell: |
+    python -m venv {{ local_pyenv }}
+    source {{ local_pyenv }}/bin/activate
+    pip install ansible kubernetes
+
 - name: gluster
   import_tasks: gluster.yml
-  
+
 - name: put certificates and keys in place
   copy:
     content: "{{ lookup('file', cert_path~'/FreeAsABird/subject_keys/'~item.name~'.pem') }}\n{{ lookup('file', cert_path~'/FreeAsABird/certs/'~item.name~'.crt') }}"

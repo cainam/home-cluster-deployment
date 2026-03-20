@@ -1,4 +1,5 @@
 ---
+local_pyenv: /data/mypyenv
 gluster_vols:
   - name: registry
     size: 10G

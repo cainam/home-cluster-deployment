@@ -44,9 +44,9 @@ sys-process/iotop
 sys-kernel/linux-firmware
 sys-kernel/raspberrypi-image
 app-misc/tmux
+dev-python/pip
+net-misc/chrony
+app-admin/ansible-molecule
 
 # only for longhorn
 sys-block/open-iscsi
-
-net-misc/chrony
-app-admin/ansible-molecule

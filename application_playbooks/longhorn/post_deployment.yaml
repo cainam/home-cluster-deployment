@@ -1,3 +1,6 @@
+- name: Force the use of the virtualenv python
+  set_fact:
+    ansible_python_interpreter: "{{ local_pyenv }}/bin/python"
 - name: get current default Engine image version from Longhorn settings
   shell: kubectl get settings  -n {{ k8s_namespace.key }}  default-engine-image -o yaml | yq -r .value
   register: default_engine_image_out
@@ -22,7 +25,6 @@
     kind: Volume
     namespace: longhorn-system
   register: volume_status
-  # Loop until the condition is met
   until: >
     volume_status.resources|default([]) | map(attribute='status.currentImage') | unique | list == [target_engine_image]
   retries: 30
