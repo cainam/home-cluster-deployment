@@ -45,5 +45,5 @@
     namespace: longhorn-system
     name: "{{ item.metadata.name }}"
   loop: "{{ installed_engine_images.resources }}"
-  when: false and item.spec.image != target_engine_image
+  when: item.spec.image != target_engine_image
 
