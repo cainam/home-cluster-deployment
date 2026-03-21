@@ -40,7 +40,7 @@ builder:
       # overlay
       mkdir -p /etc/portage/repos.conf/
       # echo -e "[local]\nlocation = /portage-local\npriority = 9999" > /etc/portage/repos.conf/local.conf
-      echo -e "[local]\nlocation = {{ local_overlay_dir }}\npriority = 9999" > /etc/portage/repos.conf/local.conf
+      echo -e "[local]\nlocation = {{ builder.local_overlay_dir }}\npriority = 9999" > /etc/portage/repos.conf/local.conf
 
       mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use}
       # mask all unwanted python version

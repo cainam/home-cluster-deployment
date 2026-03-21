@@ -49,3 +49,4 @@ net-misc/chrony
 
 # only for longhorn
 sys-block/open-iscsi
+dev-util/pkgdev # gentoo development
