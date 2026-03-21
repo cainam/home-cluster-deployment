@@ -32,6 +32,7 @@ builder:
       python_version=3.14
       echo 'INSTALL_MASK="${INSTALL_MASK} /usr/share/doc /usr/share/info"' >>  /etc/portage/make.conf
       echo '[gentoo]\nlocation = /var/db/repos/gentoo' > /etc/portage/repos.conf/gentoo.conf
+      echo 'DISTDIR="/distfiles"' >> /etc/portage/make.conf
       cat >> /etc/portage/package.use/builder.conf <<EOF
       sys-devel/binutils gold
       dev-vcs/git -perl

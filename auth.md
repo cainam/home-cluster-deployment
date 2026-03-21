@@ -99,3 +99,38 @@ curl -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_sec
 {"access_token":"eyJhbGci.....
 also outside the cluster it works:
 curl -k -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "client_secret=EcANXittpGgEpAUyEc9gWFnRxU3nW9qC" -d "client_id=test" -d "username=test"  -d 'password=test' -d 'grant_type=password'  https://my-lb.adm13:2005/realms/test/protocol/openid-connect/token
+
+
+meshConfig:
+  defaultConfig:
+    discoveryAddress: {{ application.key }}.{{ namespace.key }}.svc:15012
+    tracing:
+      zipkin:
+        address: jaeger-collector.tools:9411
+  enablePrometheusMerge: true
+  enableTracing: true
+  extensionProviders:
+  - envoyExtAuthzHttp:
+      headersToDownstreamOnDeny:
+      - content-type
+      - set-cookie
+      headersToUpstreamOnAllow:
+      - x-forwarded-access-token
+      - authorization
+      - x-auth-request-user
+      - x-auth-request-access-token
+      - path
+      - x-auth-request-email
+      - x-auth-request-preferred-username
+      includeAdditionalHeadersInCheck:
+        X-Auth-Request-Redirect: https://%REQ(:authority)%%REQ(:path)%
+      includeRequestHeadersInCheck:
+      - authorization
+      - cookie
+      - x-auth-request-groups
+      port: 80
+      service: {{ oauth2_proxy }}.auth.svc.cluster.local
+    name: {{ oauth2_proxy }}
+  rootNamespace: null
+  trustDomain: cluster.local
+

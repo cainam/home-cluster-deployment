@@ -56,7 +56,7 @@
   - name: "{{ name_prefix }} install storage content"
     include_tasks: storage_content.yaml
     when: storage.config is defined and storage.config
-    with_items: "{{ applications[k8s_namespace.key][application.key].storage }}"
+    loop: "{{ applications[k8s_namespace.key][application.key].storage }}"
     loop_control:
       loop_var: storage
   when: application.value.storage is defined
