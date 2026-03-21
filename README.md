@@ -161,3 +161,5 @@ TODO:
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - regression tests: implement continuous testing of the features to detect regressions
   - molecule in container: podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
+
+- home-assistant deployment: changed runAsUser is not applied to config share files => move all application files and templates to application playbook folders

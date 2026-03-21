@@ -10,7 +10,7 @@
       tasks_from: template_directory.yaml
     vars:
       destination_dir: "{{ dest_base_dir }}/"
-      template_source_dir: "{{ role_path }}/templates/{{ storage.name }}"
+      template_source_dir: "{{ application_playbooks[application.key] }} }}/templates }}"
       owner: "{{ application.value.security.runAsUser }}"
       group: "{{ application.value.security.runAsGroup }}"
       directoryMode: "{{ application.value.security.directoryMode }}"

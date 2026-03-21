@@ -9,6 +9,7 @@ builder:
   portage: 20260319
   portage_container: "portage"
   local_overlay_dir: /portage-local
+  local_overlay_name: private-repo
   image_root: /image-root
   env: |
       ENV PKGDIR="/packages/aarch64-unknown-linux-musl"
@@ -30,6 +31,7 @@ builder:
   configure_builder: |
       python_version=3.14
       echo 'INSTALL_MASK="${INSTALL_MASK} /usr/share/doc /usr/share/info"' >>  /etc/portage/make.conf
+      echo '[gentoo]\nlocation = /var/db/repos/gentoo' > /etc/portage/repos.conf/gentoo.conf
       cat >> /etc/portage/package.use/builder.conf <<EOF
       sys-devel/binutils gold
       dev-vcs/git -perl
@@ -40,7 +42,7 @@ builder:
       # overlay
       mkdir -p /etc/portage/repos.conf/
       # echo -e "[local]\nlocation = /portage-local\npriority = 9999" > /etc/portage/repos.conf/local.conf
-      echo -e "[local]\nlocation = {{ builder.local_overlay_dir }}\npriority = 9999" > /etc/portage/repos.conf/local.conf
+      echo -e "[{{ builder.local_overlay_name }}]\nlocation = {{ builder.local_overlay_dir }}\npriority = 9999" > /etc/portage/repos.conf/local.conf
 
       mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use}
       # mask all unwanted python version
