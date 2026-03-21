@@ -26,7 +26,7 @@ etcdctl defrag
 #### currently deactivated, requires admin.conf to be deployed
 # purge unused container images
 configured_images=$(kubectl get pods --all-namespaces -o jsonpath='{.items[*].spec.containers[*].image} {.items[*].spec.initContainers[*].image}' | tr -s '[[:space:]]' '\n' | sort -u)
-protected_images="registry:|pause|my_builder|stage3-|go:|base:|nodejs:|python3:|envoy|bazel"
+protected_images="registry:|scratch:|molecule|pause|my_builder|stage3-|go:|base:|nodejs:|python3:|envoy|bazel"
 podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${registry}/##g" | while read image id; do
   #image=$(echo "${image_with_id}" | cut -d : -f 1,2)
   #id=$(echo "${image_with_id}" | cut -d : -f 3)
