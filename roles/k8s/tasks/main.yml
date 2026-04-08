@@ -242,8 +242,6 @@
     ansible.builtin.slurp:
       src: "/tmp/limited.conf"
     register: kube_config_limited
-    delegate_to: "{{ healthy_node }}"
-    run_once: true
   when: inventory_hostname == healthy_node # to ensure this is executed on a healthy node only
      
 - block:

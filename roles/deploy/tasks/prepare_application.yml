@@ -32,12 +32,12 @@
 - block:
   - name: "{{ name_prefix }} application playbook - pre_system - playbook check"
     ansible.builtin.stat:
-      path: "{{ application_playbooks[app] }}/pre_system.yaml"
+      path: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
     register: playbook_stat
     delegate_to: localhost
 
   - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
-    include_tasks: "{{ application_playbooks[app] }}/pre_system.yaml"
+    include_tasks: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
     when: playbook_stat.stat.exists and playbook_stat.stat.isreg
   when: app in application_playbooks
 

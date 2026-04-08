@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.1
+    version: v0.28.2
     installed:
       pattern: "flannel:"
     latest:
@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.6.10
+    version: v3.6.12
     installed:
       pattern: "traefik"
     latest:
@@ -32,7 +32,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.14.2
+    version: v7.15.1
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -40,7 +40,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.9.1
+    version: 2.9.2
     latest:
       type: github
       params:
@@ -54,7 +54,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2026.3.2"
+    version: "2026.4.1"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -63,7 +63,7 @@ software:
         repo: homeassistant/home-assistant
         arch: arm64
   registry:
-    version: v3.0.0
+    version: v3.1.0
     latest:
       type: dockerhub
       params:

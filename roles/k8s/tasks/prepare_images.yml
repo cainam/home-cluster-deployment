@@ -18,6 +18,7 @@
 - name: handle additional images
   vars:
     limit_images: "{{ image_names }}"
+    dry_run: false
   include_role:
     name: gentoo-image-builder
 

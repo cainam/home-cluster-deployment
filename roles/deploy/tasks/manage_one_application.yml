@@ -56,7 +56,7 @@
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook check"
       ansible.builtin.stat:
-        path: "{{ application_playbooks[app] }}/additional_images.yaml"
+        path: "{{ application_playbooks[app] }}/tasks/additional_images.yaml"
       register: playbook_stat
       delegate_to: localhost
 
@@ -66,7 +66,7 @@
           var_additional_images: "{{ app }}_additional_images"
           kustomize_dir: "{{ build_dir }}"
           registry_path: "{{ k8s_namespace.key }}"
-        include_tasks: "{{ application_playbooks[app] }}/additional_images.yaml"
+        include_tasks: "{{ application_playbooks[app] }}/tasks/additional_images.yaml"
 
       - debug:
           msg: "return from additional_images: {{ lookup('vars', app~'_additional_images') }}"
@@ -93,12 +93,12 @@
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook check"
       ansible.builtin.stat:
-        path: "{{ application_playbooks[app] }}/migrate.yaml"
+        path: "{{ application_playbooks[app] }}/tasks/migrate.yaml"
       register: playbook_stat
       delegate_to: localhost
 
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"
-      include_tasks: "{{ application_playbooks[app] }}/migrate.yaml"
+      include_tasks: "{{ application_playbooks[app] }}/tasks/migrate.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
     when: app in application_playbooks
 
@@ -109,12 +109,12 @@
   - block:
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
       ansible.builtin.stat:
-        path: "{{ application_playbooks[app] }}/post_deployment.yaml"
+        path: "{{ application_playbooks[app] }}/tasks/post_deployment.yaml"
       register: playbook_stat
       delegate_to: localhost
 
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook run"
-      include_tasks: "{{ application_playbooks[app] }}/post_deployment.yaml"
+      include_tasks: "{{ application_playbooks[app] }}/tasks/post_deployment.yaml"
       when: playbook_stat.stat.exists and playbook_stat.stat.isreg
     when: app in application_playbooks
   
