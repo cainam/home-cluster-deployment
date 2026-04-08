@@ -42,7 +42,8 @@
       tasks_from: template_directory.yaml
     vars:
       dir_var: build_dir
-      template_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
+      Xtemplate_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
+      template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
       image_entry: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', (application.value.images|first) )| first | default(None)}}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,

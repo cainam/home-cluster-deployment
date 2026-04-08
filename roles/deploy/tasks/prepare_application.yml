@@ -14,32 +14,41 @@
     ignore_errors: true
     delegate_to: localhost
 
-  - name: "{{ name_prefix }} check if application playbooks exist"
+  - name: "{{ name_prefix }} check if application playbook exist"
     ansible.builtin.stat:
       path: "{{ application_playbook_path }}"
     register: playbook_dir_stat
     delegate_to: localhost
 
+  - name: "{{ name_prefix }} check if kustomize exists in application playbook"
+    ansible.builtin.stat:
+      path: "{{ application_playbook_path }}/kustomize"
+    register: kustomize_dir_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} application playbook - pre_system - playbook check"
+    ansible.builtin.stat:
+      path: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
+    register: pre_system_stat
+    delegate_to: localhost
+
   - name: "{{ name_prefix }} set playbook_dir_exists"
+    vars:
+      current_app_data:
+        path: "{{ application_playbook_path }}"
+        kustomize: "{{ (kustomize_dir_stat.stat.exists and kustomize_dir_stat.stat.isdir) | ternary(application_playbook_path ~ '/kustomize', omit) }}"
+        pre_system: "{{ (pre_system_stat.stat.exists and pre_system_stat.stat.isfile) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
     set_fact:
-      application_playbooks: "{{ application_playbooks | combine({application.key: application_playbook_path }, recursive=True) }}"
-      #playbook_dir_exists: "{{ playbook_dir_stat.stat.exists if (playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir) else false }}"
-      #playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+      application_playbooks: "{{ application_playbooks | combine({application.key: current_app_data}, recursive=True) }}"
     when: playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir
   run_once: true
 
 
 - block:
-  - name: "{{ name_prefix }} application playbook - pre_system - playbook check"
-    ansible.builtin.stat:
-      path: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
-    register: playbook_stat
-    delegate_to: localhost
-
   - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
     include_tasks: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
     when: playbook_stat.stat.exists and playbook_stat.stat.isreg
-  when: app in application_playbooks
+  when: app in application_playbooks and 'pre_system' in application_playbooks[app]
 
 - block:
   - name: "{{ name_prefix }} storage brick"
