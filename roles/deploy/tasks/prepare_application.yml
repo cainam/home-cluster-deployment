@@ -28,16 +28,37 @@
 
   - name: "{{ name_prefix }} application playbook - pre_system - playbook check"
     ansible.builtin.stat:
-      path: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
+      path: "{{ application_playbook_path }}/tasks/pre_system.yaml"
     register: pre_system_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} application playbook - additional_images - playbook check"
+    ansible.builtin.stat:
+      path: "{{ application_playbook_path }}/tasks/additional_images.yaml"
+    register: additional_images_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} application playbook - migrate - playbook check"
+    ansible.builtin.stat:
+      path: "{{ application_playbook_path }}/tasks/migrate.yaml"
+    register: migrate_stat
+    delegate_to: localhost
+
+  - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
+    ansible.builtin.stat:
+      path: "{{ application_playbook_path }}/tasks/post_deployment.yaml"
+    register: post_deployment_stat
     delegate_to: localhost
 
   - name: "{{ name_prefix }} set playbook_dir_exists"
     vars:
       current_app_data:
         path: "{{ application_playbook_path }}"
-        kustomize: "{{ (kustomize_dir_stat.stat.exists and kustomize_dir_stat.stat.isdir) | ternary(application_playbook_path ~ '/kustomize', omit) }}"
-        pre_system: "{{ (pre_system_stat.stat.exists and pre_system_stat.stat.isfile) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
+        kustomize: "{{ (kustomize_dir_stat.stat.exists and kustomize_dir_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
+        pre_system: "{{ (pre_system_stat.stat.exists and pre_system_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
+        additional_images: "{{ (additional_images_stat.stat.exists and additional_images_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/additional_images.yaml', omit) }}"
+        migrate: "{{ (migrate_stat.stat.exists and migrate_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/migrate.yaml', omit) }}"
+        post_deployment: "{{ (post_deployment_stat.stat.exists and post_deployment_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/post_deployment.yaml', omit) }}"
     set_fact:
       application_playbooks: "{{ application_playbooks | combine({application.key: current_app_data}, recursive=True) }}"
     when: playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir
@@ -46,8 +67,7 @@
 
 - block:
   - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
-    include_tasks: "{{ application_playbooks[app] }}/tasks/pre_system.yaml"
-    when: playbook_stat.stat.exists and playbook_stat.stat.isreg
+    include_tasks: "{{ application_playbooks[app]['pre_system'] }}"
   when: app in application_playbooks and 'pre_system' in application_playbooks[app]
 
 - block:

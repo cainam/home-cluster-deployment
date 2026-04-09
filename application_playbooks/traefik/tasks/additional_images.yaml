@@ -1,6 +1,6 @@
 - name: load image description
   include_vars:
-    file: application_images.yaml
+    file: ../vars/application_images.yaml
     name: _my_images
 
 - name: "set var {{ var_additional_images }}"
