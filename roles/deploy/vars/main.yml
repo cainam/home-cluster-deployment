@@ -7,8 +7,6 @@ applications:
       - flannel-cni-plugin
   gateway:
     traefik:
-      images:
-      - traefik
   istio-system:
     istiod-config:
     istiod:
