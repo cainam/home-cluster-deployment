@@ -1,4 +1,4 @@
 - name: software configuration file
   copy:
     content: "{{ software | to_nice_yaml }}"
-    dest: "{{ (application.value.storage | first) | map(attribute='dest_dir') }}"
+    dest: "{{ (applications[k8s_namespace.key][application.key].storage | first) | map(attribute='dest_dir') }}"
