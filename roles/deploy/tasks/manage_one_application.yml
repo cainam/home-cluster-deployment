@@ -27,15 +27,6 @@
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
 
-#  - name: "{{ name_prefix }} handle additional images" # to have the images dict recreated with defaults filled
-#    vars:
-#      limit_images: []
-#      default_section: "{{ k8s_namespace.key }}"
-#      dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
-#    include_role:
-#      name: gentoo-image-builder
-#    when: application.value.images is defined
-
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
@@ -69,10 +60,7 @@
       tasks_from: template_directory.yaml
     vars:
       dir_var: build_dir
-      Xtemplate_source_dir: "{{ playbook_dir }}/common/kustomize/{{ application.value.kustom.application | default(application.key) }}"
       template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
-      #image_entry: "{{ current_limit_images | first | default(None)}}"
-      Ximage_entry: "{{ images | selectattr('name', 'defined') | selectattr('name', 'equalto', (application.value.images|first) )| first | default(None)}}"
       image_entry: "{{ lookup('vars', 'images_details') | selectattr('name', 'defined') | selectattr('name', 'equalto', (current_limit_images|first) )| first | default(None)}}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
