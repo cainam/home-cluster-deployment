@@ -3,6 +3,5 @@ resources:
 - ClusterRoleBinding.yaml
 - ClusterRole.yaml
 - deployment.yaml
-- kustomization.yaml
 - ServiceAccount.yaml
 
