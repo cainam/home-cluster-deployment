@@ -25,6 +25,7 @@
     - vars/build-images.yaml
     - vars/software
     - vars/images
+    - vars/apps.yaml
     run_once: true
   - name: setup # to gather facts only when needed
     setup:

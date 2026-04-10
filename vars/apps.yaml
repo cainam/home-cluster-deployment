@@ -77,6 +77,14 @@ applications:
           username: ha
           password: same
   tools:
+    curator:
+      images:
+      - fastapi
+      network: true
+      storage:
+      - type: local_folder
+        size: 1Mi
+        config: true
     infopage:
       images:
       - fastapi
