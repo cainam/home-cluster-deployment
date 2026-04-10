@@ -14,54 +14,32 @@
     ignore_errors: true
     delegate_to: localhost
 
-  - name: "{{ name_prefix }} check if application playbook exist"
+  - name: "{{ name_prefix }} check for application components"
     ansible.builtin.stat:
-      path: "{{ application_playbook_path }}"
-    register: playbook_dir_stat
+      path: "{{ item.path }}"
+    register: component_stats
     delegate_to: localhost
+    loop:
+      - { key: 'root', path: "{{ application_playbook_path }}" }
+      - { key: 'kustomize', path: "{{ application_playbook_path }}/kustomize" }
+      - { key: 'pre_system', path: "{{ application_playbook_path }}/tasks/pre_system.yaml" }
+      - { key: 'additional_images', path: "{{ application_playbook_path }}/tasks/additional_images.yaml" }
+      - { key: 'migrate', path: "{{ application_playbook_path }}/tasks/migrate.yaml" }
+      - { key: 'post_deployment', path: "{{ application_playbook_path }}/tasks/post_deployment.yaml" }
 
-  - name: "{{ name_prefix }} check if kustomize exists in application playbook"
-    ansible.builtin.stat:
-      path: "{{ application_playbook_path }}/kustomize"
-    register: kustomize_dir_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} application playbook - pre_system - playbook check"
-    ansible.builtin.stat:
-      path: "{{ application_playbook_path }}/tasks/pre_system.yaml"
-    register: pre_system_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} application playbook - additional_images - playbook check"
-    ansible.builtin.stat:
-      path: "{{ application_playbook_path }}/tasks/additional_images.yaml"
-    register: additional_images_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} application playbook - migrate - playbook check"
-    ansible.builtin.stat:
-      path: "{{ application_playbook_path }}/tasks/migrate.yaml"
-    register: migrate_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} application playbook - post_deployment - playbook check"
-    ansible.builtin.stat:
-      path: "{{ application_playbook_path }}/tasks/post_deployment.yaml"
-    register: post_deployment_stat
-    delegate_to: localhost
-
-  - name: "{{ name_prefix }} set playbook_dir_exists"
+  - name: "{{ name_prefix }} set application playbook facts"
     vars:
+      results: "{{ dict(component_stats.results | map(attribute='item.key') | zip(component_stats.results)) }}"
       current_app_data:
         path: "{{ application_playbook_path }}"
-        kustomize: "{{ (kustomize_dir_stat.stat.exists and kustomize_dir_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
-        pre_system: "{{ (pre_system_stat.stat.exists and pre_system_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/pre_system.yaml', omit) }}"
-        additional_images: "{{ (additional_images_stat.stat.exists and additional_images_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/additional_images.yaml', omit) }}"
-        migrate: "{{ (migrate_stat.stat.exists and migrate_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/migrate.yaml', omit) }}"
-        post_deployment: "{{ (post_deployment_stat.stat.exists and post_deployment_stat.stat.isreg) | ternary(application_playbook_path ~ '/tasks/post_deployment.yaml', omit) }}"
+        kustomize: "{{ (results.kustomize.stat.exists and results.kustomize.stat.isdir) | ternary(results.kustomize.item.path, omit) }}"
+        pre_system: "{{ (results.pre_system.stat.exists and results.pre_system.stat.isreg) | ternary(results.pre_system.item.path, omit) }}"
+        additional_images: "{{ (results.additional_images.stat.exists and results.additional_images.stat.isreg) | ternary(results.additional_images.item.path, omit) }}"
+        migrate: "{{ (results.migrate.stat.exists and results.migrate.stat.isreg) | ternary(results.migrate.item.path, omit) }}"
+        post_deployment: "{{ (results.post_deployment.stat.exists and results.post_deployment.stat.isreg) | ternary(results.post_deployment.item.path, omit) }}"
     set_fact:
-      application_playbooks: "{{ application_playbooks | combine({application.key: current_app_data}, recursive=True) }}"
-    when: playbook_dir_stat.stat.exists and playbook_dir_stat.stat.isdir
+      application_playbooks: "{{ application_playbooks | default({}) | combine({application.key: current_app_data}, recursive=True) }}"
+    when: results.root.stat.exists and results.root.stat.isdir
   run_once: true
 
 

@@ -158,11 +158,10 @@ TODO:
 - check to use different /etc/portage between builder deploys and image-root deploys
 - create ebuild for python-kubernetes
 - gentoo-image-builder: overlay playbook vs. overlay in main: keep one!
+- gentoo-image-builder: move dry_run actions to dedicated playbook, and remove dry_run option again
 - molecule ebuild
 - standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment, first code at roles/deploy/files/curator/curator.py
 - regression tests: implement continuous testing of the features to detect regressions
   - molecule in container: 
 podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
 
-
-- change application_playbooks to be a real dict with 'path': and 'kustomize' set, set kustomize in prepare application if it exists, use in manage_one_app
