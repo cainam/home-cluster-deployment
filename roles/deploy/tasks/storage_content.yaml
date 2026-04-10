@@ -1,5 +1,5 @@
 - set_fact:
-    dest_base_dir: "{% if storage.type == 'local_folder' %}{{ local_disk_directory }}{% else %}{{ shared_mounts }}{% endif %}/{{ storage.name }}"
+    # dest_base_dir: "{% if storage.type == 'local_folder' %}{{ local_disk_directory }}{% else %}{{ shared_mounts }}{% endif %}/{{ storage.name }}"
     dest_hosts: "{% if storage.type == 'local_folder' %}{{ hostvars.keys() }}{% else %}{{ [hostvars.keys() | first] }}{% endif %}"
   run_once: true
 
@@ -9,7 +9,7 @@
       name: shared_helper
       tasks_from: template_directory.yaml
     vars:
-      destination_dir: "{{ dest_base_dir }}/"
+      destination_dir: "{{ storage.dest_dir }}/"
       template_source_dir: "{{ application_playbooks[application.key] }}/templates"
       owner: "{{ application.value.security.runAsUser }}"
       group: "{{ application.value.security.runAsGroup }}"
@@ -19,7 +19,7 @@
   - name: deploy from files
     synchronize:
       src: "{{ application_playbooks[application.key]['files'] }}"
-      dest: "{{ dest_base_dir }}/"
+      dest: "{{ storage.dest_dir }}/"
       rsync_opts:
       - "--relative"
       - "--copy-links"

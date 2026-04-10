@@ -8,15 +8,11 @@
   - name: add missing namespaces to net.routes
     set_fact:
       net_routes: >-
-        {{
-          net_routes+
-          [
+        {{ net_routes + [
             item | combine({
               'namespace': item.namespace
                 if item.namespace is defined
-                else (
-                  apps | dict2items | selectattr('value', 'defined') | selectattr('value', 'contains', item.gateway) | map(attribute='key') | first
-                )
+                else ( apps | dict2items | selectattr('value', 'defined') | selectattr('value', 'contains', item.gateway) | map(attribute='key') | first )
             })
           ]
         }}
@@ -91,7 +87,8 @@
       storage_new: |
         {%- set updated_list = [] -%}
         {%- for item in (app.storage | default([])) -%}
-          {%- set _ = updated_list.append({'type': default_storage_type} | combine(item)) -%}
+          {%- set path_prefix = local_disk_directory if item.type|default(default_storage_type) == 'local_folder' else shared_mounts -%}
+          {%- set _ = updated_list.append({'type': default_storage_type, 'dest_dir': [path_prefix, item.name] | join('/') } | combine(item)) -%}
         {%- endfor -%}
         {{ updated_list }}
       security:

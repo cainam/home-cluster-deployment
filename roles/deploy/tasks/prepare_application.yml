@@ -44,12 +44,6 @@
     when: results.root.stat.exists and results.root.stat.isdir
   run_once: true
 
-
-- block:
-  - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
-    include_tasks: "{{ application_playbooks[app]['pre_system'] }}"
-  when: app in application_playbooks and 'pre_system' in application_playbooks[app]
-
 - block:
   - name: "{{ name_prefix }} storage brick"
     include_tasks: common/storage_brick.yml
@@ -70,3 +64,8 @@
       loop_var: storage
   when: application.value.storage is defined
   
+- block:
+  - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"
+    include_tasks: "{{ application_playbooks[app]['pre_system'] }}"
+  when: app in application_playbooks and 'pre_system' in application_playbooks[app]
+
