@@ -1,0 +1,4 @@
+- name: software configuration file
+  copy:
+    content: "{{ software | to_nice_yaml }}"
+    dest: "{{ storage | first | map(attribute='dest_dir') }}"
