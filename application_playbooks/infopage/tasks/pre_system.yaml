@@ -2,8 +2,6 @@
     msg: "{{ applications[k8s_namespace.key][application.key] }}"
 - debug:
     msg: "{{ applications[k8s_namespace.key][application.key].storage }}"
-- debug:
-    msg: "{{ applications[k8s_namespace.key][application.key].storage | first }}"
 
 - name: software configuration file
   copy:
