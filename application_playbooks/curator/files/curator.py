@@ -24,14 +24,14 @@ ANNOTATION_KEY = "operator.dev/pullPolicy"
 # -----------------------------
 def get_dep_name_from_pod(pod):
     """Return Deployment name for the Pod, following ReplicaSet owner if needed"""
-    owners = pod.metadata.owner_references or []
+    owners = pod.get("metadata").owner_references or []
     if not owners:
         return None
     owner = owners[0]
     if owner.kind == "Deployment":
         return owner.name
     elif owner.kind == "ReplicaSet":
-        rs = appsv1.read_namespaced_replica_set(owner.name, pod.metadata.namespace)
+        rs = appsv1.read_namespaced_replica_set(owner.name, pod.get("metadata").namespace)
         dep_owners = rs.metadata.owner_references or []
         if dep_owners and dep_owners[0].kind == "Deployment":
             return dep_owners[0].name
@@ -71,18 +71,18 @@ def all_pods_healthy(namespace, dep_name):
 @kopf.on.event('pods')
 def on_pod_event(event, **_):
     pod = event.get('object')
-    if not pod or not pod.metadata or not pod.status:
+    if not pod or not "metadata" in pod or not "status" in pod:
         return
 
-    namespace = pod.metadata.namespace
-    pod_name = pod.metadata.name
+    namespace = pod.get("metadata").namespace
+    pod_name = pod.get("metadata").name
     dep_name = get_dep_name_from_pod(pod)
     if not dep_name:
         return
     dep_key = f"{namespace}/{dep_name}"
 
     # Check if pod is in pull failure
-    container_statuses = pod.status.container_statuses or []
+    container_statuses = pod.get("status").container_statuses or []
     pull_failures = any(
         (cs.state and cs.state.waiting and cs.state.waiting.reason in ("ImagePullBackOff", "ErrImagePull"))
         for cs in container_statuses
