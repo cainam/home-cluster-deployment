@@ -75,14 +75,14 @@ def on_pod_event(event, **_):
         return
 
     namespace = pod.get("metadata").get("namespace")
-    pod_name = pod.get("metadata").name
+    pod_name = pod.get("metadata").get("name")
     dep_name = get_dep_name_from_pod(pod)
     if not dep_name:
         return
     dep_key = f"{namespace}/{dep_name}"
 
     # Check if pod is in pull failure
-    container_statuses = pod.get("status").container_statuses or []
+    container_statuses = pod.get("status").get("container_statuses") or []
     pull_failures = any(
         (cs.state and cs.state.waiting and cs.state.waiting.reason in ("ImagePullBackOff", "ErrImagePull"))
         for cs in container_statuses
