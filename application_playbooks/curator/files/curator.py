@@ -24,7 +24,7 @@ ANNOTATION_KEY = "operator.dev/pullPolicy"
 # -----------------------------
 def get_dep_name_from_pod(pod):
     """Return Deployment name for the Pod, following ReplicaSet owner if needed"""
-    owners = pod.get("metadata").owner_references or []
+    owners = pod.get("metadata").get("owner_references") or []
     if not owners:
         return None
     owner = owners[0]
@@ -32,7 +32,7 @@ def get_dep_name_from_pod(pod):
         return owner.name
     elif owner.kind == "ReplicaSet":
         rs = appsv1.read_namespaced_replica_set(owner.name, pod.get("metadata").namespace)
-        dep_owners = rs.metadata.owner_references or []
+        dep_owners = rs.metadata.get("owner_references") or []
         if dep_owners and dep_owners[0].kind == "Deployment":
             return dep_owners[0].name
     return None
