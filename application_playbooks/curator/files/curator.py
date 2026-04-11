@@ -74,7 +74,7 @@ def on_pod_event(event, **_):
     if not pod or not "metadata" in pod or not "status" in pod:
         return
 
-    namespace = pod.get("metadata").namespace
+    namespace = pod.get("metadata").get("namespace")
     pod_name = pod.get("metadata").name
     dep_name = get_dep_name_from_pod(pod)
     if not dep_name:
