@@ -2,7 +2,6 @@ namespace: {{ kustom.namespace }}
 resources:
 - service.yaml
 - deployment.yaml
-- pvc.yaml
 - valhook.yaml
 - muthook.yaml
 - rolebinding.yaml

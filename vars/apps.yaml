@@ -77,14 +77,6 @@ applications:
           username: ha
           password: same
   tools:
-    curator:
-      images:
-      - python-operator
-      network: true
-      storage:
-      - size: 1Mi
-        type: local_folder
-        config: true
     infopage:
       images:
       - fastapi
@@ -110,10 +102,21 @@ applications:
         type: longhorn
         size: 2Gi
   kubext:
+    curator:
+      images:
+      - python-operator
+      network: true
+      storage:
+      - size: 1Mi
+        type: local_folder
+        config: true
     valmut:
       flags: ['certs']
       images:
       - fastapi
+      storage: 
+      - type: longhorn
+        size: 10Mi
     descheduler:
       images:
       - descheduler
