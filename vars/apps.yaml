@@ -82,8 +82,8 @@ applications:
       - fastapi
       network: true
       storage:
-      - type: local_folder
-        size: 1Mi
+      - size: 1Mi
+        type: local_folder
         config: true
     infopage:
       images:

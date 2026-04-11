@@ -21,6 +21,7 @@
   - name: replace net.routes with normalized routes
     set_fact:
       net: "{{ net | combine({'routes': net_routes}, recursive=True) }}"
+      app_list: []
       
 # add istio gateways as application to list of applications
   - name: combine istio gateway deployment into applications # all raw items have to be treated before! # merge from gateway_install + optional additional_ports on individual gateway
@@ -64,14 +65,10 @@
     vars:
       y: "{{ {'namespace':item[0][1],'name':item[0][0]} | combine(item[1]) }}" # turn names array item[0] into dict
     set_fact:
-      app_list: "{{ (app_list|default([])) + [y] }}"
+      app_list_from_dict: "{{ (app_list_from_dict|default([])) + [y] }}"
     loop: "{{ app_temp }}"
 
 # apply defaults and requirements
-  - name: prepare lists for defaults and requirements treatment
-    set_fact:
-      org_list: "{{ app_list }}"
-      app_list: "{{ [] }}"
   - name: apply defaults and requirements
     vars:
       my_dom: "{{ app.network.domain|default(net.base_domain) }}"
@@ -88,7 +85,7 @@
         {%- set updated_list = [] -%}
         {%- for item in (app.storage | default([])) -%}
           {%- set path_prefix = local_disk_directory if item.type|default(default_storage_type) == 'local_folder' else shared_mounts -%}
-          {%- set _ = updated_list.append({'type': default_storage_type, 'dest_dir': [path_prefix, item.name] | join('/') } | combine(item)) -%}
+          {%- set _ = updated_list.append({'name': app.name, 'type': default_storage_type, 'dest_dir': [path_prefix, item.name|default(app.name)] | join('/') } | combine(item)) -%}
         {%- endfor -%}
         {{ updated_list }}
       security:
@@ -115,7 +112,7 @@
       new_entry: "{{app  | combine({'requires': rq, 'network': network, 'security': security, 'flags': app.flags|default([]), 'storage': storage_new }, recursive=true) }}"
     set_fact:
       app_list: "{{ app_list+[new_entry] }}"
-    loop: "{{ org_list }}"
+    loop: "{{ app_list_from_dict }}"
     loop_control:
       loop_var: app
 

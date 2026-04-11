@@ -16,15 +16,21 @@
       directoryMode: "{{ application.value.security.directoryMode }}"
       fileMode: "{{ application.value.security.fileMode }}"
 
-  - name: deploy from files
-    synchronize:
-      src: "{{ application_playbooks[application.key]['files'] }}"
-      dest: "{{ storage.dest_dir }}/"
-      rsync_opts:
-      - "--relative"
-      - "--copy-links"
-      - "--chown={{ application.value.security.runAsUser }}:{{ application.value.security.runAsGroup }}"
-      - "--chmod=D{{ application.value.security.directoryMode }},F{{ application.value.security.fileMode }}"
-    when: app in application_playbooks and 'files' in application_playbooks[application.key]
+  - block:
+    - name: deploy from files
+      synchronize:
+        src: "{{ application_playbooks[application.key]['files'] }}"
+        dest: "{{ storage.dest_dir }}/"
+        rsync_opts:
+        - "--relative"
+        - "--copy-links"
+
+    - name: set ownership
+      file:
+        path: "{{ storage.dest_dir }}"
+        recurse: true
+        owner: "{{ application.value.security.runAsUser }}"
+        group: "{{ application.value.security.runAsGroup }}"
+    when: application.key in application_playbooks and 'files' in application_playbooks[application.key]
   when: inventory_hostname in dest_hosts
 

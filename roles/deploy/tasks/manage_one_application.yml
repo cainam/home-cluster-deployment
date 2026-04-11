@@ -71,6 +71,25 @@
          'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
          }) }}"
 
+# add pvc file and add it to kustomization file
+  - name: "{{ name_prefix }} - create pvc needed"
+    copy:
+      src: pvc.yaml
+      dest: "{{ build_dir }}/pvc-{{ storage.name }}.yaml"
+    loop: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+
+  - name: "{{ name_prefix }} - add pvc to kustomization resources"
+    ansible.builtin.lineinfile:
+      path: "{{ build_dir }}/kustomization.yaml"
+      insertafter: '^resources:'
+      line: '  - pvc-{{ storage.name }}.yaml'
+      state: present
+    loop: "{{ application.value.storage }}"
+    loop_control:
+      loop_var: storage
+
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"
       include_tasks: "{{ application_playbooks[app]['migrate'] }}"
