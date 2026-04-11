@@ -73,7 +73,10 @@
 
 # add pvc file and add it to kustomization file
   - name: "{{ name_prefix }} - create pvc needed"
-    copy:
+    vars:
+      kustom:
+        name: "{{ application.key }}"
+    template:
       src: pvc.yaml
       dest: "{{ build_dir }}/pvc-{{ storage.name }}.yaml"
     loop: "{{ application.value.storage }}"
@@ -81,11 +84,7 @@
       loop_var: storage
 
   - name: "{{ name_prefix }} - add pvc to kustomization resources"
-    ansible.builtin.lineinfile:
-      path: "{{ build_dir }}/kustomization.yaml"
-      insertafter: '^resources:'
-      line: '  - pvc-{{ storage.name }}.yaml'
-      state: present
+    shell: yq -y -i '.resources += ["pvc-{{ storage.name }}.yaml"]' "{{ build_dir }}/kustomization.yaml"
     loop: "{{ application.value.storage }}"
     loop_control:
       loop_var: storage

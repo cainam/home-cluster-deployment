@@ -19,10 +19,9 @@
   - block:
     - name: deploy from files
       synchronize:
-        src: "{{ application_playbooks[application.key]['files'] }}"
+        src: "{{ application_playbooks[application.key]['files'] }}/"
         dest: "{{ storage.dest_dir }}/"
         rsync_opts:
-        - "--relative"
         - "--copy-links"
 
     - name: set ownership

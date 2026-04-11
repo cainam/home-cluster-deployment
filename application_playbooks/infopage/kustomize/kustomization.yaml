@@ -3,7 +3,6 @@ resources:
 - clusterrolebinding.yaml
 - clusterrole.yaml
 - deploy.yaml
-- pvc.yaml
 - service.yaml
 - serviceaccount.yaml
 
@@ -12,4 +11,3 @@ patches:
     target:
       kind: Service
       name: {{ kustom.name }}
-
