@@ -64,12 +64,12 @@ async def check(request: Request):
 #@log
 async def node_status(request: Request):
     content = infopage.node_info()
-    return templates.TemplateResponse("general_pages/node_info.html",{"request":request, "nodes": content, "name": "node status"})
+    return templates.TemplateResponse(request=request,name="general_pages/node_info.html",context={"nodes": content, "name": "node status"})
 
 @general_pages_router.get("/virtual_services")
 async def vs(request: Request):
     content = infopage.vs_info()
-    return templates.TemplateResponse("general_pages/vs_info.html",{"request":request, "vss": content, "name": "virtual services"})
+    return templates.TemplateResponse(request=request,name="general_pages/vs_info.html",context={"vss": content, "name": "virtual services"})
 
 
 @general_pages_router.get("/services_status")
@@ -116,7 +116,7 @@ def services_status(request: Request):
     output['stage3'] = output['stage3'] + '\n' + latest_file_name
 
     # logger.info("response: "+response)
-    return templates.TemplateResponse("general_pages/service_status.html",{"request":request, "content": output, "name": "service status" } )
+    return templates.TemplateResponse(request=request,name="general_pages/service_status.html",context={"content": output, "name": "service status" } )
 
 @general_pages_router.post("/delete_image")
 async def delete_image(request: Request):
@@ -158,7 +158,7 @@ def registry_images(request: Request):
       for t in versions["tags"]:
         images_list.append([i, t])
 
-  return templates.TemplateResponse("general_pages/images_list.html",{"request":request, "images_list": images_list, "name": "registry images" } )
+  return templates.TemplateResponse(request=request,name="general_pages/images_list.html",context={"images_list": images_list, "name": "registry images" } )
 
 # @general_pages_router.get("/software")
 # #async def software(request: Request):
@@ -171,8 +171,8 @@ def registry_images(request: Request):
 def software(request: Request, software: str | None = None):
     raw, content = infopage.software(software)
     if (software is None ):
-      return templates.TemplateResponse("general_pages/software.html",{"request":request, "content": content, "raw": raw, "name": "software"})
+      return templates.TemplateResponse(request=request,name="general_pages/software.html",context={"content": content, "raw": raw, "name": "software"})
     else:
       logger.info("software: "+software+" content:"+str(content))
-      return templates.TemplateResponse("general_pages/software_versions.html",{"request":request, "content": content, "raw": raw})
+      return templates.TemplateResponse(request=request,name="general_pages/software_versions.html",context={"content": content, "raw": raw})
 
