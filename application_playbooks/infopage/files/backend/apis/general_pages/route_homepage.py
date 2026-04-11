@@ -51,7 +51,7 @@ uvicorn_logger.addFilter(LogFilter())
 #logging.getLogger("uvicorn.access").setLevel(logging.CRITICAL)
 @general_pages_router.get("/")
 async def home(request: Request):
-	return templates.TemplateResponse("general_pages/homepage.html",{"request":request})
+	return templates.TemplateResponse(request=request,name="general_pages/homepage.html",context={})
 
 @general_pages_router.get("/check")
 #@log
