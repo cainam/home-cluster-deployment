@@ -26,7 +26,7 @@ applications:
         prefix: /hydra
     auth-operator: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true or =memory
       images:
-      - auth-operator
+      - python-operator
     idp:
       images:
       - idp
@@ -79,7 +79,7 @@ applications:
   tools:
     curator:
       images:
-      - fastapi
+      - python-operator
       network: true
       storage:
       - size: 1Mi

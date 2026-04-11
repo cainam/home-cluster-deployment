@@ -387,11 +387,13 @@ images:
       mkdir -p $ROOT/usr/local/bin 
       cp -dp /bazel/output/bazel /usr/local/bin/
  
-- name: auth-operator
+- name: python-operator
   section: auth
   requires:
   - python3
   type: gentoo-image-builder
+  env:
+    PATH: /py_env/bin:/usr/bin
   build:
     packages: dev-python/idna dev-python/urllib3 dev-python/certifi dev-python/requests
     finish_rootfs_build: |
