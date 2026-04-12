@@ -4,6 +4,11 @@ kind: Deployment
 metadata:
   name: {{ kustom.name }}
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0       # Do not start a new pod until the old one is gone
+      maxUnavailable: 1 # Allow the old pod to be terminated first
   replicas: 1
   selector:
     matchLabels:
