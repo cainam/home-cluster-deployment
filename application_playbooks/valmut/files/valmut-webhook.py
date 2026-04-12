@@ -12,17 +12,18 @@ from kubernetes.client import models as k8s
 import valmut_helper
 from valmut_model import Status, PatchType, AdmissionRequest, AdmissionResponse, AdmissionReview
 
-root = logging.getLogger()
-root.setLevel(logging.INFO)
+# 1. Reset and configure the root logger
+# force=True clears out any handlers Uvicorn or other libs already attached
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout,
+    force=True 
+)
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-root.addHandler(handler)
-
+# 2. Create your module logger
+# It will now inherit the root's stdout handler and format automatically
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 #logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #logger = logging.getLogger(__name__)
