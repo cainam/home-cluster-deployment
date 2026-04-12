@@ -40,7 +40,7 @@ spec:
         - name: PYTHONPATH
           value: /app/backend/:/py_env/lib/python3.13/site-packages/
         ports:
-        - name: http
+        - name: https
           containerPort: {{ container_port }}
         volumeMounts:
         - mountPath: /config

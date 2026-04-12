@@ -21,8 +21,8 @@
       ca_state_or_province_name: Some-State
       ca_email_address: a.b@c.de
       ca_requests:
-      - name: "{%- if application.value.network is defined and application.value.network != false -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
-        alt_names: "{{ application.value.network.hosts | default([application.key~'.'~k8s_namespace.key~'.svc']) }}"
+      - name: "{%- if application.value.network.publish == true -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
+        alt_names: "{%- if application.value.network.publish == true -%}{{ application.value.network.hosts }}{%- else -%}{{ [application.key~'.'~k8s_namespace.key~'.svc'] }}{%- endif -%}"
     include_role: 
       name: certificates
     when: "'flags' in application.value and 'certs' in application.value.flags"
