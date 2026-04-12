@@ -115,8 +115,9 @@ applications:
       images:
       - fastapi
       storage: 
-      - type: longhorn
+      - type: local_folder
         size: 10Mi
+        config: true
     descheduler:
       images:
       - descheduler

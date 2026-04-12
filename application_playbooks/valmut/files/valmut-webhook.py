@@ -146,7 +146,7 @@ def process_pod_object(req_object, mutate, exemptions=None):
           patch_ops.append({"op": "add", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
         else:
           if container.get("imagePullPolicy") != 'Always':
-          patch_ops.append({"op": "replace", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
+            patch_ops.append({"op": "replace", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
 
         if config.get('set') is not None and config.get('set').get(c_name) is not None and config.get('set').get(c_name).get('uid') is not None:
             uid = config['set'][c_name]['uid']
