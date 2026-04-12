@@ -143,11 +143,11 @@ def process_pod_object(req_object, mutate, exemptions=None):
 
         # imagePullPolicy => Always
         if container.get("imagePullPolicy") is None:
-          messagers.append(f"- imagePullPolicy doesn't exist, setting it to the default")
+          messages.append(f"- imagePullPolicy doesn't exist, setting it to the default")
           patch_ops.append({"op": "add", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
         else:
           if container.get("imagePullPolicy") != 'Always':
-            messagers.append(f"- imagePullPolicy is not correctly set, fixing this")
+            messages.append(f"- imagePullPolicy is not correctly set, fixing this")
             patch_ops.append({"op": "replace", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
 
         if config.get('set') is not None and config.get('set').get(c_name) is not None and config.get('set').get(c_name).get('uid') is not None:
