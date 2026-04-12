@@ -334,7 +334,6 @@ async def mutate_webhook(request: Request): # preferred over mutate_webhook(admi
 async def validate_webhook(request: Request):
     """
     Handles validating admission requests from Kubernetes.
-    This example denies any pod creation if it has a label 'admission-webhook-example.com/deny: "true"'.
     """
     
     logger.info("/validate called")
@@ -380,5 +379,4 @@ async def validate_webhook(request: Request):
 async def health_check():
     """Simple health check endpoint."""
     return {"status": "ok"}
-
 

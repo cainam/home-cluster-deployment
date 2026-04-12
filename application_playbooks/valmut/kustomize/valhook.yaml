@@ -26,7 +26,7 @@ webhooks:
     sideEffects: None # Indicates that calling the webhook has no side effects on objects other than the AdmissionReview request.
                       # Use 'NoneOnDryRun' if it has no side effects on dry run operations.
     admissionReviewVersions: ["v1", "v1beta1"] # Supported AdmissionReview versions (v1 is preferred)
-    timeoutSeconds: 5 # Maximum time in seconds to wait for the webhook to respond
+    timeoutSeconds: 15 # Maximum time in seconds to wait for the webhook to respond
     # exclude some .... 
     namespaceSelector:
       matchExpressions:
