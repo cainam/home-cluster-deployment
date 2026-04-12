@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import yaml
+import sys
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -11,10 +12,20 @@ from kubernetes.client import models as k8s
 import valmut_helper
 from valmut_model import Status, PatchType, AdmissionRequest, AdmissionResponse, AdmissionReview
 
-config_namespace = valmut_helper.get_current_namespace()
+root = logging.getLogger()
+root.setLevel(logging.INFO)
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logger = logging.getLogger(__name__)
 
 config_path = '/config/valmut.conf'
 try:
@@ -27,6 +38,7 @@ except yaml.YAMLError as e:
     logger.error(f"Error parsing YAML: {e}")
 
 name='valmut-mutate'
+config_namespace = valmut_helper.get_current_namespace()
 mutating_config = valmut_helper.get_configmap_data(config_namespace, name, logger)
 #first_key = next(iter(mutating_config)) # the name of the key doesn't matter, we only need the content
 mutating_config = yaml.safe_load(mutating_config['mutate'])
@@ -303,7 +315,7 @@ async def mutate_webhook(request: Request): # preferred over mutate_webhook(admi
 
         patches, messages = process_pod_object(req.object, True, mutating_config)
         full_message = f"Pod {req.object.get('metadata').get('name')} in namespace {req.object.get('metadata').get('namespace')} mutation: {'\n'.join(messages)}"
-        logger.warning(full_message)
+        logger.info(full_message)
         
         if "metadata" not in req.object: patches.append({"op": "add", "path": "/metadata", "value": {}})
         if "annotations" not in req.object.get("metadata", {}): patches.append({"op": "add", "path": "/metadata/annotations", "value": {}})
