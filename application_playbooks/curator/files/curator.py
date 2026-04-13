@@ -1,5 +1,19 @@
 import kopf
 import kubernetes
+import logging
+
+
+# Force the root logger to use a single format and single handler
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s:%(name)s:%(message)s', # Simple format like your first example
+    stream=sys.stdout,
+    force=True
+)
+
+# Optional: If you still see doubles from specific libraries,
+# disable propagation on the kopf logger specifically
+logging.getLogger("kopf").propagate = False
 
 MAX_RETRIES = 3
 
