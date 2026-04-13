@@ -3,6 +3,11 @@ import kubernetes
 
 MAX_RETRIES = 3
 
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+    # Disable cluster-wide namespace scanning
+    settings.scanning.disabled = True
+
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
     if not new:
