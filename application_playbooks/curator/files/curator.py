@@ -1,7 +1,7 @@
 import kopf
 import kubernetes
 import logging
-
+import sys
 
 # Force the root logger to use a single format and single handler
 logging.basicConfig(
