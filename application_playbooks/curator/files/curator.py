@@ -13,10 +13,10 @@ def configure(settings: kopf.OperatorSettings, **_):
     settings.scanning.disabled = True
     import logging
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    )
+#    logging.basicConfig(
+#        level=logging.INFO,
+#        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+#    )
 
     # Prevent duplication
     logging.getLogger('kopf').propagate = False
