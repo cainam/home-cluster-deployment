@@ -3,17 +3,23 @@ import kubernetes
 import logging
 import sys
 
-# Force the root logger to use a single format and single handler
+# 1. Configure your desired format on the Root logger
 logging.basicConfig(
     level=logging.INFO,
-    format='%(levelname)s:%(name)s:%(message)s', # Simple format like your first example
+    format='%(levelname)s:%(name)s:%(message)s',
     stream=sys.stdout,
     force=True
 )
 
-# Optional: If you still see doubles from specific libraries,
-# disable propagation on the kopf logger specifically
-logging.getLogger("kopf").propagate = False
+# 2. Specifically clean up Kopf's internal handlers 
+# This removes the "bracketed" format without silencing the messages
+kopf_logger = logging.getLogger('kopf')
+for handler in kopf_logger.handlers[:]:
+    kopf_logger.removeHandler(handler)
+
+# 3. Ensure propagation is ON
+# This allows Kopf messages to travel to your Root logger (Step 1)
+kopf_logger.propagate = True
 
 MAX_RETRIES = 3
 
