@@ -5,6 +5,8 @@ import sys
 
 MAX_RETRIES = 3
 
+logging.getLogger('kopf').propagate = False
+
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     # Disable cluster-wide namespace scanning
