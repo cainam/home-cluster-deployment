@@ -26,7 +26,6 @@ spec:
         - name: PYTHONPATH
           value: /app/backend/:/py_env/lib/python3.13/site-packages/
         image: {{ kustom.image }}
-        imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
           httpGet:

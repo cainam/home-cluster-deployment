@@ -25,7 +25,6 @@ spec:
           containers:
             - name: descheduler
               image: {{ kustom.image }}
-              imagePullPolicy: IfNotPresent
               command:
                 - /bin/descheduler
               args:

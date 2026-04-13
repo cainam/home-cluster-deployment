@@ -30,7 +30,6 @@ spec:
         - name: T
           value: UTC
         image: {{ kustom.image }}
-        imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
           periodSeconds: 10
@@ -71,7 +70,6 @@ spec:
         - until pg_isready -h postgres.db -p 5432;do echo waiting for database; sleep
           2; done;
         image: "db/postgresql:{{ software['postgresql'].version }}"
-        imagePullPolicy: IfNotPresent
         name: waitdb
         resources: {}
         terminationMessagePath: /dev/termination-log

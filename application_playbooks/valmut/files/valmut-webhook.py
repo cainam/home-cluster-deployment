@@ -284,7 +284,7 @@ def process_pod_object(req_object, mutate, exemptions=None):
 
     return patch_ops if mutate else allowed, messages
   
-def process_deployment_object(req_object, mutate, exemptions=None):
+def process_deployment_or_statefulset_object(req_object, mutate, exemptions=None):
     patch_ops = []
     messages = ''
     for name, data in exemptions.get('deployment', {}).items():
@@ -322,9 +322,9 @@ async def mutate_webhook(request: Request): # preferred over mutate_webhook(admi
         if "annotations" not in req.object.get("metadata", {}): patches.append({"op": "add", "path": "/metadata/annotations", "value": {}})
         annotations = req.object.get("metadata", {}).get("annotations", {})
         if "mutated" not in annotations: patches.append({"op": "add", "path": "/metadata/annotations/admission-webhook-example.com~1mutated-by", "value": "yepp"})
-    elif req.kind.get("kind") == "Deployment":
+    elif req.kind.get("kind") == "Deployment" or req.kind.get("kind") == "StatefulSet":
         logger.info(f"Mutating Deployment: {req.name} in namespace: {req.namespace}")
-        patches, messages = process_deployment_object(req.object, True, mutating_config)
+        patches, messages = process_deployment_or_statefulset_object(req.object, True, mutating_config)
     else: # non-Pod resources, just allow without modification
         logger.info(f"Allowing non-Pod resource of kind: {req.kind.get('kind')} without mutation.")
         return JSONResponse(content=AdmissionReview(response=AdmissionResponse(uid=req.uid, allowed=True)).model_dump(by_alias=True, exclude_none=True))
