@@ -11,6 +11,11 @@ logging.getLogger('kopf').propagate = False
 def configure(settings: kopf.OperatorSettings, **_):
     # Disable cluster-wide namespace scanning
     settings.scanning.disabled = True
+    import logging
+    logging.getLogger().handlers.clear()  # optional but often helpful
+
+    kopf_logger = logging.getLogger('kopf')
+    kopf_logger.propagate = False
 
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
