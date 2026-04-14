@@ -18,6 +18,7 @@ spec:
             - |
               # 1. Check if the registry is up (returns 200)
               # Replace with your actual registry health endpoint
+              set -x
               STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://10.10.10.10/v2/)
               
               if [ "$STATUS" -eq 200 ]; then
@@ -42,8 +43,4 @@ spec:
                    --data "{\"data\":{\"registry\":{\"state\": \"$VAL\"}}}" \
                    "${APISERVER}/api/v1/namespaces/${NAMESPACE}/configmaps/{{ kustom.name }}"
 
-              # 2. Patch the ConfigMap
-              kubectl patch configmap your-config-map-name \
-                --type merge \
-                -p "{\"data\":{\"registry_status\":\"$VAL\"}}"
           restartPolicy: OnFailure
