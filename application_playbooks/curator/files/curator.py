@@ -10,7 +10,8 @@ def configure(settings: kopf.OperatorSettings, **_):
     # Disable cluster-wide namespace scanning
     settings.scanning.disabled = True
     import logging
-    logging.getLogger('kopf').propagate = False
+    root = logging.getLogger()
+    root.handlers.clear()   # remove the duplicate-output handler
 
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
