@@ -23,6 +23,8 @@ def configure(settings: kopf.OperatorSettings, **_):
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
     logger.info(f"handler of kopf logger:{logging.getLogger('kopf').handlers}")  # likely []
     logger.info(f"handlers of root logger:{logging.getLogger().handlers}")        # was non-empty before
+    return
+
     if not new:
         return
 
