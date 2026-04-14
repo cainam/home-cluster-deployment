@@ -1,0 +1,13 @@
+resources:
+- CronJob.yaml
+- RoleBinding.yaml
+- Role.yaml
+- ServiceAccount.yaml
+
+configMapGenerator:
+- name: {{ kustom.name }}
+  literals:
+    - state=down
+    
+generatorOptions:
+  disableNameHash: true

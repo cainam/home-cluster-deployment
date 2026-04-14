@@ -160,10 +160,15 @@ TODO:
 - gentoo-image-builder: overlay playbook vs. overlay in main: keep one!
 - gentoo-image-builder: move dry_run actions to dedicated playbook, and remove dry_run option again
 - molecule ebuild
-- standard: PullPolicy Always, but this would block pod creation if registry is unavailable. Solution: set Always as standard, but run an operator to check for failures and correct the deployment
 - regression tests: implement continuous testing of the features to detect regressions
   - molecule in container: 
-podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
+    podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
 
-- curator: react only on failures
-- test: stop registry + delete pod
+ Image Policy Webhook
+- check Tag Restrictions: Prevent the use of the :latest tag, which is considered bad practice in production for stability and traceability.
+- Registry Enforcement: Block any image that doesn't come from your private, trusted registry (e.g., cr.yourcompany.com).
+-     Tag Restrictions: Prevent the use of the :latest tag, which is considered bad practice in production for stability and traceability.
+
+- standardize: 
+  - PullPolicy Always in Deployment/Jobs/StatefulSet, set Always in Pod only if a configmap entry has registry=up, dedicated cron checks the registry status
+

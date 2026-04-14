@@ -102,6 +102,9 @@ applications:
         type: longhorn
         size: 2Gi
   kubext:
+    service-check:
+      images:
+      - curl
     curator:
       images:
       - python-operator
