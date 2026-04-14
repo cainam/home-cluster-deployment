@@ -8,6 +8,6 @@ configMapGenerator:
 - name: {{ kustom.name }}
   literals:
     - state=down
-    
+
 generatorOptions:
-  disableNameHash: true
+  disableNameSuffixHash: true
