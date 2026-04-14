@@ -33,8 +33,7 @@ spec:
         - kopf
         - run
         - /app/curator.py
-        - -n 
-        - {{ kustom.namespace }}
+        - --allnamespaces
         env:
         - name: PYTHONPATH
           value: /app/backend/:/py_env/lib/python3.13/site-packages/
