@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
 - name: {{ kustom.name }}
   literals:
-    - state=down
+    - foo=bar
 
 generatorOptions:
   disableNameSuffixHash: true
