@@ -15,6 +15,7 @@ def configure(settings: kopf.OperatorSettings, **_):
 
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
+    logger.info(f"handler called, name: {name}")
     if not new:
         return
 
