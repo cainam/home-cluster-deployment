@@ -13,9 +13,9 @@ print(logging.getLogger().handlers)        # was non-empty before
 def configure(settings: kopf.OperatorSettings, **_):
     # Disable cluster-wide namespace scanning
     settings.scanning.disabled = True
-    import logging
-    root = logging.getLogger()
-    root.handlers.clear()   # remove the duplicate-output handler
+    #import logging
+    #root = logging.getLogger()
+    #root.handlers.clear()   # remove the duplicate-output handler
     print(logging.getLogger('kopf').handlers)  # likely []
     print(logging.getLogger().handlers)        # was non-empty before
 
