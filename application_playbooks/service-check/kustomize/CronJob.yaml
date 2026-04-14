@@ -40,7 +40,8 @@ spec:
                    -X PATCH \
                    -H "Authorization: Bearer ${TOKEN}" \
                    -H "Content-Type: application/merge-patch+json" \
-                   --data "{\"data\":{\"registry\":{\"state\": \"$VAL\"}}}" \
+                   --data "{\"data\":{\"registry\":\"{\\\"state\\\": \\\"$VAL\\\"}\"}}" \
                    "${APISERVER}/api/v1/namespaces/${NAMESPACE}/configmaps/{{ kustom.name }}"
 
+                   #--data "{\"data\":{\"registry\":{\"state\": \"$VAL\"}}}" \
           restartPolicy: OnFailure
