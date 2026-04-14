@@ -18,6 +18,9 @@ def configure(settings: kopf.OperatorSettings, **_):
     #root.handlers.clear()   # remove the duplicate-output handler
     print(logging.getLogger('kopf').handlers)  # likely []
     print(logging.getLogger().handlers)        # was non-empty before
+    # Fix duplicate logging: keep only Kopf's handler on root logger
+    root = logging.getLogger()
+    root.handlers = [ h for h in root.handlers if h.__class__.__name__ == "_KopfStreamHandler" ]
 
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
