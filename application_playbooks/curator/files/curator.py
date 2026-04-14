@@ -5,7 +5,7 @@ import sys
 
 MAX_RETRIES = 3
 
-print(logging.getLogger('kopf').handlers)  # likely []
+(logging.getLogger('kopf').handlers)  # likely []
 print(logging.getLogger().handlers)        # was non-empty before
 
 
@@ -21,6 +21,8 @@ def configure(settings: kopf.OperatorSettings, **_):
 
 @kopf.on.field('v1', 'pods', field='status.containerStatuses')
 def handle_pull_failures(logger, old, new, name, namespace, spec, **kwargs):
+    logger.info(logging.getLogger('kopf').handlers)  # likely []
+    logger.info(logging.getLogger().handlers)        # was non-empty before
     if not new:
         return
 
