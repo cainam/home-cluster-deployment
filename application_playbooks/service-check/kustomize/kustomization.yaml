@@ -11,7 +11,7 @@ configMapGenerator:
   literals: []
 - name: {{ kustom.name }}-certs
   literals:
-  - service-ca-bundle.crt={{ application_playbooks[application.key].vars.ca_bundle | indent(6) }}
+  - service-ca-bundle.crt={{ application_playbooks[application.key].vars.ca_bundle | to_json }}
 
 generatorOptions:
   disableNameSuffixHash: true
