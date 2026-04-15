@@ -19,7 +19,7 @@ spec:
               # 1. Check if the registry is up (returns 200)
               # Replace with your actual registry health endpoint
               set -x
-              STATUS=$(curl -k -o /dev/null -s -w "%{http_code}" https://10.10.10.10/v2/)
+              STATUS=$(curl -k -o /dev/null -s -w "%{http_code}" https://{{ registry }}/v2/)
               
               if [ "$STATUS" -eq 200 ]; then
                 VAL="available"

@@ -11,6 +11,7 @@ data:
     {% for route in net.routes %}
       {{ route.endpointIP }} {{ route.domain }}
     {% endfor %}
+      {{ lookup('pipe', 'getent hosts ' ~ (registry|split(':')|first) ) }}
       fallthrough
     }
     health {
