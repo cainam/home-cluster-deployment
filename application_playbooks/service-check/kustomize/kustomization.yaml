@@ -10,10 +10,8 @@ configMapGenerator:
 - name: {{ kustom.name }}
   literals: []
 - name: {{ kustom.name }}-certs
-  files:
-{% for file in local_ca_files %}
-      - {{ file }}
-{% endfor %}
+  literals:
+  - service-ca-bundle.crt={{ bundled_ca_content | quote }}
 
 generatorOptions:
   disableNameSuffixHash: true
