@@ -9,6 +9,7 @@ spec:
       template:
         spec:
           serviceAccountName: {{ kustom.name }}
+          restartPolicy: OnFailure
           containers:
           - name: checker
             image: {{ kustom.image }}
@@ -39,12 +40,11 @@ spec:
               cat /etc/certs/service-ca-bundle.crt
               curl -s --cacert /etc/certs/service-ca-bundle.crt -X PATCH -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/merge-patch+json" \
                    --data "{\"data\":{\"registry\":\"{\\\"state\\\": \\\"$VAL\\\"}\"}}" "${APISERVER}/api/v1/namespaces/${NAMESPACE}/configmaps/{{ kustom.name }}"
-          restartPolicy: OnFailure
-          volumeMounts:
+            volumeMounts:
+            - name: {{ kustom.name }}-certs
+              mountPath: /etc/certs
+              readOnly: true
+          volumes:
           - name: {{ kustom.name }}-certs
-            mountPath: /etc/certs
-            readOnly: true
-        volumes:
-        - name: {{ kustom.name }}-certs
-          configMap:
-            name: {{ kustom.name }}-certs
+            configMap:
+              name: {{ kustom.name }}-certs
