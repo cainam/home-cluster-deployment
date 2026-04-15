@@ -171,6 +171,8 @@ TODO:
 - Registry Enforcement: Block any image that doesn't come from your private, trusted registry (e.g., cr.yourcompany.com).
 -     Tag Restrictions: Prevent the use of the :latest tag, which is considered bad practice in production for stability and traceability.
 
+- envoy: document build process
+
 - standardize: 
   - PullPolicy Always in Deployment/Jobs/StatefulSet, set Always in Pod only if a configmap entry has registry=up, dedicated cron checks the registry status
   - service-check cron: 1. add registry host entry into coredns configmap + 2. see how to replace curl -k option
