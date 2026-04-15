@@ -129,6 +129,8 @@ Mosquitto:
 
 applicationSecurity: allows to configure locally security settings per application which are not pushed to github, e.g. runUser which is then not only used for the concerning securityContext entry of a pod, but also for the storage deployed for it
 
+service-check: CronJob which checks if the registry is reachable and stores the result in a configmap which is then used by the valmut Mutating Webhook
+
 Kubernetes Dashboard:
 - with update, skip-login was no longer possible, seems Authorization Header is required (https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md ), set-authorization-header can nolonger be used (https://oauth2-proxy.github.io/oauth2-proxy/configuration/alpha-config/)  => somehow set bearer token in oauth2-proxy or istio, see: https://elastisys.com/istio-and-oauth2-proxy-in-kubernetes-for-microservice-authentication/
 - follow https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md

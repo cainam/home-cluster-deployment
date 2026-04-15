@@ -39,6 +39,7 @@
         additional_images: "{{ (results.additional_images.stat.exists and results.additional_images.stat.isreg) | ternary(results.additional_images.item.path, omit) }}"
         migrate: "{{ (results.migrate.stat.exists and results.migrate.stat.isreg) | ternary(results.migrate.item.path, omit) }}"
         post_deployment: "{{ (results.post_deployment.stat.exists and results.post_deployment.stat.isreg) | ternary(results.post_deployment.item.path, omit) }}"
+        vars: {}
     set_fact:
       application_playbooks: "{{ application_playbooks | default({}) | combine({application.key: current_app_data}, recursive=True) }}"
     when: results.root.stat.exists and results.root.stat.isdir

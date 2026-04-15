@@ -9,6 +9,11 @@ resources:
 configMapGenerator:
 - name: {{ kustom.name }}
   literals: []
+- name: {{ kustom.name }}-certs
+  files:
+{% for file in local_ca_files %}
+      - {{ file }}
+{% endfor %}
 
 generatorOptions:
   disableNameSuffixHash: true

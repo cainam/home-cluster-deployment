@@ -1,7 +1,6 @@
 - name: set app fact
   set_fact:
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
-    app: "{{ application.key }}"
 
 - block:
   - debug:
@@ -30,19 +29,19 @@
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
-        var_additional_images: "{{ app }}_additional_images"
+        var_additional_images: "{{ application.key }}_additional_images"
         kustomize_dir: "{{ build_dir }}"
         registry_path: "{{ k8s_namespace.key }}"
-      include_tasks: "{{ application_playbooks[app]['additional_images'] }}"
+      include_tasks: "{{ application_playbooks[application.key]['additional_images'] }}"
 
     - debug:
-        msg: "return from additional_images: {{ lookup('vars', app~'_additional_images')|to_nice_yaml }}"
-    when: app in application_playbooks and 'additional_images' in application_playbooks[application.key]
+        msg: "return from additional_images: {{ lookup('vars', application.key~'_additional_images')|to_nice_yaml }}"
+    when: application.key in application_playbooks and 'additional_images' in application_playbooks[application.key]
 
   - name: "{{ name_prefix }} update images variables"
     set_fact:
-      current_app_images: "{{ images|default([]) + lookup('vars', app ~ '_additional_images')|default([]) }}"
-      current_limit_images: "{{ application.value.images|default([]) + (lookup('vars', app ~ '_additional_images') | map(attribute='name') | list|default([])) }}"
+      current_app_images: "{{ images|default([]) + lookup('vars', application.key ~ '_additional_images')|default([]) }}"
+      current_limit_images: "{{ application.value.images|default([]) + (lookup('vars', application.key ~ '_additional_images') | map(attribute='name') | list|default([])) }}"
 
   - name: "{{ name_prefix }} handle additional images"
     vars:
@@ -91,8 +90,8 @@
 
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"
-      include_tasks: "{{ application_playbooks[app]['migrate'] }}"
-    when: app in application_playbooks and 'migrate' in application_playbooks[application.key]
+      include_tasks: "{{ application_playbooks[application.key]['migrate'] }}"
+    when: application.key in application_playbooks and 'migrate' in application_playbooks[application.key]
 
   - name: "{{ name_prefix }} kustomize"
     shell: |
@@ -100,8 +99,8 @@
 
   - block:
     - name: "{{ name_prefix }} application playbook - post_deployment - playbook run"
-      include_tasks: "{{ application_playbooks[app]['post_deployment'] }}"
-    when: app in application_playbooks and 'post_deployment' in application_playbooks[application.key]
+      include_tasks: "{{ application_playbooks[application.key]['post_deployment'] }}"
+    when: application.key in application_playbooks and 'post_deployment' in application_playbooks[application.key]
   
 - block:
   - name: "{{ name_prefix }} manage application requirements"
