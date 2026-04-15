@@ -8,8 +8,7 @@ resources:
 
 configMapGenerator:
 - name: {{ kustom.name }}
-  literals:
-    - foo=bar
+  literals: []
 
 generatorOptions:
   disableNameSuffixHash: true
