@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.2
+    version: v0.28.4
     installed:
       pattern: "flannel:"
     latest:
@@ -8,7 +8,7 @@ software:
       params:
         repo: flannel-io/flannel
   flannel-cni-plugin:
-    version: v1.9.0-flannel1
+    version: v1.9.1-flannel1
     installed:
       pattern: "lannel-cni-plugin:"
     latest:
@@ -32,7 +32,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.15.1
+    version: v7.15.2
     installed:
       pattern: "oauth2-proxy:"
     latest:
