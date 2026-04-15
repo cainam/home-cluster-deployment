@@ -5,6 +5,6 @@
       {{ lookup('file', cert_path ~'/'~ file) }}
       {% endfor %}
   set_fact:
-    application_playbooks: "{{ application_playbooks | default({}) | combine({application.key:{'vars':{'registry_cert':ca_bundle}} }, recursive=True) }}"
+    application_playbooks: "{{ application_playbooks | default({}) | combine({application.key:{'vars':{'ca_bundle':ca_bundle}} }, recursive=True) }}"
  
 

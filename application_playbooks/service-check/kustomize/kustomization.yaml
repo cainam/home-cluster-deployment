@@ -11,7 +11,7 @@ configMapGenerator:
   literals: []
 - name: {{ kustom.name }}-certs
   literals:
-  - service-ca-bundle.crt={{ bundled_ca_content | quote }}
+  - service-ca-bundle.crt={{ application_playbooks[application.key].vars.ca_bundle | quote }}
 
 generatorOptions:
   disableNameSuffixHash: true
