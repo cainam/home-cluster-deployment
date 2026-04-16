@@ -6,6 +6,7 @@ additional_roles:
 
 auto_silent: true
 own_git_url: https://github.com/cainam/home-cluster-deployment.git
+applications_git: https://github.com/cainam/application-specifics.git
 timezone: Europe/Amsterdam
 path: /usr/local/bin/:/usr/sbin:/usr/bin:/sbin:/bin
 

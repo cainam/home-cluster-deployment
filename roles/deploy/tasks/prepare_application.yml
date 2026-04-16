@@ -2,14 +2,14 @@
   set_fact:
     app: "{{ application.key }}"
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
-    application_playbook_path: "{{ local_playbook_temp }}/application_playbooks/{{ application.key }}"
+    application_playbook_path: "{{ local_playbook_temp }}/applications/{{ application.key }}"
   run_once: true
 
 - block: # prepare application playbook integration
   - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
     ansible.builtin.git:
-      repo: '{{ own_git_url }}'
-      dest: "{{ local_playbook_temp }}"
+      repo: '{{ applications_git }}'
+      dest: "{{ local_playbook_temp }}/applications"
       depth: 1
     ignore_errors: true
     delegate_to: localhost

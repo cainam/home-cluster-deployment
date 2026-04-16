@@ -158,13 +158,8 @@ TODO:
 - try to create modules for Ansible: kustom, gateway, dependencies, code (infopage/auth-operator)
   - move to application_deployment: kustomize + vars/images 
 - check to use different /etc/portage between builder deploys and image-root deploys
-- create ebuild for python-kubernetes
-- gentoo-image-builder: overlay playbook vs. overlay in main: keep one!
-- gentoo-image-builder: move dry_run actions to dedicated playbook, and remove dry_run option again
-- molecule ebuild
 - regression tests: implement continuous testing of the features to detect regressions
   - molecule in container: 
     podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
 
 - envoy: document build process
-- applications_playbooks: add check for images.yaml directly and include tasks in main playbook instead of each application
