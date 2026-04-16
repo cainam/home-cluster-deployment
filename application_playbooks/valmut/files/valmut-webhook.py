@@ -167,7 +167,8 @@ def process_pod_object(req_object, mutate, exemptions=None):
             set_caps = config['set'][c_name]['caps']
 
         # forbid the use of image tag "latest"
-        if container.get('securityContext').split(':')[-1] == 'latest'
+        image = container.get('image')
+        if ':' not in image or image.split(':')[-1] == 'latest':
           messages.append(f"- Container '{c_name}': image tag 'latest' is forbidden => violated, creation forbidden")
           allowed = False
 
