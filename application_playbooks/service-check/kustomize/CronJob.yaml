@@ -20,7 +20,6 @@ spec:
               # 1. Check if the registry is up (returns 200)
               # Replace with your actual registry health endpoint
               set -x
-              cat /etc/certs/service-ca-bundle.crt
               STATUS=$(curl --cacert /etc/certs/service-ca-bundle.crt -o /dev/null -s -w "%{http_code}" https://{{ registry }}/v2/)
               
               if [ "$STATUS" -eq 200 ]; then
@@ -38,9 +37,8 @@ spec:
               CACERT=${SERVICEACCOUNT}/ca.crt
 
               # patch the configmap
-              curl -s --cacert "${CACERT}" -X PATCH -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/merge-patch+json" \
+              curl --cacert "${CACERT}" -X PATCH -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/merge-patch+json" \
                    --data "{\"data\":{\"registry\":\"{\\\"state\\\": \\\"$VAL\\\"}\"}}" "${APISERVER}/api/v1/namespaces/${NAMESPACE}/configmaps/{{ kustom.name }}"
-              echo $?
             volumeMounts:
             - name: {{ kustom.name }}-certs
               mountPath: /etc/certs
