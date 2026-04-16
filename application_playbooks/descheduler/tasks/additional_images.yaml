@@ -1,9 +1,0 @@
-- name: load image description
-  include_vars:
-    file: ../vars/application_images.yaml
-    name: _my_images
-
-- name: "set var {{ var_additional_images }}"
-  set_fact:
-    "{{ var_additional_images }}": "{{ _my_images.images }}"
-

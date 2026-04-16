@@ -169,7 +169,7 @@ def process_pod_object(req_object, mutate, exemptions=None):
         # forbid the use of image tag "latest"
         image = container.get('image')
         if ':' not in image or image.split(':')[-1] == 'latest':
-          messages.append(f"- Container '{c_name}': image tag 'latest' is forbidden => violated, creation forbidden")
+          messages.append(f"- Container '{c_name}': image tag 'latest' or no tag is forbidden => violated, creation forbidden")
           allowed = False
 
         sc = container.get('securityContext')

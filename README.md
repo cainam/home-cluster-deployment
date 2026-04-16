@@ -166,10 +166,5 @@ TODO:
   - molecule in container: 
     podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
 
- Image Policy Webhook
-- check Tag Restrictions: Prevent the use of the :latest tag, which is considered bad practice in production for stability and traceability.
-- Registry Enforcement: Block any image that doesn't come from your private, trusted registry (e.g., cr.yourcompany.com).
--     Tag Restrictions: Prevent the use of the :latest tag, which is considered bad practice in production for stability and traceability.
-
 - envoy: document build process
 - applications_playbooks: add check for images.yaml directly and include tasks in main playbook instead of each application

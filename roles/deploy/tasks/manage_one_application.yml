@@ -27,21 +27,31 @@
     when: "'flags' in application.value and 'certs' in application.value.flags"
 
   - block:
+    - name: "{{ name_prefix }} application playbook - additional_images - import vars}}"
+      include_vars:
+        file: "{{ application_playbooks[application.key]['additional_images_list'] }}"
+        name: _my_images
+
+    - name: "{{ name_prefix }} application playbook - additional_images - set_fact"
+      set_fact:
+        "{{ application.key }}_additional_images_list": "{{ _my_images.images }}"
+    when: application.key in application_playbooks and 'additional_images_playbook' in application_playbooks[application.key]
+
+  - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
-        var_additional_images: "{{ application.key }}_additional_images"
+        var_additional_images: "{{ application.key }}_additional_images_playbook"
         kustomize_dir: "{{ build_dir }}"
         registry_path: "{{ k8s_namespace.key }}"
-      include_tasks: "{{ application_playbooks[application.key]['additional_images'] }}"
-
-    - debug:
-        msg: "return from additional_images: {{ lookup('vars', application.key~'_additional_images')|to_nice_yaml }}"
-    when: application.key in application_playbooks and 'additional_images' in application_playbooks[application.key]
+      include_tasks: "{{ application_playbooks[application.key]['additional_images_playbook'] }}"
+    when: application.key in application_playbooks and 'additional_images_playbook' in application_playbooks[application.key]
 
   - name: "{{ name_prefix }} update images variables"
+    vars:
+      additional_images: "{{ lookup('vars', application.key ~ '_additional_images_playbook')|default([]) + lookup('vars', application.key ~ '_additional_images_list')|default([]) }}"
     set_fact:
-      current_app_images: "{{ images|default([]) + lookup('vars', application.key ~ '_additional_images')|default([]) }}"
-      current_limit_images: "{{ application.value.images|default([]) + (lookup('vars', application.key ~ '_additional_images') | map(attribute='name') | list|default([])) }}"
+      current_app_images: "{{ images|default([]) + additional_images }}"
+      current_limit_images: "{{ application.value.images|default([]) + i(additional_images | map(attribute='name') | list|default([])) }}"
 
   - name: "{{ name_prefix }} handle additional images"
     vars:

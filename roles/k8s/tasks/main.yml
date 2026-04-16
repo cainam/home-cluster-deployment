@@ -38,7 +38,7 @@
     dest: "{{ kubelet_config }}"
 
 - name: get etcd image
-  shell:  "kubeadm config images list --kubernetes-version {{ current_k8s_version if current_k8s_version else k8s_version }} --image-repository {{ registry }}/{{ kubernetes_image_section }} | grep /etcd:"
+  shell:  "kubeadm config images list --kubernetes-version {{ current_k8s_version if current_k8s_version else k8s_version }} --image-repository {{ kubernetes_image_section }} | grep /etcd:"
   register: shell_etcd_image
   run_once: true
   delegate_to: "{{ selected_host }}"
