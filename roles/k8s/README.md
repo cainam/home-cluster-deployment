@@ -41,3 +41,5 @@ k8s-2-int ~ # ip addr show dev cni0 | grep inet
 ## example for patching
     # kubectl -n kube-system patch ds kube-flannel-ds -p '{"spec": {"template": {"spec": {"containers": [{"name": "kube-flannel","args": ["--ip-masq","--kube-subnet-mgr","--flannel-backend=host-gw"]}]}}}}'
 
+# AlwaysPullImages
+This little admission plugin is enabled to enforce imagePullPolicy=Always for all admissions through api server (which does not include the kubelet managed pods)

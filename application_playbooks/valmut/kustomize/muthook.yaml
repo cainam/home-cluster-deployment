@@ -20,9 +20,7 @@ webhooks:
         apiGroups: ["apps"] # "" indicates core API group (e.g., Pods, Services, Deployments)
         apiVersions: ["v1"]
         resources: ["deployments"]
-    failurePolicy: Ignore # How Kubernetes handles webhook failures:
-                        # - Fail: Denies the request if the webhook fails or is unreachable (recommended for strict policies)
-                        # - Ignore: Allows the request to proceed even if the webhook fails (useful for non-critical mutations/validations)
+    failurePolicy: Fail
     sideEffects: None # Indicates that calling the webhook has no side effects on objects other than the AdmissionReview request.
                       # Use 'NoneOnDryRun' if it has no side effects on dry run operations.
     admissionReviewVersions: ["v1", "v1beta1"] # Supported AdmissionReview versions (v1 is preferred)

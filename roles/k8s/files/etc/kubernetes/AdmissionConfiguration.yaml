@@ -16,3 +16,5 @@ plugins:
       usernames: []
       runtimeClasses: []
       namespaces: [home,kube-system,longhorn-system]
+- name: AlwaysPullImages
+  configuration: null  # No extra config needed for this plugin

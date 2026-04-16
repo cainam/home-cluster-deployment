@@ -154,15 +154,6 @@ def process_pod_object(req_object, mutate, exemptions=None):
               messages.append(f"- adding emptyDir volumeMount in container {c_name} for {ed['path']}")
               patch_ops.append({"op": "add", "path": container_path+"/volumeMounts/-", "value": {'name': ed['name'], 'mountPath': ed['path'] } })
 
-        # imagePullPolicy => Always
-        if container.get("imagePullPolicy") is None:
-          messages.append(f"- imagePullPolicy doesn't exist, setting it to the default")
-          patch_ops.append({"op": "add", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
-        else:
-          if container.get("imagePullPolicy") != 'Always':
-            messages.append(f"- imagePullPolicy is not correctly set, fixing this")
-            patch_ops.append({"op": "replace", "path": container_path+"/imagePullPolicy", 'value': 'Always'})
-
         if config.get('set') is not None and config.get('set').get(c_name) is not None and config.get('set').get(c_name).get('uid') is not None:
             uid = config['set'][c_name]['uid']
         else:
@@ -174,6 +165,11 @@ def process_pod_object(req_object, mutate, exemptions=None):
         set_caps = []
         if config.get('set') is not None and config.get('set').get(c_name) is not None and config.get('set').get(c_name).get('caps') is not None:
             set_caps = config['set'][c_name]['caps']
+
+        # forbid the use of image tag "latest"
+        if container.get('securityContext').split(':')[-1] == 'latest'
+          messages.append(f"- Container '{c_name}': image tag 'latest' is forbidden => violated, creation forbidden")
+          allowed = False
 
         sc = container.get('securityContext')
         logger.info(f"securityContext of {container_type} {i}: {sc}")
@@ -284,7 +280,7 @@ def process_pod_object(req_object, mutate, exemptions=None):
 
     return patch_ops if mutate else allowed, messages
   
-def process_deployment_or_statefulset_object(req_object, mutate, exemptions=None):
+def process_controller_object(req_object, mutate, exemptions=None):
     patch_ops = []
     messages = ''
     for name, data in exemptions.get('deployment', {}).items():
@@ -322,9 +318,9 @@ async def mutate_webhook(request: Request): # preferred over mutate_webhook(admi
         if "annotations" not in req.object.get("metadata", {}): patches.append({"op": "add", "path": "/metadata/annotations", "value": {}})
         annotations = req.object.get("metadata", {}).get("annotations", {})
         if "mutated" not in annotations: patches.append({"op": "add", "path": "/metadata/annotations/admission-webhook-example.com~1mutated-by", "value": "yepp"})
-    elif req.kind.get("kind") == "Deployment" or req.kind.get("kind") == "StatefulSet":
+    elif req.kind.get("kind") in ["Deployment", "StatefulSet", "CronJob", "DaemonSet"]:
         logger.info(f"Mutating Deployment: {req.name} in namespace: {req.namespace}")
-        patches, messages = process_deployment_or_statefulset_object(req.object, True, mutating_config)
+        patches, messages = process_controller_object(req.object, True, mutating_config)
     else: # non-Pod resources, just allow without modification
         logger.info(f"Allowing non-Pod resource of kind: {req.kind.get('kind')} without mutation.")
         return JSONResponse(content=AdmissionReview(response=AdmissionResponse(uid=req.uid, allowed=True)).model_dump(by_alias=True, exclude_none=True))
