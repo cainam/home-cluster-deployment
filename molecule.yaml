@@ -10,6 +10,7 @@ platforms:
   - name: instance
     image: myregistry.adm13:443/local/molecule-tester:20260416
     network_mode: host
+    networks: []
     pre_build_image: true
     security_opts:
       - seccomp=unconfined
