@@ -1,7 +1,0 @@
-- name: software configuration file
-  vars:
-    sw:
-      software: "{{ software }}"
-  copy:
-    content: "{{ sw | to_nice_yaml }}"
-    dest: "{{ applications[k8s_namespace.key][application.key].storage | map(attribute='dest_dir') | first }}/backend/software"

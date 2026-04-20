@@ -23,8 +23,8 @@ all:
       system_roles:
       - control_plane
     k8s-2-int.adm13:
-      boot_root: PARTUUID=2e93d72b-02
-      boot_uuid: 92BE-3FCF
+      boot_root: PARTUUID=83551ef6-02
+      boot_uuid: 3DD5-E50D
       system_roles:
       - control_plane
 

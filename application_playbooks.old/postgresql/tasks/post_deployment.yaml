@@ -1,5 +1,0 @@
-
-- name: scale to 1
-  ansible.builtin.shell: |
-    kubectl scale --replicas=1 -n {{ k8s_namespace.key }} statefulset postgres
-  when: is_major_upgrade

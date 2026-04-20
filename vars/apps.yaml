@@ -77,6 +77,7 @@ applications:
           username: ha
           password: same
   tools:
+    tester:
     infopage:
       images:
       - fastapi

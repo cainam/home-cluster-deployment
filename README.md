@@ -160,4 +160,8 @@ TODO:
   - molecule in container: 
     podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
 
+non-privileged ín tester image:
+/ $ podman run -it   --rm --net=host --uts=host --pid=host --ipc=host --security-opt label=disable --tls-verify=false  --security-opt seccomp=unconfined myregistry.adm13:443/local/molecule:20260416 sh
+clone repo with submodules: git clone --recursive https://github.com/cainam/home-cluster-deployment.git
+
 - envoy: document build process
