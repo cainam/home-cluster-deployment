@@ -7,7 +7,7 @@ driver:
     managed: true
 platforms:
   - name: instance
-    image: myregistry.adm13:443/local/molecule-tester:20260305
+    image: myregistry.adm13:443/local/molecule-tester:20260416
     pre_build_image: true
     security_opts:
       - seccomp=unconfined
