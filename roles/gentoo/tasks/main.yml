@@ -1,4 +1,12 @@
 ---
+- name: create user podman
+  user:
+    name: podman
+    shell: /bin/nologin
+    group: nogroup
+    home: /home/podman
+    uid: 9823907
+
 - name: ensure required directories exist
   file:
     path: "{{ item.path }}"

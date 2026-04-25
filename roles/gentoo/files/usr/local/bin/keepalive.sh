@@ -8,7 +8,7 @@ echo "$d - $1 $2 has transitioned to the $3 state with a priority of $4" >> "${l
 exec >> $logf
 if [ "$2" = "k8s" ]; then
   if [ "$3" = "MASTER" ]; then
-    for service in registry ; do
+    for service in registry podman; do
       echo "$d - stop output: $(rc-service ${service} stop 2>&1)" >> "${logf}"
       echo "$d - start output: $(rc-service ${service} start 2>&1)" >> "${logf}"
       echo "$d - service status: ${service}: $( rc-service ${service} status | cat )" >> "${logf}"
