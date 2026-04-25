@@ -165,3 +165,8 @@ non-privileged ín tester image:
 clone repo with submodules: git clone --recursive https://github.com/cainam/home-cluster-deployment.git
 
 - envoy: document build process
+
+- podman:
+  - create full home structure, copy files and set permissions
+  - known hosts to include podman host
+  - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)

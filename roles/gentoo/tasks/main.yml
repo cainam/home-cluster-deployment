@@ -148,6 +148,10 @@
     dest: "~podman/.ssh/id_ed25519.pub"
     owner: podman
     group: nogroup
+  - content: "{{ ssh_keys.podman.pub }}"
+    dest: "~podman/.ssh/authorized_keys"
+    owner: podman
+    group: nogroup
 
 - name: authorized_keys
   copy:
