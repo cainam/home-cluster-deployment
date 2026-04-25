@@ -10,7 +10,9 @@
 {% endif %}
 {% endfor %}
 
-{{ net.local_master_ip }} k8s.adm13 myregistry.adm13 podman.adm13
+{% for l in net.virtual_ips %}
+{{ l.ip }} {% for n in l.names %}{{ n }} {%endfor %}
+{% endfor %}
 
 {% for route in net.routes %}
 {{ route.endpointIP }} {{ route.domain }}

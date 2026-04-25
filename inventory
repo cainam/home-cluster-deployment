@@ -15,9 +15,6 @@ all:
       - image_builder
       - worker
     k8s-1-int.adm13:
-      alt_names:
-        Xgentoo_build:
-        Xgentoo-binhost:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
       system_roles:

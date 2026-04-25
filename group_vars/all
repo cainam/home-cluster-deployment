@@ -32,7 +32,9 @@ certs:
 net:
   domain_external: adm13.dnshome.de
   base_domain: my-lb.adm13
-  local_master_ip: 10.10.10.10
+  virtual_ips:
+  - ip: 10.10.10.10
+    names: ["k8s.adm13", "myregistry.adm13", "podman.adm13"]
   open_services:
   - oauth2-proxy
   - hydra

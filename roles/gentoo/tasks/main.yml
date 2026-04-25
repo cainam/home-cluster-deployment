@@ -12,6 +12,7 @@
     path: "{{ item.path }}"
     state: directory
     mode: "{{ item.perm }}"
+    owner: "{{ item.owner|default('root') }}"
   loop:
     - path: /etc/modprobe.d
       perm: u=rwx,g=rx,o=rx
@@ -33,6 +34,9 @@
       perm: u=rwx,g=rx,o=rx
     - path: /etc/cron.hourly
       perm: u=rwx,g=rx
+    - path: ~podman/.ssh
+      perm: u=rwx,g=,o=
+      owner: podman
 
 - name: auto.master
   lineinfile: 
@@ -83,9 +87,6 @@
     rsync_opts:
       - "--relative"
 
-- name: include secrets (wlan, ssh_keys)
-  include_vars: "{{ local_only }}/secrets"
-
 - name: first line in iwd security file
   lineinfile:
     path: /var/lib/iwd/AdM13.psk
@@ -126,19 +127,23 @@
     dest: "{{ item.dest }}"
     owner: "{{ item.owner|default('root') }}"
     group: "{{ item.group|default('root') }}"
+    mode: "{{ item.mode|default('u=rw,g=r,o=r') }}"
   loop:
   - content: "{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key.pub
   - content: "{{ ssh_keys.hosts[inventory_hostname].private}}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key
+    mode: u=rw,g=,o=
   - content: "ssh-{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].admin_pub~' root@'~inventory_hostname }}"
     dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}.pub
   - content: "{{ ssh_keys.hosts[inventory_hostname].admin_key }}"
     dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}
+    mode: u=rw,g=,o=
   - content: "{{ ssh_keys.podman.key }}"
     dest: "~podman/.ssh/id_ed25519"
     owner: podman
     group: nogroup
+    mode: u=rw,g=,o=
   - content: "{{ ssh_keys.podman.pub }}"
     dest: "~podman/.ssh/id_ed25519.pub"
     owner: podman
