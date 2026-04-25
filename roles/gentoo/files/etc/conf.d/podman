@@ -9,3 +9,6 @@ SOCKET="unix:///run/podman/podman.sock"
 
 # Configure the user[:group] the API service daemon will run as
 RUN_AS_USER="podman:nogroup"
+
+rc_cgroup_mode="delegated"
+rc_cgroup_user="podman:podman"

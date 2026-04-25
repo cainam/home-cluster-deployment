@@ -124,6 +124,8 @@
   copy:
     content: "{{ item.content }}"
     dest: "{{ item.dest }}"
+    owner: "{{ item.owner|default('root') }}"
+    group: "{{ item.group|default('root') }}"
   loop:
   - content: "{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key.pub
@@ -133,6 +135,14 @@
     dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}.pub
   - content: "{{ ssh_keys.hosts[inventory_hostname].admin_key }}"
     dest: /root/.ssh/id_{{ ssh_keys.hosts[inventory_hostname].type }}
+  - content: "{{ ssh_keys.podman.key }}"
+    dest: "~podman/.ssh/id_ed25519"
+    owner: podman
+    group: nogroup
+  - content: "{{ ssh_keys.podman.pub }}"
+    dest: "~podman/.ssh/id_ed25519.pub"
+    owner: podman
+    group: nogroup
 
 - name: authorized_keys
   copy:
