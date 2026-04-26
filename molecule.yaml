@@ -10,6 +10,10 @@ platforms:
   - name: instance
     image: myregistry.adm13:443/local/molecule-tester:20260416
     network_mode: host
+    etc_hosts:
+      "molecule-instance": "127.0.0.1"
+    network_args:
+      - "pasta:--no-ipv6,--no-copy-addrs"
     networks: []
     pre_build_image: true
     security_opts:
