@@ -170,3 +170,4 @@ clone repo with submodules: git clone --recursive https://github.com/cainam/home
   - create full home structure, copy files and set permissions
   - known hosts to include podman host
   - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
+  - replace IP by podman hostname

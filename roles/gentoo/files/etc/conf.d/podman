@@ -12,3 +12,5 @@ RUN_AS_USER="podman:nogroup"
 
 rc_cgroup_mode="delegated"
 rc_cgroup_user="podman:podman"
+
+export CONTAINERS_CONF="/etc/containers/podman-service-rootless.conf"
