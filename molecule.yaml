@@ -28,3 +28,5 @@ provisioner:
 dependency:
   name: galaxy
   enabled: False
+verifier:
+  name: ansible
