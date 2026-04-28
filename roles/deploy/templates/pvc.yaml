@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: {{ kustom.name }}
+  name: {{ storage.name|default(kustom.name) }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ storage.size }}
+  storageClassName: {{ 'local' if storage.type in ['local_folder', 'gluster'] else 'longhorn' }}
+  #volumeName: {{ storage.name|default(kustom.name) }}
+
