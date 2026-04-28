@@ -78,6 +78,8 @@ applications:
           password: same
   tools:
     tester:
+      images:
+      - molecule
     infopage:
       images:
       - fastapi

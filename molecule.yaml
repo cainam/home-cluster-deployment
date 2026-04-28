@@ -23,15 +23,23 @@ provisioner:
   env:
     # Use the native 'default' callback but tell it to act like the YAML plugin
     ANSIBLE_STDOUT_CALLBACK: default
+    ANSIBLE_CALLBACK_ENABLED: simple_junit
     ANSIBLE_RESULT_FORMAT: yaml
+    ANSIBLE_CALLBACK_PLUGINS: "/tmp/home/home-cluster-deployment/callback_plugins"
 
     # XML Report Configuration
     ANSIBLE_CALLBACK_ENABLED: junit
     JUNIT_OUTPUT_DIR: /tmp/molecule
-    JUNIT_INCLUDE_SETUP_TASKS: "true"
+    JUNIT_INCLUDE_SETUP_TASKS: "false"
+    JUNIT_TASK_CLASS: "true"
+    ANSIBLE_JUNIT_TASK_RELATIVE_PATH: "false"
+    ANSIBLE_JUNIT_INCLUDE_SETUP_TASKS: "false"
+    ANSIBLE_JUNIT_FAIL_ON_IGNORE: "false"
 
     # Path configuration
     ANSIBLE_COLLECTIONS_PATH: /tmp/home/.ansible/collections:/usr/share/ansible/collections
+    ANSIBLE_REMOTE_TMP: /tmp/ansible
+    ANSIBLE_ASYNC_DIR: /tmp/.ansible_async
   config_options:
     defaults:
       fact_caching: jsonfile
