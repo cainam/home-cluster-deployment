@@ -28,13 +28,13 @@ provisioner:
     ANSIBLE_CALLBACK_PLUGINS: "/tmp/home/home-cluster-deployment/callback_plugins"
 
     # XML Report Configuration
-    ANSIBLE_CALLBACK_ENABLED: junit
+    #ANSIBLE_CALLBACK_ENABLED: junit
     JUNIT_OUTPUT_DIR: /tmp/molecule
-    JUNIT_INCLUDE_SETUP_TASKS: "false"
-    JUNIT_TASK_CLASS: "true"
-    ANSIBLE_JUNIT_TASK_RELATIVE_PATH: "false"
-    ANSIBLE_JUNIT_INCLUDE_SETUP_TASKS: "false"
-    ANSIBLE_JUNIT_FAIL_ON_IGNORE: "false"
+    #JUNIT_INCLUDE_SETUP_TASKS: "false"
+    #JUNIT_TASK_CLASS: "true"
+    #ANSIBLE_JUNIT_TASK_RELATIVE_PATH: "false"
+    #ANSIBLE_JUNIT_INCLUDE_SETUP_TASKS: "false"
+    #ANSIBLE_JUNIT_FAIL_ON_IGNORE: "false"
 
     # Path configuration
     ANSIBLE_COLLECTIONS_PATH: /tmp/home/.ansible/collections:/usr/share/ansible/collections
