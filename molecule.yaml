@@ -20,7 +20,7 @@ platforms:
 
 provisioner:
   name: ansible
-  env:
+  # env:
     # Use the native 'default' callback but tell it to act like the YAML plugin
     #ANSIBLE_STDOUT_CALLBACK: default
     #ANSIBLE_CALLBACK_ENABLED: simple_junit
