@@ -79,13 +79,14 @@ class CallbackModule(CallbackBase):
     # WRITE OUTPUTS
     # -------------------------
     def v2_playbook_on_stats(self, stats):
-        self._write_yaml()
+        self._write_file()
         self._write_junit()
 
     # -------------------------
     # YAML OUTPUT
     # -------------------------
-    def _write_yaml(self):
+    def _write_file(self):
+        import json
         output = {"tests": self.tests}
 
         outdir = os.environ.get("JUNIT_OUTPUT_DIR", "/tmp")
@@ -95,7 +96,8 @@ class CallbackModule(CallbackBase):
 
         with open(outfile, "w") as f:
             #yaml.dump(output, f, sort_keys=False)
-            f.write(dict_to_yaml(output))
+            #f.write(dict_to_yaml(output))
+            json.dump(output, file)
 
     # -------------------------
     # JUNIT OUTPUT (keep if you already use it)
