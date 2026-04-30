@@ -97,7 +97,7 @@ class CallbackModule(CallbackBase):
         with open(outfile, "w") as f:
             #yaml.dump(output, f, sort_keys=False)
             #f.write(dict_to_yaml(output))
-            json.dump(output, file)
+            json.dump(output, f)
 
     # -------------------------
     # JUNIT OUTPUT (keep if you already use it)
