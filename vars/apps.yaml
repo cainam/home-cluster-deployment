@@ -78,7 +78,7 @@ applications:
           password: same
   tools:
     tester:
-      images:
+      Ximages:
       - molecule
     infopage:
       images:
