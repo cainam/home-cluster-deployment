@@ -164,11 +164,7 @@ non-privileged ín tester image:
 / $ podman run -it   --rm --net=host --uts=host --pid=host --ipc=host --security-opt label=disable --tls-verify=false  --security-opt seccomp=unconfined myregistry.adm13:443/local/molecule:20260416 sh
 clone repo with submodules: git clone --recursive https://github.com/cainam/home-cluster-deployment.git
 
-- envoy: document build process
-
 - podman:
-  - create full home structure, copy files and set permissions
-  - known hosts to include podman host
   - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
   - replace IP by podman hostname
 

@@ -11,7 +11,11 @@ data:
     {% for route in net.routes %}
       {{ route.endpointIP }} {{ route.domain }}
     {% endfor %}
-      {{ lookup('pipe', 'getent hosts ' ~ (registry|split(':')|first) ) }}
+
+    {% for l in net.virtual_ips %}
+      {{ l.ip }} {% for n in l.names %}{{ n }} {%endfor %}
+{    % endfor %}
+
       fallthrough
     }
     health {
