@@ -74,7 +74,7 @@ images:
     packages: "dev-python/packaging dev-python/gpep517"
     configure_rootfs_build: |
       echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
-      # provide_package sys-devel/gcc
+      echo 'dev-libs/libb2 -openmp' > /etc/portage/package.use/libb2
       ln -s usr/lib "${ROOT}/lib"
       # add user/group for unprivileged container usage
       groupadd -g 404 python

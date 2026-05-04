@@ -19,7 +19,7 @@ solution: registry init script accesses the registry filesystem, builds a tar wh
 ### new node
 - populate /boot partition with copy and root from stage3-arm64-openrc
 - /boot/cmdline.txt => update root=PARTUUID from  lsblk -o NAME,UUID,PARTUUID /dev/sdf, set /etc/conf.d/hostname to FQDN and define FQDN in /etc/hosts
-- configure end0 in /etc/conf.d/net, link sshd and net.end0 in etc/runlevels/default,  authorized_keys, admin + host keypair from secrets(key with go-r mod), sync /lib/firmware+/lib/modules => boot!
+- configure end0 in /etc/conf.d/net, link sshd and net.end0 in etc/runlevels/default,  authorized_keys, admin + host keypair from secrets(key with go-r mod), sync /lib/firmware+/lib/modules => boot and /var/db/repos/gentoo
 - update UUID and PARTUUID in inventory file and if host to be installed is gentoo-build, remove this from the inventory ( lsblk -o NAME,UUID,PARTUUID /dev/sda )
 - run deploy gentoo ( to test: run without emerge option, then emerge --keep-going --verbose --update --deep --newuse --usepkg --ask --with-bdeps=y @world), emaint binhost -f if facing binary package issues
 - gluster: remove former bricks if any:  (for v in $(gluster vol list); do gluster vol heal $v info | grep k8s-3 | sed -e "s/^Brick/$v/g"; done) | while read v b;do (echo "y" | gluster vol remove-brick $v replica 2 $b force); done
@@ -171,3 +171,5 @@ clone repo with submodules: git clone --recursive https://github.com/cainam/home
   - known hosts to include podman host
   - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
   - replace IP by podman hostname
+
+- python error blake error python3 -c "import hashlib; print(hashlib.blake2b(b'test').hexdigest())" => test with -openmp use flag in python3 image

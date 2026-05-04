@@ -1,7 +1,7 @@
 ---
 applications:
   kube-flannel:
-    kube-flannel:
+    flannel:
       images:
       - flannel
       - flannel-cni-plugin
