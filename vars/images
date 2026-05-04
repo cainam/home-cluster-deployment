@@ -67,7 +67,7 @@ images:
   section: local
   requires:
   - base
-  env:
+  Xenv:
     LD_LIBRARY_PATH: /usr/local/lib
   type: gentoo-image-builder
   build:
@@ -75,12 +75,13 @@ images:
     configure_rootfs_build: |
       echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
       echo 'dev-libs/libb2 -openmp' > /etc/portage/package.use/libb2
+      echo 'app-crypt/libb2 -openmp' >> /etc/portage/package.use/libb2
       ln -s usr/lib "${ROOT}/lib"
       # add user/group for unprivileged container usage
       groupadd -g 404 python
       useradd -u 4004 -g python -d /home/python python
       mkdir -p "${ROOT}"/home/python
-    finish_rootfs_build: mkdir -p "${ROOT}/usr/local/lib"; #for lib in $(find /usr/lib/ -name libgomp.so.1); do cp "${lib}" "${ROOT}/usr/local/lib"; done
+    Xfinish_rootfs_build: mkdir -p "${ROOT}/usr/local/lib"; #for lib in $(find /usr/lib/ -name libgomp.so.1); do cp "${lib}" "${ROOT}/usr/local/lib"; done
 
 - name: python-operator
   section: auth
