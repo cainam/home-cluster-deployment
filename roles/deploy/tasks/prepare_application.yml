@@ -22,6 +22,7 @@
     loop:
       - { key: 'root', path: "{{ application_playbook_path }}" }
       - { key: 'files', path: "{{ application_playbook_path }}/files" }
+      - { key: 'templates', path: "{{ application_playbook_path }}/templates" }
       - { key: 'kustomize', path: "{{ application_playbook_path }}/kustomize" }
       - { key: 'pre_system', path: "{{ application_playbook_path }}/tasks/pre_system.yaml" }
       - { key: 'additional_images_list', path: "{{ application_playbook_path }}/vars/application_images.yaml" }
@@ -35,6 +36,7 @@
       current_app_data:
         path: "{{ application_playbook_path }}"
         files: "{{ (results.files.stat.exists and results.files.stat.isdir) | ternary(results.files.item.path, omit) }}"
+        templates: "{{ (results.templates.stat.exists and results.templates.stat.isdir) | ternary(results.templates.item.path, omit) }}"
         kustomize: "{{ (results.kustomize.stat.exists and results.kustomize.stat.isdir) | ternary(results.kustomize.item.path, omit) }}"
         pre_system: "{{ (results.pre_system.stat.exists and results.pre_system.stat.isreg) | ternary(results.pre_system.item.path, omit) }}"
         additional_images_list: "{{ (results.additional_images_list.stat.exists and results.additional_images_list.stat.isreg) | ternary(results.additional_images_list.item.path, omit) }}"
