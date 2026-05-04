@@ -15,6 +15,7 @@
       group: "{{ application.value.security.runAsGroup }}"
       directoryMode: "{{ application.value.security.directoryMode }}"
       fileMode: "{{ application.value.security.fileMode }}"
+    when: application.key in application_playbooks and 'templates' in application_playbooks[application.key]
 
   - block:
     - name: deploy from files
