@@ -14,7 +14,7 @@ data:
 
     {% for l in net.virtual_ips %}
       {{ l.ip }} {% for n in l.names %}{{ n }} {%endfor %}
-{    % endfor %}
+    {% endfor %}
 
       fallthrough
     }
