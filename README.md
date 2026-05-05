@@ -166,6 +166,4 @@ clone repo with submodules: git clone --recursive https://github.com/cainam/home
 
 - podman:
   - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
-  - replace IP by podman hostname
 
-- python error blake error python3 -c "import hashlib; print(hashlib.blake2b(b'test').hexdigest())" => test with -openmp use flag in python3 image

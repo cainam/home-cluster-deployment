@@ -74,7 +74,7 @@ images:
     packages: "dev-python/packaging dev-python/gpep517"
     configure_rootfs_build: |
       echo "*/* sqlite" >> /etc/portage/package.use/builder.conf
-      echo 'dev-libs/libb2 -openmp' > /etc/portage/package.use/libb2
+      echo 'dev-libs/libb2 -openmp' > /etc/portage/package.use/libb2 # openmp is dynamically linked and removed here to avoid deploying gcc to image and to prevent errors like "ERROR:root:code for hash blake2b was not found."
       echo 'app-crypt/libb2 -openmp' >> /etc/portage/package.use/libb2
       ln -s usr/lib "${ROOT}/lib"
       # add user/group for unprivileged container usage
