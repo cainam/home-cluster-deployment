@@ -37,6 +37,23 @@
         "{{ application.key }}_additional_images_list": "{{ _my_images.images }}"
     when: application.key in application_playbooks and 'additional_images_list' in application_playbooks[application.key]
 
+  - name: "{{ name_prefix }} - run helper to process kustomize templates"
+    include_role:
+      name: shared_helper
+      tasks_from: template_directory.yaml
+    vars:
+      dir_var: build_dir
+      template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
+      image_entry: "{{ lookup('vars', 'images_details') | selectattr('name', 'defined') | selectattr('name', 'equalto', (current_limit_images|first) )| first | default(None)}}"
+      kustom: "{{ application.value.kustom | default({}) | combine({
+         'namespace': k8s_namespace.key,
+         'name': application.key,
+         'security': application.value.security | default({}),
+         'storage': application.value.storage | default({}),
+         'network':  application.value.network | default({}),
+         'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
+         }) }}"
+
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
@@ -62,23 +79,6 @@
       updated_images_var: images_details
     include_role:
       name: gentoo-image-builder
-
-  - name: "{{ name_prefix }} - run helper to process kustomize templates"
-    include_role:
-      name: shared_helper
-      tasks_from: template_directory.yaml
-    vars:
-      dir_var: build_dir
-      template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
-      image_entry: "{{ lookup('vars', 'images_details') | selectattr('name', 'defined') | selectattr('name', 'equalto', (current_limit_images|first) )| first | default(None)}}"
-      kustom: "{{ application.value.kustom | default({}) | combine({
-         'namespace': k8s_namespace.key,
-         'name': application.key,
-         'security': application.value.security | default({}),
-         'storage': application.value.storage | default({}),
-         'network':  application.value.network | default({}),
-         'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
-         }) }}"
 
 # add pvc file and add it to kustomization file
   - name: "{{ name_prefix }} - create pvc needed"

@@ -63,7 +63,7 @@ software:
         repo: homeassistant/home-assistant
         arch: arm64
   registry:
-    version: v3.1.0
+    version: v3.1.1
     latest:
       type: dockerhub
       params:
@@ -96,7 +96,7 @@ software:
       params:
         repo: ory/hydra
   longhorn:
-    version: v1.11.1
+    version: v1.11.2
     installed:
       pattern: "longhorn-ui:"
     latest:

@@ -156,7 +156,3 @@ TODO:
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - check to use different /etc/portage between builder deploys and image-root deploys
-
-- podman:
-  - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
-

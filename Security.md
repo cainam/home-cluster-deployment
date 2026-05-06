@@ -1,10 +1,12 @@
+## node services
+Most services running on the nodes outside Kubernetes are bound to the lan interface (end0), not to all interfaces. This makes them unaccessible in the WLAN.
+Only ssh is available on the WLAN.
 
+Pod Security admission enabled but not fine-grained enough 
 cluster and namespace-wide: 
 https://kubernetes.io/docs/concepts/security/pod-security-admission/
 https://kubernetes.io/docs/concepts/security/pod-security-standards/
 https://dev.to/thenjdevopsguy/implementing-kubernetes-pod-security-standards-4aco
-
-Kyvero: hm, nice, but too heavy, better to code directly for the need
 
 query audit violations of PSA from audit.log: cat /var/log/kubernetes/audit.log | jq 'select(.annotations."pod-security.kubernetes.io/audit-violations" != null)'
 
@@ -35,6 +37,12 @@ longhorn-system and kube-system seem to be implicitly exempted from PodSecurity.
 All in all Pod Security Admission is not useful when you want to restrict individually on Pod level
 
 ## ingress logging
+✔ conntrack
+✔ Fluent Bit
+✔ Loki
+✔ Grafana
+=> to track all connections on node level
+
 
 traefik+istio forward logs to OpenTelemetry which makes it usable in Loki
 - traefik log forwarding
