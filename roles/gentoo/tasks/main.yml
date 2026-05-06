@@ -46,48 +46,6 @@
     backup: yes
     create: true
 
-- name: test if ssh CA exists
-  ansible.builtin.stat:
-    path: "{{ cert_path }}/ssh_ca"
-  register: ssh_ca
-  delegate_to: localhost
-
-- name: create ssh CA
-  shell: ssh-keygen -t ed25519 -f "{{ cert_path }}/ssh_ca" -C "SSH-Cluster-CA"
-  delegate_to: localhost
-  when: ssh_ca.stat.exists and ssh_ca.stat.isreg
-
-- name: read ssh public host key
-  ansible.builtin.slurp:
-    src: /etc/ssh/ssh_host_ed25519_key.pub
-  register: public_host_key
-
-- name: place public host key for signing
-  ansible.builtin.copy:
-    dest: "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}.pub"
-    content: "{{ public_host_key['content'] | b64decode }}"
-  delegate_to: localhost
-  
-- name: sign public host keys
-  ansible.builtin.shell: >
-    ssh-keygen -s "{{ cert_path }}/ssh_ca" -I "host_{{ inventory_hostname }}" -h -V +52w 
-    -n "{{ inventory_hostname }},{% for l in net.virtual_ips %}{{ l.ip }}{% for n in l.names %},{{ n }}{%endfor %}{% endfor %}" "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}.pub"
-  delegate_to: localhost
-
-- name: read the signed certificate back
-  ansible.builtin.slurp:
-    src: "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}-cert.pub"
-  register: signed_cert
-  delegate_to: ca_master
-
-- name: write the signed certificate to node
-  ansible.builtin.copy:
-    dest: /etc/ssh/ssh_host_ed25519_key-cert.pub
-    content: "{{ signed_cert['content'] | b64decode }}"
-    owner: root
-    group: root
-    mode: '0644'
-
 - name: symlinks for CA
   copy:
     src: "{{ cert_path }}/{{ item }}"
@@ -119,15 +77,6 @@
     content: >
       hostname="{{ ansible_facts.fqdn }}"
     dest: /etc/conf.d/hostname
-
-- name: deploy from files
-  synchronize:
-    src: "{{ role_path }}/files/./"
-    dest: "/"
-    archive: yes
-    recursive: yes
-    rsync_opts:
-      - "--relative"
 
 - name: first line in iwd security file
   lineinfile:
@@ -171,7 +120,7 @@
     group: "{{ item.group|default('root') }}"
     mode: "{{ item.mode|default('u=rw,g=r,o=r') }}"
   loop:
-  - content: "{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
+  - content: "ssh-{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key.pub
   - content: "{{ ssh_keys.hosts[inventory_hostname].private}}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key
@@ -207,6 +156,59 @@
       {% endfor %}
       {% endif %}
     dest: /root/.ssh/authorized_keys
+
+- name: test if ssh CA exists
+  ansible.builtin.stat:
+    path: "{{ cert_path }}/ssh_ca"
+  register: ssh_ca
+  delegate_to: localhost
+
+- name: create ssh CA
+  shell: ssh-keygen -t ed25519 -f "{{ cert_path }}/ssh_ca" -C "SSH-Cluster-CA"
+  delegate_to: localhost
+  run_once: true
+  when: not ssh_ca.stat.exists
+
+- name: read ssh public host key
+  ansible.builtin.slurp:
+    src: /etc/ssh/ssh_host_ed25519_key.pub
+  register: public_host_key
+  run_once: true
+
+- name: place public host key for signing
+  ansible.builtin.copy:
+    dest: "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}.pub"
+    content: "{{ public_host_key['content'] | b64decode }}"
+  delegate_to: localhost
+  
+- name: sign public host keys
+  ansible.builtin.shell: >
+    ssh-keygen -s "{{ cert_path }}/ssh_ca" -I "host_{{ inventory_hostname }}" -h -V +52w 
+    -n "{{ inventory_hostname }},{% for l in net.virtual_ips %}{{ l.ip }}{% for n in l.names %},{{ n }}{%endfor %}{% endfor %}" "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}.pub"
+  delegate_to: localhost
+
+- name: read the signed certificate back
+  ansible.builtin.slurp:
+    src: "{{ cert_path }}/ssh_host_ed25519_key_{{ inventory_hostname }}-cert.pub"
+  register: signed_cert
+  delegate_to: localhost
+
+- name: write the signed certificate to node
+  ansible.builtin.copy:
+    dest: /etc/ssh/ssh_host_ed25519_key-cert.pub
+    content: "{{ signed_cert['content'] | b64decode }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: deploy from files
+  synchronize:
+    src: "{{ role_path }}/files/./"
+    dest: "/"
+    archive: yes
+    recursive: yes
+    rsync_opts:
+      - "--relative"
 
 - name: set my role_path
   set_fact:

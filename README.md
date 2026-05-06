@@ -156,13 +156,6 @@ TODO:
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - check to use different /etc/portage between builder deploys and image-root deploys
-- regression tests: implement continuous testing of the features to detect regressions
-  - molecule in container: 
-    podman run -it --env USER=root --privileged   --env HOME=/root --workdir $PWD/roles/shared_helper --volume /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt --volume $PWD:$PWD --rm myregistry.adm13:443/local/molecule:20260305 /py_env/bin/python -m molecule  --base-config /data/mine/home-cluster-deployment/molecule.yaml test --scenario-name test_directory_sync
-
-non-privileged ín tester image:
-/ $ podman run -it   --rm --net=host --uts=host --pid=host --ipc=host --security-opt label=disable --tls-verify=false  --security-opt seccomp=unconfined myregistry.adm13:443/local/molecule:20260416 sh
-clone repo with submodules: git clone --recursive https://github.com/cainam/home-cluster-deployment.git
 
 - podman:
   - create SSH CA and sign the host keys (VIP issue for podman service as its host cannot be predicted)
