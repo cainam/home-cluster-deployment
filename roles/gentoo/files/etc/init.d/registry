@@ -50,9 +50,10 @@ start()
         # claim IP
         #ip address add "${ipconf}" dev wlan0
         podman rm -f registry
-        podman run --rm --privileged -d --name registry -p ${ip}:1443:443 -v ${host_volume}:/var/lib/registry \
+        podman run --rm --privileged -d --name registry -p $(getent hosts $(hostname) | awk '{print $1}'):1443:443 -v ${host_volume}:/var/lib/registry \
                 -e REGISTRY_STORAGE_DELETE_ENABLED=true \
                 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+                -e OTEL_TRACES_EXPORTER=none \
                 -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \
                 -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/myregistry.adm13.key \
         "${service_image}" serve /var/lib/registry/config.yml

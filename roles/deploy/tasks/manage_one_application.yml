@@ -37,6 +37,32 @@
         "{{ application.key }}_additional_images_list": "{{ _my_images.images }}"
     when: application.key in application_playbooks and 'additional_images_list' in application_playbooks[application.key]
 
+  - block:
+    - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
+      vars:
+        var_additional_images: "{{ application.key }}_additional_images_playbook"
+        kustomize_dir: "{{ application_playbooks[application.key].kustomize | default(omit) }}"
+        registry_path: "{{ k8s_namespace.key }}"
+      include_tasks: "{{ application_playbooks[application.key]['additional_images_playbook'] }}"
+    when: application.key in application_playbooks and 'additional_images_playbook' in application_playbooks[application.key]
+
+  - name: "{{ name_prefix }} update images variables"
+    vars:
+      additional_images: "{{ lookup('vars', application.key ~ '_additional_images_playbook')|default([]) + lookup('vars', application.key ~ '_additional_images_list')|default([]) }}"
+    set_fact:
+      current_app_images: "{{ images|default([]) + additional_images }}"
+      current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
+
+  - name: "{{ name_prefix }} images"
+    vars:
+      limit_images: "{{ current_limit_images }}"
+      images: "{{ current_app_images }}"
+      default_section: "{{ k8s_namespace.key }}"
+      dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
+      updated_images_var: images_details
+    include_role:
+      name: gentoo-image-builder
+
   - name: "{{ name_prefix }} - run helper to process kustomize templates"
     include_role:
       name: shared_helper
@@ -53,32 +79,6 @@
          'network':  application.value.network | default({}),
          'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
          }) }}"
-
-  - block:
-    - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
-      vars:
-        var_additional_images: "{{ application.key }}_additional_images_playbook"
-        kustomize_dir: "{{ build_dir }}"
-        registry_path: "{{ k8s_namespace.key }}"
-      include_tasks: "{{ application_playbooks[application.key]['additional_images_playbook'] }}"
-    when: application.key in application_playbooks and 'additional_images_playbook' in application_playbooks[application.key]
-
-  - name: "{{ name_prefix }} update images variables"
-    vars:
-      additional_images: "{{ lookup('vars', application.key ~ '_additional_images_playbook')|default([]) + lookup('vars', application.key ~ '_additional_images_list')|default([]) }}"
-    set_fact:
-      current_app_images: "{{ images|default([]) + additional_images }}"
-      current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
-
-  - name: "{{ name_prefix }} handle additional images"
-    vars:
-      limit_images: "{{ current_limit_images }}"
-      images: "{{ current_app_images }}"
-      default_section: "{{ k8s_namespace.key }}"
-      dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
-      updated_images_var: images_details
-    include_role:
-      name: gentoo-image-builder
 
 # add pvc file and add it to kustomization file
   - name: "{{ name_prefix }} - create pvc needed"
