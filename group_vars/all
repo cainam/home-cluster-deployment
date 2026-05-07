@@ -32,6 +32,7 @@ certs:
 net:
   domain_external: adm13.dnshome.de
   base_domain: my-lb.adm13
+  cidr: 10.10.10.0/24
   virtual_ips:
   - ip: 10.10.10.10
     names: ["k8s.adm13", "myregistry.adm13", "podman.adm13"]
