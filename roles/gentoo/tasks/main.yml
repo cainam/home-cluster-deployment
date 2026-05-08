@@ -382,7 +382,15 @@
     - keepalived
   when: inventory_hostname in (groups['all'] | map('extract', hostvars) | selectattr('system_roles', 'defined') | selectattr('system_roles', 'contains', 'control_plane') | map(attribute='inventory_hostname') )
 
-- name: only enable and reload services, but don't force a restart 
+- name: enable and restart services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  loop:
+  - sysctl
+
+- name: only enable and reload services, but don't force a restart
   service:
     name: "{{ item }}"
     enabled: yes
@@ -393,6 +401,7 @@
     - haproxy
     - crio
     - syslog-ng
+    - conntrackd
 
 - name: enable and restart services
   service:
