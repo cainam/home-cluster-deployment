@@ -36,109 +36,21 @@ longhorn-system and kube-system seem to be implicitly exempted from PodSecurity.
 
 All in all Pod Security Admission is not useful when you want to restrict individually on Pod level
 
-## ingress logging
-✔ conntrack
-✔ Fluent Bit
-✔ Loki
-✔ Grafana
-=> to track all connections on node level
+## connection logging
+While iniitially I was looking to get log monitoring on the ingress, I discovered that log capturing on the Fritz Box router is what I need to
+- check who tries to connect
+- check with whom my systems try to connect
 
+## Gentoo binhost package signing
+package signing on Gentoo consists out of the signing performed as root and the signature verification performed as nobody.
+This means that the information for verification has to be stored at a place managed by the nobody user.
 
-traefik+istio forward logs to OpenTelemetry which makes it usable in Loki
-- traefik log forwarding
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: otel-log-sink
-  namespace: ingress-traefik
-spec:
-  forwardAuth:
-    address: "http://otel-collector.otel-namespace.svc.cluster.local:55681/v1/logs"
-    trustForwardHeader: true
-    authResponseHeaders:
-      - "X-Request-Start"
+install -d -m0700 -o root -g root /etc/portage/gpg
+gpg --homedir /etc/portage/gpg --batch --passphrase '' --quick-gen-key "Cainam Gentoo Binhost Signer <root@gentoo-binhost>" rsa4096 default 2y
+k=$(gpg --homedir /etc/portage/gpg --with-colons --fingerprint | grep ^fpr | cut -d : -f 10)
 
-- istio:
-apiVersion: install.istio.io/v1alpha1
-kind: IstioOperator
-metadata:
-  name: istio-ingress
-  namespace: istio-system
-spec:
-  components:
-    ingressGateways:
-    - name: istio-ingressgateway
-      enabled: true
-      k8s:
-        overlays:
-        - kind: Deployment
-          name: istio-ingressgateway
-          patches:
-          - path: spec.template.spec.containers[0].env
-            value:
-            - name: ISTIO_META_JSON_LOGGING
-              value: |
-                {
-                  "accessLogService": {
-                    "address": "otel-collector.otel-namespace.svc.cluster.local:4317",
-                    "logName": "istio-access"
-                  }
-                }
+install -d -m0700 -o nobody -g nobody   /var/lib/portage/binpkg-verify
+gpg --homedir /etc/portage/gpg --export "$k" | su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify  gpg --import'
+printf '%s:6:\n' "$k" | su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify gpg --import-ownertrust'
+su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify gpg --check-trustdb'
 
-- OTEL
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: otel-collector
-  namespace: otel-namespace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: otel-collector
-  template:
-    metadata:
-      labels:
-        app: otel-collector
-    spec:
-      containers:
-      - name: otel-collector
-        image: otel/opentelemetry-collector-contrib:0.84.0
-        command: ["/otelcontribcol"]
-        args: ["--config=/conf/otel-config.yaml"]
-        volumeMounts:
-          - name: config
-            mountPath: /conf
-      volumes:
-        - name: config
-          configMap:
-            name: otel-collector-config
-
-
-- OTEL config
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: otel-collector-config
-  namespace: otel-namespace
-data:
-  otel-config.yaml: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:    # Istio ALS
-          http:    # Traefik ForwardAuth
-
-    exporters:
-      loki:
-        endpoint: "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
-        labels:
-          source: otel-collector
-
-    service:
-      pipelines:
-        logs:
-          receivers: [otlp]
-          exporters: [loki]
-
-- Loki:

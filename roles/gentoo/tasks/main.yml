@@ -74,8 +74,7 @@
 
 - name: hostname in /etc/conf.d
   copy:
-    content: >
-      hostname="{{ ansible_facts.fqdn }}"
+    content: hostname="{{ ansible_facts.fqdn }}"
     dest: /etc/conf.d/hostname
 
 - name: first line in iwd security file
@@ -228,16 +227,13 @@
   changed_when: false 
 
 - name: deploy from templates to /boot
-  vars:
   template:
     src: "{{ item.file }}"
-    dest: "{{ item.dest }}"
+    dest: /boot/
     backup: no
   loop:
-    - file: cmdline.txt
-      dest: /boot/
-    - file: config.txt
-      dest: /boot/
+  - file: cmdline.txt
+  - file: config.txt
 
 - name: symlinks for net.lo and localtime
   file:
@@ -259,18 +255,11 @@
     dest: /etc/cron.daily/purge.sh
     state: link
 
-- name: link deploy cron
+- name: manage deploy gentoo cron link
   file:
-    src: /usr/local/bin/deploy_gentoo.sh
+    src: "{{ '/usr/local/bin/deploy_gentoo.sh' if (alt_names is defined and alt_names.gentoo_build is defined) else omit }}"
     dest: /etc/cron.daily/deploy_gentoo.sh
-    state: link
-  when: alt_names is defined and alt_names.gentoo_build is defined
-
-- name: unlink deploy cron
-  file:
-    dest: /etc/cron.daily/deploy_gentoo.sh
-    state: absent
-  when: alt_names is not defined or alt_names.gentoo_build is not defined
+    state: "{{ 'link' if (alt_names is defined and alt_names.gentoo_build is defined) else 'absent' }}"
 
 - name: set date if year is 1970
   shell: date +%Y | ( grep -q "^1970$" && date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" ) || echo "date ok"
@@ -308,59 +297,8 @@
       rm /etc/portage/make.profile && mv /etc/portage/make.profile.bck /etc/portage/make.profile || true
     fi
 
-- name: emerge sync
-  shell: emerge --sync
-  ignore_errors: true
-
-- name: portage profile
-  shell: export LC_ALL=C && eselect profile show && eselect profile set default/linux/arm64/23.0 #/split-usr
-  
-- name: build and deploy
-  block:
-  - name: park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-    shell: test -f "{{ item }}" && mv "{{ item }}" "{{ item }}.deployed"
-    loop:
-    - /boot/cmdline.txt
-    - /boot/config.txt
-  
-  - name: emerge build
-    shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-    when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
-
-  - name: link check_and_fix.sh cron
-    file:
-      src: /usr/local/bin/check_and_fix.sh
-      dest: /etc/cron.hourly/check_and_fix.sh
-      state: link
- 
-  - name: emerge deploy
-    shell: emerge --keep-going --verbose --update --deep --newuse --with-bdeps=y @world
-    when: (alt_names is not defined or (alt_names is defined and alt_names.gentoo_build is not defined)) and 'emerge' in ansible_run_tags
-  
-  always:
-  - name: un-park /boot/cmdline.txt and /boot/config.txt to enable sys-boot/raspberrypi-firmware installation (breaks for hard check in ebuild)
-    shell: test -f "{{ item }}.deployed" && mv "{{ item }}.deployed" "{{ item }}"
-    loop:
-    - /boot/cmdline.txt
-    - /boot/config.txt
-  
-- name: eclean distfiles
-  shell: eclean --deep distfiles
-  when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
- 
-- name: eclean packages
-  shell: eclean --deep packages
-
-- name: emerge depclean
-  shell: emerge --depclean
-
-- name: emerge preserved rebuild
-  shell: emerge @preserved-rebuild
-  when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
-
-- name: emerge preserved rebuild
-  shell: emerge @preserved-rebuild
-  when: alt_names is defined and alt_names.gentoo_build is not defined and 'emerge' in ansible_run_tags
+- name: emerge
+  import_tasks: emerge.yaml
 
 - name: install additional modules from Ansible Galaxy
   shell: ansible-galaxy collection install gluster.gluster --upgrade #--collections-path /usr/lib/python3.12/site-packages/ansible_collections
@@ -426,7 +364,7 @@
     pip install ansible kubernetes
 
 - name: gluster
-  import_tasks: gluster.yml
+  import_tasks: gluster.yaml
 
 - name: put certificates and keys in place
   copy:
