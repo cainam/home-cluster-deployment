@@ -1,0 +1,28 @@
+- name: gluster peering
+  gluster_peer:
+    state: present
+    nodes:
+      - "{{ item }}"
+  loop: "{{ gluster_hosts }}"
+
+- name: set app name
+  set_fact:
+    app: host
+
+- name: app:{{ app }} storage bricks
+  include_tasks: common/storage_brick.yml
+  vars:
+    outside_k8s: true
+  with_items: "{{ gluster_vols }}"
+  loop_control:
+    loop_var: storage
+
+- name: app:{{ app }} storage
+  include_tasks: common/storage.yml
+  vars:
+    outside_k8s: true
+  with_items: "{{ gluster_vols }}"
+  loop_control:
+    loop_var: storage
+  run_once: true
+  #failed_when: true
