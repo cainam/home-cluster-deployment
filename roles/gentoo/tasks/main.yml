@@ -1,4 +1,8 @@
 ---
+- name: set gentoo_builder variable
+  set_fact:
+    gentoo_builder: "{{ groups['all'] | select('extract', hostvars) | selectattr('alt_names.gentoo_build', 'defined') | map(attribute='inventory_hostname') | first }}"
+
 - name: create user podman
   user:
     name: podman

@@ -20,10 +20,12 @@ images:
   requires:
   - curl
   build:
-    packages: net-analyzer/wireshark
+    packages: net-analyzer/wireshark net-analyzer/tcpdump
     configure_rootfs_build: |
       echo "net-analyzer/wireshark -gui" >> /etc/portage/package.use/wireshark
       echo "sys-libs/zlib minizip" >> /etc/portage/package.use/zlib
+      mkdir /etc/portage/env && echo 'LD_LIBRARY_PATH="${ROOT}/usr/lib"' >> /etc/portage/env/custom-ld.conf
+      echo 'dev-libs/glib custom-ld.conf' >> /etc/portage/package.env
 
 - name: curl
   section: local
