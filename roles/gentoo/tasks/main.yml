@@ -1,7 +1,7 @@
 ---
 - name: set gentoo_builder variable
   set_fact:
-    gentoo_builder: "{{ groups['all'] | select('extract', hostvars) | selectattr('alt_names.gentoo_build', 'defined') | map(attribute='inventory_hostname') | first }}"
+    gentoo_builder: "{{ groups['all'] | map('extract', hostvars) | selectattr('alt_names.gentoo_build', 'defined') | map(attribute='inventory_hostname') | first | mandatory }}"
 
 - name: create user podman
   user:
@@ -107,7 +107,6 @@
       {{i~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
       {{(i| split('.') | first)~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
       {% if hostvars[i].alt_names is defined %}
-      # alt_names is defined
       {% for j in hostvars[i].alt_names %}
       {{j~' ssh-'~ssh_keys.hosts[i].type~' '~ssh_keys.hosts[i].public}}
       {% endfor %}
@@ -274,32 +273,6 @@
   delegate_to: localhost
   set_fact:
     ansible_controller_hostname: "{{ lookup('pipe', 'hostname') }}"
-
-- name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-  shell: |
-    if [ ! -d "/var/db/repos/gentoo/.git" ]; then
-      set -e
-      profile_dir=/var/db/repos/gentoo/profiles
-      binpkgs="/var/cache/binpkgs"
-      rsync -a {{ ansible_controller_hostname }}:${profile_dir} /tmp
-      mv /etc/portage/make.profile /etc/portage/make.profile.bck || true
-      # see before, separate task - date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" # set the time from the Control node
-      ln -s /tmp/profiles/default/linux/arm64/23.0 /etc/portage/make.profile
-      rsync -a {{ ansible_controller_hostname }}:${binpkgs}/Packages ${binpkgs}/Packages
-      sed -i -e 's/^/#/g' /etc/portage/binrepos.conf/gentoobinhost.conf # use only self-build packages
-      atoms=$(USE="adns alt-svc ftp hsts http2 http3 httpsrr imap openssl pop3 psl quic smtp ssl tftp websockets" ACCEPT_LICENSE="*" emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e 's/-[0-9].*$//g')
-      atoms_iwd=$(ACCEPT_LICENSE="*" emerge -1 --usepkg --pretend net-wireless/iwd 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e "s/-[0-9].*$//g")
-      for atom in ${atoms} ${atoms_iwd}; do
-        pkg_dir=${binpkgs}/${atom}
-        mkdir -p ${pkg_dir}
-        rsync -a {{ ansible_controller_hostname }}:${pkg_dir}/* ${pkg_dir}/
-        ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
-      done
-      modprobe brcmfmac
-      /etc/init.d/dbus start
-      /etc/init.d/iwd start
-      rm /etc/portage/make.profile && mv /etc/portage/make.profile.bck /etc/portage/make.profile || true
-    fi
 
 - name: emerge
   import_tasks: emerge.yaml

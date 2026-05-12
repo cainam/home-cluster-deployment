@@ -24,8 +24,10 @@ images:
     configure_rootfs_build: |
       echo "net-analyzer/wireshark -gui" >> /etc/portage/package.use/wireshark
       echo "sys-libs/zlib minizip" >> /etc/portage/package.use/zlib
-      mkdir /etc/portage/env && echo 'LD_LIBRARY_PATH="${ROOT}/usr/lib"' >> /etc/portage/env/custom-ld.conf
+      mkdir /etc/portage/env && echo "LD_LIBRARY_PATH='${ROOT}/usr/lib'" >> /etc/portage/env/custom-ld.conf
       echo 'dev-libs/glib custom-ld.conf' >> /etc/portage/package.env
+      echo "${ROOT}/lib" >> /etc/ld-musl-aarch64.path
+      echo "${ROOT}/usr/lib" >> /etc/ld-musl-aarch64.path
 
 - name: curl
   section: local

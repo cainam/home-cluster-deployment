@@ -1,3 +1,39 @@
+- name: find all binrepo files execpt the one managed here
+  ansible.builtin.find:
+    paths: /etc/portage/binrepos.conf
+    excludes: 'binrepos.conf'  # Keep this one!
+  register: files_to_delete
+
+- name: remove unwanted binrepo files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ files_to_delete.files }}"
+
+- name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
+  shell: |
+    if [ ! -d "/var/db/repos/gentoo/.git" ]; then
+      set -e
+      profile_dir=/var/db/repos/gentoo/profiles
+      binpkgs="/var/cache/binpkgs"
+      rsync -a {{ ansible_controller_hostname }}:${profile_dir} /tmp
+      rm /etc/portage/make.profile
+      # see before, separate task - date -s "{{ now(fmt='%Y-%m-%d %H:%M:%S') }}" # set the time from the Control node
+      ln -s /tmp/profiles/default/linux/arm64/23.0 /etc/portage/make.profile
+      rsync -a {{ ansible_controller_hostname }}:${binpkgs}/Packages ${binpkgs}/Packages
+      atoms=$(USE="adns alt-svc ftp hsts http2 http3 httpsrr imap openssl pop3 psl quic smtp ssl tftp websockets" ACCEPT_LICENSE="*" emerge --pretend --usepkg dev-vcs/git 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e 's/-[0-9].*$//g')
+      atoms_iwd=$(ACCEPT_LICENSE="*" emerge -1 --usepkg --pretend net-wireless/iwd 2> /dev/null | grep "binary  N" | cut -d "]" -f 2 | cut -d " " -f 2 | sed -e "s/-[0-9].*$//g")
+      for atom in ${atoms} ${atoms_iwd}; do
+        pkg_dir=${binpkgs}/${atom}
+        mkdir -p ${pkg_dir}
+        rsync -a {{ ansible_controller_hostname }}:${pkg_dir}/* ${pkg_dir}/
+        ACCEPT_LICENSE="*" emerge -1 --usepkg --nodeps ${atom}
+      done
+      modprobe brcmfmac
+      /etc/init.d/dbus start
+      /etc/init.d/iwd start
+    fi
+
 - name: emerge sync
   shell: emerge --sync
   ignore_errors: true
@@ -30,14 +66,14 @@
     run_once: true
 
   - name: create valid signing key
-      shell: gpg --homedir {{ gpg_dir }} --batch --passphrase '' --quick-gen-key "Cainam Gentoo Binhost Signer <root@gentoo-binhost>" rsa4096 default 2y
+    shell: gpg --homedir {{ gpg_dir }} --batch --passphrase '' --quick-gen-key "Cainam Gentoo Binhost Signer <root@gentoo-binhost>" rsa4096 default 2y
     when: signing_key.stdout_lines | length == 0
     run_once: true
 
   - name: export signing key
-    shell: >
+    shell: |
       k=$(gpg --homedir {{ gpg_dir }} --with-colons --fingerprint | grep ^fpr | cut -d : -f 10 | tail -n 1)
-      gpg --homedir {{ gpg_dir }} --export "$k"
+      gpg --homedir {{ gpg_dir }} --export --armor "${k}"
     register: signing_key
     changed_when: false
     run_once: true
@@ -45,10 +81,8 @@
 
 - name: set-up signing verification
   shell: |
-    k=$(echo "{{ signing_key }}" | gpg --show-keys --with-colons --fingerprint | grep ^fpr | cut -d : -f 10 | tail -n 1)
-    echo "{{ signing_key }}" | su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify  gpg --import'
-    echo "$k" > /tmp/k
-    echo "{{ signing_key }}" >  /tmp/s
+    k=$(echo "{{ signing_key.stdout }}" | gpg --show-keys --with-colons --fingerprint | grep ^fpr | cut -d : -f 10 | tail -n 1)
+    echo "{{ signing_key.stdout }}" | su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify  gpg --import'
     printf '%s:6:\n' "$k" | su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify gpg --import-ownertrust'
     su -s /bin/sh nobody -c 'GNUPGHOME=/var/lib/portage/binpkg-verify gpg --check-trustdb'
 
@@ -86,7 +120,7 @@
   when: alt_names is defined and alt_names.gentoo_build is defined and 'emerge' in ansible_run_tags
 
 - name: eclean packages
-  shell: eclean packages
+  shell: PKGDIR=$(dirname $(find /var/cache/ -name Packages.gz)) eclean packages
 
 - name: emerge depclean
   shell: emerge --depclean
