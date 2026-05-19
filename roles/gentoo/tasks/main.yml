@@ -15,27 +15,18 @@
   file:
     path: "{{ item.path }}"
     state: directory
-    mode: "{{ item.perm }}"
+    mode: "{{ item.perm|default('u=rwx,g=rx,o=rx') }}"
     owner: "{{ item.owner|default('root') }}"
   loop:
     - path: /etc/modprobe.d
-      perm: u=rwx,g=rx,o=rx
     - path: /etc/wpa_supplicant
-      perm: u=rwx,g=rx,o=rx
     - path: "{{ shared_mounts }}"
-      perm: u=rwx,g=rx,o=rx
     - path: /etc/modules-load.d
-      perm: u=rwx,g=rx,o=rx
     - path: /usr/local/share/ca-certificates/
-      perm: u=rwx,g=rx,o=rx
     - path: "{{ gluster_directory }}/bricks"
-      perm: u=rwx,g=rx,o=rx
     - path: /etc/autofs
-      perm: u=rwx,g=rx,o=rx
     - path: /var/lib/iwd
-      perm: u=rwx,g=rx,o=rx
     - path: /etc/iwd
-      perm: u=rwx,g=rx,o=rx
     - path: /etc/cron.hourly
       perm: u=rwx,g=rx
     - path: ~podman/.ssh
@@ -50,18 +41,44 @@
     backup: yes
     create: true
 
-- name: symlinks for CA
+- block:
+  - name: "certificates"
+    vars:
+      cert_results_var: "my_cert"
+      caBundle_var: "caBundle"
+      ca_init: true
+      certificates_configuration: "{{ my_certs.conf }}"
+      ca_requests: "{{ my_certs.certs }}"
+    include_role:
+      name: certificates
+  delegate_to: localhost
+  run_once: true
+
+- name: copy root and intermediate CA
   copy:
     src: "{{ cert_path }}/{{ item }}"
     dest: "{{ system_local_certs }}/{{ item }}"
     owner: root
     group: root
   register: ca
-  loop: "{{ local_ca_files }}"
+  loop: "{{ my_certs.local_ca_files }}"
 
 - name: update CA certificates
   shell: /usr/sbin/update-ca-certificates
   when: ca.changed
+
+- name: put certificate keys in place
+  copy:
+    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/subject_keys/{{ item.name }}.pem"
+    dest: "{{ item.dest }}/{{ item.name }}.key"
+  loop: "{{ my_certs.certs }}"
+
+- name: put certificates in place
+  copy:
+    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/certs/{{ item.name }}.crt"
+    dest: "{{ item.dest }}/{{ item.name }}.crt"
+  loop: "{{ my_certs.certs }}"
+
 
 - name: rc.conf
   lineinfile:
@@ -342,22 +359,3 @@
 
 - name: gluster
   import_tasks: gluster.yaml
-
-- name: put certificates and keys in place
-  copy:
-    content: "{{ lookup('file', cert_path~'/FreeAsABird/subject_keys/'~item.name~'.pem') }}\n{{ lookup('file', cert_path~'/FreeAsABird/certs/'~item.name~'.crt') }}"
-    dest: "{{ item.dest }}/{{ item.name }}.pem"
-  loop: "{{ certs }}"
-    
-- name: put certificate keys in place
-  copy:
-    src: "{{ cert_path }}/FreeAsABird/subject_keys/{{ item.name }}.pem"
-    dest: "{{ item.dest }}/{{ item.name }}.key"
-  loop: "{{ certs }}"
-    
-- name: put certificates in place
-  copy:
-    src: "{{ cert_path }}/FreeAsABird/certs/{{ item.name }}.crt"
-    dest: "{{ item.dest }}/{{ item.name }}.crt"
-  loop: "{{ certs }}"
-

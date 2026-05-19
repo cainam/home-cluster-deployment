@@ -149,7 +149,6 @@ TODO:
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on fritzbox see fritzdump.sh
-- certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
 - lifeness and readiness probes: generate from application config

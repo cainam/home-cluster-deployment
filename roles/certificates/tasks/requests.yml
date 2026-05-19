@@ -4,14 +4,21 @@
   when:
     - (request.state is not defined) or (request.state == 'present')
   block:
+    - debug:
+        msg: "request:\n{{request}}"
+    - name: Check if the certificate exists and is valid 5 days from now
+      community.crypto.x509_certificate_info:
+        path: "{{ ca_path }}/{{ ca_certs_path }}/{{ request.name | default(request) }}.crt"
+        valid_at:
+          five_days_from_now: "+5d"
+      register: cert_info
+      failed_when: false
+
     - name: requests | Generate requested key
       community.crypto.openssl_privatekey:
         path: "{{ ca_path }}/{{ ca_subject_keys_path }}/{{ request.name | default(request) }}.pem"
         passphrase: "{{ request.passphrase | default(omit) }}"
         cipher: "{{ 'auto' if request.passphrase is defined else omit }}"
-
-    - debug: 
-        msg: "request.alt_names type: {{ request.alt_names | type_debug }}" 
 
     - name: requests | Generate requested certificate signing request
       community.crypto.openssl_csr:
@@ -23,7 +30,7 @@
         email_address: "{{ request.email_address | default(omit) }}"
         organization_name: "{{ request.organization_name | default(omit) }}"
         organizational_unit_name: "{{ request.organizational_unit_name | default(omit) }}"
-        subject_alt_name: '{% if request.alt_names is defined %}{{ request.alt_names | map("regex_replace", "^", "DNS:") | list | join(",") }}{% endif %}'
+        subject_alt_name: "{{ request.alt_names | map('regex_replace', '^', 'DNS:') | list | join(',') if request.alt_names is defined else omit }}"
 
     - name: requests | Generate requested certificate
       community.crypto.x509_certificate: #_pipe:
@@ -34,10 +41,9 @@
         ownca_privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
         ownca_not_after: +365d  # valid for one year
         ownca_not_before: "-1d"  # valid since yesterday
+        force: "{{ cert_info.exists is not defined or not cert_info.exists or not cert_info.valid_at.five_days_from_now }}"
         path: "{{ ca_path }}/{{ ca_certs_path }}/{{ request.name | default(request) }}.crt"
-      register: reg_cert
 
-      # so yes, the following is only useful if the requests array contains a single entry only, otherwise the vars get overwritten in the loop
     - block:
       - name: requests | read cert
         slurp:

@@ -21,15 +21,15 @@ default_platform: arm64
 cert_path: /data/mine/certs
 system_local_certs: /usr/local/share/ca-certificates
 
-local_ca_files:
-- "root-ca.crt"
-- "intermediate-ca.crt"
-
 my_certs:
+  local_ca_files:
+  - "root-ca.crt"
+  - "intermediate-ca.crt"
   certs:
   - name: myregistry.adm13
     dest: /shared/registry/certs
   conf:
+    ca_own_root: true
     ca_openssl_path: "{{ cert_path }}"
     ca_common_name: FreeAsABird
     ca_country_name: XX

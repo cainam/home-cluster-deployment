@@ -65,7 +65,7 @@
     path: "{{ ca_root_path }}/{{ ca_csr_path }}"
     privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
     privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
-    common_name: "{{ ca_common_name }}"
+    common_name: "{{ certificates_configuration.ca_common_name }}"
     country_name: "{{ certificates_configuration.ca_country_name | default(omit) }}"
     email_address: "{{ certificates_configuration.ca_email_address | default(omit) }}"
     organization_name: "{{ certificates_configuration.ca_organization_name | default(omit) }}"

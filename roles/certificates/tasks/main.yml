@@ -17,12 +17,12 @@
 - name: Generate ca certificates
   ansible.builtin.include_tasks:
     file: generate_ca_certs.yml
-  when: ca_init and ca_own_root
+  when: ca_init and certificates_configuration.ca_own_root
 
 - block:
   - name: main | read CA certificates
     ansible.builtin.slurp:
-      src: "{{ ca_root_path }}/{{ item.path }}"
+      src: "{{ ca_root_path }}/{{ item }}"
     loop:
       - "{{ ca_root_certificate_path }}"
       - "{{ ca_certificate_path }}"
@@ -30,15 +30,15 @@
 
   - name: main | save caBundle var
     set_fact:
-      "{{ caBundle_var }}": "{{ (_cacert.results[0].content | b64decode ~ _cacert.results[1].content | b64decode) | b64encode }}"
-  when: caBundle_var is defined
+      "{{ caBundle_var }}": "{{ (_cacerts.results[0].content | b64decode ~ _cacerts.results[1].content | b64decode) | b64encode }}"
+    when: caBundle_var is defined
 
-- name: main | Create ca chain
-  ansible.builtin.copy:
-    content: "{{ _cacert.content| b64decode }}{{ _cacert_root.content| b64decode }}"
-    dest: "{{ ca_path }}/{{ ca_certificate_path }}"
-    mode: "0644"
-  when: ca_init and ca_own_root
+  - name: main | Create ca chain
+    ansible.builtin.copy:
+      content: "{{ _cacerts.results[0].content| b64decode }}{{ _cacerts.results[1].content| b64decode }}"
+      dest: "{{ ca_path }}/{{ ca_certificate_path }}"
+      mode: "0644"
+    when: ca_init and certificates_configuration.ca_own_root
 
 - name: Handle requests
   vars: 
