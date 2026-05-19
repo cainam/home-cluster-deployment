@@ -1,61 +1,5 @@
 ---
 
-- name: assert | Test ca_passphrase
-  ansible.builtin.assert:
-    that:
-      - ca_passphrase is defined
-      - ca_passphrase is string
-      - ca_passphrase is not none
-    quiet: true
-
-- name: assert | Test ca_common_name
-  ansible.builtin.assert:
-    that:
-      - ca_common_name is defined
-      - ca_common_name is string
-      - ca_common_name is not none
-    quiet: true
-
-- name: assert | Test ca_country_name
-  ansible.builtin.assert:
-    that:
-      - ca_country_name is defined
-      - ca_country_name is string
-      - ca_country_name | length <= 2
-    quiet: true
-
-- name: assert | Test ca_email_address
-  ansible.builtin.assert:
-    that:
-      - ca_email_address is defined
-      - ca_email_address is string
-      - ca_email_address is not none
-    quiet: true
-
-- name: assert | Test ca_organization_name
-  ansible.builtin.assert:
-    that:
-      - ca_organization_name is defined
-      - ca_organization_name is string
-      - ca_organization_name is not none
-    quiet: true
-
-- name: assert | Test ca_organizational_unit_name
-  ansible.builtin.assert:
-    that:
-      - ca_organizational_unit_name is defined
-      - ca_organizational_unit_name is string
-      - ca_organizational_unit_name is not none
-    quiet: true
-
-- name: assert | Test ca_state_or_province_name
-  ansible.builtin.assert:
-    that:
-      - ca_state_or_province_name is defined
-      - ca_state_or_province_name is string
-      - ca_state_or_province_name is not none
-    quiet: true
-
 - name: assert | Test ca_requests
   ansible.builtin.assert:
     that:
@@ -76,58 +20,16 @@
     - ca_requests is defined
     - item.name is defined
 
-- name: assert | Test ca_publication_location
+- name: assert | Test variables defined?, string?, not none?
   ansible.builtin.assert:
     that:
-      - ca_publication_location is defined
-      - ca_publication_location is string
-      - ca_publication_location is not none
-    quiet: true
-
-- name: assert | Test ca_openssl_path
-  ansible.builtin.assert:
-    that:
-      - ca_openssl_path is defined
-      - ca_openssl_path is string
-      - ca_openssl_path is not none
-    quiet: true
-
-- name: assert | Test ca_private_path
-  ansible.builtin.assert:
-    that:
-      - ca_private_path is defined
-      - ca_private_path is string
-      - ca_private_path is not none
-    quiet: true
-
-- name: assert | Test ca_certs_path
-  ansible.builtin.assert:
-    that:
-      - ca_certs_path is defined
-      - ca_certs_path is string
-      - ca_certs_path is not none
-    quiet: true
-
-- name: assert | Test ca_privatekey_path
-  ansible.builtin.assert:
-    that:
-      - ca_privatekey_path is defined
-      - ca_privatekey_path is string
-      - ca_privatekey_path is not none
-    quiet: true
-
-- name: assert | Test ca_csr_path
-  ansible.builtin.assert:
-    that:
-      - ca_csr_path is defined
-      - ca_csr_path is string
-      - ca_csr_path is not none
-    quiet: true
-
-- name: assert | Test ca_certificate_path
-  ansible.builtin.assert:
-    that:
-      - ca_certificate_path is defined
-      - ca_certificate_path is string
-      - ca_certificate_path is not none
+    - ca_openssl_path is defined and ca_openssl_path is string and ca_openssl_path is not none
+    - ca_private_path is defined and ca_private_path is string and ca_private_path is not none
+    - ca_certs_path is defined and ca_certs_path is string and ca_certs_path is not none
+    - ca_privatekey_path is defined and ca_privatekey_path is string and ca_privatekey_path is not none
+    - ca_csr_path is defined and ca_csr_path is string and ca_csr_path is not none
+    - ca_certificate_path is defined and ca_certificate_path is string and ca_certificate_path is not none
+    - certificates_configuration is defined and certificates_configuration is mapping
+    - certificates_configuration.ca_common_name is defined and certificates_configuration.ca_common_name is string and (certificates_configuration.ca_common_name|length > 0)
+    - certificates_configuration.ca_passphrase is defined and certificates_configuration.ca_passphrase is string and certificates_configuration.ca_passphrase is not none
     quiet: true

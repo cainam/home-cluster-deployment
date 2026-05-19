@@ -25,9 +25,19 @@ local_ca_files:
 - "root-ca.crt"
 - "intermediate-ca.crt"
 
-certs:
-- name: myregistry.adm13
-  dest: /shared/registry/certs
+my_certs:
+  certs:
+  - name: myregistry.adm13
+    dest: /shared/registry/certs
+  conf:
+    ca_openssl_path: "{{ cert_path }}"
+    ca_common_name: FreeAsABird
+    ca_country_name: XX
+    ca_passphrase: "{{ cert_pass }}"
+    ca_organization_name: FreeAsABird
+    ca_organizational_unit_name: Anarchists
+    ca_state_or_province_name: Some-State
+    ca_email_address: a.b@c.de
 
 net:
   domain_external: adm13.dnshome.de

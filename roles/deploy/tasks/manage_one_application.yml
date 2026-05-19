@@ -3,29 +3,6 @@
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
 
 - block:
-  - debug:
-      msg: "alt_names: {%- if application.value.network is defined and application.value.network != false -%}{{ application.value.network.hosts }}{%- else -%}['{{ application.key }}.{{ k8s_namespace.key }}.svc']{%- endif -%}"
-  - name: "{{ name_prefix }} certificates for internal service"
-    vars:
-      cert_var: "reg_cert"
-      key_var: "reg_key"
-      caBundle_var: "caBundle"
-      ca_init: false
-      ca_openssl_path: "{{ cert_path }}"
-      ca_common_name: FreeAsABird
-      ca_country_name: XX
-      ca_passphrase: "{{ cert_pass }}"
-      ca_organization_name: FreeAsABird
-      ca_organizational_unit_name: Anarchists
-      ca_state_or_province_name: Some-State
-      ca_email_address: a.b@c.de
-      ca_requests:
-      - name: "{%- if application.value.network.publish == true -%}{{ application.value.network.domain }}{%- else -%}{{ application.key }}.{{ k8s_namespace.key }}.svc{%- endif -%}"
-        alt_names: "{%- if application.value.network.publish == true -%}{{ application.value.network.hosts }}{%- else -%}{{ [application.key~'.'~k8s_namespace.key~'.svc'] }}{%- endif -%}"
-    include_role: 
-      name: certificates
-    when: "'flags' in application.value and 'certs' in application.value.flags"
-
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - import vars}}"
       include_vars:

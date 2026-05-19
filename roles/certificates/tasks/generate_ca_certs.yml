@@ -4,17 +4,39 @@
 #  ansible.builtin.set_fact:
 #    ca_root_path: "{{ ca_path }}/rootCA"
 
+- name: init_ca | Ensure ca_path exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ ca_path }}/{{ ca_private_path }}"
+    - "{{ ca_path }}/{{ ca_certs_path }}"
+    - "{{ ca_path }}/{{ ca_requests_path }}"
+    - "{{ ca_path }}/{{ ca_subject_keys_path }}"
+    - "{{ ca_root_path }}/{{ ca_private_path }}"
+    - "{{ ca_root_path }}/{{ ca_certs_path }}"
+    - "{{ ca_root_path }}/{{ ca_requests_path }}"
+    - "{{ ca_root_path }}/{{ ca_subject_keys_path }}"
+
+
+- name: init_ca | Generate ca key
+  community.crypto.openssl_privatekey:
+    path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
+    passphrase: "{{ certificates_configuration.ca_passphrase }}"
+    cipher: auto
+
 - name: generate_ca_certs | Generate root ca certificate signing request
   community.crypto.openssl_csr:
     path: "{{ ca_root_path }}/{{ ca_root_csr_path }}"
     privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
-    privatekey_passphrase: "{{ ca_passphrase }}"
+    privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
     common_name: "{{ ca_root_common_name }}"
-    country_name: "{{ ca_country_name | default(omit) }}"
-    email_address: "{{ ca_email_address | default(omit) }}"
-    organization_name: "{{ ca_organization_name | default(omit) }}"
-    organizational_unit_name: "{{ ca_organizational_unit_name | default(omit) }}"
-    state_or_province_name: "{{ ca_state_or_province_name | default(omit) }}"
+    country_name: "{{ certificates_configuration.ca_country_name | default(omit) }}"
+    email_address: "{{ certificates_configuration.ca_email_address | default(omit) }}"
+    organization_name: "{{ certificates_configuration.ca_organization_name | default(omit) }}"
+    organizational_unit_name: "{{ certificates_configuration.ca_organizational_unit_name | default(omit) }}"
+    state_or_province_name: "{{ certificates_configuration.ca_state_or_province_name | default(omit) }}"
     use_common_name_for_san: false
     basic_constraints:
       - 'CA:TRUE'
@@ -27,22 +49,28 @@
   community.crypto.x509_certificate:
     provider: "selfsigned"
     privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
-    privatekey_passphrase: "{{ ca_passphrase }}"
+    privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
     path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
     csr_path: "{{ ca_root_path }}/{{ ca_root_csr_path }}"
     selfsigned_not_after: "+3650d"
   
+- name: init_ca | Generate ca key
+  community.crypto.openssl_privatekey:
+    path: "{{ ca_path }}/{{ ca_privatekey_path }}"
+    passphrase: "{{ certificates_configuration.ca_passphrase }}"
+    cipher: auto
+
 - name: generate_ca_certs | Generate ca certificate signing request
   community.crypto.openssl_csr:
     path: "{{ ca_root_path }}/{{ ca_csr_path }}"
     privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
-    privatekey_passphrase: "{{ ca_passphrase }}"
+    privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
     common_name: "{{ ca_common_name }}"
-    country_name: "{{ ca_country_name | default(omit) }}"
-    email_address: "{{ ca_email_address | default(omit) }}"
-    organization_name: "{{ ca_organization_name | default(omit) }}"
-    organizational_unit_name: "{{ ca_organizational_unit_name | default(omit) }}"
-    state_or_province_name: "{{ ca_state_or_province_name | default(omit) }}"
+    country_name: "{{ certificates_configuration.ca_country_name | default(omit) }}"
+    email_address: "{{ certificates_configuration.ca_email_address | default(omit) }}"
+    organization_name: "{{ certificates_configuration.ca_organization_name | default(omit) }}"
+    organizational_unit_name: "{{ certificates_configuration.ca_organizational_unit_name | default(omit) }}"
+    state_or_province_name: "{{ certificates_configuration.ca_state_or_province_name | default(omit) }}"
     use_common_name_for_san: false
     basic_constraints:
       - 'CA:TRUE'
@@ -55,11 +83,11 @@
   community.crypto.x509_certificate:
     provider: "ownca"
     privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
-    privatekey_passphrase: "{{ ca_passphrase }}"
+    privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
     path: "{{ ca_root_path }}/{{ ca_certificate_path }}"
     csr_path: "{{ ca_root_path }}/{{ ca_csr_path }}"
     ownca_not_after: "+3650d"
     ownca_path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
     ownca_privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
-    ownca_privatekey_passphrase: "{{ ca_passphrase }}"
+    ownca_privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
     

@@ -5,20 +5,10 @@
     - (request.state is not defined) or (request.state == 'present')
   block:
     - name: requests | Generate requested key
-      block:
-        - name: requests | Generate requested key (passphrase set)
-          community.crypto.openssl_privatekey:
-            path: "{{ ca_path }}/{{ ca_subject_keys_path }}/{{ request.name | default(request) }}.pem"
-            passphrase: "{{ request.passphrase }}"
-            cipher: "auto"
-          when:
-            - request.passphrase is defined
-
-        - name: requests | Generate requested key (passphrase not set)
-          community.crypto.openssl_privatekey:
-            path: "{{ ca_path }}/{{ ca_subject_keys_path }}/{{ request.name | default(request) }}.pem"
-          when:
-            - request.passphrase is not defined
+      community.crypto.openssl_privatekey:
+        path: "{{ ca_path }}/{{ ca_subject_keys_path }}/{{ request.name | default(request) }}.pem"
+        passphrase: "{{ request.passphrase | default(omit) }}"
+        cipher: "{{ 'auto' if request.passphrase is defined else omit }}"
 
     - debug: 
         msg: "request.alt_names type: {{ request.alt_names | type_debug }}" 
@@ -33,9 +23,7 @@
         email_address: "{{ request.email_address | default(omit) }}"
         organization_name: "{{ request.organization_name | default(omit) }}"
         organizational_unit_name: "{{ request.organizational_unit_name | default(omit) }}"
-        #subject_alt_name: 'DNS:{{ request.internal_name }},DNS:{{ request.external_name }}'
         subject_alt_name: '{% if request.alt_names is defined %}{{ request.alt_names | map("regex_replace", "^", "DNS:") | list | join(",") }}{% endif %}'
-
 
     - name: requests | Generate requested certificate
       community.crypto.x509_certificate: #_pipe:
@@ -43,10 +31,9 @@
         provider: ownca
         ownca_path: "{{ ca_root_path }}/{{ ca_certificate_path }}"
         ownca_privatekey_path: "{{ ca_path }}/{{ ca_privatekey_path }}"
-        ownca_privatekey_passphrase: "{{ ca_passphrase }}"
+        ownca_privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
         ownca_not_after: +365d  # valid for one year
         ownca_not_before: "-1d"  # valid since yesterday
-        # if not pipe:
         path: "{{ ca_path }}/{{ ca_certs_path }}/{{ request.name | default(request) }}.crt"
       register: reg_cert
 
@@ -56,25 +43,10 @@
         slurp:
           src: "{{ ca_path }}/{{ ca_certs_path }}/{{ request.name | default(request) }}.crt"
         register: cert
-      - set_fact: 
-          "{{ cert_var }}": "{{ cert.content | b64decode }}"
-      when: cert_var is defined
-
-    - block:
       - name: requests | read key
         slurp:
           src: "{{ ca_path }}/{{ ca_subject_keys_path }}/{{ request.name | default(request) }}.pem"
         register: key
       - set_fact:
-          "{{ key_var }}": "{{ key.content | b64decode }}"
-      when: key_var is defined
-
-    - name: requests | Publish certificate
-      ansible.builtin.copy:
-        src: "{{ ca_path }}/{{ ca_certs_path }}/{{ request.name | default(request) }}.crt"
-        dest: "{{ ca_publication_location }}/{{ request.name | default(request) }}.crt"
-        mode: "644"
-        remote_src: true
-      when:
-        - ca_publication_location is defined
-
+          "{{ cert_results_var }}": "{{ lookup('vars', cert_results_var)|default({})|combine({request.name: {'key': key.content | b64decode, 'cert':cert.content | b64decode} }) }}"
+      when: cert_results_var is defined

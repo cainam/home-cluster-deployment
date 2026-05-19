@@ -2,15 +2,8 @@
   # -name: check if root ca exists and is valid
   - name: certificates
     vars:
-      ca_openssl_path: /data/mine/certs
-      ca_common_name: FreeAsABird
-      ca_country_name: XX
-      ca_passphrase: "{{ cert_pass }}"
-      ca_organization_name: FreeAsABird
-      ca_organizational_unit_name: Anarchists
-      ca_state_or_province_name: Some-State
-      ca_email_address: a.b@c.de
-      #ca_init: false
+      certificates_configuration: "{{ my_certs.conf }}"
+      ca_init: false
       ca_requests:
       - name: myregistry.adm13
         alt_names: 

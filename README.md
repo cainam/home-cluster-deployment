@@ -148,7 +148,7 @@ TODO:
 - dependencies: generalize waitdb initcontainer 
 - Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-- security: log all incoming connections on gateway (traefik+istio log access to file => OpenTelemetry collector => Loki ) => see Security.md
+- security: log all incoming connections on fritzbox see fritzdump.sh
 - certificates: requests.yaml => replace reg_cert and reg_key by dynamic variables provided as input similar as build dir for templates
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
@@ -156,3 +156,17 @@ TODO:
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - check to use different /etc/portage between builder deploys and image-root deploys
+
+Claude with openrouter:
+(mypyenv) k8s-4-int /tmp/claude # cat .claude/settings.json
+{
+  "theme": "auto",
+   "env": {
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api"
+  },
+  "model": "meta-llama/llama-3.3-70b-instruct:free",
+  "smallModel": "meta-llama/llama-3.1-8b-instruct:free"
+}
+(mypyenv) k8s-4-int /tmp/claude # podman run -it --rm -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_API_KEY="" -e OPENROUTER_API_KEY="$K" -e ANTHROPIC_AUTH_TOKEN="$K"  -v /tmp/claude:/claude 7ad55a8e7db1 /opt/bin/claude  "Write a one-line Python function that returns the factorial of a number"   ^C
+(mypyenv) k8s-4-int /tmp/claude #
+
