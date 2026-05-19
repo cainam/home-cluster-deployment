@@ -11,8 +11,8 @@
 
 - name: set path for CA
   ansible.builtin.set_fact:
-    ca_path:      "{{ ca_openssl_path }}/{{ certificates_configuration.ca_common_name }}"
-    ca_root_path: "{{ ca_openssl_path }}/{{ certificates_configuration.ca_common_name }}/rootCA"
+    ca_path:      "{{ certificates_configuration.ca_openssl_path }}/{{ certificates_configuration.ca_common_name }}"
+    ca_root_path: "{{ certificates_configuration.ca_openssl_path }}/{{ certificates_configuration.ca_common_name }}/rootCA"
 
 - name: Generate ca certificates
   ansible.builtin.include_tasks:

@@ -23,13 +23,13 @@
 - name: assert | Test variables defined?, string?, not none?
   ansible.builtin.assert:
     that:
-    - ca_openssl_path is defined and ca_openssl_path is string and ca_openssl_path is not none
     - ca_private_path is defined and ca_private_path is string and ca_private_path is not none
     - ca_certs_path is defined and ca_certs_path is string and ca_certs_path is not none
     - ca_privatekey_path is defined and ca_privatekey_path is string and ca_privatekey_path is not none
     - ca_csr_path is defined and ca_csr_path is string and ca_csr_path is not none
     - ca_certificate_path is defined and ca_certificate_path is string and ca_certificate_path is not none
     - certificates_configuration is defined and certificates_configuration is mapping
+    - certificates_configuration.ca_openssl_path is defined and certificates_configuration.ca_openssl_path is string and certificates_configuration.ca_openssl_path is not none
     - certificates_configuration.ca_common_name is defined and certificates_configuration.ca_common_name is string and (certificates_configuration.ca_common_name|length > 0)
     - certificates_configuration.ca_passphrase is defined and certificates_configuration.ca_passphrase is string and certificates_configuration.ca_passphrase is not none
     quiet: true
