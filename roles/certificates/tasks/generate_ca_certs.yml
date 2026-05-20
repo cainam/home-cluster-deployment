@@ -19,12 +19,33 @@
     - "{{ ca_root_path }}/{{ ca_requests_path }}"
     - "{{ ca_root_path }}/{{ ca_subject_keys_path }}"
 
+# verify if CAs are expired
+- name: init_ca | Check if root CA certificate exists and is valid
+  community.crypto.x509_certificate_info:
+    path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
+  register: root_ca_info
+  ignore_errors: true
+
+- name: init_ca | Check if CA certificate exists and is valid
+  community.crypto.x509_certificate_info:
+    path: "{{ ca_root_path }}/{{ ca_certificate_path }}"
+  register: ca_info
+  ignore_errors: true
+
+- name: init_ca | Set renewal flags
+  ansible.builtin.set_fact:
+    root_ca_expired: >-
+      {{ root_ca_info.failed or (root_ca_info.expired | default(true)) }}
+    ca_expired: >-
+      {{ ca_info.failed or (ca_info.expired | default(true)) or
+         root_ca_info.failed or (root_ca_info.expired | default(true)) }}
 
 - name: init_ca | Generate ca key
   community.crypto.openssl_privatekey:
     path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
     passphrase: "{{ certificates_configuration.ca_passphrase }}"
     cipher: auto
+    force: "{{ root_ca_expired }}"
 
 - name: generate_ca_certs | Generate root ca certificate signing request
   community.crypto.openssl_csr:
@@ -44,6 +65,7 @@
     key_usage:
       - keyCertSign
     key_usage_critical: true
+    force: "{{ root_ca_expired }}"
 
 - name: generate_ca_certs | Generate root ca certificate
   community.crypto.x509_certificate:
@@ -53,12 +75,14 @@
     path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
     csr_path: "{{ ca_root_path }}/{{ ca_root_csr_path }}"
     selfsigned_not_after: "+3650d"
-  
+    force: "{{ root_ca_expired }}"
+
 - name: init_ca | Generate ca key
   community.crypto.openssl_privatekey:
     path: "{{ ca_path }}/{{ ca_privatekey_path }}"
     passphrase: "{{ certificates_configuration.ca_passphrase }}"
     cipher: auto
+    force: "{{ ca_expired }}"
 
 - name: generate_ca_certs | Generate ca certificate signing request
   community.crypto.openssl_csr:
@@ -78,7 +102,8 @@
     key_usage:
       - keyCertSign
     key_usage_critical: true
-    
+    force: "{{ ca_expired }}"
+
 - name: generate_ca_certs | Generate ca certificate
   community.crypto.x509_certificate:
     provider: "ownca"
@@ -90,4 +115,5 @@
     ownca_path: "{{ ca_root_path }}/{{ ca_root_certificate_path }}"
     ownca_privatekey_path: "{{ ca_root_path }}/{{ ca_root_privatekey_path }}"
     ownca_privatekey_passphrase: "{{ certificates_configuration.ca_passphrase }}"
-    
+    force: "{{ ca_expired }}"
+

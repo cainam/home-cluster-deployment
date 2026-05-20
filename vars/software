@@ -84,7 +84,7 @@ software:
       params:
         repo: dev-db/postgresql
   descheduler:
-    version: "v0.35.1"
+    version: "v0.36.0"
     latest:
       type: github
       params: 

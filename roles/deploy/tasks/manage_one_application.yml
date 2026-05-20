@@ -143,7 +143,7 @@
             namespace: {{ k8s_namespace.key }}
             port: {{ application.value.network.svcPort }}
         tls:
-          secretName: certs
+          secretName: tls-traefik
       EOF
     loop: "{{ ['int','ext'] if 'external_port' in route else ['int'] }}"
   when: application.value.network is defined and application.value.network.publish != false and (net.routes | selectattr('domain','equalto',application.value.network.domain) | map(attribute='gateway') | first) == 'traefik'

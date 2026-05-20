@@ -55,10 +55,6 @@ net:
     gateway: traefik
     external_port: 44354
     endpointIP: 192.168.4.100
-  - domain: traefik.my-lb.adm13
-    gateway: traefik
-    external_port: 51234
-    endpointIP: 192.168.4.106
   - domain: ha.my-lb.adm13
     gateway: istio
     namespace: istio-ingress

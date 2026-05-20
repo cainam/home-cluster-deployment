@@ -25,3 +25,17 @@
 ❯ /init
   ⎿  API Error: Request rejected (429) · Provider returned error
 
+
+Claude with openrouter:
+(mypyenv) k8s-4-int /tmp/claude # cat .claude/settings.json
+{
+  "theme": "auto",
+   "env": {
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api"
+  },
+  "model": "meta-llama/llama-3.3-70b-instruct:free",
+  "smallModel": "meta-llama/llama-3.1-8b-instruct:free"
+}
+(mypyenv) k8s-4-int /tmp/claude # podman run -it --rm -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_API_KEY="" -e OPENROUTER_API_KEY="$K" -e ANTHROPIC_AUTH_TOKEN="$K"  -v /tmp/claude:/claude 7ad55a8e7db1 /opt/bin/claude  "Write a one-line Python function that returns the factorial of a number"   ^C
+(mypyenv) k8s-4-int /tmp/claude #
+
