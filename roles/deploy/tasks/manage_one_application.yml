@@ -40,7 +40,7 @@
     include_role:
       name: gentoo-image-builder
 
-  - name: "{{ name_prefix }} - run helper to process kustomize templates"
+  - name: "{{ name_prefix }} run helper to process kustomize templates"
     include_role:
       name: shared_helper
       tasks_from: template_directory.yaml

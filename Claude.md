@@ -1,41 +1,29 @@
-- Gentoo install in container image
-(mypyenv) k8s-4-int /tmp/claude # cat .claude/settings.json
-{
-  "theme": "auto",
-   "env": {
-    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api/v1"
-  },
-  "model": "meta-llama/llama-3.3-70b-instruct:free",
-  "smallModel": "meta-llama/llama-3.1-8b-instruct:free"
-}
-(mypyenv) k8s-4-int /tmp/claude # vi .claude/settings.json
-(mypyenv) k8s-4-int /tmp/claude # podman run -it --rm -e HOME=/claude -e ANTHROPIC_API_KEY="xxx"  -v /tmp/claude:/claude 7ad55a8e7db1 /opt/bin/claude
-╭─── Claude Code v2.1.121 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                                    │ Tips for getting started                                                                                                                                                 │
-│                    Welcome back!                   │ Run /init to create a CLAUDE.md file with instructions for Claude                                                                                                        │
-│                                                    │ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── │
-│                       ▐▛███▜▌                      │ What's new                                                                                                                                                               │
-│                      ▝▜█████▛▘                     │ Added plugin dependency enforcement: `claude plugin disable` now refuses when another enabled plugin depends on the target (with a copy-pasteable disable-chain hint), … │
-│                        ▘▘ ▝▝                       │ Added projected context cost (per-turn and per-invocation token estimates) to the `/plugin` marketplace browse pane                                                      │
-│                                                    │ Added `worktree.bgIsolation: "none"` setting to let background sessions edit the working copy directly without `EnterWorktree`, for repos where worktrees are impractic… │
-│ meta-llama/llama-3.3-70b-inst… · API Usage Billing │ /release-notes for more                                                                                                                                                  │
-│                         /                          │                                                                                                                                                                          │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
-❯ /init
-  ⎿  API Error: Request rejected (429) · Provider returned error
-
-
 Claude with openrouter:
-(mypyenv) k8s-4-int /tmp/claude # cat .claude/settings.json
+
+HOST_DIR=/tmp
+CLAUDE_DIR=/claude
+rm -rf $HOST_DIR/$CLAUDE_DIR
+mkdir -p $HOST_DIR/$CLAUDE_DIR/.claude
+echo -e '{"theme": "auto",
+"model": "poolside/laguna-xs.2:free",
+"smallModel": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
+}' > $HOST_DIR/$CLAUDE_DIR/.claude/settings.json
+
+cat > $HOST_DIR/$CLAUDE_DIR/.claude.json << EOF
 {
-  "theme": "auto",
-   "env": {
-    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api"
-  },
-  "model": "meta-llama/llama-3.3-70b-instruct:free",
-  "smallModel": "meta-llama/llama-3.1-8b-instruct:free"
+  "hasCompletedOnboarding": true,
+  "projects": {
+    "$CLAUDE_DIR": {
+      "allowedTools": [],
+      "hasTrustDialogAccepted": true
+    }
+  }
 }
-(mypyenv) k8s-4-int /tmp/claude # podman run -it --rm -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_API_KEY="" -e OPENROUTER_API_KEY="$K" -e ANTHROPIC_AUTH_TOKEN="$K"  -v /tmp/claude:/claude 7ad55a8e7db1 /opt/bin/claude  "Write a one-line Python function that returns the factorial of a number"   ^C
-(mypyenv) k8s-4-int /tmp/claude #
+EOF
+chown -R -h podman $HOST_DIR/$CLAUDE_DIR
+
+podman run --rm -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN="$K" -e ANTHROPIC_BASE_URL=https://openrouter.ai/api -v /tmp/claude:/claude -v /etc/passwd:/etc/passwd \
+--user podman myregistry.adm13:443/local/claude:20260429  /opt/bin/claude --verbose -p --output-format stream-json --dangerously-skip-permissions \
+"Write a one-line Python function that returns the factorial of a number" \
+| jq -r 'select(.type=="assistant") | .message.content[] | select(.type=="text") | .text'
 

@@ -2,7 +2,7 @@
   set_fact:
     app: "{{ application.key }}"
     name_prefix: "namespace:{{ k8s_namespace.key }} app:{{ application.key }} -"
-    application_playbook_path: "{{ local_playbook_temp }}/applications/{{ application.key }}"
+    application_playbook_path: "{{ local_playbook_temp }}/applications/{{ application.value.kustom.application|default(application.key) }}"
   run_once: true
 
 - block: # prepare application playbook integration

@@ -79,7 +79,6 @@
     dest: "{{ item.dest }}/{{ item.name }}.crt"
   loop: "{{ my_certs.certs }}"
 
-
 - name: rc.conf
   lineinfile:
     path: /etc/rc.conf
@@ -255,7 +254,7 @@
   - file: cmdline.txt
   - file: config.txt
 
-- name: symlinks for net.lo and localtime
+- name: symlinks for net.lo, iptables, localtime
   file:
     src: "{{ item.src }}"
     path: "{{ item.path }}"
@@ -268,6 +267,18 @@
       path: /etc/init.d/net.end0
     - src: "/usr/share/zoneinfo/{{ timezone }}"
       path: /etc/localtime
+    - src: xtables-nft-multi
+      path: /usr/bin/iptables
+    - src: xtables-nft-multi
+      path: /usr/bin/iptables-restore
+    - src: xtables-nft-multi
+      path: /usr/bin/iptables-save
+    - src: ip6tables-nft
+      path: /usr/bin/ip6tables
+    - src: ip6tables-nft
+      path: /usr/bin/ip6tables-restore
+    - src: ip6tables-nft
+      path: /usr/bin/ip6tables-save
 
 - name: cron - purge.sh
   file:
