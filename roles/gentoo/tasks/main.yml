@@ -331,7 +331,16 @@
     enabled: yes
     state: restarted
   loop:
-  - sysctl
+    - net.end0
+    - chronyd
+    - brickmount
+    - glusterd
+    - cronie
+    - cpupower
+    - iscsid
+    - iwd
+    - sysctl
+  ignore_errors: yes
 
 - name: only enable and reload services, but don't force a restart
   service:
@@ -345,22 +354,7 @@
     - crio
     - syslog-ng
     - conntrackd
-
-- name: enable and restart services
-  service:
-    name: "{{ item }}"
-    enabled: yes
-    state: restarted
-  loop:
-    - net.end0
-    - chronyd
-    - brickmount
-    - glusterd 
-    - cronie
-    - cpupower
     - iscsid
-    - iwd
-  ignore_errors: yes
 
 - name: virtual python environment
   shell: |
