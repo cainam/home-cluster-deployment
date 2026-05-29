@@ -64,13 +64,13 @@
         name: "{{ application.key }}"
     template:
       src: pvc.yaml
-      dest: "{{ build_dir }}/pvc-{{ storage.name }}.yaml"
+      dest: "{{ build_dir }}/pvc-{{ storage.name|default(application.key) }}.yaml"
     loop: "{{ application.value.storage }}"
     loop_control:
       loop_var: storage
 
   - name: "{{ name_prefix }} - add pvc to kustomization resources"
-    shell: yq -y -i '.resources += ["pvc-{{ storage.name }}.yaml"]' "{{ build_dir }}/kustomization.yaml"
+    shell: yq -y -i '.resources += ["pvc-{{ storage.name|default(application.key) }}.yaml"]' "{{ build_dir }}/kustomization.yaml"
     loop: "{{ application.value.storage }}"
     loop_control:
       loop_var: storage

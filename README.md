@@ -146,34 +146,6 @@ Networking Istio:
 TODO: 
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
-- Longhorn I/O error: high CPU? working again after: kubectl get pod -o wide -n longhorn-system | grep k8s-3 | grep -v longhorn- | awk '{print $1}' | xargs kubectl delete pod -n longhorn-system => restart instance-manager + pgsql - iscsid is restarted by deploy, session is not recovered by iscsid, instance-manager is bad
-(mypyenv) k8s-2-int ~ # blkid /dev/longhorn/pvc-e512272e-7fdd-41c3-9851-265e899aaa55
-/dev/longhorn/pvc-e512272e-7fdd-41c3-9851-265e899aaa55: UUID="dfc3e7aa-9d23-436c-b590-534b766ba502" BLOCK_SIZE="4096" TYPE="ext4"
-(mypyenv) k8s-2-int ~ # /etc/init.d/iscsid restart
- * Executing: /usr/libexec/rc/sh/openrc-run.sh /etc/init.d/iscsid stop
- * Disconnecting iSCSI targets ...
-Logging out of session [sid: 1, target: iqn.2019-10.io.longhorn:pvc-e512272e-7fdd-41c3-9851-265e899aaa55, portal: 10.244.0.10,3260]
-Logging out of session [sid: 2, target: iqn.2019-10.io.longhorn:pvc-2b5176fe-0fbd-4ec1-b8ee-a03b63b4fc04, portal: 10.244.0.10,3260]
-Logout of [sid: 1, target: iqn.2019-10.io.longhorn:pvc-e512272e-7fdd-41c3-9851-265e899aaa55, portal: 10.244.0.10,3260] successful.
-Logout of [sid: 2, target: iqn.2019-10.io.longhorn:pvc-2b5176fe-0fbd-4ec1-b8ee-a03b63b4fc04, portal: 10.244.0.10,3260] successful.                                                                                         [ ok ]
- * Stopping iscsid ...
- * Will stop /usr/sbin/iscsid
- * Will stop PID 1793
- * Will stop processes of `/usr/sbin/iscsid'
- * Sending signal 15 to PID 1793 ...                                                                                                                                                                                       [ ok ]
- * Executing: /usr/libexec/rc/sh/openrc-run.sh /etc/init.d/iscsid start
- * Checking Open-iSCSI configuration ...                                                                                                                                                                                   [ ok ]
- * Starting iscsid ...
- * start-stop-daemon: fopen `/var/run/iscsid.pid': No such file or directory
- * Detaching to start `/usr/sbin/iscsid' ...                                                                                                                                                                               [ ok ]
- * Setting up iSCSI targets ...
-Login to [iface: default, target: iqn.2019-10.io.longhorn:pvc-2b5176fe-0fbd-4ec1-b8ee-a03b63b4fc04, portal: 10.244.0.10,3260] successful.
-Login to [iface: default, target: iqn.2019-10.io.longhorn:pvc-e512272e-7fdd-41c3-9851-265e899aaa55, portal: 10.244.0.10,3260] successful.                                                                                  [ ok ]
-(mypyenv) k8s-2-int ~ # blkid /dev/longhorn/pvc-e512272e-7fdd-41c3-9851-265e899aaa55
-(mypyenv) k8s-2-int ~ #
-
-=> blkid shows device is not usable
-
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on fritzbox see fritzdump.sh
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
@@ -182,4 +154,5 @@ Login to [iface: default, target: iqn.2019-10.io.longhorn:pvc-e512272e-7fdd-41c3
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - check to use different /etc/portage between builder deploys and image-root deploys
+- fritzdump: run in container
 

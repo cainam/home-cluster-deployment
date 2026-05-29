@@ -80,6 +80,13 @@ applications:
     tester:
       Ximages:
       - molecule
+    colombo:
+      images:
+      - shark
+      - suricata
+      storage:
+      - size: 500Mi
+        type: longhorn
     infopage:
       images:
       - fastapi

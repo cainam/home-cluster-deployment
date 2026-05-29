@@ -34,6 +34,7 @@ longhorn:
 - shared mounts are enabled via /etc/fstab
 - check disk (shared propagation is required): findmnt -o TARGET,PROPAGATION /var/lib/longhorn/
 - check and delete longhorn crds: kubectl get crd -o jsonpath={.items[*].metadata.name} | tr ' ' '\n' | grep longhorn.io | xargs kubectl delete crd
+- attention: do not restart iscsid, longhorn will loose its reference
 - list api-resources in namespace: kubectl api-resources --verbs=list --namespaced -o name | grep -v ^events  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n storage
 - delete: 
 # cat longhorn-confirm-deletion.yaml

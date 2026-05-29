@@ -337,7 +337,6 @@
     - glusterd
     - cronie
     - cpupower
-    - iscsid
     - iwd
     - sysctl
   ignore_errors: yes
