@@ -7,7 +7,7 @@ clusterDNS:
 kind: InitConfiguration
 apiVersion: kubeadm.k8s.io/v1beta4
 localAPIEndpoint:
-  advertiseAddress: {{ internal_first_master_ip | default("0.0.0.0")  }}
+  advertiseAddress: {{ my_cluster_ip | default("0.0.0.0")  }}
 
 ---
 apiVersion: kubeadm.k8s.io/v1beta4
@@ -23,12 +23,12 @@ apiVersion: kubeadm.k8s.io/v1beta4
 {% if 'control_plane' in system_roles %}
 controlPlane:
   localAPIEndpoint:
-    advertiseAddress: {{ join_ip | default("0.0.0.0") }}
+    advertiseAddress: {{ my_cluster_ip | default("0.0.0.0") }}
   certificateKey: {{ cert_key | default("I have none") }}
 {% endif %}
 discovery:
   bootstrapToken:
-    token: "{{ token }}"
+    token: "{{ token | default("I have none") }}"
     apiServerEndpoint: "{{ controlPlaneEndpoint }}"
     caCertHashes:
-    - "{{ discovery_token_ca_cert_hash }}"
+    - "{{ discovery_token_ca_cert_hash | default("I have none") }}"

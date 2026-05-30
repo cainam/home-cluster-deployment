@@ -78,12 +78,11 @@ applications:
           password: same
   tools:
     tester:
-      Ximages:
-      - molecule
     colombo:
       images:
       - shark
       - suricata
+      - python3
       storage:
       - size: 500Mi
         type: longhorn
