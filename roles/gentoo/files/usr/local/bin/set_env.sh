@@ -2,6 +2,12 @@
 
 . /etc/conf.d/home-cluster
 
+if [ ! -d "${local_pyenv}" ]; then
+  python -m venv "${local_pyenv}"
+  source "${local_pyenv}"/bin/activate
+  pip install ansible kubernetes
+
+fi
 source ${local_pyenv}/bin/activate
 
 export ANSIBLE_ROLES_PATH=${ANSIBLE_DIR}/roles
