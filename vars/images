@@ -29,6 +29,14 @@ images:
       mv "${ROOT}"/etc/suricata "${ROOT}"/etc/suricata.org && mkdir "${ROOT}"/etc/suricata && cp "${ROOT}"/etc/suricata.org/* "${ROOT}"/etc/suricata/ && chmod 755 "${ROOT}"/etc/suricata/ "${ROOT}"/etc/suricata.org && chmod 644 "${ROOT}"/etc/suricata.org/* "${ROOT}"/etc/suricata/*
       sed -e '/^  user:/d' -e '/^  group:/d' -e '/^run-as:/d' -i "${ROOT}"/etc/suricata/suricata.yaml
 
+- name: spider-collect
+  section: local
+  type: gentoo-image-builder
+  requires:
+  - python3
+  build:
+    packages: app-misc/jq net-misc/curl
+
 - name: shark
   section: local
   type: gentoo-image-builder
@@ -45,9 +53,9 @@ images:
   section: local
   type: gentoo-image-builder
   requires:
-  - base
+  - curl
   build:
-    packages: dev-util/claude-code
+    packages: dev-util/claude-code app-misc/jq 
 
 - name: curl
   section: local

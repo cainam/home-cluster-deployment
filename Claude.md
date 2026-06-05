@@ -27,3 +27,7 @@ podman run --rm -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHE
 "Write a one-line Python function that returns the factorial of a number" \
 | jq -r 'select(.type=="assistant") | .message.content[] | select(.type=="text") | .text'
 
+
+Alternatives:
+llm CLI 
+curl to openrouter directly
