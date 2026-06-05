@@ -355,11 +355,5 @@
     - conntrackd
     - iscsid
 
-- name: virtual python environment
-  shell: |
-    python -m venv {{ local_pyenv }}
-    source {{ local_pyenv }}/bin/activate
-    pip install ansible kubernetes
-
 - name: gluster
   import_tasks: gluster.yaml
