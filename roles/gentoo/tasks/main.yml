@@ -94,7 +94,7 @@
 
 - name: hostname in /etc/conf.d
   copy:
-    content: hostname="{{ ansible_facts.fqdn }}"
+    content: hostname="{{ inventory_hostname }}"
     dest: /etc/conf.d/hostname
 
 - name: first line in iwd security file

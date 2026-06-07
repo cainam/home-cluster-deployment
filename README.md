@@ -145,6 +145,7 @@ Networking Istio:
 
 TODO: 
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
+- glusterd: certs are deployed to gluster volume (registry), but gluster config and gluster import happens later => deploy in the right order
 - dependencies: generalize waitdb initcontainer 
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on fritzbox see fritzdump.sh

@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.1
+    version: v3.7.3
     installed:
       pattern: "traefik"
     latest:
