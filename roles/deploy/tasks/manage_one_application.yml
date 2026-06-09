@@ -7,17 +7,13 @@
     - name: "{{ name_prefix }} application playbook - additional_images - import vars}}"
       include_vars:
         file: "{{ application_playbooks[application.key]['additional_images_list'] }}"
-        name: _my_images
-
-    - name: "{{ name_prefix }} application playbook - additional_images - set_fact"
-      set_fact:
-        "{{ application.key }}_additional_images_list": "{{ _my_images.images }}"
+        name: _my_images_list
     when: application.key in application_playbooks and 'additional_images_list' in application_playbooks[application.key]
 
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
-        var_additional_images: "{{ application.key }}_additional_images_playbook"
+        var_additional_images: "_additional_images_playbook"
         kustomize_dir: "{{ application_playbooks[application.key].kustomize | default(omit) }}"
         registry_path: "{{ k8s_namespace.key }}"
       include_tasks: "{{ application_playbooks[application.key]['additional_images_playbook'] }}"
@@ -25,7 +21,7 @@
 
   - name: "{{ name_prefix }} update images variables"
     vars:
-      additional_images: "{{ lookup('vars', application.key ~ '_additional_images_playbook')|default([]) + lookup('vars', application.key ~ '_additional_images_list')|default([]) }}"
+      additional_images: "{{ _additional_images_playbook|default([]) + _my_images.images|default([]) }}"
     set_fact:
       current_app_images: "{{ images|default([]) + additional_images }}"
       current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
