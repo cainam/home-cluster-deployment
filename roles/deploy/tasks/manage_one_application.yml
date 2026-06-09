@@ -21,7 +21,7 @@
 
   - name: "{{ name_prefix }} update images variables"
     vars:
-      additional_images: "{{ _additional_images_playbook|default([]) + _my_images.images|default([]) }}"
+      additional_images: "{{ _additional_images_playbook|default([]) + _my_images_list.images|default([]) }}"
     set_fact:
       current_app_images: "{{ images|default([]) + additional_images }}"
       current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
