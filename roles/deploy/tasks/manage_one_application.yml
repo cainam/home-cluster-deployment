@@ -26,6 +26,10 @@
       current_app_images: "{{ images|default([]) + additional_images }}"
       current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
 
+  - name: "{{ name_prefix }} debug image vars"
+    debug:
+      msg: "current_app_images:\n{{current_app_images|to_nice_yaml}}\ncurrent_limit_images:\n{{current_limit_images|to_nice_yaml}}"
+
   - name: "{{ name_prefix }} images"
     vars:
       limit_images: "{{ current_limit_images }}"

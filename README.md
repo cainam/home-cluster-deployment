@@ -156,5 +156,7 @@ TODO:
 - with podman 5.8: change k8s-1-int from boltDB to sqlite: podman system migrate --database-backend sqlite
 - check to use different /etc/portage between builder deploys and image-root deploys
 - fritzdump: run in container
+  - add white list: connectivitycheck.gstatic.com, archive.raspberrypi.com, deb.debian.org, cloudflare-dns.com
 - build etcd image and use it for k8s but also to replace system etcd
+
 
