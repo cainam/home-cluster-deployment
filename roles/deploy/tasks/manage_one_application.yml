@@ -37,8 +37,11 @@
       name: gentoo-image-builder
 
   - name: "{{ name_prefix }} debug image vars"
+    vars:
+      image_entries: "{{ lookup('vars', 'images_details') | selectattr('name', 'in', current_limit_images) | list }}"
+      image_dict: "{% set res = {} %}{% for item in image_entries %}{% set _ = res.update({item.name: item.section ~ '/' ~ item.name ~ ':' ~ item.tag}) %}{% endfor %}{{ res }}"
     debug:
-      msg: "current_app_images:\n{{current_app_images|to_nice_yaml}}\ncurrent_limit_images:\n{{current_limit_images|to_nice_yaml}}\nimages_details:\n{{lookup('vars', 'images_details')|to_nice_yaml}}"
+      msg: "current_app_images:\n{{current_app_images|to_nice_yaml}}\ncurrent_limit_images:\n{{current_limit_images|to_nice_yaml}}\nimages_details:\n{{lookup('vars', 'images_details')|to_nice_yaml}}\nimage_dict:{{image_dict}}\ntype of image_dict:{{ image_dict | type_debug }}"
     when: "'debug' in ansible_run_tags"
 
   - name: "{{ name_prefix }} run helper to process kustomize templates"
@@ -48,13 +51,8 @@
     vars:
       dir_var: build_dir
       template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
-      image_entries: lookup('vars', 'images_details') | selectattr('name', 'in', current_limit_images) | list| items2dict(key_name='name', value_name='value')
-      image_dict: >-
-        {% set res = {} %}
-        {% for item in image_entries %}
-        {%   set _ = res.update({item.name: item.section ~ '/' ~ item.name ~ ':' ~ item.tag}) %}
-        {% endfor %}
-        {{ res }}
+      image_entries: "{{ lookup('vars', 'images_details') | selectattr('name', 'in', current_limit_images) | list }}"
+      image_dict: "{% set res = {} %}{% for item in image_entries %}{% set _ = res.update({item.name: item.section ~ '/' ~ item.name ~ ':' ~ item.tag}) %}{% endfor %}{{ res }}"
       image_entry: "{{ lookup('vars', 'images_details') | selectattr('name', 'defined') | selectattr('name', 'equalto', (current_limit_images|first) )| first | default(None)}}"
       kustom: "{{ application.value.kustom | default({}) | combine({
          'namespace': k8s_namespace.key,
