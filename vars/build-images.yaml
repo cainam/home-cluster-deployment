@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened-openrc
-  stage3_date: 20260531T234604Z
-  portage: 20260603
+  stage3_date: 20260607T234631Z
+  portage: 20260611
   portage_container: "portage"
   local_overlay_dir: /portage-local
   local_overlay_name: private-repo
@@ -28,7 +28,7 @@ builder:
       ENV ACCEPT_LICENSE="*"
       ENV MAKEOPTS="-j3"
   configure_builder: |
-      python_version=3.13
+      python_version=3.14
       mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use} /etc/portage/repos.conf/
       echo 'INSTALL_MASK="${INSTALL_MASK} /usr/share/doc /usr/share/info"' >>  /etc/portage/make.conf
       echo -e '[gentoo]\nlocation = /var/db/repos/gentoo' > /etc/portage/repos.conf/gentoo.conf
