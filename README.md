@@ -156,6 +156,6 @@ TODO:
 - check to use different /etc/portage between builder deploys and image-root deploys
 - build etcd image and use it for k8s but also to replace system etcd
 - etcd status in infopage
-- infopage - keep nav buttons fixed
-
+- OS + image vulnerability scan using trivy 
+- colombo: add authorization to the api
 

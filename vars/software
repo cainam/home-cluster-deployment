@@ -54,7 +54,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2026.4.1"
+    version: "2026.6.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -69,6 +69,13 @@ software:
       params:
         repo: library/registry
         arch: arm64
+  trivy:
+    version: v0.71.0
+    max_entries: 3
+    latest:
+      type: github
+      params:
+        repo: aquasecurity/trivy
   kubernetes:
     version: 1.35.0
     max_entries: 3

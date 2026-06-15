@@ -41,6 +41,14 @@ While iniitially I was looking to get log monitoring on the ingress, I discovere
 - check who tries to connect
 - check with whom my systems try to connect
 
+My solution called colombo is a tooling chain in a Pod from capture via analytics to api publishing of the results.
+I am using my infopage solution to display the findings in a browser.
+
+## vulnerability scanning
+Although I use containers and my private registry I decided not to use the usual combination of Trivy with Harbor because Harbor is using an outdated fork while I am writing this and I see no benefit of the additional features Harbor brings for me.
+
+Trivy is supporting both, OS filesystem and image scanning and this is sufficient for toolchain integration.
+
 ## Gentoo binhost package signing
 package signing on Gentoo consists out of the signing performed as root and the signature verification performed as nobody.
 This means that the information for verification has to be stored at a place managed by the nobody user.
