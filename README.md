@@ -153,9 +153,12 @@ TODO:
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
 - lifeness and readiness probes: generate from application config
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
-- check to use different /etc/portage between builder deploys and image-root deploys
+- use different /etc/portage between builder deploys and image-root deploys: PORTAGE_CONFIGROOT=/path/to/container-config 
 - build etcd image and use it for k8s but also to replace system etcd
 - etcd status in infopage
 - OS + image vulnerability scan using trivy 
-- colombo: add authorization to the api
+  - DONE image build, can scan mapped fs and mapped image tar
+  - integrate in builder (check if trivy is available, scan image before push and fail or continue)
+- colombo: add authorization to the api (APIKEY) and NetworkPolicy
+- fix: /data mountpoint missing in fstab of k8s-1
 

@@ -74,6 +74,13 @@ software:
     max_entries: 3
     latest:
       type: github
+  etcd:
+    version: v3.6.12
+    max_entries: 3
+    latest:
+      type: github
+
+
       params:
         repo: aquasecurity/trivy
   kubernetes:

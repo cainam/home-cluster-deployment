@@ -1,24 +1,53 @@
 - block:
+#  - name: get list of images
+#    shell: |
+#      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }});do
+#        src="${img%:*}";
+#        echo -e "- name: ${src##*/}\n  tag: ${img##*:}\n  section: {{ kubernetes_image_section }}\n  type: fetch\n  source: $src";
+#      done
+#    register: required_images
+#    changed_when: false
   - name: get list of images
     shell: |
-      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }});do 
-        src="${img%:*}";
-        echo -e "- name: ${src##*/}\n  tag: ${img##*:}\n  section: {{ kubernetes_image_section }}\n  type: fetch\n  source: $src"; 
+      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }}); do
+        repo_and_tag="${img##*/}" # Strip the registry (everything before the first /)
+        # Extract the image name and the tag
+        image="${repo_and_tag%:*}"
+        tag="${repo_and_tag##*:}"
+        echo "$image: $tag"
       done
-    register: required_images
+    register: required_images_raw
     changed_when: false
+
+  - name: Set images as an Ansible dictionary
+    set_fact:
+      k8s_images: "{{ required_images_raw.stdout | from_yaml }}"
+
+  - name: generate the images structure for the builder
+    set_fact:
+      required_images: >-
+        {{
+          required_images | default([]) + [{
+            'name': item.key,
+            'tag': item.value,
+            'section': kubernetes_image_section,
+            'type': 'fetch',
+            'source': 'registry.k8s.io/' ~ item.key
+          }]
+        }}
+    loop: "{{ k8s_images | dict2items }}"
 
   - name: load image information as yaml
     set_fact:
-      images: "{{ images + (required_images.stdout | from_yaml) }}"
-      image_names: "{{ ['registry','flannel','flannel-cni-plugin'] + (required_images.stdout | from_yaml | map(attribute='name')) }}"
+      images: "{{ images + required_images }}"
+      image_names: "{{ ['registry','flannel','flannel-cni-plugin'] + (required_images | map(attribute='name')) }}"
   run_once: true
   delegate_to: "{{ selected_host }}"
 
-- name: handle additional images
-  vars:
-    limit_images: "{{ image_names }}"
-    dry_run: false
-  include_role:
-    name: gentoo-image-builder
+#- name: handle additional images
+#  vars:
+#    limit_images: "{{ image_names }}"
+#    dry_run: false
+#  include_role:
+#    name: gentoo-image-builder
 

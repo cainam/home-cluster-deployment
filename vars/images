@@ -90,16 +90,33 @@ images:
       cd ..
       rm -rf distribution /root/.??* /root/*
 
+- name: etcd
+  section: k8s
+  requires:
+  - go
+  build:
+    configure_rootfs_build: |
+      git clone  --depth 1 --single-branch -b "{{ software.etcd.version }}" https://github.com/etcd-io/etcd.git
+      cd etcd
+      GO_LDFLAGS="-w -s" make build
+      cp -dp bin/* "${ROOT}/bin"
+
 - name: trivy
   section: local
   requires:
   - go
+  env:
+    HOME: /trivy
   build:
     entrypoint: ["/bin/trivy"]
     configure_rootfs_build: |
       git clone -b "{{ software.trivy.version }}" --depth 1 --single-branch https://github.com/aquasecurity/trivy.git
       cd trivy
-      CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'  ./cmd/trivy
+      go clean -modcache -cache
+      GOEXPERIMENT=jsonv2 CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -s -w'  ./cmd/trivy
+      mkdir /trivy/.cache/ && HOME=/trivy ./trivy  image --download-db-only && cp -r /trivy "${ROOT}"/
+      cp -dp trivy "${ROOT}/bin/"
+
 
 - name: nodejs
   section: local

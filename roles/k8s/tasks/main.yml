@@ -42,30 +42,6 @@
     src: kubelet-config.yaml
     dest: "{{ kubelet_config }}"
 
-- name: get etcd image
-  shell:  "kubeadm config images list --kubernetes-version {{ current_k8s_version if current_k8s_version else k8s_version }} --image-repository {{ kubernetes_image_section }} | grep /etcd:"
-  register: shell_etcd_image
-  run_once: true
-  delegate_to: "{{ selected_host }}"
-
-- name: kubernetes static manifests
-  vars:
-    etcd_image: "{{ shell_etcd_image.stdout }}"
-  template:
-    src: "{{ item }}"
-    dest: "/etc/kubernetes/{{ item }}"
-  loop:
-  - manifests/etcd.yaml
-  - manifests/kube-apiserver.yaml
-  - manifests/kube-controller-manager.yaml
-  - manifests/kube-scheduler.yaml
-
-- name: enable kubelet service
-  service:
-    name: kubelet
-    enabled: yes
-    state: restarted
-
 - block:
   - name: get token
     shell: kubeadm token create
@@ -146,7 +122,25 @@
       delay: 10
   throttle: 1
   when: k8s_upgrade or ('update' in ansible_run_tags)
-  
+
+- name: debug network facts
+  debug:
+    msg:
+      - "inventory_hostname: {{ inventory_hostname }}"
+      - "end0 address: {{ ansible_facts['end0']['ipv4']['address'] }}"
+      - "all end0 facts: {{ ansible_facts['end0'] }}"
+      - "hostvars end0: {{ hostvars[inventory_hostname]['ansible_facts'].get('end0', 'NOT FOUND') }}"
+
+- name: kubernetes static manifests # update manifests after joining and updating when cluster should be on k8s_version
+  template:
+    src: "{{ item }}"
+    dest: "/etc/kubernetes/{{ item }}"
+  loop:
+  - manifests/etcd.yaml
+  - manifests/kube-apiserver.yaml
+  - manifests/kube-controller-manager.yaml
+  - manifests/kube-scheduler.yaml
+
 - block:
   - name: taint to allow master nodes to run pods
     shell: kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- || true

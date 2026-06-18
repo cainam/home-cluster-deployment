@@ -3,6 +3,14 @@
     set_fact:
       gluster_hosts: "{{ groups['all']|list }}"
 
+  - name: debug network facts
+    debug:
+     msg:
+        - "inventory_hostname: {{ inventory_hostname }}"
+        - "end0 address: {{ ansible_facts['end0']['ipv4']['address'] }}"
+        - "all end0 facts: {{ ansible_facts['end0'] }}"
+        - "hostvars end0: {{ hostvars[inventory_hostname]['ansible_facts'].get('end0', 'NOT FOUND') }}"
+
   - debug: var=ansible_search_path
 
   - name: set gluster ips and number of replicas
