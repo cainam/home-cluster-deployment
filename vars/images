@@ -14,41 +14,6 @@ images:
       sed -i '/CONFIG_CROND\|CONFIG_AT\|CONFIG_FEATURE_MMC\|CONFIG_FEATURE_USB\|CONFIG_FEATURE_MTD\|CONFIG_PPP\|CONFIG_SLIP\|CONFIG_TELNET\|CONFIG_TFTP\|CONFIG_FTP\|CONFIG_WATCHDOG\|CONFIG_HWCLOCK\|CONFIG_DMESG\|CONFIG_BUNZIP\|CONFIG_BZ\|DHCP\|CONFIG_INIT\|CONFIG_RUN_INIT/s/=y$/=n/' /etc/portage/savedconfig/sys-apps/busybox
     finish_rootfs_build: ln -s usr/lib "${ROOT}/lib" && "${ROOT}"/bin/busybox --install "${ROOT}/bin"
 
-- name: suricata
-  section: local
-  type: gentoo-image-builder
-  requires:
-  - base
-  build:
-    packages: net-analyzer/suricata
-    configure_rootfs_build: |
-      echo -e "net-analyzer/suricata **\nnet-libs/libhtp ~arm64" > /etc/portage/package.accept_keywords/suricata
-    finish_rootfs_build: |
-      LD_LIBRARY_PATH="${ROOT}"/usr/lib/ "${ROOT}"/usr/bin/suricata-update --no-test -D "${ROOT}"/var/lib/suricata 
-      chmod 755 "${ROOT}"/var/lib/suricata "${ROOT}"/var/lib/suricata/rules && chmod 644 "${ROOT}"/var/lib/suricata/rules/*
-      mv "${ROOT}"/etc/suricata "${ROOT}"/etc/suricata.org && mkdir "${ROOT}"/etc/suricata && cp "${ROOT}"/etc/suricata.org/* "${ROOT}"/etc/suricata/ && chmod 755 "${ROOT}"/etc/suricata/ "${ROOT}"/etc/suricata.org && chmod 644 "${ROOT}"/etc/suricata.org/* "${ROOT}"/etc/suricata/*
-      sed -e '/^  user:/d' -e '/^  group:/d' -e '/^run-as:/d' -e 's/# threshold-file: /threshold-file: /' -i "${ROOT}"/etc/suricata/suricata.yaml
-
-- name: spider-collect
-  section: local
-  type: gentoo-image-builder
-  requires:
-  - python3
-  build:
-    packages: app-misc/jq net-misc/curl
-
-- name: shark
-  section: local
-  type: gentoo-image-builder
-  requires:
-  - curl
-  build:
-    packages: net-analyzer/wireshark net-analyzer/tcpdump
-    configure_rootfs_build: |
-      echo "net-analyzer/wireshark -gui" >> /etc/portage/package.use/wireshark
-      echo "sys-libs/zlib minizip" >> /etc/portage/package.use/zlib
-      echo -e "${ROOT}/lib\n${ROOT}/usr/lib" >> /etc/ld.so.conf.d/99-image-builder.conf
-
 - name: claude
   section: local
   type: gentoo-image-builder
@@ -89,17 +54,6 @@ images:
       mkdir -p "${ROOT}/bin" && mv bin/registry "${ROOT}/bin/"
       cd ..
       rm -rf distribution /root/.??* /root/*
-
-- name: etcdxx
-  section: k8s
-  requires:
-  - go
-  build:
-    configure_rootfs_build: |
-      git clone  --depth 1 --single-branch -b "{{ software.etcd.version }}" https://github.com/etcd-io/etcd.git
-      cd etcd
-      GO_LDFLAGS="-w -s" make build
-      cp -dp bin/* "${ROOT}/bin"
 
 - name: trivy
   section: local

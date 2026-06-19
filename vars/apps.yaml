@@ -2,21 +2,13 @@
 applications:
   kube-flannel:
     flannel:
-      images:
-      - flannel
-      - flannel-cni-plugin
   gateway:
     traefik:
   istio-system:
     istiod-config:
     istiod:
-      images:
-      - pilot
-      - proxyv2
   auth:
     hydra:
-      images:
-      - hydra
       storage:
       - name: hydra
         size: 5Mi 
@@ -28,12 +20,8 @@ applications:
       images:
       - python-operator
     idp:
-      images:
-      - idp
       network: true
     oauth2-proxy:
-      images:
-      - oauth2-proxy
       network:
         svcPort: 80
         prefix: /oauth2-hydra
@@ -45,22 +33,16 @@ applications:
     zigbee2mqtt:
       flags: ['no strip']
       affinity: k8s-2-int.adm13
-      images:
-      - zigbee2mqtt
       network:
         rewrite: /zigbee2mqtt
       storage:
       - type: longhorn
         size: 100Mi
     mosquitto:
-      images:
-      - mosquitto
       storage:
       - type: longhorn
         size: 3Mi
     home-assistant:
-      images:
-      - home-assistant
       storage:
       - name: home-assistant
         size: 100Mi
@@ -80,11 +62,14 @@ applications:
     tester:
     colombo:
       images:
-      - shark
-      - suricata
       - python3
-      - spider-collect
       - fastapi
+      network:
+        publish: false
+        allow:
+        - name: infopage
+          namespace: tools
+          dest: api
       storage:
       - size: 500Mi
         type: longhorn
@@ -106,8 +91,6 @@ applications:
         runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
         dataPath: /var/lib/postgresql
         confPath: /conf
-      images:
-      - postgresql
       storage: 
       - name: data-postgresql-0
         type: longhorn

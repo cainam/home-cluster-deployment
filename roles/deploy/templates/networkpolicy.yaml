@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ kustom.name }}-{{ allow.dest }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ kustom.name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ allow.namespace }}
+      podSelector:
+        matchLabels:
+          app: {{ allow.name }}
+    ports:
+    - protocol: TCP
+      port: {{ allow.dest }}

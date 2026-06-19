@@ -46,7 +46,7 @@ spec:
         - --admission-control-config-file=/etc/kubernetes/AdmissionConfiguration.yaml
         - --audit-log-path=/var/log/kubernetes/audit.log
         - --audit-policy-file=/etc/kubernetes/audit-policy.yaml
-      image: {{ kubernetes_image_section }}/kube-apiserver:{{ k8s_version }}
+      image: {{ kubernetes_image_section }}/kube-apiserver:v{{ k8s_version }}
       imagePullPolicy: IfNotPresent
       livenessProbe:
         failureThreshold: 8

@@ -154,7 +154,6 @@ TODO:
 - lifeness and readiness probes: generate from application config
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - use different /etc/portage between builder deploys and image-root deploys: PORTAGE_CONFIGROOT=/path/to/container-config 
-- build etcd image and use it for k8s but also to replace system etcd
 - etcd status in infopage
 - OS + image vulnerability scan using trivy 
   - DONE image build, can scan mapped fs and mapped image tar
