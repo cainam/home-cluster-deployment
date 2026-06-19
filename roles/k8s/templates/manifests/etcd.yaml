@@ -32,7 +32,7 @@ spec:
     - --auto-compaction-retention=1h
     - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
     - --watch-progress-notify-interval=5s
-    image: {{ kubernetes_image_section }}/etcd:{{ k8s_images['etcd'] }}
+    image: {{ kubernetes_image_section }}/etcd:{{ software.etcd.version }}
     imagePullPolicy: IfNotPresent
     livenessProbe:
       failureThreshold: 8

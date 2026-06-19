@@ -1,7 +1,7 @@
 - block:
   - name: get list of images
     shell: |
-      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }}); do
+      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }} | grep -v etcd ); do
         repo_and_tag="${img##*/}" # strip registry and path (everything before the last /)
         # Extract the image name and the tag
         image="${repo_and_tag%:*}"
@@ -13,7 +13,7 @@
 
   - name: Set images as an Ansible dictionary
     set_fact:
-      k8s_images: "{{ required_images_raw.stdout | from_yaml }}"
+      required_images_dict: "{{ required_images_raw.stdout | from_yaml }}"
 
   - name: generate the images structure for the builder
     set_fact:
@@ -27,12 +27,12 @@
             'source': 'registry.k8s.io/' ~ item.key
           }]
         }}
-    loop: "{{ k8s_images | dict2items }}"
+    loop: "{{ required_images_dict | dict2items }}"
 
   - name: load image information as yaml
     set_fact:
-      images: "{{ images + required_images }}"
-      image_names: "{{ ['registry','flannel','flannel-cni-plugin'] + (required_images | map(attribute='name')) }}"
+      images: "{{ images + required_images + k8s_images }}"
+      image_names: "{{ ['registry','flannel','flannel-cni-plugin'] + (required_images | map(attribute='name')) + (k8s_images | map(attribute='name')) }}"
   run_once: true
   delegate_to: "{{ selected_host }}"
 
