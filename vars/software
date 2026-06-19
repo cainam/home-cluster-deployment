@@ -75,16 +75,14 @@ software:
     latest:
       type: github
   etcd:
-    version: v3.6.12
+    version: v3.6.8
     max_entries: 3
     latest:
       type: github
-
-
       params:
         repo: aquasecurity/trivy
   kubernetes:
-    version: 1.35.0
+    version: 1.36.1
     max_entries: 3
     latest:
       type: gentoo

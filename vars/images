@@ -90,7 +90,7 @@ images:
       cd ..
       rm -rf distribution /root/.??* /root/*
 
-- name: etcd
+- name: etcdxx
   section: k8s
   requires:
   - go

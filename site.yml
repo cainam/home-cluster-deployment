@@ -26,7 +26,7 @@
     - vars/software
     - vars/images
     - vars/apps.yaml
-    run_once: true
+    run_once: false # maybe turn to true again, but gather facts got wrong (hostname => IP) in 2.21
   - name: setup # to gather facts only when needed
     setup:
     tags:

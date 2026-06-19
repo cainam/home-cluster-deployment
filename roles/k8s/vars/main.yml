@@ -1,10 +1,23 @@
 ---
 k8s_check_file: /etc/kubernetes/kubelet.conf
 kubelet_config: /var/lib/kubelet/config.yaml
-k8s_version: v1.36.1
+k8s_version: {{ software.kubernetes.version }}
 controlPlaneEndpoint: "k8s.adm13:7443"
 k8s_log_directory: /var/log/kubernetes
 serviceSubnet: 10.96.0.0/12
 longhorn_disk: "{{ local_disk_directory }}/longhorn-1.disk"
 longhorn_size: 10G
 kubernetes_image_section: k8s
+
+k8s_images:
+- name: etcd
+  section: k8s
+  requires:
+  - go
+  build:
+    configure_rootfs_build: |
+      git clone  --depth 1 --single-branch -b "{{ software.etcd.version }}" https://github.com/etcd-io/etcd.git
+      cd etcd
+      GO_LDFLAGS="-w -s" make build
+      cp -dp bin/* "${ROOT}/bin"
+

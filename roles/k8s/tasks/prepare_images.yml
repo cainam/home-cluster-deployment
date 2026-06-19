@@ -1,16 +1,8 @@
 - block:
-#  - name: get list of images
-#    shell: |
-#      for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }});do
-#        src="${img%:*}";
-#        echo -e "- name: ${src##*/}\n  tag: ${img##*:}\n  section: {{ kubernetes_image_section }}\n  type: fetch\n  source: $src";
-#      done
-#    register: required_images
-#    changed_when: false
   - name: get list of images
     shell: |
       for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }}); do
-        repo_and_tag="${img##*/}" # Strip the registry (everything before the first /)
+        repo_and_tag="${img##*/}" # strip registry and path (everything before the last /)
         # Extract the image name and the tag
         image="${repo_and_tag%:*}"
         tag="${repo_and_tag##*:}"
@@ -44,10 +36,10 @@
   run_once: true
   delegate_to: "{{ selected_host }}"
 
-#- name: handle additional images
-#  vars:
-#    limit_images: "{{ image_names }}"
-#    dry_run: false
-#  include_role:
-#    name: gentoo-image-builder
+- name: handle additional images
+  vars:
+    limit_images: "{{ image_names }}"
+    dry_run: false
+  include_role:
+    name: gentoo-image-builder
 
