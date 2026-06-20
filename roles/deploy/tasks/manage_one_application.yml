@@ -82,22 +82,24 @@
     loop_control:
       loop_var: storage
 
-  - name: "{{ name_prefix }} - create NetworkPolicy"
-    vars:
-      kustom:
-        name: "{{ application.key }}"
-    template:
-      src: networkpolicy.yaml
-      dest: "{{ build_dir }}/networkpolicy-{{ allow.name|default(application.key) }}.yaml"
-    loop: "{{ application.value.network.allow }}"
-    loop_control:
-      loop_var: allow
+  - block:
+    - name: "{{ name_prefix }} - create NetworkPolicy"
+      vars:
+        kustom:
+          name: "{{ application.key }}"
+      template:
+        src: networkpolicy.yaml
+        dest: "{{ build_dir }}/networkpolicy-{{ allow.name|default(application.key) }}.yaml"
+      loop: "{{ application.value.network.allow }}"
+      loop_control:
+        loop_var: allow
 
-  - name: "{{ name_prefix }} - add NetworkPolicy to kustomization resources"
-    shell: yq -y -i '.resources += ["networkpolicy-{{ allow.name|default(application.key) }}.yaml"]' "{{ build_dir }}/kustomization.yaml"
-    loop: "{{ application.value.network.allow }}"
-    loop_control:
-      loop_var: allow
+    - name: "{{ name_prefix }} - add NetworkPolicy to kustomization resources"
+      shell: yq -y -i '.resources += ["networkpolicy-{{ allow.name|default(application.key) }}.yaml"]' "{{ build_dir }}/kustomization.yaml"
+      loop: "{{ application.value.network.allow }}"
+      loop_control:
+        loop_var: allow
+    when: application.value.network.allow is defined
 
   - block:
     - name: "{{ name_prefix }} application playbook - migrate - playbook run"

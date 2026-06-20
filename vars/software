@@ -74,13 +74,22 @@ software:
     max_entries: 3
     latest:
       type: github
+      params:
+        repo: aquasecurity/trivy
+  kube-network-policies:
+    version: v1.0.0
+    max_entries: 3
+    latest:
+      type: github
+      params:
+        repo: kubernetes-sigs/kube-network-policies
   etcd:
     version: v3.6.8
     max_entries: 3
     latest:
       type: github
       params:
-        repo: aquasecurity/trivy
+        repo: etcd-io/etcd
   kubernetes:
     version: 1.36.1
     max_entries: 3

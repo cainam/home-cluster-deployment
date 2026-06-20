@@ -95,6 +95,8 @@ applications:
       - name: data-postgresql-0
         type: longhorn
         size: 2Gi
+  kube-system:
+    kube-network-policies:
   kubext:
     service-check:
       images:
