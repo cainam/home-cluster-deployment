@@ -17,6 +17,7 @@ all:
     k8s-1-int.adm13:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
+      data_uuid: 2c2a02d6-495f-4957-ac0a-db26c070a4cf
       system_roles:
       - control_plane
     k8s-2-int.adm13:

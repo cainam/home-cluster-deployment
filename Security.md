@@ -48,6 +48,10 @@ I am using my infopage solution to display the findings in a browser.
 Although I use containers and my private registry I decided not to use the usual combination of Trivy with Harbor because Harbor is using an outdated fork while I am writing this and I see no benefit of the additional features Harbor brings for me.
 
 Trivy is supporting both, OS filesystem and image scanning and this is sufficient for toolchain integration.
+Images cannot be accessed easily directly from host, but easily via saved tar:
+* podman image ^Cve --format docker-archive k8s/etcd:v3.6.8 > /tmp/out
+* podman run -it --rm -v /:/host:ro  -v /tmp/out:/tmp/out:ro -v /etc/containers:/etc/containers:ro -e HOME=/trivy -v /etc/ssl/:/etc/ssl myregistry.adm13:443/local/^Civy:v0.71.0 image --skip-db-update --input /tmp/out
+
 
 ## Gentoo binhost package signing
 package signing on Gentoo consists out of the signing performed as root and the signature verification performed as nobody.

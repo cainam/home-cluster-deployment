@@ -14,21 +14,20 @@ builder:
   env: |
       ENV PKGDIR="/packages/aarch64-unknown-linux-musl"
       ENV DISTDIR="/distfiles"
-      ENV FEATURES="-parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
-      ENV EMERGE_DEFAULT_OPTS="--buildpkg y --usepkg  y --binpkg-respect-use=y --quiet-build --binpkg-changed-deps=y -v --tree"
+      ENV FEATURES="noclean -parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
+      ENV EMERGE_DEFAULT_OPTS="--buildpkg y --usepkg n --binpkg-respect-use=y --quiet-build --binpkg-changed-deps=y -v --tree"
       ENV XXXUSE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd static-libs"
       ENV USE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd -dhcp"
       ENV static_libs_use="-static-libs"
       ENV LDFLAGS="-static-libgcc -static-libstdc++"
-      ENV NODOC=true
-      ENV NOINFO=true
-      ENV NOMAN=true
+      ENV xRUSTFLAGS="-C link-arg=-static-libgcc"
       ENV LINGUAS="en"
       ENV L10N="en"
       ENV ACCEPT_LICENSE="*"
       ENV MAKEOPTS="-j3"
   configure_builder: |
       python_version=3.14
+      echo 'GROUP ( libgcc_eh.a libgcc.a )' > $(stat --format="%n" /usr/lib/gcc/aarch64-unknown-linux-musl/*/libgcc_s.so)
       mkdir -p /etc/portage/package.{accept_keywords,unmask,mask,use} /etc/portage/repos.conf/
       echo 'INSTALL_MASK="${INSTALL_MASK} /usr/share/doc /usr/share/info"' >>  /etc/portage/make.conf
       echo -e '[gentoo]\nlocation = /var/db/repos/gentoo' > /etc/portage/repos.conf/gentoo.conf

@@ -15,7 +15,7 @@ spec:
           kubernetes.io/metadata.name: {{ allow.namespace }}
       podSelector:
         matchLabels:
-          app: {{ allow.name }}
+          app.kubernetes.io/name: {{ allow.name }}
     ports:
     - protocol: TCP
       port: {{ allow.dest }}

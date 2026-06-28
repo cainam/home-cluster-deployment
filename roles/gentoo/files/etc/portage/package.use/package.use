@@ -2,11 +2,12 @@
 sys-cluster/glusterfs -ipv6 debug
 net-proxy/haproxy -slz
 sys-libs/glibc userlocales
-dev-embedded/rpi-eeprom pi4
+dev-embedded/rpi-eeprom pi4 pi5
 >=sys-devel/binutils-2.40-r4 gold
 # required by app-containers/containers-common-0.56.0-r1::gentoo
 # required by app-containers/buildah-1.32.2::gentoo
 # required by @selected
 # required by @world (argument)
 >=net-firewall/iptables-1.8.10 nftables
-sys-cluster/glusterfs PYTHON_SINGLE_TARGET: -* python3_12
+net-firewall/nftables json
+#sys-cluster/glusterfs PYTHON_SINGLE_TARGET: -* python3_12

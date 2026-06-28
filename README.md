@@ -112,6 +112,8 @@ Fritz.Box:
 replace token in all my git repos:
  find /data/mine/ -type d -name .git | while read d; do sed -i -e 's/Andi:.*@/Andi:token@/g' $d/config  | grep url; done
 
+infopage retrieves
+- flow information from colombos api interface
 
 Deconz:
 flash:
@@ -152,12 +154,11 @@ TODO:
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
 - lifeness and readiness probes: generate from application config
+- image builder: add downstream images to build (if python is build, rebuild fastapi
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - use different /etc/portage between builder deploys and image-root deploys: PORTAGE_CONFIGROOT=/path/to/container-config 
 - etcd status in infopage
 - OS + image vulnerability scan using trivy 
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
-- colombo: add authorization to the api (APIKEY) and NetworkPolicy
-- fix: /data mountpoint missing in fstab of k8s-1
 
