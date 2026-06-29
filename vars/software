@@ -77,7 +77,7 @@ software:
       params:
         repo: aquasecurity/trivy
   kube-network-policies:
-    version: v1.0.0
+    version: v1.1.0
     max_entries: 3
     latest:
       type: github

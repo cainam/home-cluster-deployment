@@ -20,7 +20,7 @@ images:
   requires:
   - curl
   build:
-    packages: dev-util/claude-code app-misc/jq 
+    packages: dev-util/claude-code app-misc/jq app-shells/bash
 
 - name: curl
   section: local

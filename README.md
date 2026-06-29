@@ -157,8 +157,42 @@ TODO:
 - image builder: add downstream images to build (if python is build, rebuild fastapi
 - var/images: split build script snippet so multiple required images can be used (e.g. traefik has go and nodejs, so run a part on go builder, another on nodejs builder), but: how to handle data like libc which is already there, image would blow up with simple COPY-from instruction
 - use different /etc/portage between builder deploys and image-root deploys: PORTAGE_CONFIGROOT=/path/to/container-config 
-- etcd status in infopage
 - OS + image vulnerability scan using trivy 
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
+- infopage: scroll
+- etcd update without k8s update, check if etcd update is disabled for kubeadm
+- etcd status in infopage
+(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # ls -lrt
+...
+-rw------- 1 root root 1704 29. Jun 21:46 webservice.key
+-rw-r--r-- 1 root root  229 29. Jun 21:46 webservice.cnf
+-rw-r--r-- 1 root root  993 29. Jun 21:46 webservice.csr
+-rw-r--r-- 1 root root   41 29. Jun 21:47 ca.srl
+-rw-r--r-- 1 root root 1168 29. Jun 21:47 webservice.crt
+(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # curl -X POST https://localhost:2379/v3/maintenance/status \
+     -H "Content-Type: application/json" \
+     -d '{}' \
+     --cacert /etc/kubernetes/pki/etcd/ca.crt \
+     --cert /etc/kubernetes/pki/etcd/webservice.crt \
+     --key /etc/kubernetes/pki/etcd/webservice.key
+{"header":{"cluster_id":"10452310601766765441", "member_id":"13058045378126779063", "revision":"347550772", "raft_term":"79424"}, "version":"3.6.8", "dbSize":"13365248", "leader":"12862265752508483583", "raftIndex":"446970327", "raftTerm":"79424", "raftAppliedIndex":"446970327", "dbSizeInUse":"11321344", "storageVersion":"3.6.0", "dbSizeQuota":"2147483648", "downgradeInfo":{}}(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # 
+
+(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # curl -X GET https://localhost:2379/health \
+     --cacert /etc/kubernetes/pki/etcd/ca.crt \
+     --cert /etc/kubernetes/pki/etcd/webservice.crt \
+     --key /etc/kubernetes/pki/etcd/webservice.key
+{"health":"true","reason":""}
+
+(mypyenv) k8s-3-incurl -X POST https://localhost:2379/v3/cluster/member/list \2379/v3/cluster/member/list \
+     -H "Content-Type: application/json" \
+     -d '{}' \
+     --cacert /etc/kubernetes/pki/etcd/ca.crt \
+     --cert /etc/kubernetes/pki/etcd/webservice.crt \
+     --key /etc/kubernetes/pki/etcd/webservice.key
+{"header":{"cluster_id":"10452310601766765441", "member_id":"13058045378126779063", "raft_term":"79424"}, "members":[{"ID":"5557987294218821930", "name":"k8s-2-int.adm13", "peerURLs":["https://10.10.10.22:2380"], "clientURLs":["https://10.10.10.22:2379"]}, {"ID":"12862265752508483583", "name":"k8s-1-int.adm13", "peerURLs":["https://10.10.10.21:2380"], "clientURLs":["https://10.10.10.21:2379"]}, {"ID":"13058045378126779063", "name":"k8s-3-int.adm13", "peerURLs":["https://10.10.10.23:2380"], "clientURLs":["https://10.10.10.23:2379"]}]}
+
+(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # curl -X GET https://10.10.10.21:2379/health      --cacert /etc/kubernetes/pki/etcd/ca.crt      --cert /etc/kubernetes/pki/etcd/webservice.crt      --key /etc/kubernetes/pki/etcd/webservice.key
+{"health":"true","reason":""}(mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # 
+
 
