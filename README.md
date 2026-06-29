@@ -163,6 +163,10 @@ TODO:
 - infopage: scroll
 - etcd update without k8s update, check if etcd update is disabled for kubeadm
 - etcd status in infopage
+1. deploy cert+key
+2. cert+key to env
+3. fetch members first, then add health and status checks
+
 (mypyenv) k8s-3-int /etc/kubernetes/pki/etcd # ls -lrt
 ...
 -rw------- 1 root root 1704 29. Jun 21:46 webservice.key
