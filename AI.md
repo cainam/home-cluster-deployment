@@ -15,7 +15,7 @@ podman run --rm -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHE
 
 
 Claude:
-mkdir /tmp/claude
+mkdir -p /tmp/claude/.claude
 chown -R -h podman /tmp/claude/
 echo '{
   "hasCompletedOnboarding": true,
@@ -33,4 +33,11 @@ echo '{
 }' > /tmp/claude/.claude/settings.json
 K=sk-xxxxxx
  podman run -it --rm -v /tmp/claude:/claude -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN="$K" -e ANTHROPIC_BASE_URL=https://openrouter.ai/api -v /tmp/claude:/claude -v /etc/passwd:/etc/passwd --user podman local/claude:20260521  /opt/bin/claude  -p --verbose --output-format stream-json  --dangerously-skip-permissions "Write a one-line Python function that returns the factorial of a number" | jq -r 'select(.type=="assistant") | .message.content[] | select(.type=="text") | .text'
+
+podman run -it --rm -v /root/application-specifics/:/apps -v /tmp/claude:/claude -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN="$K" -e ANTHROPIC_BASE_URL=https://openrouter.ai/api -v /tmp/claude:/claude -v /etc/passwd:/etc/passwd --user podman local/claude:20260611 bash
+CLAUDE_CODE_REQUEST_DELAY=5000  /opt/bin/claude --model qwen/qwen3-coder:free "the folder /apps/infopage contains the uvicorn app infopage. The website is a showing different views using tabs with divs. The tabs contains another level of divs. For the 'Status' tab there is an issue with html or css, because it has three sub-divs, but I cannot view the content of the div at the bottom as there is no scrollbar"
+
+
+groq:
+podman run -it --rm -v /root/application-specifics/:/apps -v /tmp/claude:/claude -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN="$K" -e ANTHROPIC_BASE_URL=https://api.groq.com/openai/v1 -e ANTHROPIC_MODEL="llama-3.3-70b-versatile" -e ANTHROPIC_SMALL_FAST_MODEL="llama-3.1-8b-instant" -v /tmp/claude:/claude -v /etc/passwd:/etc/passwd --user podman local/claude:20260611 bash
 

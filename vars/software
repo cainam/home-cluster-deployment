@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.5
+    version: v0.28.7
     installed:
       pattern: "flannel:"
     latest:
@@ -8,7 +8,7 @@ software:
       params:
         repo: flannel-io/flannel
   flannel-cni-plugin:
-    version: v1.9.1-flannel1
+    version: v1.9.1-flannel2
     installed:
       pattern: "lannel-cni-plugin:"
     latest:
@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.5
+    version: v3.7.6
     installed:
       pattern: "traefik"
     latest:
@@ -40,7 +40,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.12.0
+    version: 2.12.1
     latest:
       type: github
       params:
@@ -70,7 +70,7 @@ software:
         repo: library/registry
         arch: arm64
   trivy:
-    version: v0.71.0
+    version: v0.72.0
     max_entries: 3
     latest:
       type: github
@@ -84,7 +84,7 @@ software:
       params:
         repo: kubernetes-sigs/kube-network-policies
   etcd:
-    version: v3.6.8
+    version: v3.6.12
     max_entries: 3
     latest:
       type: github

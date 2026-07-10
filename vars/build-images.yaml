@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened-openrc
-  stage3_date: 20260607T234631Z
-  portage: 20260611
+  stage3_date: 20260705T233102Z
+  portage: 20260708
   portage_container: "portage"
   local_overlay_dir: /portage-local
   local_overlay_name: private-repo
@@ -15,8 +15,7 @@ builder:
       ENV PKGDIR="/packages/aarch64-unknown-linux-musl"
       ENV DISTDIR="/distfiles"
       ENV FEATURES="noclean -parallel-fetch nodoc noinfo noman binpkg-multi-instance -ipc-sandbox -network-sandbox -pid-sandbox"
-      ENV EMERGE_DEFAULT_OPTS="--buildpkg y --usepkg n --binpkg-respect-use=y --quiet-build --binpkg-changed-deps=y -v --tree"
-      ENV XXXUSE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd static-libs"
+      ENV EMERGE_DEFAULT_OPTS="--buildpkg y --usepkg y --binpkg-respect-use=y --quiet-build --binpkg-changed-deps=y -v --tree"
       ENV USE="bindist threads -nls -X -gnome -gtk -kde -qt4 -cups -alsa -cups -ipv6 -pppd -gdbm -gpm -pam -ncurses -debug -doc -kerberos -ldap -pam -perl -systemd -tcl -test -su -seccomp -udev -systemd -dhcp"
       ENV static_libs_use="-static-libs"
       ENV LDFLAGS="-static-libgcc -static-libstdc++"
@@ -43,7 +42,8 @@ builder:
       echo -e "[{{ builder.local_overlay_name }}]\nlocation = {{ builder.local_overlay_dir }}\npriority = 9999" > /etc/portage/repos.conf/local.conf
 
       # mask all unwanted python version
-      qlist -Iv | grep "^dev-lang/python-[0-9]" | grep -v "dev-lang/python-${python_version}" | sed -e 's/^/=/g' >> /etc/portage/package.mask/python
+      set -x
+      qlist -Iv | grep "^dev-lang/python-[0-9]" | grep -v "dev-lang/python-${python_version}" | sed -e 's/^/=/g' >> /etc/portage/package.mask/python || true
       source /etc/profile
       emerge --newuse sys-apps/portage app-portage/gentoolkit dev-vcs/git # app-portage/flaggie app-portage/eix app-portage/gentoolkit
       remove="virtual/ssh virtual/pager-0-r1 virtual/service-manager sys-apps/elfix sys-libs/libseccomp dev-python/pypax virtual/udev sys-apps/systemd-utils virtual/dev-manager net-misc/dhcpcd net-misc/iputils sys-apps/openrc sys-apps/net-tools app-editors/nano sys-apps/help2man sys-apps/iproute2 sys-apps/kmod sys-apps/man-db  sys-apps/texinfo virtual/man net-mail/mailbase"

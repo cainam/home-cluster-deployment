@@ -112,7 +112,7 @@
 - block:
     - name: update k8s
       shell: |
-        KUBECONFIG={{ kubeconfig }} kubeadm upgrade apply --config /etc/kubernetes/kubeadm.conf --yes "{{ k8s_version }}"
+        KUBECONFIG={{ kubeconfig }} kubeadm upgrade apply --etcd-upgrade --config /etc/kubernetes/kubeadm.conf --yes "{{ k8s_version }}"
     - name: wait for node to report Ready status
       shell: kubectl get node {{ inventory_hostname }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
       delegate_to: "{{ healthy_node  }}"
@@ -132,6 +132,14 @@
   - manifests/kube-apiserver.yaml
   - manifests/kube-controller-manager.yaml
   - manifests/kube-scheduler.yaml
+
+- name: wait for node to report Ready status
+  shell: kubectl get node {{ inventory_hostname }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+  delegate_to: "{{ healthy_node  }}"
+  register: node_status
+  until: node_status.stdout == "True"
+  retries: 30
+  delay: 10
 
 - block:
   - name: taint to allow master nodes to run pods
