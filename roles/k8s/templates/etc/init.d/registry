@@ -12,7 +12,7 @@ depend()
 }
 
 load_image(){
-    registry_content="/shared/registry/docker/registry/v2"
+    registry_content="{{ shared_mounts }}/registry/docker/registry/v2"
     cd $(mktemp --directory)
     reg_sha=$(cut -d : -f 2 ${registry_content}/repositories/local/registry/_manifests/tags/${service_image##*:}/current/link )
     config_sha=$(cat ${registry_content}/blobs/sha256/$(echo "$reg_sha"| cut -c -2)/$reg_sha/data | jq -r .config.digest  | cut -d : -f 2)
@@ -54,8 +54,8 @@ start()
                 -e REGISTRY_STORAGE_DELETE_ENABLED=true \
                 -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
                 -e OTEL_TRACES_EXPORTER=none \
-                -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/myregistry.adm13.crt \
-                -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/myregistry.adm13.key \
+                -e REGISTRY_HTTP_TLS_CERTIFICATE=/var/lib/registry/certs/{{ registry_host }}.crt \
+                -e REGISTRY_HTTP_TLS_KEY=/var/lib/registry/certs/{{ registry_host }}.key \
         "${service_image}" serve /var/lib/registry/config.yml
 
         rc=0

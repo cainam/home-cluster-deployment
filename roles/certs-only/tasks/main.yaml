@@ -5,9 +5,9 @@
       certificates_configuration: "{{ my_certs.conf }}"
       ca_init: false
       ca_requests:
-      - name: myregistry.adm13
+      - name: {{ registry_host }}
         alt_names: 
-        - myregistry.adm13
+        - {{ registry_host }}
       - name: my-lb.adm13
         alt_names:
         - my-lb.adm13

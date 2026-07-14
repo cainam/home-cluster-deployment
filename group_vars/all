@@ -15,7 +15,8 @@ local_disk_directory: /data/disks
 remote_temp: /data/tmp
 default_boot_device: /dev/mmcblk0p1
 
-registry: myregistry.adm13:443
+registry_host: myregistry.adm13
+registry: {{ registry_host }}:443
 shared_mounts: /shared
 default_platform: arm64
 cert_path: /data/mine/certs
@@ -26,7 +27,7 @@ my_certs:
   - "root-ca.crt"
   - "intermediate-ca.crt"
   certs:
-  - name: myregistry.adm13
+  - name: {{ registry_host }}
     dest: /shared/registry/certs
   conf:
     ca_own_root: true
@@ -45,7 +46,7 @@ net:
   cidr: 10.10.10.0/24
   virtual_ips:
   - ip: 10.10.10.10
-    names: ["k8s.adm13", "myregistry.adm13", "podman.adm13"]
+    names: ["k8s.adm13", "{{ registry_host }}", "podman.adm13"]
   open_services:
   - oauth2-proxy
   - hydra

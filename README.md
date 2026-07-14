@@ -147,7 +147,6 @@ Networking Istio:
 
 TODO: 
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
-- glusterd: certs are deployed to gluster volume (registry), but gluster config and gluster import happens later => deploy in the right order
 - dependencies: generalize waitdb initcontainer 
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
 - security: log all incoming connections on fritzbox see fritzdump.sh
@@ -161,4 +160,6 @@ TODO:
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
-- infopage: fix bug with tests => RuntimeError: Python 3.14 requires ansible-core version >= 2.20.0, and we found 2.19.3.
+- Ansible tester variable
+- glusterd: certs are deployed to gluster volume (registry), but gluster config and gluster import happens later => deploy in the right order
+

@@ -39,6 +39,14 @@
     - etc/kubernetes/AdmissionConfiguration.yaml
     - var/lib/kubelet/seccomp/podman.json
 
+- name: deploy etc from templates
+  include_role:
+    name: shared_helper
+    tasks_from: template_directory.yaml
+  vars:
+    destination_dir: "/etc"
+    template_source_dir: "{{ my_role_path }}/templates/etc"
+
 - name: check /var/lib/etcd
   stat:
     path: "/var/lib/etcd"
