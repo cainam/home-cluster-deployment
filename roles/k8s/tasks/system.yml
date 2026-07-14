@@ -39,6 +39,10 @@
     - etc/kubernetes/AdmissionConfiguration.yaml
     - var/lib/kubelet/seccomp/podman.json
 
+- name: set my role_path
+  set_fact:
+    my_role_path: "{{ role_path }}"
+
 - name: deploy etc from templates
   include_role:
     name: shared_helper

@@ -16,7 +16,7 @@ remote_temp: /data/tmp
 default_boot_device: /dev/mmcblk0p1
 
 registry_host: myregistry.adm13
-registry: {{ registry_host }}:443
+registry: "{{ registry_host }}:443"
 shared_mounts: /shared
 default_platform: arm64
 cert_path: /data/mine/certs
@@ -27,7 +27,7 @@ my_certs:
   - "root-ca.crt"
   - "intermediate-ca.crt"
   certs:
-  - name: {{ registry_host }}
+  - name: "{{ registry_host }}"
     dest: /shared/registry/certs
   conf:
     ca_own_root: true
