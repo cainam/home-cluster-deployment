@@ -67,17 +67,28 @@
   shell: /usr/sbin/update-ca-certificates
   when: ca.changed
 
-- name: put certificate keys in place
-  copy:
-    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/subject_keys/{{ item.name }}.pem"
-    dest: "{{ item.dest }}/{{ item.name }}.key"
+- name: deploy certs
+  include_role:
+    name: shared_helper
+    tasks_from: deploy_cert.yaml
+  vars:
+    cert_name: "{{ item.name }}"
+    cert_ca_common_name: "{{ my_certs.conf.ca_common_name }}"
+    cert_local_path: "{{ cert_path }}"
+    cert_dest_dir: "{{ item.dest }}"
   loop: "{{ my_certs.certs }}"
 
-- name: put certificates in place
-  copy:
-    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/certs/{{ item.name }}.crt"
-    dest: "{{ item.dest }}/{{ item.name }}.crt"
-  loop: "{{ my_certs.certs }}"
+#- name: put certificate keys in place
+#  copy:
+#    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/subject_keys/{{ item.name }}.pem"
+#    dest: "{{ item.dest }}/{{ item.name }}.key"
+#  loop: "{{ my_certs.certs }}"
+#
+#- name: put certificates in place
+#  copy:
+#    src: "{{ cert_path }}/{{ my_certs.conf.ca_common_name }}/certs/{{ item.name }}.crt"
+#    dest: "{{ item.dest }}/{{ item.name }}.crt"
+#  loop: "{{ my_certs.certs }}"
 
 - name: rc.conf
   lineinfile:

@@ -160,6 +160,4 @@ TODO:
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
-- Ansible tester variable
-- glusterd: certs are deployed to gluster volume (registry), but gluster config and gluster import happens later => deploy in the right order
 

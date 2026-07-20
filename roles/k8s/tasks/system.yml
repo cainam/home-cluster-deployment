@@ -51,6 +51,20 @@
     destination_dir: "/etc"
     template_source_dir: "{{ my_role_path }}/templates/etc"
 
+- name: deploy certs
+  include_role:
+    name: shared_helper
+    tasks_from: deploy_cert.yaml
+  vars:
+    cert_name: "{{ item.name }}"
+    cert_ca_common_name: "{{ my_certs.conf.ca_common_name }}"
+    cert_local_path: "{{ cert_path }}"
+    cert_dest_dir: "{{ item.dest }}"
+  loop:
+  - name: "{{ registry_host }}"
+    dest: /shared/registry/certs
+
+
 - name: check /var/lib/etcd
   stat:
     path: "/var/lib/etcd"
