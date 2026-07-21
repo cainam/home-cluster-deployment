@@ -45,6 +45,7 @@ sys-kernel/raspberrypi-image
 app-misc/tmux
 dev-python/pip
 net-misc/chrony
+app-misc/yq
 
 # only for longhorn
 sys-block/open-iscsi
