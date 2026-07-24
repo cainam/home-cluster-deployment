@@ -145,6 +145,9 @@ Networking Istio:
 - VirtualService <=> Application: one to many relationship
 - inject istio sidecare, mutatingwebhookconfigraion update to inject sidecar based on label "app"
 
+Patches:
+- https://bugs.gentoo.org/979676: see copy of policy.json in roles/gentoo/tasks/main.yaml
+
 TODO: 
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 

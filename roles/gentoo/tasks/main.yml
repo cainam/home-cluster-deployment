@@ -77,6 +77,7 @@
     cert_local_path: "{{ cert_path }}"
     cert_dest_dir: "{{ item.dest }}"
   loop: "{{ my_certs.certs }}"
+  when: "'certs' in my_certs"
 
 #- name: put certificate keys in place
 #  copy:
