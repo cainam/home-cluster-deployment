@@ -132,6 +132,3 @@
 - name: emerge preserved rebuild
   shell: emerge @preserved-rebuild
   when: alt_names is defined and alt_names.gentoo_build is not defined and 'emerge' in ansible_run_tags
-
-- name: workaround for https://bugs.gentoo.org/979676
-  shell: cp -dp /usr/share/containers/policy.json /etc/containers/

@@ -11,7 +11,8 @@
       repo: '{{ applications_git }}'
       dest: "{{ local_playbook_temp }}/applications"
       depth: 1
-    ignore_errors: true
+      force: yes
+    #ignore_errors: true
     delegate_to: localhost
 
   - name: "{{ name_prefix }} check for application components"

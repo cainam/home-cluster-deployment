@@ -5,5 +5,6 @@ dev-embedded/rpi-eeprom pi4
 >=sys-devel/binutils-2.40-r4 gold
 >=net-firewall/iptables-1.8.10 nftables
 net-firewall/nftables json
-app-misc/yq -yq-symlink
+#app-misc/yq -yq-symlink
+app-misc/yq 
 
