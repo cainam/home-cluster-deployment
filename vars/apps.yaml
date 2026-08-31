@@ -27,9 +27,9 @@ applications:
         prefix: /oauth2-hydra
         rewrite: /oauth2-hydra/
   home:
-    grott:
-      git: "{{ own_git_url }}"
-      subdir: charts/grott
+    #grott:
+    #  git: "{{ own_git_url }}"
+    #  subdir: charts/grott
     zigbee2mqtt:
       flags: ['no strip']
       affinity: k8s-2-int.adm13

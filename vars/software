@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.7
+    version: v0.28.9
     installed:
       pattern: "flannel:"
     latest:
@@ -8,7 +8,7 @@ software:
       params:
         repo: flannel-io/flannel
   flannel-cni-plugin:
-    version: v1.9.1-flannel2
+    version: v1.9.1-flannel3
     installed:
       pattern: "lannel-cni-plugin:"
     latest:
@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.6
+    version: v3.7.12
     installed:
       pattern: "traefik"
     latest:
@@ -32,7 +32,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.15.3
+    version: v7.15.4
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -40,7 +40,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.12.1
+    version: 2.13.0
     latest:
       type: github
       params:
@@ -54,7 +54,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2026.7.2"
+    version: "2026.8.3"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -70,7 +70,7 @@ software:
         repo: library/registry
         arch: arm64
   trivy:
-    version: v0.72.0
+    version: v0.74.0
     max_entries: 3
     latest:
       type: github
@@ -98,7 +98,7 @@ software:
       params:
         repo: sys-cluster/kubeadm
   postgresql:
-    version: 18.6
+    version: 18.4
     max_entries: 4
     latest:
       type: gentoo

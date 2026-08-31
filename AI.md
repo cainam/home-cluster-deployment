@@ -28,7 +28,7 @@ echo '{
 }' > /tmp/claude/.claude.json
 echo '{
   "theme": "auto",
-  "model": "poolside/laguna-xs.2:free",
+  "model": "poolside/laguna-s-2.1:free",
   "smallModel": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
 }' > /tmp/claude/.claude/settings.json
 K=sk-xxxxxx
