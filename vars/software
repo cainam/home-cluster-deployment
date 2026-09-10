@@ -98,7 +98,7 @@ software:
       params:
         repo: sys-cluster/kubeadm
   postgresql:
-    version: 18.4
+    version: 18.6
     max_entries: 4
     latest:
       type: gentoo

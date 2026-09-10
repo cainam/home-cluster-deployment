@@ -6,14 +6,14 @@
   run_once: true
 
 - block: # prepare application playbook integration
-  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
-    ansible.builtin.git:
-      repo: '{{ applications_git }}'
-      dest: "{{ local_playbook_temp }}/applications"
-      depth: 1
-      force: yes
-    #ignore_errors: true
-    delegate_to: localhost
+#  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+#    ansible.builtin.git:
+#      repo: '{{ applications_git }}'
+#      dest: "{{ local_playbook_temp }}/applications"
+#      depth: 1
+#      force: yes
+#    #ignore_errors: true
+#    delegate_to: localhost
 
   - name: "{{ name_prefix }} check for application components"
     ansible.builtin.stat:

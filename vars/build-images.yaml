@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened-openrc
-  stage3_date: 20260823T234554Z
-  portage: 20260824
+  stage3_date: 20260906T223105Z
+  portage: 20260908
   portage_container: "portage"
   local_overlay_dir: /portage-local
   local_overlay_name: private-repo

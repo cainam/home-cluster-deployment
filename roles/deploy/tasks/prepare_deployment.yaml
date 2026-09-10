@@ -1,10 +1,22 @@
 # testing examples: '\{\"limit_application\":[\"x\",\"y\"]}'  '\{\"limit_application\":\"x1y\"}' '{"limit_application":[infopage,tor],"limit_namespace":[tools]}' '{"limit_application":[1a1],"limit_namespace":[ns2]}'
-- block:
+
+- block: 
   - set_fact:
       apps: "{{ applications }}"
       net_routes: []
       application_playbooks: {}
+      local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
+  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+    ansible.builtin.git:
+      repo: '{{ applications_git }}'
+      dest: "{{ local_playbook_temp }}/applications"
+      depth: 1
+      force: yes
+    #ignore_errors: true
+    delegate_to: localhost
+
+- block:
   - name: add missing namespaces to net.routes
     set_fact:
       net_routes: >-
