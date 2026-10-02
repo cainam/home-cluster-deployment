@@ -1,2 +1,2 @@
->sys-devel/gcc-15.2.1_p20260214
-<sys-devel/gcc-15.2.1_p20260214
+>sys-devel/gcc-16.2.1_p20260926
+<sys-devel/gcc-16.2.1_p20260926

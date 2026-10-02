@@ -25,12 +25,14 @@
     set_fact:
       current_app_images: "{{ images|default([]) + additional_images }}"
       current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
+      already_processed_images: "{{ (images_processed | default([]) ) + (already_processed_images | default([]) ) }}"
 
   - name: "{{ name_prefix }} images"
     vars:
       limit_images: "{{ current_limit_images }}"
       images: "{{ current_app_images }}"
       default_section: "{{ k8s_namespace.key }}"
+      skip_images: "{{ already_processed_images }}"
       dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
       updated_images_var: images_details
     include_role:
