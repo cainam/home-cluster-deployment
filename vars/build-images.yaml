@@ -5,8 +5,8 @@ builder:
   makeopts: "-j4"
   chost: 'aarch64-unknown-linux-musl'
   stage3_base: stage3-arm64-musl-hardened-openrc
-  stage3_date: 20260906T223105Z
-  portage: 20260908
+  stage3_date: 20260913T234554Z
+  portage: 20260919
   portage_container: "portage"
   local_overlay_dir: /portage-local
   local_overlay_name: private-repo
@@ -49,7 +49,7 @@ builder:
       remove="virtual/ssh virtual/pager-0-r1 virtual/service-manager sys-apps/elfix sys-libs/libseccomp dev-python/pypax virtual/udev sys-apps/systemd-utils virtual/dev-manager net-misc/dhcpcd net-misc/iputils sys-apps/openrc sys-apps/net-tools app-editors/nano sys-apps/help2man sys-apps/iproute2 sys-apps/kmod sys-apps/man-db  sys-apps/texinfo virtual/man net-mail/mailbase"
       for p in sys-devel/gcc sys-devel/gcc-config sys-apps/systemd-utils; do equery --quiet --no-color --no-pipe list "${p}" >> /etc/portage/profile/package.provided; done
       emerge --unmerge ${remove} $(sed -e 's/^=//g' /etc/portage/package.mask/* | xargs)
-      emerge --newuse --deep @installed --tree
+      emerge --update --newuse --deep @installed --tree
       emerge --depclean
       emerge @preserved-rebuild
   finish_build: |

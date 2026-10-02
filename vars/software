@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.12
+    version: v3.7.13
     installed:
       pattern: "traefik"
     latest:
@@ -24,7 +24,7 @@ software:
       params:
         repo: traefik/traefik
   istio:
-    version: 1.30.2
+    version: 1.31.1
     installed:
       pattern: "istio"
     latest:
@@ -32,7 +32,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.15.4
+    version: v7.15.5
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -40,7 +40,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.13.0
+    version: 2.14.2
     latest:
       type: github
       params:
@@ -54,7 +54,7 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   home-assistant:
-    version: "2026.8.3"
+    version: "2026.9.4"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -63,21 +63,21 @@ software:
         repo: homeassistant/home-assistant
         arch: arm64
   registry:
-    version: v3.1.1
+    version: v3.1.2
     latest:
       type: dockerhub
       params:
         repo: library/registry
         arch: arm64
   trivy:
-    version: v0.74.0
+    version: v0.75.0
     max_entries: 3
     latest:
       type: github
       params:
         repo: aquasecurity/trivy
   kube-network-policies:
-    version: v1.1.1
+    version: v1.1.2
     max_entries: 3
     latest:
       type: github

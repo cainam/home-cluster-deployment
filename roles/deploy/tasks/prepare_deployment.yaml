@@ -7,7 +7,7 @@
       application_playbooks: {}
       local_playbook_temp: "{{ remote_temp }}/{{ own_git_url | basename | split('.') | first }}"
 
-  - name: "{{ name_prefix }} clone application playbooks to Ansible Controller"
+  - name: "clone application playbooks to Ansible Controller"
     ansible.builtin.git:
       repo: '{{ applications_git }}'
       dest: "{{ local_playbook_temp }}/applications"

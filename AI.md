@@ -41,3 +41,8 @@ CLAUDE_CODE_REQUEST_DELAY=5000  /opt/bin/claude --model qwen/qwen3-coder:free "t
 groq:
 podman run -it --rm -v /root/application-specifics/:/apps -v /tmp/claude:/claude -w /claude -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN="$K" -e ANTHROPIC_BASE_URL=https://api.groq.com/openai/v1 -e ANTHROPIC_MODEL="llama-3.3-70b-versatile" -e ANTHROPIC_SMALL_FAST_MODEL="llama-3.1-8b-instant" -v /tmp/claude:/claude -v /etc/passwd:/etc/passwd --user podman local/claude:20260611 bash
 
+
+running claude inside build container to fix build issues:
+K=xxx
+podman run -it --rm -v /data/build/data/patches/:/etc/portage/patches --volume /data/build/data/portage-20260908:/var/db/repos/gentoo --volume /data/build/data/packages/:/packages --volume /data/build/data/distfiles/:/distfiles -e HOME=/claude -e CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1 -e ANTHROPIC_AUTH_TOKEN=$K -e ANTHROPIC_BASE_URL=https://openrouter.ai/api -v /tmp/claude/:/claude localhost/local/my_builder-envoy-base:20260908 bash
+
