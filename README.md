@@ -164,4 +164,29 @@ TODO:
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
 - colombo: suricata fails to start due to enabled eve stats, install yq in container to create the good --set commandline option for suricata (list of types)
-- images: return list of processed images which could be used as input for later use of image builder role: provide var for role: exclude_images: already_processed_images, processed_images_var: already_processed_images
+- apps:         var_additional_images: "_additional_images_playbook" => should be application playbook var to avoid being considered by other applications
+- deploy: roles/deploy/tasks/manage_application_requirements.yaml => move to ... ? maybe postgres to implement an interface which ha uses
+- images: return list of processed images which could be used as input for later use of image builder role: provide var for role: exclude_images: already_processed_images, processed_images_var: already_processed_images, => remove images to skip from list instead of when in loop
+irgendwie paßt die logik nicht, skip_images enthält duplikates
+
+
+- name is somehow wrong TASK [shared_helper : manage image molecule-tester - get template directories] ***, this is after manage image
+
+
+
+status before skip_images and image.yaml update:
+PLAY RECAP *********************************************************************
+k8s-1-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+k8s-2-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+k8s-3-int.adm13            : ok=3156 changed=479  unreachable=0    failed=0    skipped=4304 rescued=0    ignored=0
+k8s-4-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+
+
+real    79m54,846s
+user    42m58,281s
+sys     13m19,914s
+(mypyenv) k8s-2-int /data/mine/home-cluster-deployment # Falls erfolgreich, Zeit aufschreiben und nochmal, vorher aber die anzahl der image processings zählen
+
+k8s-2-int /data/mine/home-cluster-deployment # grep "check if image exists already" /tmp/out  | wc -l
+152
+k8s-2-int /data/mine/home-cluster-deployment #
