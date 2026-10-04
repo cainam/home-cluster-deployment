@@ -8,15 +8,12 @@
       include_vars:
         file: "{{ application_playbooks[application.key]['additional_images_list'] }}"
         name: _my_images_list
-
-    - name: add images as var to application_playbook
-      set_fact:
-        application_playbooks: "{{ application_playbooks | default({}) | combine({application.key:{'vars':{'images_var': _my_images_list.images  }} }, recursive=True) }}"
     when: application.key in application_playbooks and 'additional_images_list' in application_playbooks[application.key]
 
   - block:
     - name: "{{ name_prefix }} application playbook - additional_images - playbook run}}"
       vars:
+        var_additional_images: "_additional_images_playbook"
         kustomize_dir: "{{ application_playbooks[application.key].kustomize | default(omit) }}"
         registry_path: "{{ k8s_namespace.key }}"
       include_tasks: "{{ application_playbooks[application.key]['additional_images_playbook'] }}"
@@ -24,18 +21,18 @@
 
   - name: "{{ name_prefix }} update images variables"
     vars:
-      additional_images: "{{ application_playbooks[application.key].vars.images | default([]) + application_playbooks[application.key].vars.images_var | default([]) }}"
+      additional_images: "{{ _additional_images_playbook|default([]) + _my_images_list.images|default([]) }}"
     set_fact:
       current_app_images: "{{ images|default([]) + additional_images }}"
-      current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name') | list|default([])) }}"
-      already_processed_images: "{{ (images_processed | default([]) ) + (already_processed_images | default([]) ) }}"
+      current_limit_images: "{{ application.value.images|default([]) + (additional_images | map(attribute='name')|list|default([])) }}"
+      all_images_details: "{{all_images_details|default([]) + lookup('vars', 'images_details')|default([]) }}"
+      skip_images: "{{ skip_images|default([]) + images_processed|default([]) }}"
 
   - name: "{{ name_prefix }} images"
     vars:
       limit_images: "{{ current_limit_images }}"
       images: "{{ current_app_images }}"
       default_section: "{{ k8s_namespace.key }}"
-      skip_images: "{{ already_processed_images }}"
       dry_run: "{{ false if 'build' in ansible_run_tags else true }}"
       updated_images_var: images_details
     include_role:
@@ -56,7 +53,7 @@
     vars:
       dir_var: build_dir
       template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
-      image_entries: "{{ lookup('vars', 'images_details') | selectattr('name', 'in', current_limit_images) | list }}"
+      image_entries: "{{ (lookup('vars', 'images_details')+all_images_details) | selectattr('name', 'in', current_limit_images) | list }}"
       image_dict: "{% set res = {} %}{% for item in image_entries %}{% set _ = res.update({item.name: item.section ~ '/' ~ item.name ~ ':' ~ item.tag}) %}{% endfor %}{{ res }}"
       image_entry: "{{ lookup('vars', 'images_details') | selectattr('name', 'defined') | selectattr('name', 'equalto', (current_limit_images|first) )| first | default(None)}}"
       kustom: "{{ application.value.kustom | default({}) | combine({

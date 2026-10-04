@@ -190,3 +190,19 @@ sys     13m19,914s
 k8s-2-int /data/mine/home-cluster-deployment # grep "check if image exists already" /tmp/out  | wc -l
 152
 k8s-2-int /data/mine/home-cluster-deployment #
+
+
+PLAY RECAP *********************************************************************
+k8s-1-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+k8s-2-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+k8s-3-int.adm13            : ok=3027 changed=478  unreachable=0    failed=0    skipped=3416 rescued=0    ignored=0
+k8s-4-int.adm13            : ok=90   changed=9    unreachable=0    failed=0    skipped=75   rescued=0    ignored=0
+
+
+real    59m57,349s
+user    36m53,886s
+sys     11m0,327s
+
+(mypyenv) k8s-2-int /data/mine/home-cluster-deployment # grep "check if image exists already" /tmp/out  | wc -l
+126
+(mypyenv) k8s-2-int /data/mine/home-cluster-deployment #
