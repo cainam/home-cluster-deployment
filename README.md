@@ -171,6 +171,7 @@ irgendwie paßt die logik nicht, skip_images enthält duplikates
 
 
 - name is somehow wrong TASK [shared_helper : manage image molecule-tester - get template directories] ***, this is after manage image
+- pvcs get created which trigger longhorn volumes, slightly differently named than the used ones
 
 
 

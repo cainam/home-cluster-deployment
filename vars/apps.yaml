@@ -36,11 +36,13 @@ applications:
       network:
         rewrite: /zigbee2mqtt
       storage:
-      - type: longhorn
+      - name: data-zigbee2mqtt-0
+        type: longhorn
         size: 100Mi
     mosquitto:
       storage:
-      - type: longhorn
+      - name: data-mosquitto-0
+        type: longhorn
         size: 3Mi
     home-assistant:
       storage:
@@ -92,7 +94,7 @@ applications:
         dataPath: /var/lib/postgresql
         confPath: /conf
       storage: 
-      - name: data-postgresql-0
+      - name: data-postgres-0
         type: longhorn
         size: 2Gi
   kube-system:
