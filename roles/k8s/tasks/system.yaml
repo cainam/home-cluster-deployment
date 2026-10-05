@@ -24,6 +24,10 @@
     perm: u=rwx,g=rx,o=rx
   - path: /var/lib/kubelet/seccomp
     perm: u=rwx,g=,o=
+  - path: /etc/kubernetes
+    perm: u=rwx,g=rx,o=rx
+  - path: /etc/kubernetes/patches
+    perm: u=rwx,g=,o=
 
 - name: deploy configuration files
   copy:

@@ -120,11 +120,14 @@
   
 - block:
   - name: "{{ name_prefix }} manage application requirements"
-    include_tasks: manage_application_requirements.yaml
+    vars:
+      requirements: rq.config
+    include_tasks: "{{ application_playbooks[rq.type]['provides'] }}"
     loop: "{{ application.value.requires|default([]) }}"
     loop_control:
       loop_var: rq
-
+  # here could be a when: check, but then only with another task to alert that the provider is missing ... maybe I'll add it later (aka never)
+  
 # traefik
 - block:
   - name: "{{ name_prefix }} Middleware stripprefix"

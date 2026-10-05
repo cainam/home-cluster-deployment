@@ -164,6 +164,9 @@ TODO:
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
 - colombo: suricata fails to start due to enabled eve stats, install yq in container to create the good --set commandline option for suricata (list of types)
+- postgresql: port 5432 as variable
 - deploy: roles/deploy/tasks/manage_application_requirements.yaml => move to ... ? maybe postgres to implement an interface which ha uses
-
-
+playbook option: provides: playbook
+playbook with asserts
+called if it matches required
+challenge: rq.name is the service name of the deployed app, this should not be a parameter, but determined pg internally

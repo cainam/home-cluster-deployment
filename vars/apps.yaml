@@ -93,6 +93,9 @@ applications:
         runAs: "{{ lookup('pipe', 'id -u postgres') | int }}"
         dataPath: /var/lib/postgresql
         confPath: /conf
+      vars:
+        service_name: postgres
+        service_port: 5432
       storage: 
       - name: data-postgres-0
         type: longhorn
