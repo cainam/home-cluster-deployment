@@ -1,3 +1,3 @@
 [
-  { "op": "replace", "path": "/spec/containers/0/image", "value": "{{ registry }}/{{ kubernetes_image_section }}/etcd:{{ software.etcd.varsion }}" }
+  { "op": "replace", "path": "/spec/containers/0/image", "value": "{{ registry }}/{{ kubernetes_image_section }}/etcd:{{ software.etcd.version }}" }
 ]
