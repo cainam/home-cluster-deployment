@@ -34,7 +34,6 @@
     - etc/sysctl.d/k8s.conf
     - etc/modules-load.d/k8s.conf
     - etc/conf.d/kubelet
-    - etc/kubernetes/kubeadm.conf
     - etc/kubernetes/audit-policy.yaml 
     - etc/kubernetes/AdmissionConfiguration.yaml
     - var/lib/kubelet/seccomp/podman.json
