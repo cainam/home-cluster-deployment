@@ -51,6 +51,7 @@
       name: shared_helper
       tasks_from: template_directory.yaml
     vars:
+      title: name_prefix
       dir_var: build_dir
       template_source_dir: "{{ application_playbooks[application.key]['kustomize'] | default(playbook_dir ~ '/common/kustomize/' ~ (application.value.kustom.application | default(application.key))) }}"
       image_entries: "{{ (lookup('vars', 'images_details')+all_images_details) | selectattr('name', 'in', current_limit_images) | list }}"

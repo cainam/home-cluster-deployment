@@ -84,14 +84,14 @@ software:
       params:
         repo: kubernetes-sigs/kube-network-policies
   etcd:
-    version: v3.6.12
+    version: v3.7.2
     max_entries: 3
     latest:
       type: github
       params:
         repo: etcd-io/etcd
   kubernetes:
-    version: 1.36.1
+    version: 1.37.0
     max_entries: 3
     latest:
       type: gentoo
