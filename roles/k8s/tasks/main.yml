@@ -10,7 +10,7 @@
   run_once: true
 
 - name: system configurations
-  include_tasks: system.yml
+  include_tasks: system.yaml
   when: inventory_hostname in worker or inventory_hostname in control_plane
 
 - name: force-reinstall

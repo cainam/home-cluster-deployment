@@ -2,7 +2,7 @@
   - name: get list of images
     shell: |
       for img in $(kubeadm config images list --kubernetes-version {{ k8s_version }} | grep -v etcd ); do
-        repo_and_tag="${img##*/}" # strip registry and path (everything before the last /)
+        repo_and_tag="${img#*/}" # strip registry and path (everything before the last /)
         # Extract the image name and the tag
         image="${repo_and_tag%:*}"
         tag="${repo_and_tag##*:}"
