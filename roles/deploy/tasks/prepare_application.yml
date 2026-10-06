@@ -35,9 +35,10 @@
         additional_images_list: "{{ (results.additional_images_list.stat.exists and results.additional_images_list.stat.isreg) | ternary(results.additional_images_list.item.path, omit) }}"
         additional_images_playbook: "{{ (results.additional_images_playbook.stat.exists and results.additional_images_playbook.stat.isreg) | ternary(results.additional_images_playbook.item.path, omit) }}"
         migrate: "{{ (results.migrate.stat.exists and results.migrate.stat.isreg) | ternary(results.migrate.item.path, omit) }}"
+        provides: "{{ (results.provides.stat.exists and results.provides.stat.isreg) | ternary(results.provides.item.path, omit) }}"
         post_deployment: "{{ (results.post_deployment.stat.exists and results.post_deployment.stat.isreg) | ternary(results.post_deployment.item.path, omit) }}"
-        vars: application.value.vars|default({})
-        set_fact:
+        vars: "{{ application.value.vars|default({}) }}"
+    set_fact:
       application_playbooks: "{{ application_playbooks | default({}) | combine({application.key: current_app_data}, recursive=True) }}"
     when: (results.root.stat.exists and results.root.stat.isdir) or application.value.vars is defined
   run_once: true

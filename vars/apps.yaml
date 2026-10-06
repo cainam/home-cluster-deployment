@@ -53,8 +53,8 @@ applications:
         prefix: "/"
         domain: ha.my-lb.adm13
       requires:
-      - type: postgresql
-        name: postgres
+      - XXtype: postgresql
+        name: postgresql
         namespace: db
         config:
           database: ha

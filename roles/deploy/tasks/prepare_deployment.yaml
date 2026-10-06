@@ -13,7 +13,6 @@
       dest: "{{ local_playbook_temp }}/applications"
       depth: 1
       force: yes
-    #ignore_errors: true
     delegate_to: localhost
 
 - block:
@@ -85,14 +84,15 @@
     vars:
       my_dom: "{{ app.network.domain|default(net.base_domain) }}"
       my_route: "{{ net.routes | selectattr('domain','equalto',my_dom)|first }}"
+      to_publish: "{{ (app.network is defined and app.network is boolean and app.network) or (app.network is defined and app.network is mapping) }}"
       my_gw_rq: >-
         {{
          { 'name': my_dom | replace('.', '-'),
-         'type': 'gateway',
+         'Xtype': 'gateway',
+         'Xname': 'gateway',
          'namespace': my_route.namespace
          } }}
-      rq: "{{ (app.requires|default([])|list)+[my_gw_rq] }}"
-      xxstorage_new: "{{ (app.storage | default([])) | map('combine', { 'type': default_storage_type }) | list }}"
+      rq: "{{ (app.requires|default([])|list)+([my_gw_rq] if to_publish else []) }}"
       storage_new: |
         {%- set updated_list = [] -%}
         {%- for item in (app.storage | default([])) -%}
@@ -112,7 +112,7 @@
         svcName: "{{ app.name }}"
         prefix: "{{ '/'~app.name}}"
         domain: "{{ my_dom  }}"
-        publish: "{{ (app.network is defined and app.network is boolean and app.network) or (app.network is defined and app.network is not boolean) | bool }}"
+        publish: "{{ to_publish }}"
         hosts: |
           {%- set domain_list = [my_dom] -%}
           {%- if my_route.endpointIP is defined -%}

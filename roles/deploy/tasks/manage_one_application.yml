@@ -121,12 +121,13 @@
 - block:
   - name: "{{ name_prefix }} manage application requirements"
     vars:
-      requirements: rq.config
-    include_tasks: "{{ application_playbooks[rq.type]['provides'] }}"
+      provider: "{{ rq.name }}"
+      requirements: "{{ rq.config }}"
+    include_tasks: "{{ application_playbooks[rq.name]['provides'] }}"
     loop: "{{ application.value.requires|default([]) }}"
     loop_control:
       loop_var: rq
-  # here could be a when: check, but then only with another task to alert that the provider is missing ... maybe I'll add it later (aka never)
+    when: rq.name in application_playbooks and 'provides' in application_playbooks[rq.name]
   
 # traefik
 - block:
