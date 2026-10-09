@@ -116,7 +116,7 @@
       PrefixLength=64
 
       [Security]
-      Passphrase={{ wlan.psk }}"
+      Passphrase={{ wlan.psk }}
     dest: "/var/lib/iwd/{{ wlan.ssid }}.psk"
 
 - name: /etc/ssh/known_hosts
