@@ -19,7 +19,6 @@
     owner: "{{ item.owner|default('root') }}"
   loop:
     - path: /etc/modprobe.d
-    - path: /etc/wpa_supplicant
     - path: "{{ shared_mounts }}"
     - path: /etc/modules-load.d
     - path: /usr/local/share/ca-certificates/
