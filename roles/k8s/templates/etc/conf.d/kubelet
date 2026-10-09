@@ -7,4 +7,4 @@ rc_use=crio
 
 command_args="--container-runtime-endpoint='unix:///var/run/crio/crio.sock' --kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"
 command_args="--kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml"
-command_args="--kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml --node-ip='{{ my_cluster_ip }},{{ node_ip }}'"
+command_args="--kubeconfig=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --config=/var/lib/kubelet/config.yaml --node-ip='{{ my_cluster_ip }},{{ node_ipv6 }}'"
