@@ -32,7 +32,6 @@ spec:
     - --node-monitor-grace-period=5m
     - --concurrent-deployment-syncs=1
     - --concurrent-replicaset-syncs=1
-    - --concurrent-service-syncs=1
     image: {{ kubernetes_image_section }}/kube-controller-manager:v{{ k8s_version }}
     imagePullPolicy: IfNotPresent
     livenessProbe:

@@ -75,10 +75,3 @@ k8s:
   external_coredns_ip: 192.168.4.111
   podSubnet: 10.244.0.0/16
 
-gateway_install:
-  deployment_type: kustomize
-  flags: ['certs']
-  images:
-  - proxyv2
-  kustom:
-    application: gateway

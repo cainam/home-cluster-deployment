@@ -54,7 +54,8 @@ software:
         repo: eclipse-mosquitto/mosquitto
         arch: arm64
   descheduler:
-    version: "v0.36.0"
+    version: "v0.37.0"
+    max_entries: 2
     latest:
       type: github-tags
       params: 

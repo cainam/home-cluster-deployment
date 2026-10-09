@@ -21,9 +21,10 @@
       net_routes: >-
         {{ net_routes + [
             item | combine({
-              'namespace': item.namespace
-                if item.namespace is defined
-                else ( apps | dict2items | selectattr('value', 'defined') | selectattr('value', 'contains', item.gateway) | map(attribute='key') | first )
+              'namespace': item.namespace if item.namespace is defined
+                else ( apps | dict2items | selectattr('value', 'defined') | selectattr('value', 'contains', item.gateway) | map(attribute='key') | first ),
+              'app_instance': (item.app_instance if item.app_instance is defined
+                else ( item.domain if item.gateway == 'istio' else item.gateway))|replace('.', '-')
             })
           ]
         }}
@@ -42,7 +43,7 @@
         {%- if item.endpointIP is defined -%}
         {%- set _d = domain_list.append(net.domain_external) -%}
         {%- endif -%}
-        {{ apps | combine( {item.namespace: {item.domain|replace('.','-'): gateway_install | combine(
+        {{ apps | combine( {item.namespace: {item.app_instance: {'deployment_type': 'kustomize', 'flags': ['certs'], 'images': ['proxyv2'], 'kustom': {'application': 'gateway'}} | combine(
                      {'network':{ 
                           'hosts': domain_list,
                           'domain': item.domain
@@ -87,10 +88,9 @@
       to_publish: "{{ (app.network is defined and app.network is boolean and app.network) or (app.network is defined and app.network is mapping) }}"
       my_gw_rq: >-
         {{
-         { 'name': my_dom | replace('.', '-'),
-         'Xtype': 'gateway',
-         'Xname': 'gateway',
-         'namespace': my_route.namespace
+         { 'name': my_route.app_instance,
+         'namespace': my_route.namespace,
+         'config':{'strip': false if 'no strip' in app.flags|default([]) else true}
          } }}
       rq: "{{ (app.requires|default([])|list)+([my_gw_rq] if to_publish else []) }}"
       storage_new: |
