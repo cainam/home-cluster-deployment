@@ -15,7 +15,7 @@ spec:
     - --authorization-kubeconfig=/etc/kubernetes/controller-manager.conf
     - --bind-address=127.0.0.1
     - --client-ca-file=/etc/kubernetes/pki/ca.crt
-    - --cluster-cidr={{ k8s.podSubnet }}
+    - --cluster-cidr={{ k8s.podSubnet }},fd42:9999:ffff::/48
     - --cluster-name=kubernetes
     - --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt
     - --cluster-signing-key-file=/etc/kubernetes/pki/ca.key
@@ -25,7 +25,7 @@ spec:
     - --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt
     - --root-ca-file=/etc/kubernetes/pki/ca.crt
     - --service-account-private-key-file=/etc/kubernetes/pki/sa.key
-    - --service-cluster-ip-range={{ serviceSubnet }}
+    - --service-cluster-ip-range={{ serviceSubnet }},fd42:9999:fffe::/112
     - --use-service-account-credentials=true
     - --min-resync-period=12h
     - --node-monitor-period=30s

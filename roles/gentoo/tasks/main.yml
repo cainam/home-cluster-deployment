@@ -109,24 +109,16 @@
     content: hostname="{{ inventory_hostname }}"
     dest: /etc/conf.d/hostname
 
-- name: first line in iwd security file
-  lineinfile:
-    path: /var/lib/iwd/AdM13.psk
-    insertbefore: BOF
-    create: true
-    line: "[Security]"
+- name: iwd - psk file
+  copy:
+    content: |
+      [IPv6]
+      Address={{ node_ipv6 }}
+      PrefixLength=64
 
-- name: passphrase for iwd
-  lineinfile:
-    path: /var/lib/iwd/AdM13.psk
-    regexp: '^Passphrase='
-    line: "Passphrase={{ psk }}"
-
-- name: PreSharedKey for iwd
-  lineinfile:
-    path: /var/lib/iwd/AdM13.psk
-    regexp: '^PreSharedKey='
-    line: "PreSharedKey={{ PreSharedKey }}"
+      [Security]
+      Passphrase={{ wlan.psk }}"
+    dest: "/var/lib/iwd/{{ wlan.ssid }}.psk"
 
 - name: /etc/ssh/known_hosts
   copy:

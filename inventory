@@ -8,21 +8,24 @@ all:
       boot_uuid: B986-19BF
       system_roles:
       - control_plane
+      node_ipv6: fd8f:1f5c:2459:0::23/64
     k8s-4-int.adm13:
       boot_root: PARTUUID=bda80f2a-d2dd-df4a-b95e-121c81790c0c
       boot_uuid: 40A8-6A62
       system_roles:
       - image_builder
       - worker
+      node_ipv6: fd8f:1f5c:2459:0::25/64
     k8s-1-int.adm13:
       boot_root: /dev/mmcblk0p2
       boot_uuid: E183-594D
       data_uuid: 2c2a02d6-495f-4957-ac0a-db26c070a4cf
       system_roles:
       - control_plane
+      node_ipv6: fd8f:1f5c:2459:0::21/64
     k8s-2-int.adm13:
       boot_root: PARTUUID=83551ef6-02
       boot_uuid: 3DD5-E50D
       system_roles:
       - control_plane
-
+      node_ipv6: fd8f:1f5c:2459:0::22/64

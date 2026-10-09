@@ -39,7 +39,7 @@ spec:
         - --service-account-issuer=https://kubernetes.default.svc.cluster.local
         - --service-account-key-file=/etc/kubernetes/pki/sa.pub
         - --service-account-signing-key-file=/etc/kubernetes/pki/sa.key
-        - --service-cluster-ip-range={{ serviceSubnet }}
+        - --service-cluster-ip-range={{ serviceSubnet }},fd42:9999:fffe::/112
         - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
         - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
         - --enable-admission-plugins=NodeRestriction,PodSecurity,AlwaysPullImages
