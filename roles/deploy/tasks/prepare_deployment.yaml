@@ -218,8 +218,6 @@
     when: only_apps is not defined
  
   - name: turn app_list into a dict again
-    vars:
-      reqs: "{{ reqs|default([]) }}"
     set_fact:
       applications: >-
         {%- set apps = {} -%}
@@ -231,7 +229,7 @@
         {%-     set _ = attrs.update({k: v}) -%}
         {%-   endfor -%}
         {#- add app if it is a requirement, but only install it if ansible tag deps is set -#}
-        {%-   if item.name in reqs and 'deps' not in ansible_run_tags -%}
+        {%-   if item.name in reqs|default([]) and 'deps' not in ansible_run_tags -%}
         {%-     set _ = attrs.update({'install': false}) -%}
         {%-   endif -%}
         {%-   if ns not in apps -%}
