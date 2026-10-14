@@ -218,6 +218,8 @@
     when: only_apps is not defined
  
   - name: turn app_list into a dict again
+    vars:
+      reqs: "{{ reqs|default([]) }}"
     set_fact:
       applications: >-
         {%- set apps = {} -%}
