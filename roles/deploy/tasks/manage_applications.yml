@@ -10,3 +10,4 @@
   loop: "{{ k8s_namespace.value | dict2items }}"
   loop_control:
     loop_var: application
+  when: application.value.install is not defined or application.value.install

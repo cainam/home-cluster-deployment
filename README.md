@@ -164,7 +164,7 @@ TODO:
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
 - colombo: suricata fails to start due to enabled eve stats, install yq in container to create the good --set commandline option for suricata (list of types)
-
+=> install tcpdump on host and test as script outside k8s
 IPv6:
 iwd psk+main
 kubelet conf.d 
