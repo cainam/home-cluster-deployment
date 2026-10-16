@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.9
+    version: v0.28.10
     installed:
       pattern: "flannel:"
     latest:
@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.13
+    version: v3.7.14
     installed:
       pattern: "traefik"
     latest:
@@ -77,7 +77,7 @@ software:
         repo: library/registry
         arch: arm64
   trivy:
-    version: v0.75.0
+    version: v0.76.0
     max_entries: 3
     latest:
       type: github

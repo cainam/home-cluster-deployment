@@ -170,3 +170,5 @@ iwd psk+main
 kubelet conf.d 
 apiserver manifest
 controller manifest
+
+- introduce local-only container registry domain

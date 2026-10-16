@@ -39,35 +39,6 @@ images:
     configure_builder: emerge dev-lang/go
     configure_rootfs_build: touch "${ROOT}/ready2go"
       
-- name: registry
-  section: local
-  type: gentoo-image-builder
-  requires:
-  - go
-  build:
-    entrypoint: ["/bin/registry"]
-    configure_rootfs_build: |
-      git clone -b "{{ software.registry.version }}" https://github.com/distribution/distribution.git
-      cd distribution
-      make bin/registry
-      strip bin/registry
-      mkdir -p "${ROOT}/bin" && mv bin/registry "${ROOT}/bin/"
-      cd ..
-      rm -rf distribution /root/.??* /root/*
-
-- name: kube-network-policies
-  section: k8s
-  requires:
-  - go
-  build:
-    entrypoint: ["/bin/kube-network-policies-standard"]
-    configure_rootfs_build: |
-      git clone  --depth 1 --single-branch -b "{{ software['kube-network-policies'].version }}" https://github.com/kubernetes-sigs/kube-network-policies.git
-      cd kube-network-policies
-      GO_LDFLAGS="-w -s" make build-standard
-      cp -dp bin/* "${ROOT}/bin"
-
-
 - name: trivy
   section: local
   requires:
