@@ -102,7 +102,7 @@ spec:
           mountPath: /etc/kubernetes/audit-policy.yaml
           readOnly: true
         - name: audit-log
-          mountPath: /var/log/kubernetes/audit.log
+          mountPath: /var/log/kubernetes
           readOnly: false
         - name: admission-configuration
           mountPath: /etc/kubernetes/AdmissionConfiguration.yaml
@@ -136,8 +136,8 @@ spec:
         path: /etc/kubernetes/audit-policy.yaml
     - name: audit-log
       hostPath:
-        type: FileOrCreate
-        path: /var/log/kubernetes/audit.log
+        type: DirectoryOrCreate
+        path: /var/log/kubernetes
     - name: admission-configuration
       hostPath:
         type: File
