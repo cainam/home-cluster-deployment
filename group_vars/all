@@ -44,6 +44,7 @@ net:
   domain_external: adm13.dnshome.de
   base_domain: my-lb.adm13
   cidr: 10.10.10.0/24
+  oauth2_path: /oauth2-hydra
   virtual_ips:
   - ip: 10.10.10.10
     names: ["k8s.adm13", "{{ registry_host }}", "podman.adm13"]
@@ -60,8 +61,6 @@ net:
     gateway: istio
     namespace: istio-ingress
     endpointIP: 192.168.4.101
-
-oauth2_path: /oauth2-hydra
 
 volumes_to_exempt:
   - registry

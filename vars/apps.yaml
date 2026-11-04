@@ -11,21 +11,31 @@ applications:
     hydra:
       storage:
       - name: hydra
-        size: 5Mi 
+        size: 5Mi
       network:
         svcPort: 4444
         svcName: hydra-public
         prefix: /hydra
-    auth-operator: # only valid with hydra.config.dsn=sqlite:///data/hydra.sqlite?_fk=true or =memory
-      images:
-      - python-operator
+      vars:
+        admin_port: 4445
+        public_port: 4444
+        cookie_secret: "{{ auth.hydra_cookie_secret }}"
+        system_secret: "{{ auth.hydra_system_secret }}"
+        clientID: "{{ auth.client_id }}"
+        clientSecret: "{{ auth.client_secret }}"
+        oauth2_path: "{{ net.oauth2_path }}"
     idp:
       network: true
     oauth2-proxy:
       network:
         svcPort: 80
-        prefix: /oauth2-hydra
-        rewrite: /oauth2-hydra/
+        prefix: "{{ net.oauth2_path }}"
+        rewrite: "{{ net.oauth2_path }}/"
+      vars:
+        oauth2_path: "{{ net.oauth2_path }}"
+        cookie_secret: "{{ auth.oauth2_proxy_cookie_secret }}"
+        clientID: "{{ auth.client_id }}"
+        clientSecret: "{{ auth.client_secret }}"
   home:
     #grott:
     #  git: "{{ own_git_url }}"

@@ -32,6 +32,9 @@ spec:
     - --node-monitor-grace-period=5m
     - --concurrent-deployment-syncs=1
     - --concurrent-replicaset-syncs=1
+    - --leader-elect-lease-duration=60s
+    - --leader-elect-renew-deadline=40s
+    - --leader-elect-retry-period=10s
     image: {{ kubernetes_image_section }}/kube-controller-manager:v{{ k8s_version }}
     imagePullPolicy: IfNotPresent
     livenessProbe:

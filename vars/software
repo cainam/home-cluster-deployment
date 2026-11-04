@@ -16,7 +16,7 @@ software:
       params:
         repo: flannel-io/cni-plugin
   traefik:
-    version: v3.7.14
+    version: v3.7.17
     installed:
       pattern: "traefik"
     latest:
@@ -40,7 +40,7 @@ software:
       params:
         repo: oauth2-proxy/oauth2-proxy
   zigbee2mqtt:
-    version: 2.14.2
+    version: 2.14.3
     latest:
       type: github
       params:
@@ -61,7 +61,7 @@ software:
       params: 
         repo: kubernetes-sigs/descheduler
   home-assistant:
-    version: "2026.9.4"
+    version: "2026.10.4"
     installed:
       pattern: "home-assistant:"
     latest:
@@ -77,14 +77,14 @@ software:
         repo: library/registry
         arch: arm64
   trivy:
-    version: v0.76.0
+    version: v0.76.1
     max_entries: 3
     latest:
       type: github
       params:
         repo: aquasecurity/trivy
   kube-network-policies:
-    version: v1.1.2
+    version: v1.1.3
     max_entries: 3
     latest:
       type: github

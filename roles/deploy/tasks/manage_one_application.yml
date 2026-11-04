@@ -63,7 +63,7 @@
          'security': application.value.security | default({}),
          'storage': application.value.storage | default({}),
          'network':  application.value.network | default({}),
-         'image': (image_entry.section~'/'~image_entry.name~':'~image_entry.tag if image_entry is not none else omit),
+         'vars': application.value.vars | default({}),
          'images': image_dict
          }) }}"
 

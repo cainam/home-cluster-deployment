@@ -152,7 +152,6 @@ TODO:
 - k8s join - replace kubectl token create by managing boostrap tokens (secrete in kube-system namespace) directly, get valid if not expired, else create new
 - dependencies: generalize waitdb initcontainer 
 - turn script into real Ansible tasks: - name: install git directly if /var/db/repos/gentoo/.git is empty to allow emerge-sync (needed for initial installation)
-- security: log all incoming connections on fritzbox see fritzdump.sh
 - longhorn: see to run less privileged, e.g. replace hostpath by something elese e.g. for the socke in /var/lib/kubelet/plugins/driver.longhorn.io/
 - init node: lib/firmware and lib/modules commented out => need to find a generic solution from scratch to install a node => bootstrap script, generated via playbook from the config, packed with the data into a tar
 - lifeness and readiness probes: generate from application config
@@ -163,12 +162,118 @@ TODO:
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
-- colombo: suricata fails to start due to enabled eve stats, install yq in container to create the good --set commandline option for suricata (list of types)
-=> install tcpdump on host and test as script outside k8s
-IPv6:
-iwd psk+main
-kubelet conf.d 
-apiserver manifest
-controller manifest
 
-- introduce local-only container registry domain
+- replace externalIP:
+Step 1: Expose Traefik and Istio via NodePort
+
+Instead of externalIPs, set your Traefik and Istio IngressGateway services to type NodePort. This gives them stable, predictable ports across every Raspberry Pi in your cluster.
+
+    Traefik (e.g., standard HTTP/HTTPS):
+
+YAML
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: kube-system # or your traefik namespace
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: traefik
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+      nodePort: 30080 # Fix a static port
+    - name: websecure
+      port: 443
+      targetPort: websecure
+      nodePort: 30443 # Fix a static port
+
+    Istio IngressGateway:
+
+YAML
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  type: NodePort
+  selector:
+    app: istio-ingressgateway
+  ports:
+    - name: status-port
+      port: 15021
+      targetPort: 15021
+    - name: http2
+      port: 80
+      targetPort: 8080
+      nodePort: 30081 # Fix a static port for Istio HTTP
+    - name: https
+      port: 443
+      targetPort: 8443
+      nodePort: 30443 # Fix a static port for Istio HTTPS (or use different port like 30444)
+
+Verification: Run kubectl get svc -A | grep NodePort and verify that both Traefik and Istio are bound to your chosen static nodePorts.
+Step 2: Configure Your External HAProxy Load Balancer
+
+On your HAProxy load balancer nodes (managed by Keepalived and your Virtual IP/VIP), point incoming traffic to the NodePorts of all your Raspberry Pi worker nodes. HAProxy will health-check them and load-balance traffic across your cluster.
+
+Add frontends and backends matching your workloads to your /etc/haproxy/haproxy.cfg:
+Code-Snippet
+
+# --- Traefik Web Traffic (HTTP/HTTPS) ---
+frontend traefik_in_http
+    bind <YOUR_KEEPIS_VIP>:80
+    mode tcp
+    default_backend traefik_nodes_http
+
+backend traefik_nodes_http
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server rpi-node-1 192.168.1.101:30080 check
+    server rpi-node-2 192.168.1.102:30080 check
+    server rpi-node-3 192.168.1.103:30080 check
+
+frontend traefik_in_https
+    bind <YOUR_KEEPIS_VIP>:443
+    mode tcp
+    default_backend traefik_nodes_https
+
+backend traefik_nodes_https
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server rpi-node-1 192.168.1.101:30443 check
+    server rpi-node-2 192.168.1.102:30443 check
+    server rpi-node-3 192.168.1.103:30443 check
+
+
+# --- Istio IngressGateway Traffic ---
+frontend istio_in_http
+    bind <YOUR_KEEPIS_VIP>:8080 # or whatever external port you prefer for Istio
+    mode tcp
+    default_backend istio_nodes_http
+
+backend istio_nodes_http
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server rpi-node-1 192.168.1.101:30081 check
+    server rpi-node-2 192.168.1.102:30081 check
+    server rpi-node-3 192.168.1.103:30081 check
+
+Verification: Run sudo systemctl restart haproxy and check sudo journalctl -u haproxy to ensure servers are marked as UP and healthy.
+Why this setup is ideal for your Raspberry Pi cluster:
+
+    Completely removes externalIPs: You no longer rely on the deprecated, insecure Kubernetes field.
+
+    Leverages existing infrastructure: Keepalived maintains high availability via your VIP, while HAProxy acts as a robust external gatekeeper.
+
+    Clean separation of concerns: Traefik handles standard ingress routing, Istio handles service mesh/internal-external mTLS traffic, and HAProxy handles layer 4 load balancing from your home network/LAN straight into the Pis.
+
+
