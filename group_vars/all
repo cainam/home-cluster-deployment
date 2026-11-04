@@ -58,12 +58,15 @@ net:
     external_port: 44354
     endpointIP: 192.168.4.100
     nodePorts:
-      web80: 40080
-      web443: 40443
+      web80: 30080
+      web443: 30443
   - domain: ha.my-lb.adm13
     gateway: istio
     namespace: istio-ingress
     endpointIP: 192.168.4.101
+    nodePorts:
+      web80: 30081
+      web_https: 30444
 
 volumes_to_exempt:
   - registry
