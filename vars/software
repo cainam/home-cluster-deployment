@@ -32,7 +32,7 @@ software:
       params:
         repo: istio/istio
   oauth2-proxy:
-    version: v7.15.5
+    version: v7.15.6
     installed:
       pattern: "oauth2-proxy:"
     latest:
@@ -61,7 +61,7 @@ software:
       params: 
         repo: kubernetes-sigs/descheduler
   home-assistant:
-    version: "2026.10.4"
+    version: "2026.11.0"
     installed:
       pattern: "home-assistant:"
     latest:

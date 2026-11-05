@@ -229,7 +229,7 @@
         {%-     set _ = attrs.update({k: v}) -%}
         {%-   endfor -%}
         {#- add app if it is a requirement, but only install it if ansible tag deps is set -#}
-        {%-   if item.name in reqs|default([]) and 'deps' not in ansible_run_tags -%}
+        {%-   if item.name in reqs|default([]) and 'deps' not in ansible_run_tags and item.name not in only_apps -%}
         {%-     set _ = attrs.update({'install': false}) -%}
         {%-   endif -%}
         {%-   if ns not in apps -%}

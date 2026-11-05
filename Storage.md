@@ -48,9 +48,13 @@ metadata:
 gluster:
 - change size: use "vol replace-brick" and replace brick by brick
 - repair split-brain:
-    files=$(gluster vol heal home-assistant-config info | grep ^/ | sort -u | grep -v split-brain)
-    brickdir=/data/gluster/bricks/home-assistant/home-assistant-config/
+
+## check inodes full first!!
+    files=$(gluster vol heal home-assistant info | grep ^/ | sort -u | grep -v split-brain)
+    brickdir=/data/gluster/bricks/home-assistant/home-assistant/
     backupdir=/tmp/bck
     mkdir -p ${backupdir}
-    for a in $files;do rsync --mkpath -a $brickdir/$a $backupdir/$a;inum=$(ls -aind $brickdir/$a | awk '{print $1}'); f=$(find $brickdir/.glusterfs  -inum $inum);rm $brickdir/$a $f;[ "$f" != "" ] &&  rsync --mkpath -a $backupdir/$a $brickdir/$a;  done
+    rsync --mkpath -a $brickdir $backupdir
+    for a in $files;do echo "inode: $a"; inum=$(ls -aind $brickdir/$a 2>/dev/null | awk '{print $1}');if [ "$inum" != "" ]; then f=$(find $brickdir/.glusterfs  -inum $inum); b=$(stat --format="%n"  $backupdir/$a 2>/dev/null); echo "inum: $inum b: $b"; ls -ld $brickdir/$a $f;if [ "$f" != "" -a "$b" != "" ]; then echo "replace"; rm -f "$brickdir/$a" "$f";rsync --mkpath -a $backupdir/$a $brickdir/$a;  gluster vol heal home-assistant split-brain source-brick $(hostname):$brickdir $a;  fi;fi;echo; done
+
 

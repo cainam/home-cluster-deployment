@@ -29,7 +29,7 @@
     - ca_csr_path is defined and ca_csr_path is string and ca_csr_path is not none
     - ca_certificate_path is defined and ca_certificate_path is string and ca_certificate_path is not none
     - certificates_configuration is defined and certificates_configuration is mapping
-    - certificates_configuration.ca_openssl_path is defined and certificates_configuration.ca_openssl_path is string and certificates_configuration.ca_openssl_path is not none
+    - certificates_configuration.cert_path is defined and certificates_configuration.cert_path is string and certificates_configuration.cert_path is not none
     - certificates_configuration.ca_common_name is defined and certificates_configuration.ca_common_name is string and (certificates_configuration.ca_common_name|length > 0)
     - certificates_configuration.ca_passphrase is defined and certificates_configuration.ca_passphrase is string and certificates_configuration.ca_passphrase is not none
     quiet: true
