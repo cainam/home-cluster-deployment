@@ -25,4 +25,6 @@ eval $my_ansible ${ANSIBLE_DIR}/site.yml --tags=gentoo,emerge
 
 eval $my_ansible ${ANSIBLE_DIR}/site.yml --tags=deploy --extra-vars limit_application=infopage
 
+sed -n '/^PLAY RECAP/,/^$/p' /var/log/${my_name}.log > "$SYS_INFO_LOG"/daily_deploy.log
+
 logger "finished $my_name"

@@ -96,8 +96,8 @@
       storage_new: |
         {%- set updated_list = [] -%}
         {%- for item in (app.storage | default([])) -%}
-          {%- set path_prefix = local_disk_directory if item.type|default(default_storage_type) == 'local_folder' else shared_mounts -%}
-          {%- set _ = updated_list.append({'name': app.name, 'type': default_storage_type, 'dest_dir': [path_prefix, item.name|default(app.name)] | join('/') } | combine(item)) -%}
+          {%- set path_prefix = local_disk_directory if item.type == 'local_folder' else shared_mounts -%}
+          {%- set _ = updated_list.append({'name': app.name, 'dest_dir': [path_prefix, item.name|default(app.name)] | join('/') } | combine(item)) -%}
         {%- endfor -%}
         {{ updated_list }}
       security:

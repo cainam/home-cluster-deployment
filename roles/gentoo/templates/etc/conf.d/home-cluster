@@ -1,6 +1,8 @@
 export registry="{{ registry }}"
 export ANSIBLE_DIR={{ playbook_dir }}
 
+export SYS_INFO_LOG=/shared/system-information/
+
 export KUBE_EDITOR=vi
 export KUBECONFIG={{ kubeconfig }}
 LOCAL_CONF=/data/mine/local

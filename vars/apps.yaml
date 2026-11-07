@@ -9,9 +9,6 @@ applications:
     istiod:
   auth:
     hydra:
-      storage:
-      - name: hydra
-        size: 5Mi
       network:
         svcPort: 4444
         svcName: hydra-public
@@ -59,12 +56,12 @@ applications:
       - name: home-assistant
         size: 100Mi
         config: true
+        type: gluster
       network:
         prefix: "/"
         domain: ha.my-lb.adm13
       requires:
-      - XXtype: postgresql
-        name: postgresql
+      - name: postgresql
         namespace: db
         config:
           database: ha
@@ -90,10 +87,12 @@ applications:
       - fastapi
       network: true
       storage:
-      - name: infopage
-        size: 5Mi
+      - size: 5Mi
         type: local_folder
         config: true
+      - name: system-information
+        size: 10Mi
+        type: gluster
   db:
     postgresql:
       kustom:

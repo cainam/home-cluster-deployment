@@ -67,9 +67,6 @@ net:
 volumes_to_exempt:
   - registry
 
-# supported storage types are longhorn, gluster and local
-default_storage_type: gluster
-
 # K8s
 k8s:
   mutate: valmut
