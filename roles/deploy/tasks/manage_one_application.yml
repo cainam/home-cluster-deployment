@@ -122,7 +122,7 @@
   - name: "{{ name_prefix }} manage application requirements"
     vars:
       provider: "{{ rq.name }}"
-      requirements: "{{ rq.config }}"
+      requirements: "{{ rq.config|default({}) }}"
     include_tasks: "{{ application_playbooks[rq.name]['provides'] }}"
     loop: "{{ application.value.requires }}"
     loop_control:

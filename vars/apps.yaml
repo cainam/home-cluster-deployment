@@ -27,7 +27,7 @@ applications:
       network:
         svcPort: 80
         prefix: "{{ net.oauth2_path }}"
-        rewrite: "{{ net.oauth2_path }}/"
+        rewrite: "{{ net.oauth2_path }}"
       vars:
         oauth2_path: "{{ net.oauth2_path }}"
         cookie_secret: "{{ auth.oauth2_proxy_cookie_secret }}"
@@ -38,7 +38,6 @@ applications:
     #  git: "{{ own_git_url }}"
     #  subdir: charts/grott
     zigbee2mqtt:
-      flags: ['no strip']
       affinity: k8s-2-int.adm13
       network:
         rewrite: /zigbee2mqtt
