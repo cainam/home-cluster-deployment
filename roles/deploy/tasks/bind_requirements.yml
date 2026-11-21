@@ -29,7 +29,7 @@
       {%- for rq in application.value.requires | default([]) -%}
       {%-   set provider_ns = rq.namespace if rq.namespace is defined
              else (app_list | selectattr('name','eq',rq.name) | map(attribute='namespace') | first) -%}
-      {%-   set _ = out.update({rq.name: applications[provider_ns][rq.name].vars | default({})}) -%}
+      {%-   set _ = out.update({rq.name: applications[provider_ns][rq.name].vars.expose | default({})}) -%}
       {%- endfor -%}
       {{ out }}
   set_fact:

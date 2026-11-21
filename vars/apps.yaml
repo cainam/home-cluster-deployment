@@ -23,6 +23,9 @@ applications:
         oauth2_path: "{{ net.oauth2_path }}"
     idp:
       network: true
+      requires:
+      - namespace: auth
+        name: hydra
     oauth2-proxy:
       network:
         svcPort: 80
