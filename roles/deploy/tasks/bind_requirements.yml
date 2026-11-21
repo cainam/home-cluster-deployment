@@ -1,0 +1,45 @@
+# copies the vars published by required applications (in their pre_system hooks)
+# into the dependent application's vars, exposed as kustom.vars.providers.<name>.
+# runs after the whole prepare phase, so the result is independent of the order in
+# which applications were prepared and works across namespaces and transitive deps.
+- name: "namespace: {{ k8s_namespace.key }} - assert requirement providers are prepared"
+  vars:
+    missing: >-
+      {%- set m = [] -%}
+      {%- for rq in application.value.requires | default([]) -%}
+      {%-   set provider_ns = rq.namespace if rq.namespace is defined
+             else (app_list | selectattr('name','eq',rq.name) | map(attribute='namespace') | first) -%}
+      {%-   if applications[provider_ns] is not defined or applications[provider_ns][rq.name] is not defined -%}
+      {%-     set _ = m.append(rq.name) -%}
+      {%-   endif -%}
+      {%- endfor -%}
+      {{ m }}
+  assert:
+    that: missing | length == 0
+    fail_msg: "bind phase: providers not found for {{ application.key }}: {{ missing | join(', ') }}"
+  loop: "{{ k8s_namespace.value | dict2items }}"
+  loop_control:
+    loop_var: application
+  when: application.value.requires | default([]) | length > 0
+
+- name: "namespace: {{ k8s_namespace.key }} - import provided vars"
+  vars:
+    provided: >-
+      {%- set out = {} -%}
+      {%- for rq in application.value.requires | default([]) -%}
+      {%-   set provider_ns = rq.namespace if rq.namespace is defined
+             else (app_list | selectattr('name','eq',rq.name) | map(attribute='namespace') | first) -%}
+      {%-   set _ = out.update({rq.name: applications[provider_ns][rq.name].vars | default({})}) -%}
+      {%- endfor -%}
+      {{ out }}
+  set_fact:
+    applications: >-
+      {{ applications | combine({
+           k8s_namespace.key: { application.key: {
+             'vars': (application.value.vars | default({})) | combine({'providers': provided})
+           }}
+         }, recursive=True) }}
+  loop: "{{ k8s_namespace.value | dict2items }}"
+  loop_control:
+    loop_var: application
+  when: application.value.requires | default([]) | length > 0
