@@ -1,3 +1,16 @@
+
+- name: test if ssh CA exists
+  ansible.builtin.stat:
+    path: "{{ my_certs.conf.cert_path }}/ssh_ca"
+  register: ssh_ca
+  delegate_to: localhost
+
+- name: create ssh CA
+  shell: ssh-keygen -t ed25519 -f "{{ my_certs.conf.cert_path }}/ssh_ca" -C "SSH-Cluster-CA"
+  delegate_to: localhost
+  run_once: true
+  when: not ssh_ca.stat.exists
+
 - name: /etc/ssh/known_hosts
   copy:
     content: |
@@ -19,6 +32,7 @@
     owner: "{{ item.owner|default('root') }}"
     group: "{{ item.group|default('root') }}"
     mode: "{{ item.mode|default('u=rw,g=r,o=r') }}"
+  notify: reload sshd
   loop:
   - content: "ssh-{{ ssh_keys.hosts[inventory_hostname].type~' '~ssh_keys.hosts[inventory_hostname].public~' root@'~inventory_hostname }}"
     dest: /etc/ssh/ssh_host_{{ ssh_keys.hosts[inventory_hostname].type }}_key.pub
@@ -57,23 +71,10 @@
       {% endif %}
     dest: /root/.ssh/authorized_keys
 
-- name: test if ssh CA exists
-  ansible.builtin.stat:
-    path: "{{ my_certs.conf.cert_path }}/ssh_ca"
-  register: ssh_ca
-  delegate_to: localhost
-
-- name: create ssh CA
-  shell: ssh-keygen -t ed25519 -f "{{ my_certs.conf.cert_path }}/ssh_ca" -C "SSH-Cluster-CA"
-  delegate_to: localhost
-  run_once: true
-  when: not ssh_ca.stat.exists
-
 - name: read ssh public host key
   ansible.builtin.slurp:
     src: /etc/ssh/ssh_host_ed25519_key.pub
   register: public_host_key
-  run_once: true
 
 - name: place public host key for signing
   ansible.builtin.copy:
@@ -100,3 +101,4 @@
     owner: root
     group: root
     mode: '0644'
+  notify: reload sshd

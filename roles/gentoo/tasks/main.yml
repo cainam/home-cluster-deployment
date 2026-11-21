@@ -28,6 +28,9 @@
     - path: /etc/iwd
     - path: /etc/cron.hourly
       perm: u=rwx,g=rx
+    - path: ~root/.ssh
+      perm: u=rwx,g=,o=
+      owner: root
     - path: ~podman/.ssh
       perm: u=rwx,g=,o=
       owner: podman
@@ -118,6 +121,9 @@
     recursive: yes
     rsync_opts:
       - "--relative"
+  # this task also carries files/etc/ssh (e.g. sshd_config.d); any role file change
+  # therefore reloads sshd, which is a graceful, connection-preserving operation
+  notify: reload sshd
 
 - name: set my role_path
   set_fact:
@@ -231,6 +237,12 @@
     - sysctl
   ignore_errors: yes
 
+- name: ensure sshd is enabled and running
+  service:
+    name: sshd
+    enabled: yes
+    state: started
+
 - name: only enable and reload services, but don't force a restart
   service:
     name: "{{ item }}"
@@ -238,7 +250,6 @@
     state: reloaded
   loop:
     - autofs
-    - sshd
     - haproxy
     - crio
     - syslog-ng
