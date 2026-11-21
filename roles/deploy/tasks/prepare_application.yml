@@ -61,7 +61,10 @@
     loop: "{{ applications[k8s_namespace.key][application.key].storage }}"
     loop_control:
       loop_var: storage
-  when: application.value.storage is defined
+  when:
+    - application.value.storage is defined
+    # dependency-only apps (install: false) are not deployed, so no storage is prepared
+    - application.value.install is not defined or application.value.install
   
 - block:
   - name: "{{ name_prefix }} application playbook - pre_system - playbook run}}"

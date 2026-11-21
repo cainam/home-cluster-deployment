@@ -127,6 +127,27 @@
     loop_control:
       loop_var: app
 
+# fail early on typo'd or ambiguous requirement names instead of resolving them silently
+  - name: validate requirement references
+    vars:
+      app_names: "{{ app_list | map(attribute='name') | list }}"
+      req_names: "{{ app_list | map(attribute='requires') | flatten | map(attribute='name') | list | unique }}"
+      duplicate_names: >-
+        {%- set ns = namespace(items=[]) -%}
+        {%- for name, group in app_list | groupby('name') -%}
+        {%-   if group | length > 1 -%}{%- set _ = ns.items.append(name) -%}{%- endif -%}
+        {%- endfor -%}
+        {{ ns.items }}
+      missing: "{{ req_names | difference(app_names) }}"
+      ambiguous: "{{ req_names | select('in', duplicate_names) | list }}"
+    fail:
+      msg: >-
+        Invalid application requirements.
+        Unknown names: {{ (missing | join(', ')) if missing else '-' }}.
+        Names defined in multiple namespaces: {{ (ambiguous | join(', ')) if ambiguous else '-' }}.
+        Fix or qualify the requires entries in vars/apps.yaml.
+    when: (missing | length > 0) or (ambiguous | length > 0)
+
 ## build only_apps list from limit_application and limit_namespace variables
   - name: assign limit_namespace to fact
     set_fact:
@@ -161,74 +182,70 @@
       msg: "only_apps prepared:{{ only_apps }}"
     when: only_apps is defined
 
-# combine all multi-level requirements to requires
+# combine all multi-level requirements into requires (cycle-safe BFS with a visited set)
+# list mutation (pop/append) is used instead of rebinding, because Jinja loop scoping
+# discards reassignments; seen starts with the app itself, so cycles terminate and no
+# app ends up in its own requires. First occurrence of a name wins if it is required
+# through several paths with different config values.
   - name: merge application requirements
     set_fact:
       app_list: >-
-        {%- set loop_data={'all_apps': [], 'all_reqs': []} -%}
+        {%- set resolved = [] -%}
         {%- for app in app_list -%}
-          {%- set reqs = [app.name] -%}
-          {%- set _ = loop_data.update( {'all_reqs': [] }) -%}
-          {%- for b in range(0,4,1)  if (reqs|length|int > 0) -%}
-            {%- set current=reqs[-1] %}
-            {%- set reqs=reqs[:-1] %}
-            {%- set full_req = (app_list | selectattr('name','eq',current)|list)[0]['requires'] | default([]) -%}
-            {%- set _ = loop_data.update( {'all_reqs': (loop_data.all_reqs+full_req) } ) %}
-            {%- for r in full_req -%}
-              {%- set _ = reqs.append(r.name) -%}
+          {%- set seen = [app.name] -%}
+          {%- set queue = [app.name] -%}
+          {%- set all_reqs = [] -%}
+          {%- for hop in range(0, (app_list | length) + 1) if queue -%}
+            {%- set current = queue.pop(0) -%}
+            {%- set current_app = app_list | selectattr('name','eq',current) | first -%}
+            {%- for r in current_app.requires | default([]) -%}
+              {%- if r.name not in seen -%}
+                {%- set _ = seen.append(r.name) -%}
+                {%- set _ = queue.append(r.name) -%}
+                {%- set _ = all_reqs.append(r) -%}
+              {%- endif -%}
             {%- endfor -%}
           {%- endfor -%}
-          {%- set new_app = app | combine({'requires': loop_data.all_reqs|unique}) -%}
-          {%- set _ = loop_data.update( {'all_apps': (loop_data.all_apps+[new_app]) } ) %}
-          {%- set _ = resolved.append(new_app) -%}
+          {%- set _ = resolved.append(app | combine({'requires': all_reqs})) -%}
         {%- endfor -%}
-        {{ loop_data.all_apps|unique }}
+        {{ resolved }}
 
   - name: app_list
     debug: 
       msg: "app_list:\n{{ app_list | to_nice_yaml }}"
 
-# extend only_apps with dependencies from requires attributes
-  - block: 
-    - name: debug - addition of dependencies to limited application list
-      vars:
-        add_reqs: "{{ (app_list | selectattr('name', 'eq', item) | selectattr('requires', 'defined') | map(attribute='requires'))[0]|default([]) |map(attribute='name' )|default([])  | list }}" 
-      debug:
-        msg: "reqs: \n{{ add_reqs }}"
-      loop: "{{ only_apps }}"
-
-    - name: determine additional applications for limited application list from dependencies
-      vars:
-        add_reqs: "{{ (app_list | selectattr('name', 'eq', item) | selectattr('requires', 'defined') | map(attribute='requires'))[0]|default([]) |map(attribute='name' )|default([])  | list }}" 
-      set_fact:
-        reqs: "{{ reqs|default([]) + add_reqs }}"
-      loop: "{{ only_apps }}"
-
-    - name: update additional applications for limited application list from dependencies
-      set_fact:
-        only_apps: "{{ (reqs + only_apps) | unique }}"
-    #when: "'deps' in ansible_run_tags and only_apps is defined" 
+# determine applications that are only needed as dependencies of the selected apps
+# requires already holds the transitive closure, so one pass over the selected apps
+# is enough. dependency-only apps stay separate from the explicitly requested ones,
+# so they can be installed conditionally on the 'deps' tag.
+  - name: determine dependency-only applications for limited application list
+    set_fact:
+      dep_names: >-
+        {{ (app_list | selectattr('name','in', only_apps)
+            | map(attribute='requires') | flatten
+            | map(attribute='name') | list) | unique | difference(only_apps) }}
     when: only_apps is defined
 
-# set only_apps to all apps if not yet defined
+# set only_apps to all apps and clear dependency-only list if not yet defined
   - name: set only_apps to include all_apps if only_apps is not defined
     set_fact:
       only_apps: "{{ app_list | map(attribute='name') | list }}"
+      dep_names: []
     when: only_apps is not defined
  
   - name: turn app_list into a dict again
     set_fact:
       applications: >-
         {%- set apps = {} -%}
-        {%- for item in app_list if item.name in only_apps -%}
+        {%- for item in app_list if item.name in only_apps or item.name in dep_names -%}
         {%-   set ns = item.namespace -%}
         {%-   set nm = item.name -%}
         {%-   set attrs = {} -%}
         {%-   for k, v in item.items() if k not in ['namespace', 'name'] -%}
         {%-     set _ = attrs.update({k: v}) -%}
         {%-   endfor -%}
-        {#- add app if it is a requirement, but only install it if ansible tag deps is set -#}
-        {%-   if item.name in reqs|default([]) and 'deps' not in ansible_run_tags and item.name not in only_apps -%}
+        {#- dependency-only apps are installed only when the ansible tag deps is set -#}
+        {%-   if item.name in dep_names and 'deps' not in ansible_run_tags -%}
         {%-     set _ = attrs.update({'install': false}) -%}
         {%-   endif -%}
         {%-   if ns not in apps -%}

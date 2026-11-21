@@ -19,6 +19,14 @@
   loop_control:
     loop_var: k8s_namespace
 
+# must run for all namespaces: providers may live in another namespace than the
+# dependent application, and all pre_system hooks have completed by now
+- name: bind provided vars into dependent applications
+  include_tasks: bind_requirements.yml
+  loop: "{{ applications | dict2items }}"
+  loop_control:
+    loop_var: k8s_namespace
+
 - name: stop here if prepare_only is set
   debug: 
     msg: ""
