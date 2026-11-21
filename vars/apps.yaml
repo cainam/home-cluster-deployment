@@ -9,6 +9,8 @@ applications:
     istiod:
   auth:
     hydra:
+      requires:
+      - name: idp
       network:
         svcPort: 4444
         svcName: hydra-public
@@ -24,8 +26,7 @@ applications:
     idp:
       network: true
       requires:
-      - namespace: auth
-        name: hydra
+      - name: hydra
     oauth2-proxy:
       network:
         svcPort: 80

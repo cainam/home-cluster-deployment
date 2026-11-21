@@ -7,8 +7,7 @@
     missing: >-
       {%- set m = [] -%}
       {%- for rq in application.value.requires | default([]) -%}
-      {%-   set provider_ns = rq.namespace if rq.namespace is defined
-             else (app_list | selectattr('name','eq',rq.name) | map(attribute='namespace') | first) -%}
+      {%-   set provider_ns = rq.namespace -%}
       {%-   if applications[provider_ns] is not defined or applications[provider_ns][rq.name] is not defined -%}
       {%-     set _ = m.append(rq.name) -%}
       {%-   endif -%}
@@ -27,9 +26,7 @@
     provided: >-
       {%- set out = {} -%}
       {%- for rq in application.value.requires | default([]) -%}
-      {%-   set provider_ns = rq.namespace if rq.namespace is defined
-             else (app_list | selectattr('name','eq',rq.name) | map(attribute='namespace') | first) -%}
-      {%-   set _ = out.update({rq.name: applications[provider_ns][rq.name].vars.expose | default({})}) -%}
+      {%-   set _ = out.update({rq.name: applications[rq.namespace][rq.name].vars.expose | default({})}) -%}
       {%- endfor -%}
       {{ out }}
   set_fact:

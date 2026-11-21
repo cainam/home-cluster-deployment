@@ -91,7 +91,15 @@
          { 'name': my_route.app_instance,
          'namespace': my_route.namespace,
          } }}
-      rq: "{{ (app.requires|default([])|list)+([my_gw_rq] if to_publish else []) }}"
+      # every requirement entry carries a namespace: an explicit one from vars/apps.yaml
+      # wins, otherwise the requiring application's own namespace is used. Applied here so
+      # all later consumers (BFS, bind phase, provides hooks) never need a fallback lookup.
+      rq: >-
+        {%- set out = [] -%}
+        {%- for r in (app.requires | default([]) | list) + ([my_gw_rq] if to_publish else []) -%}
+        {%-   set _ = out.append({'namespace': app.namespace} | combine(r)) -%}
+        {%- endfor -%}
+        {{ out }}
       storage_new: |
         {%- set updated_list = [] -%}
         {%- for item in (app.storage | default([])) -%}
