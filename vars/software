@@ -1,6 +1,6 @@
 software:
   flannel:
-    version: v0.28.10
+    version: v0.28.11
     installed:
       pattern: "flannel:"
     latest:
@@ -8,7 +8,7 @@ software:
       params:
         repo: flannel-io/flannel
   flannel-cni-plugin:
-    version: v1.9.1-flannel3
+    version: v1.10.0-flannel1
     installed:
       pattern: "lannel-cni-plugin:"
     latest:
@@ -46,7 +46,7 @@ software:
       params:
         repo: koenkk/zigbee2mqtt
   mosquitto:
-    version: v2.1.2
+    version: v2.1.4
     max_entries: 2
     latest:
       type: github-tags
@@ -105,7 +105,7 @@ software:
       params:
         repo: sys-cluster/kubeadm
   postgresql:
-    version: 18.6
+    version: 18.7
     max_entries: 4
     latest:
       type: gentoo
