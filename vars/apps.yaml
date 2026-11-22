@@ -4,6 +4,8 @@ applications:
     flannel:
   gateway:
     traefik:
+      requires:
+      - oauth2-proxy
   istio-system:
     istiod-config:
     istiod:
