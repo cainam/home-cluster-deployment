@@ -166,5 +166,4 @@ TODO:
 - hardcoded idp in hyra
 - deploy_gentoo + emerge: output to gluster volume to be read and shown by infopage 
 - hydra: dynamic svcPort, not apps.yaml config
-
-- auth config: via circular requirements? (how to prevent endless loops with deps option?) or dedicated auth-config application as requirement for all authentication apps and traefik?
+- nodejs: compile with only two poarallel jobs
