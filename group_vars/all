@@ -40,7 +40,7 @@ net:
   domain_external: adm13.dnshome.de
   base_domain: my-lb.adm13
   cidr: 10.10.10.0/24
-  oauth2_path: /oauth2_blablub
+  XXoauth2_path: /oauth2_blablub
   virtual_ips:
   - ip: 10.10.10.10
     names: ["k8s.adm13", "{{ registry_host }}", "podman.adm13"]
