@@ -24,7 +24,7 @@ software:
       params:
         repo: traefik/traefik
   istio:
-    version: 1.31.1
+    version: 1.32.0
     installed:
       pattern: "istio"
     latest:
@@ -61,7 +61,7 @@ software:
       params: 
         repo: kubernetes-sigs/descheduler
   home-assistant:
-    version: "2026.11.0"
+    version: "2026.11.3"
     installed:
       pattern: "home-assistant:"
     latest:

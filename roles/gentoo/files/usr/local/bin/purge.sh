@@ -25,15 +25,41 @@ etcdctl defrag
 
 #### currently deactivated, requires admin.conf to be deployed
 # purge unused container images
-configured_images=$(kubectl get pods --all-namespaces -o jsonpath='{.items[*].spec.containers[*].image} {.items[*].spec.initContainers[*].image}' | tr -s '[[:space:]]' '\n' | sort -u)
-protected_images="registry:|scratch:|molecule|pause|my_builder|stage3-|go:|base:|nodejs:|python3:|envoy|bazel"
-podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${registry}/##g" | while read image id; do
-  #image=$(echo "${image_with_id}" | cut -d : -f 1,2)
-  #id=$(echo "${image_with_id}" | cut -d : -f 3)
-  echo "${image}" | grep -Eq "${protected_images}" && continue
-  # this sadly deletes images in the making by podman build: echo "${image}" | grep -Eq "<none>:<none>$" && (echo "delete $image"; podman image rm "${id}") && continue
-  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm "$image")
-done
+#configured_images=$(kubectl get pods --all-namespaces -o jsonpath='{.items[*].spec.containers[*].image} {.items[*].spec.initContainers[*].image}' | tr -s '[[:space:]]' '\n' | sort -u)
+#protected_images="registry:|scratch:|molecule|pause|my_builder|stage3-|go:|base:|nodejs:|python3:|envoy|bazel"
+#podman image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | sed -e "s#^${registry}/##g" | while read image id; do
+#  #image=$(echo "${image_with_id}" | cut -d : -f 1,2)
+#  #id=$(echo "${image_with_id}" | cut -d : -f 3)
+#  echo "${image}" | grep -Eq "${protected_images}" && continue
+#  # this sadly deletes images in the making by podman build: echo "${image}" | grep -Eq "<none>:<none>$" && (echo "delete $image"; podman image rm "${id}") && continue
+#  echo "${configured_images}" | grep -Eq "^${image}$|^${registry}/${image}$" || (echo "delete $image"; podman image rm "$image")
+#done
+
+# remove build containers which are not in use
+buildah containers --json \
+  | jq -r '.[] | select(.builder == true) | .id' \
+  | while read -r id; do
+      mount=$(buildah inspect --format '{{.MountPoint}}' "$id")
+      if [ -z "$mount" ]; then
+        echo "Removing unmounted builder container: $id"
+        buildah rm "$id"
+      fi
+    done
+
+# prune
+podman image prune --force
+
+# keep the two most recent versions
+podman image ls --format json \
+  | jq -r '
+      group_by(.Repository)[]
+      | sort_by(.Created)
+      | reverse
+      | .[2:][]
+      | "\(.Repository):\(.Tag)"
+    ' \
+  | xargs -r podman image rm
+
 
 # registry garbage collect
 rc-service registry status && podman exec -it registry bin/registry garbage-collect --delete-untagged /var/lib/registry/config.yml

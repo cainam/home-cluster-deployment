@@ -5,7 +5,8 @@ applications:
   gateway:
     traefik:
       requires:
-      - oauth2-proxy
+      - name: oauth2-proxy
+        namespace: auth
   istio-system:
     istiod-config:
     istiod:
@@ -15,17 +16,14 @@ applications:
       - name: idp
       - name: oauth2-proxy
       network:
-        del_svcPort: 4444
         svcName: hydra-public
         prefix: /hydra
       vars:
-        admin_port: 4445
-        public_port: 4444
+        del_public_port: 4444
         cookie_secret: "{{ auth.hydra_cookie_secret }}"
         system_secret: "{{ auth.hydra_system_secret }}"
         clientID: "{{ auth.client_id }}"
         clientSecret: "{{ auth.client_secret }}"
-        del_oauth2_path: "{{ net.oauth2_path }}"
     idp:
       network: true
       requires:
@@ -35,8 +33,6 @@ applications:
       - name: hydra
       network:
         svcPort: 80
-        del_prefix: "{{ net.oauth2_path }}"
-        del_rewrite: "{{ net.oauth2_path }}"
       vars:
         oauth2_path: /Poauth2T
         cookie_secret: "{{ auth.oauth2_proxy_cookie_secret }}"

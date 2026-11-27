@@ -162,8 +162,8 @@ TODO:
   - DONE image build, can scan mapped fs and mapped image tar
   - integrate in builder (check if trivy is available, scan image before push and fail or continue)
 - test of model change to openai/gpt-oss-20b on 03.ß7.
-- purge-images based on version < current version
-- hardcoded idp in hyra
-- deploy_gentoo + emerge: output to gluster volume to be read and shown by infopage 
-- hydra: dynamic svcPort, not apps.yaml config
 - nodejs: compile with only two poarallel jobs
+- deploy_gentoo + emerge: output to gluster volume to be read and shown by infopage 
+- hydra: dynamic svcPort, not apps.yaml config => internal_admin_port and admin_port can be different, same for public
+
+
